@@ -52,6 +52,7 @@ int main(void)
 //
 
     kvstore.dumpmem();
+    kvstore.merge_all_files();
     kvstore.catdiskfiles();
     
     printf("Everything ok!\n");

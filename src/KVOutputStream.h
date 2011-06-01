@@ -1,16 +1,28 @@
-#ifndef KVSCANNER_H
-#define KVSCANNER_H
+#ifndef KVOUTPUTSTREAM_H
+#define KVOUTPUTSTREAM_H
 
 #include "Global.h"
 
-class KVScanner {
+class KVOutputStream {
 
 public:
 
     /**
-     * get next <key, value> pair
+     * reset stream
      */
-    virtual bool next(const char **key, const char **value) = 0;
+    virtual void reset() = 0;
+
+    /**
+     * write <key, value> to stream
+     *
+     * @return false if could not write <k,v> to stream. else, true.
+     */
+    virtual bool write(const char *key, const char *value) = 0;
+
+    /**
+     * flush output stream buffer
+     */
+    virtual void flush() = 0;
 
 protected:
 

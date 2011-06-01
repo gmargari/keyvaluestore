@@ -1,5 +1,5 @@
-#ifndef KVDISKFILESCANNER_H
-#define KVDISKFILESCANNER_H
+#ifndef KVDISKFILEINPUTSTREAM_H
+#define KVDISKFILEINPUTSTREAM_H
 
 #include "Global.h"
 #include "KVInputStream.h"
@@ -26,7 +26,9 @@ public:
     void reset();
     
     /**
-     * get next <key, value> pair
+     * get next <key, value> pair from stream
+     *
+     * @return false if no <k,v> pair left. else, true.
      */
     bool read(const char **key, const char **value);
     
@@ -36,7 +38,7 @@ protected:
     char       *m_buf;
     uint32_t    m_buf_size;
     uint32_t    m_bytes_in_buf;
-    uint32_t    m_bytes_used;  
+    uint32_t    m_bytes_used;
 };
 
 #endif

@@ -1,8 +1,10 @@
 #include "Global.h"
 #include "KVDiskFileInputStream.h"
 #include "VFile.h"
+#include "KVSerialization.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <cassert>
 
 /*========================================================================
@@ -31,28 +33,15 @@ void KVDiskFileInputStream::reset()
 {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
-    m_kvdiskfile->rewind();
+    m_kvdiskfile->m_vfile->fs_rewind();
 }
 
 /*========================================================================
- *                                 next
+ *                                 read
  *========================================================================*/
 bool KVDiskFileInputStream::read(const char **key, const char **value)
 {
-
-    // TODO: static variables should be private for while class. code below should handle
-    // case file is closed and reopen, case we performed a read and then a write
-    // etc (e.g. we may read a file, then rewind, and read it again..)
-    uint32_t len;
-
-    if (m_bytes_in_buf == 0) { // first time function called
-        m_bytes_in_buf = m_kvdiskfile->m_vfile->fs_read(m_buf, 200);
-        assert(m_bytes_in_buf);
-    }
-
-    if (m_bytes_used == m_bytes_in_buf) {
-        return 0;
-    }
+    uint32_t len, unused_bytes;
 
     // NOTE: 'false' arg: do not copy key and value, just make them point to
     // the buffer position, as read from fs_read().
@@ -62,8 +51,20 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
         m_bytes_used += len;
         return len;
     } else {
-        // TODO: read more bytes to disk, preserving existing unused bytes
+
+        // keep only unused bytes
+        unused_bytes = m_bytes_in_buf - m_bytes_used;
+        memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
+        m_bytes_in_buf = unused_bytes;
+        m_bytes_used = 0;
+
+        // read more bytes to buffer
+        m_bytes_in_buf += m_kvdiskfile->m_vfile->fs_read(m_buf, m_buf_size - m_bytes_used);
+        if (deserialize(m_buf, m_bytes_in_buf, key, value, &len, false)) {
+            m_bytes_used += len;
+            return len;
+        }
+
         return 0;
-    }
-    
+    }    
 }

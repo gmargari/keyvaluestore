@@ -84,13 +84,7 @@ uint64_t KeyValueStore::disk_size()
 }
 
 // TEST
-void KeyValueStore::dumpmem()
-{
-    m_compactionmanager->flush_memstore();
-}
-
-//TEST
-void KeyValueStore::catdiskfiles()
-{
-    m_compactionmanager->catdiskfiles();
-}
+void KeyValueStore::dumpmem()           { m_compactionmanager->flush_memstore();  }
+void KeyValueStore::catdiskfiles()      { m_compactionmanager->catdiskfiles();    }
+void KeyValueStore::merge_all_files()   { m_compactionmanager->merge_all_files(); }
+// TEST

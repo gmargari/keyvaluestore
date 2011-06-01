@@ -15,7 +15,7 @@ public:
     /**
      * get next <key, value> pair from stream
      * 
-     * @return false if no <k,v> pair left. else, true.
+     * @return false if not <k,v> pair left. else, true.
      */
     virtual bool read(const char **key, const char **value) = 0;
 

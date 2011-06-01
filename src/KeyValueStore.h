@@ -72,6 +72,9 @@ public:
 
     // TEST
     void catdiskfiles();
+
+    // TEST
+    void merge_all_files();
     
 protected:
 
