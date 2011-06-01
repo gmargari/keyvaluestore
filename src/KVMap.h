@@ -7,14 +7,10 @@
 #include <cstring>
 #include <map>
 
-struct cmp_str { // required, in order for the map to have its keys sorted
-   bool operator()(char const *a, char const *b) {
-      return strcmp(a, b) < 0;
-   }
-};
-
 class KVMap {
-    
+
+friend class KVMapScanner;
+
 public:
     
     /**
@@ -65,17 +61,17 @@ public:
      */
     uint64_t size();
 
-//     //TEST
-//     void print_kvs();
-    
-    friend class KVMapScanner;
-    
+    struct cmp_str { // required, in order for the map to have its keys sorted
+        bool operator()(char const *a, char const *b) {
+            return strcmp(a, b) < 0;
+        }
+    };
+
     typedef std::map<const char *, char *, cmp_str> kvmap;
     
 protected:
     
     kvmap m_map;
-
 };
 
 #endif

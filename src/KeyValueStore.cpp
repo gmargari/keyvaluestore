@@ -23,11 +23,17 @@ KeyValueStore::~KeyValueStore()
     delete m_compactionmanager;
 }
 
+#include <stdio.h>
+
 /*========================================================================
  *                                 put
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
+    if (m_memstore->num_keys() > 4) {
+        m_compactionmanager->flush_memstore();
+    }
+    
     return m_memstore->put(key,value);
 }
 
@@ -81,4 +87,10 @@ uint64_t KeyValueStore::disk_size()
 void KeyValueStore::dumpmem()
 {
     m_compactionmanager->flush_memstore();
+}
+
+//TEST
+void KeyValueStore::catdiskfiles()
+{
+    m_compactionmanager->catdiskfiles();
 }

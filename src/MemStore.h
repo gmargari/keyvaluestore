@@ -5,7 +5,9 @@
 #include "KVMap.h"
 
 class MemStore {
-   
+
+friend class CompactionManager;
+    
 public:
 
     /**
@@ -36,7 +38,7 @@ public:
      * map (return value is not copied, caller must copy it)
      */
     char *get(char *key);
-
+    
     /**
      * number of <key, value> pairs in memstore
      *
@@ -51,12 +53,14 @@ public:
      */
     uint64_t size();
 
-    friend class CompactionManager;
-    
+    /**
+     * clear memstore
+     */
+    void clear();
+
 protected:
 
     KVMap m_kvmap;
-
 };
 
 #endif

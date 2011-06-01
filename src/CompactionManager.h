@@ -19,11 +19,15 @@ public:
      */
     ~CompactionManager();
 
+    //TEST
     /**
      * sort memory <k,v> pairs by key and store them in a new disk file
      */
     void flush_memstore(void);
 
+    // TEST
+    void catdiskfiles();
+    
 protected:
 
     MemStore    *m_memstore;

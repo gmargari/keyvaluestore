@@ -12,14 +12,16 @@ add_library (KVDiskFile         KVDiskFile.cpp)
 add_library (KVDiskFileScanner  KVDiskFileScanner.cpp)
 add_library (CompactionManager  CompactionManager.cpp)
 add_library (KVSerialization    KVSerialization.cpp)
+add_library (VFile              VFile.cpp)
+add_library (Simulator          Simulator.cpp)
 
 target_link_libraries (MemStore         KVMap)
-target_link_libraries (DiskStore        KVDiskFile)
+target_link_libraries (DiskStore        KVDiskFile VFile)
 target_link_libraries (KVDiskFile       KVSerialization)
+target_link_libraries (VFile            Simulator )
 
 # target_link_libraries (KVDiskFileScanner KVScanner)
 # target_link_libraries (KVMapScanner KVScanner)
-
 
 target_link_libraries (CompactionManager MemStore DiskStore KVMapScanner KVDiskFileScanner )
 

@@ -69,6 +69,9 @@ public:
 
     // TEST
     void dumpmem();
+
+    // TEST
+    void catdiskfiles();
     
 protected:
 

@@ -27,7 +27,6 @@ public:
 protected:
     KVMap                       *m_kvmap;
     KVMap::kvmap::iterator       iter;
-
 };
 
 #endif

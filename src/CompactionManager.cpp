@@ -23,21 +23,54 @@ CompactionManager::~CompactionManager()
 
 }
 
+//TEST
 /*========================================================================
- *                          memstore_to_diskfile
+ *                            flush_memstore
  *========================================================================*/
 void CompactionManager::flush_memstore(void)
 {
-//     KVDiskFile *diskfile;
+    KVDiskFile *diskfile;
     KVMapScanner scanner(&(m_memstore->m_kvmap));
     const char *key, *value;
 
-//     diskfile = new KVDiskFile;
+    printf("-----------[ compaction ]----------\n");
+
+    diskfile = new KVDiskFile;
+    printf(">>> %s\n", diskfile->name());
     while (scanner.next(&key, &value)) {
-        printf("[%s] -> [%s]\n", key, value);
-//         diskfile->append(key, value); // TODO
+        diskfile->write(key, value);
+        printf("[%s] [%s]\n", key, value);
     }
-//     diskfile->flush();
-//     diskfile->close();
-//     m_diskstore->m_diskfiles.push_back(diskfile);
+    diskfile->sync();
+//     diskfile->close(); // if I close it, cannot use it next by read
+    m_diskstore->m_diskfiles.push_back(diskfile);
+    m_memstore->clear();
+
+    printf("-----------------------------------\n\n");
+}
+
+// TEST
+/*========================================================================
+ *                             catdiskfiles
+ *========================================================================*/
+void CompactionManager::catdiskfiles()
+{
+    // TODO:
+    // TODO: All these should be done using KVDiskScanner
+    // TODO:
+    
+    std::vector<KVDiskFile *>::iterator iter;
+    const char *key, *value;
+
+    printf("-----------[ catdiskfiles ]----------\n");
+    
+    for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
+        printf(">>> File: %s\n", (*iter)->name());
+        KVDiskFileScanner scanner((*iter));
+        while (scanner.next(&key, &value)) {
+            printf("[%s] [%s]\n", key, value);
+        }
+        printf("\n");
+    }
+    printf("-------------------------------------\n\n");
 }

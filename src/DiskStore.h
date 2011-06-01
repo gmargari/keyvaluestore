@@ -7,9 +7,9 @@
 #include <stdint.h>
 #include <vector>
 
-using namespace std;
-
 class DiskStore {
+
+friend class CompactionManager;
 
 public:
 
@@ -45,13 +45,10 @@ public:
      * @return byte size of <key, value> pairs in diskstore
      */
     uint64_t size();
-    
-   friend class CompactionManager;
 
 protected:
 
-    vector<KVDiskFile *> m_diskfiles;
-    
+    std::vector<KVDiskFile *> m_diskfiles;
 };
 
 #endif

@@ -12,7 +12,7 @@ public:
     /**
      * constructor
      */
-    KVDiskFileScanner();
+    KVDiskFileScanner(KVDiskFile *file);
 
     /**
      * destructor
@@ -20,14 +20,22 @@ public:
     ~KVDiskFileScanner();
 
     /**
+     * reset scanner
+     */
+    void reset();
+    
+    /**
      * get next <key, value> pair
      */
-    bool next(char *key, char *value);
+    bool next(const char **key, const char **value);
     
 protected:
-    KVDiskFile  *m_diskfile;
-//     KVDiskFile::iterator iter;
-
+    
+    KVDiskFile *m_kvdiskfile;
+    char       *m_buf;
+    uint32_t    m_buf_size;
+    uint32_t    m_bytes_in_buf;
+    uint32_t    m_bytes_used;  
 };
 
 #endif
