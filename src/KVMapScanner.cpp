@@ -1,6 +1,7 @@
-#include <cassert>
-
+#include "Global.h"
 #include "KVMapScanner.h"
+
+#include <cassert>
 
 /*========================================================================
  *                             KVMapScanner

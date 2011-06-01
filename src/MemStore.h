@@ -1,6 +1,7 @@
 #ifndef MEMSTORE_H
 #define MEMSTORE_H
 
+#include "Global.h"
 #include "KVMap.h"
 
 class MemStore {

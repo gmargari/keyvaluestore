@@ -1,10 +1,10 @@
+#include "Global.h"
 #include "CompactionManager.h"
-
-#include <cstdio>
-
 #include "KVDiskFile.h"
 #include "KVMapScanner.h"
 #include "KVDiskFileScanner.h"
+
+#include <cstdio>
 
 /*========================================================================
  *                           CompactionManager
@@ -26,7 +26,7 @@ CompactionManager::~CompactionManager()
 /*========================================================================
  *                          memstore_to_diskfile
  *========================================================================*/
-void CompactionManager::memstore_to_diskfile(void)
+void CompactionManager::flush_memstore(void)
 {
 //     KVDiskFile *diskfile;
     KVMapScanner scanner(&(m_memstore->m_kvmap));

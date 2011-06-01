@@ -1,3 +1,4 @@
+#include "Global.h"
 #include "KeyValueStore.h"
 #include "MemStore.h"
 #include "DiskStore.h"
@@ -79,5 +80,5 @@ uint64_t KeyValueStore::disk_size()
 // TEST
 void KeyValueStore::dumpmem()
 {
-    m_compactionmanager->memstore_to_diskfile();
+    m_compactionmanager->flush_memstore();
 }

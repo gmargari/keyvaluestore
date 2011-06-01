@@ -1,6 +1,7 @@
 #ifndef COMPACTIONMANAGER_H
 #define COMPACTIONMANAGER_H
 
+#include "Global.h"
 #include "MemStore.h"
 #include "DiskStore.h"
 
@@ -21,7 +22,7 @@ public:
     /**
      * sort memory <k,v> pairs by key and store them in a new disk file
      */
-    void memstore_to_diskfile(void);
+    void flush_memstore(void);
 
 protected:
 

@@ -1,6 +1,7 @@
 #ifndef KEYVALUESTORE_H
 #define KEYVALUESTORE_H
 
+#include "Global.h"
 #include "MemStore.h"
 #include "DiskStore.h"
 #include "CompactionManager.h"

@@ -1,10 +1,11 @@
 #ifndef DISKSTORE_H
 #define DISKSTORE_H
 
+#include "Global.h"
+#include "KVDiskFile.h"
+
 #include <stdint.h>
 #include <vector>
-
-#include "KVDiskFile.h"
 
 using namespace std;
 

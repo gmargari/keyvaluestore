@@ -1,6 +1,7 @@
 #ifndef KVDISKFILESCANNER_H
 #define KVDISKFILESCANNER_H
 
+#include "Global.h"
 #include "KVScanner.h"
 #include "KVDiskFile.h"
 

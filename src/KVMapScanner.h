@@ -1,6 +1,7 @@
 #ifndef KVMAPSCANNER_H
 #define KVMAPSCANNER_H
 
+#include "Global.h"
 #include "KVScanner.h"
 #include "KVMap.h"
 

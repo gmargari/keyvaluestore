@@ -1,6 +1,8 @@
 #ifndef KVSCANNER_H
 #define KVSCANNER_H
 
+#include "Global.h"
+
 class KVScanner {
 
 public:

@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "KeyValueStore.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <cassert>
 
 #define BUFSIZE 1000

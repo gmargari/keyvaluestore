@@ -1,6 +1,8 @@
 #ifndef KVMAP_H
 #define KVMAP_H
 
+#include "Global.h"
+
 #include <stdint.h>
 #include <cstring>
 #include <map>

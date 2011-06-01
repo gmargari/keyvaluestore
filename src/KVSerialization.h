@@ -1,6 +1,8 @@
 #ifndef KVSERIALIZATION_H
 #define KVSERIALIZATION_H
 
+#include "Global.h"
+
 class KVSerialization {
 
 public:
