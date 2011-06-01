@@ -1,14 +1,14 @@
 #include "Global.h"
-#include "KVDiskFileScanner.h"
+#include "KVDiskFileInputStream.h"
 #include "VFile.h"
 
 #include <cstdlib>
 #include <cassert>
 
 /*========================================================================
- *                           KVDiskFileScanner
+ *                           KVDiskFileInputStream
  *========================================================================*/
-KVDiskFileScanner::KVDiskFileScanner(KVDiskFile *file)
+KVDiskFileInputStream::KVDiskFileInputStream(KVDiskFile *file)
 {
     m_kvdiskfile = file;
     m_buf_size = SCANNERBUFSIZE;
@@ -17,9 +17,9 @@ KVDiskFileScanner::KVDiskFileScanner(KVDiskFile *file)
 }
 
 /*========================================================================
- *                          ~KVDiskFileScanner
+ *                          ~KVDiskFileInputStream
  *========================================================================*/
-KVDiskFileScanner::~KVDiskFileScanner()
+KVDiskFileInputStream::~KVDiskFileInputStream()
 {
     free(m_buf);
 }
@@ -27,7 +27,7 @@ KVDiskFileScanner::~KVDiskFileScanner()
 /*========================================================================
  *                                 reset
  *========================================================================*/
-void KVDiskFileScanner::reset()
+void KVDiskFileInputStream::reset()
 {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
@@ -37,7 +37,7 @@ void KVDiskFileScanner::reset()
 /*========================================================================
  *                                 next
  *========================================================================*/
-bool KVDiskFileScanner::next(const char **key, const char **value)
+bool KVDiskFileInputStream::read(const char **key, const char **value)
 {
 
     // TODO: static variables should be private for while class. code below should handle

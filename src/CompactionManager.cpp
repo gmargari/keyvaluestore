@@ -1,8 +1,8 @@
 #include "Global.h"
 #include "CompactionManager.h"
 #include "KVDiskFile.h"
-#include "KVMapScanner.h"
-#include "KVDiskFileScanner.h"
+#include "KVMapInputStream.h"
+#include "KVDiskFileInputStream.h"
 
 #include <cstdio>
 
@@ -30,14 +30,14 @@ CompactionManager::~CompactionManager()
 void CompactionManager::flush_memstore(void)
 {
     KVDiskFile *diskfile;
-    KVMapScanner scanner(&(m_memstore->m_kvmap));
+    KVMapInputStream scanner(&(m_memstore->m_kvmap));
     const char *key, *value;
 
     printf("-----------[ compaction ]----------\n");
 
     diskfile = new KVDiskFile;
     printf(">>> %s\n", diskfile->name());
-    while (scanner.next(&key, &value)) {
+    while (scanner.read(&key, &value)) {
         diskfile->write(key, value);
         printf("[%s] [%s]\n", key, value);
     }
@@ -66,8 +66,8 @@ void CompactionManager::catdiskfiles()
     
     for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
         printf(">>> File: %s\n", (*iter)->name());
-        KVDiskFileScanner scanner((*iter));
-        while (scanner.next(&key, &value)) {
+        KVDiskFileInputStream scanner((*iter));
+        while (scanner.read(&key, &value)) {
             printf("[%s] [%s]\n", key, value);
         }
         printf("\n");

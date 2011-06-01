@@ -2,23 +2,24 @@
 #define KVDISKFILESCANNER_H
 
 #include "Global.h"
-#include "KVScanner.h"
+#include "KVInputStream.h"
 #include "KVDiskFile.h"
 
-class KVDiskFileScanner: public KVScanner {
+class KVDiskFileInputStream: public KVInputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVDiskFileScanner(KVDiskFile *file);
+    KVDiskFileInputStream(KVDiskFile *file);
 
     /**
      * destructor
      */
-    ~KVDiskFileScanner();
+    ~KVDiskFileInputStream();
 
+    // inherited from KVInputStream
     /**
      * reset scanner
      */
@@ -27,7 +28,7 @@ public:
     /**
      * get next <key, value> pair
      */
-    bool next(const char **key, const char **value);
+    bool read(const char **key, const char **value);
     
 protected:
     

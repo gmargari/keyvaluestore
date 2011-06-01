@@ -9,7 +9,7 @@
 
 class KVMap {
 
-friend class KVMapScanner;
+friend class KVMapInputStream;
 
 public:
     

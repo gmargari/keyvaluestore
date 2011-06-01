@@ -1,29 +1,37 @@
 #include "Global.h"
-#include "KVMapScanner.h"
+#include "KVMapInputStream.h"
 
 #include <cassert>
 
 /*========================================================================
- *                             KVMapScanner
+ *                           KVMapInputStream
  *========================================================================*/
-KVMapScanner::KVMapScanner(KVMap *kvmap)
+KVMapInputStream::KVMapInputStream(KVMap *kvmap)
 {
     m_kvmap = kvmap;
     iter = m_kvmap->m_map.begin();
 }
 
 /*========================================================================
- *                            ~KVMapScanner
+ *                          ~KVMapInputStream
  *========================================================================*/
-KVMapScanner::~KVMapScanner()
+KVMapInputStream::~KVMapInputStream()
 {
 
 }
 
 /*========================================================================
- *                                 next
+ *                                 reset
  *========================================================================*/
-bool KVMapScanner::next(const char **key, const char **value)
+void KVMapInputStream::reset()
+{
+    iter = m_kvmap->m_map.begin();
+}
+
+/*========================================================================
+ *                                 read
+ *========================================================================*/
+bool KVMapInputStream::read(const char **key, const char **value)
 {
     assert(key && value);
     if (iter == m_kvmap->m_map.end()) {

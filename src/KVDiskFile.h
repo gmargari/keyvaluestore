@@ -7,7 +7,7 @@
 
 class KVDiskFile {
 
-friend class KVDiskFileScanner;
+friend class KVDiskFileInputStream;
     
 public:
 
