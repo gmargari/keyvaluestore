@@ -10,22 +10,6 @@
 #define ENCODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_buf_) + _used_,  (_str_), (_len_)); _used_ += (_len_); } while (0)
 #define DECODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_str_), (_buf_) + _used_, (_len_)); _used_ += (_len_); } while (0)
 
-// /*========================================================================
-//  *                             KVSerialization
-//  *========================================================================*/
-// KVSerialization::KVSerialization()
-// {
-// 
-// }
-// 
-// /*========================================================================
-//  *                            ~KVSerialization
-//  *========================================================================*/
-// KVSerialization::~KVSerialization()
-// {
-// 
-// }
-
 /*=======================================================================*
  *                              serialize_len
  *=======================================================================*/
@@ -98,6 +82,9 @@ bool deserialize(char *buf, uint32_t buflen, const char **key, const char **valu
     return true;
 }
 
+/*=======================================================================*
+ *                               deserialize
+ *=======================================================================*/
 bool deserialize(char *buf, uint32_t buflen, const char **key, const char **value, uint32_t *len) {
     return deserialize(buf, buflen, key, value, len, true);
 }

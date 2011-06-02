@@ -11,7 +11,8 @@ using namespace std;
  *========================================================================*/
 KVMap::KVMap()
 {
-    clear();
+    m_size = 0;
+    m_keys = 0;
 }
 
 /*========================================================================
@@ -27,15 +28,22 @@ KVMap::~KVMap()
  *=======================================================================*/
 void KVMap::clear()
 {
+uint64_t free_mem = 0;
+    
     for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         if ((*iter).first) {
-            free(const_cast<char*>(iter->first));
+free_mem += strlen(iter->first) + 1;
+free(const_cast<char*>(iter->first));
         }
         if ((*iter).second) {
+free_mem += strlen(iter->second) + 1;
             free(iter->second);
         }
     }
+assert(m_size == free_mem);
     m_map.clear();
+    m_size = 0;
+    m_keys = 0;
 }
 
 /*=======================================================================*
@@ -45,22 +53,32 @@ bool KVMap::put(const char *key, const char *value)
 {
     char *cpvalue;
     const char *cpkey;
-    
+
+    sanity_check();
     assert(key);
     assert(value);
-    // if 'key' exists in map, delete corresponding value (it'll bereplaced)
+    
+    // if 'key' exists in map, delete corresponding value (it'll be replaced)
     kvmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
+        m_size -= strlen(f->second) + 1;
         free(const_cast<char*>(f->second));
         cpkey = key;
     } else {
         cpkey = strdup(key);
+        m_size += strlen(cpkey) + 1;
+        m_keys++;
     }
+    
     cpvalue = strdup(value);
     assert(cpkey);
     assert(cpvalue);
+
+    m_size += strlen(cpvalue) + 1;
     m_map[cpkey] = cpvalue;
 
+    sanity_check();
+    
     return true;
 }
 
@@ -69,6 +87,7 @@ bool KVMap::put(const char *key, const char *value)
  *=======================================================================*/
 char *KVMap::get(char *key)
 {
+    sanity_check();
     kvmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
         return f->second;
@@ -82,8 +101,8 @@ char *KVMap::get(char *key)
  *=======================================================================*/
 uint64_t KVMap::size()
 {
-    // total size of keys and values in map (in bytes)
-    return 0;
+    sanity_check();
+    return m_size;
 }
 
 
@@ -92,14 +111,24 @@ uint64_t KVMap::size()
  *=======================================================================*/
 uint64_t KVMap::num_keys()
 {
-    return m_map.size();
+    sanity_check();
+    return m_keys;
 }
 
-// // TEST
-// KVMap::print_kvs()
-// {
-//     for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
-//         printf("\t[%p -> %p] = ['%s' -> '%s']\n", (*iter).first, (*iter).second, (*iter).first, (*iter).second);
-//     }
-//     printf("\n");
-// }
+/*=======================================================================*
+ *                              sanity_check
+ *=======================================================================*/
+void KVMap::sanity_check()
+{
+    uint64_t map_size = 0;
+
+#if DBGLVL < 2
+    return;
+#endif
+    
+    for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+        map_size += strlen(iter->first) + strlen(iter->second) + 2;
+    }
+    assert(m_size == map_size);
+    assert(m_keys == m_map.size());
+}

@@ -71,7 +71,11 @@ public:
     
 protected:
     
-    kvmap m_map;
+    void sanity_check();
+
+    kvmap       m_map;
+    uint64_t    m_size;
+    uint64_t    m_keys;
 };
 
 #endif

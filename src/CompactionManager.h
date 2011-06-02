@@ -32,6 +32,8 @@ public:
     
 protected:
 
+    void sanity_check();
+
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };

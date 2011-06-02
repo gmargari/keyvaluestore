@@ -23,14 +23,13 @@ KeyValueStore::~KeyValueStore()
     delete m_compactionmanager;
 }
 
-#include <stdio.h>
-
 /*========================================================================
  *                                 put
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    if (m_memstore->num_keys() > 4) {
+    if (m_memstore->num_keys() > 2) {
+//     if (m_memstore->size() > 10) {
         m_compactionmanager->flush_memstore();
     }
     
@@ -81,6 +80,16 @@ uint64_t KeyValueStore::mem_size()
 uint64_t KeyValueStore::disk_size()
 {
     return m_diskstore->size();
+}
+
+/*=======================================================================*
+ *                             sanity_check
+ *=======================================================================*/
+void KeyValueStore::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
 }
 
 // TEST

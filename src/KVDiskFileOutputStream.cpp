@@ -54,3 +54,13 @@ void KVDiskFileOutputStream::flush()
 {
     m_kvdiskfile->m_vfile->fs_sync();
 }
+
+/*=======================================================================*
+ *                             sanity_check
+ *=======================================================================*/
+void KVDiskFileOutputStream::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
+}

@@ -86,3 +86,13 @@ void CompactionManager::catdiskfiles()
         }
     }
 }
+
+/*=======================================================================*
+ *                              sanity_check
+ *=======================================================================*/
+void CompactionManager::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
+}

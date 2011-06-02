@@ -5,9 +5,10 @@
 
 // set debug level:
 //  0 - debugging disabled
-//  1 - normal mode
-//  2 - heavy debugging
-#define DBGLVL 1
+//  1 - light mode      (only assertions enabled)
+//  2 - normal mode     (assertions and sanity_check()s enabled)
+//  3 - heavy debugging (assertions, sanity_checks()s and all other debugging functions enabled)
+#define DBGLVL 2
 
 // default values
 #define DEFAULT_MEMSIZE            1073741824LL // 1GB
@@ -58,5 +59,9 @@
 #define min2sec(m)  ((m)*60.0)
 #define msec2sec(m) ((m)/1000.0)
 #define usec2sec(u) ((u)/1000000.0))
+
+#if DBGLVL == 0
+    #define NDEBUG // disable assertions
+#endif
 
 #endif

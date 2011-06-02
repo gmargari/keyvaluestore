@@ -573,3 +573,13 @@ void VFile::end_timing(void)
     }
     Sim->inc_time_passed(sec, usec);
 }
+
+/*-------------------------------------------------------
+ *                      sanity_check
+ *-------------------------------------------------------*/
+void VFile::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
+}

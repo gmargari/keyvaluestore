@@ -34,6 +34,8 @@ public:
     
 protected:
     
+    void sanity_check();
+
     KVDiskFile *m_kvdiskfile;
     char       *m_buf;
     uint32_t    m_buf_size;

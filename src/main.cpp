@@ -57,4 +57,3 @@ int main(void)
     
     printf("Everything ok!\n");
 }
-

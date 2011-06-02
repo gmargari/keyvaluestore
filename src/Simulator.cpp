@@ -148,3 +148,14 @@ float Simulator::get_avg_fragmentation(void)
 {
     return (float)Fragm_total / (float)Fragm_count;
 }
+
+
+/*-------------------------------------------------------
+ *                    sanity_check
+ *-------------------------------------------------------*/
+void Simulator::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
+}

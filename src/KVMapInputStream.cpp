@@ -45,3 +45,13 @@ bool KVMapInputStream::read(const char **key, const char **value)
         return true;
     }
 }
+
+/*=======================================================================*
+ *                              sanity_check
+ *=======================================================================*/
+void KVMapInputStream::sanity_check()
+{
+#if DBGLVL < 2
+    return;
+#endif
+}

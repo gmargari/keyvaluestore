@@ -78,6 +78,8 @@ public:
     
 protected:
 
+    void sanity_check();
+
     DiskStore           *m_diskstore;
     MemStore            *m_memstore;
     CompactionManager   *m_compactionmanager;

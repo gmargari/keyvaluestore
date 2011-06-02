@@ -33,8 +33,12 @@ public:
     bool read(const char **key, const char **value);
 
 protected:
+
+    void sanity_check();
+    
     KVMap                       *m_kvmap;
     KVMap::kvmap::iterator       iter;
+
 };
 
 #endif

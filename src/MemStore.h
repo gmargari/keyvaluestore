@@ -60,6 +60,8 @@ public:
 
 protected:
 
+    void sanity_check();
+    
     KVMap m_kvmap;
 };
 

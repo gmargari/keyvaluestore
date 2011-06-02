@@ -22,28 +22,31 @@ public:
      */
     ~KVDiskFile();
 
-//     /**
-//      * rewind file
-//      */
-//     void rewind();
-//     
-//     /**
-//      * flush all pending writes to disk
-//      */
-//     void sync();
-// 
-//     /**
-//      * close file
-//      */
-//     void close();
-
     /**
      * file system name of this file
      */
     char *name();
+
+//     /**
+//      * rewind file
+//      */
+//     void rewind();
+//
+//     /**
+//      * flush all pending writes to disk
+//      */
+//     void sync();
+//
+//     /**
+//      * close file
+//      */
+//     void close();
     
 protected:
-    VFile       *m_vfile;    
+
+    void sanity_check();
+
+    VFile       *m_vfile;
 };
 
 #endif

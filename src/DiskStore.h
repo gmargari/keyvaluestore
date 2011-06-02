@@ -48,6 +48,8 @@ public:
 
 protected:
 
+    void sanity_check();
+
     std::vector<KVDiskFile *> m_diskfiles;
 };
 
