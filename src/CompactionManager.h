@@ -4,6 +4,10 @@
 #include "Global.h"
 #include "MemStore.h"
 #include "DiskStore.h"
+#include "KVMapInputStream.h"
+#include "KVDiskFileOutputStream.h"
+
+using std::vector;
 
 class CompactionManager {
 
@@ -23,16 +27,17 @@ public:
      * sort memory <k,v> pairs by key and store them in a new disk file
      */
     void flush_memstore(void);
-
-    // TEST
-    void merge_all_files();
-
-    // TEST
-    void catdiskfiles();
+    
+    /**
+     * merge all input streams producing one sorted output stream written to 'ostream'
+     */
+    void merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream);
     
 protected:
 
     void sanity_check();
+    // TEST
+    void catdiskfiles();
 
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;

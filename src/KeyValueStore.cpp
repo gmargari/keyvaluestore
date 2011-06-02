@@ -3,6 +3,8 @@
 #include "MemStore.h"
 #include "DiskStore.h"
 
+#include <cassert>
+
 /*========================================================================
  *                            KeyValueStore
  *========================================================================*/
@@ -11,6 +13,8 @@ KeyValueStore::KeyValueStore()
     m_memstore = new MemStore();
     m_diskstore = new DiskStore();
     m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
+
+    check_parameters();
 }
 
 /*========================================================================
@@ -28,7 +32,7 @@ KeyValueStore::~KeyValueStore()
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    if (m_memstore->num_keys() > 2) {
+    if (m_memstore->num_keys() > 6) {
 //     if (m_memstore->size() > 10) {
         m_compactionmanager->flush_memstore();
     }
@@ -92,8 +96,11 @@ void KeyValueStore::sanity_check()
 #endif
 }
 
-// TEST
-void KeyValueStore::dumpmem()           { m_compactionmanager->flush_memstore();  }
-void KeyValueStore::catdiskfiles()      { m_compactionmanager->catdiskfiles();    }
-void KeyValueStore::merge_all_files()   { m_compactionmanager->merge_all_files(); }
-// TEST
+/*=======================================================================*
+ *                           check_parameters
+ *=======================================================================*/
+void KeyValueStore::check_parameters()
+{
+    assert(SCANNERBUFSIZE >= (2*MAX_KVSIZE + 2*sizeof(uint64_t))); // need at least these bytes (e.g. to fully decode a kv read from disk)
+}
+

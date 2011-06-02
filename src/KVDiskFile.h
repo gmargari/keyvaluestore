@@ -22,6 +22,11 @@ public:
      */
     ~KVDiskFile();
 
+    /**
+     * delete file from disk 
+     */
+    void delete_from_disk();
+    
 //     /**
 //      * file system name of this file
 //      */

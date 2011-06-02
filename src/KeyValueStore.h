@@ -66,19 +66,11 @@ public:
      * @return byte size of <key, value> pairs stored on disk
      */
     uint64_t disk_size();
-
-    // TEST
-    void dumpmem();
-
-    // TEST
-    void catdiskfiles();
-
-    // TEST
-    void merge_all_files();
     
 protected:
 
     void sanity_check();
+    void check_parameters();
 
     DiskStore           *m_diskstore;
     MemStore            *m_memstore;

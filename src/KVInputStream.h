@@ -8,6 +8,16 @@ class KVInputStream {
 public:
 
     /**
+     * constructor
+     */
+    KVInputStream();
+
+    /**
+     * destructor (define as 'virtual' so it will call destructors of derived classes)
+     */
+    virtual ~KVInputStream();  
+    
+    /**
      * reset stream
      */
     virtual void reset() = 0;

@@ -98,6 +98,7 @@ void VFile::fs_open(char *filename)
 void VFile::fs_open_tmp(void)
 {
     char *name = tempnam(TMPFILEDIR, TMPFILEPREFIX);
+    printf("OPENED: %s\n", name);
     fs_open(name);
     free(name);
 }

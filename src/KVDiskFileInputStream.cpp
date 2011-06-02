@@ -43,16 +43,12 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
 {
     uint32_t len, unused_bytes;
 
-    // NOTE: 'false' arg: do not copy key and value, just make them point to
-    // the buffer position, as read from fs_read().
-    // NOTE: pointers are valid only until next call to deserialize. if we want
-    // to used them after next call to deserialize() we must copy key and value.
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, &len, false)) {
         m_bytes_used += len;
         return len;
     } else {
 
-        // keep only unused bytes
+        // keep only unused bytes in buffer
         unused_bytes = m_bytes_in_buf - m_bytes_used;
         memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
         m_bytes_in_buf = unused_bytes;

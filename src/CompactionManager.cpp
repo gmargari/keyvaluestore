@@ -1,9 +1,10 @@
 #include "Global.h"
 #include "CompactionManager.h"
-#include "KVDiskFile.h"
 #include "KVMapInputStream.h"
+#include "KVDiskFile.h"
 #include "KVDiskFileInputStream.h"
 #include "KVDiskFileOutputStream.h"
+#include "KVPriorityInputStream.h"
 
 #include <cstdio>
 
@@ -31,83 +32,82 @@ void CompactionManager::flush_memstore(void)
 {
     const char *key, *value;
     KVDiskFile *kvdiskfile;
-    KVMapInputStream *iscanner;
-    KVDiskFileOutputStream *oscanner;
+    KVMapInputStream *istream;
+    KVDiskFileOutputStream *ostream, *merged_ostream;
+    vector<KVDiskFile *>::iterator iter;
+    vector<KVInputStream *> istreams;
+    
+    /*
+     * first, flush memstore to a new file on disk
+     */
     
     printf("========== Flush mem ==========\n");
+    // create an input stream for memstore, using it write memstore to 
+    // a new file on disk and then clear memstore
     kvdiskfile = new KVDiskFile;
-    iscanner = new KVMapInputStream(&(m_memstore->m_kvmap));
-    oscanner = new KVDiskFileOutputStream(kvdiskfile);
-    while (iscanner->read(&key, &value)) {
-        oscanner->write(key, value);
+    istream = new KVMapInputStream(&(m_memstore->m_kvmap));
+    ostream = new KVDiskFileOutputStream(kvdiskfile);
+    while (istream->read(&key, &value)) {
+        ostream->write(key, value);
         printf("[%s] [%s]\n", key, value);
     }
-    oscanner->flush();
-    delete iscanner;
-    delete oscanner;
-    
-//     kvdiskfile->close(); // if I close it, cannot use it next by read
+    ostream->flush();
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
     m_memstore->clear();
     
+    delete istream;
+    delete ostream;
+    
+    /* 
+     * if we need to merge some disk files, merge them
+     */
+    if (m_diskstore->m_diskfiles.size() > 2) {
+        
+        printf("========== Merge files to ==========\n");
+
+        // create vector of all input streams that will be merged
+        for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
+            istreams.push_back(new KVDiskFileInputStream((*iter)));
+        }
+
+        // merge input streams, writing output to a new file
+        kvdiskfile = new KVDiskFile;
+        merged_ostream = new KVDiskFileOutputStream(kvdiskfile);
+        merge_istreams(istreams, merged_ostream);
+
+        // delete all files merged
+        for (int i = 0; i < (int)m_diskstore->m_diskfiles.size(); i++) {
+            m_diskstore->m_diskfiles[i]->delete_from_disk();
+            delete m_diskstore->m_diskfiles[i];
+        }
+        m_diskstore->m_diskfiles.clear();
+
+        // add new file to (currently empty) set of disk files
+        m_diskstore->m_diskfiles.push_back(kvdiskfile);
+
+        // free memory
+        for (int i = 0; i < (int)istreams.size(); i++)
+            delete istreams[i];
+        delete merged_ostream;
+    }
 }
 
-// TEST
 /*========================================================================
- *                             merge_all_files
+ *                             merge_istreams
  *========================================================================*/
-void CompactionManager::merge_all_files()
+void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream)
 {
     const char *key, *value;
-    std::vector<KVDiskFile *>::iterator iter;
-    KVDiskFile *kvdiskfile;
-    KVDiskFileOutputStream *oscanner;
-    KVDiskFileInputStream *iscanner;
+    vector<KVDiskFile *>::iterator iter;
+    KVPriorityInputStream *istream_heap;
 
-// NOTE: if after merging a value is greater than MAX_KVSIZE --> error!
-//     assert(strlen(key) + 1 <= MAX_KVSIZE);
-//     if (strlen(key) + 1 > MAX_KVSIZE || strlen(value) + 1> MAX_KVSIZE) {
-//         printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVSIZE);
-//         assert(0);
-//         return false;
-//     }
-
-    printf("========== Merge files to ==========\n");
-
-    kvdiskfile = new KVDiskFile;
-    oscanner = new KVDiskFileOutputStream(kvdiskfile);
-    for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-        iscanner = new KVDiskFileInputStream((*iter));
-        while (iscanner->read(&key, &value)) {
-            oscanner->write(key, value);
-            printf("[%s] [%s]\n", key, value);
-        }
-        delete iscanner;
+    istream_heap = new KVPriorityInputStream(istreams);    
+    while (istream_heap->read(&key, &value)) {
+        ostream->write(key, value);
+        printf("[%s] [%s]\n", key, value);
     }
-    oscanner->flush();
-    delete oscanner;
-
-    m_diskstore->m_diskfiles.push_back(kvdiskfile);
-}
-
-// TEST
-/*========================================================================
- *                             catdiskfiles
- *========================================================================*/
-void CompactionManager::catdiskfiles()
-{
-    const char *key, *value;
-    std::vector<KVDiskFile *>::iterator iter;
-    KVDiskFileInputStream *iscanner;
-
-    for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-        printf("========== Cat file ==========\n");
-        iscanner = new KVDiskFileInputStream(*iter);
-        while (iscanner->read(&key, &value)) {
-            printf("[%s] [%s]\n", key, value);
-        }
-        delete iscanner;
-    }
+    ostream->flush();
+    delete istream_heap;
 }
 
 /*=======================================================================*
@@ -118,4 +118,24 @@ void CompactionManager::sanity_check()
 #if DBGLVL < 2
     return;
 #endif
+}
+
+// TEST
+/*========================================================================
+ *                             catdiskfiles
+ *========================================================================*/
+void CompactionManager::catdiskfiles()
+{
+    const char *key, *value;
+    vector<KVDiskFile *>::iterator iter;
+    KVDiskFileInputStream *istream;
+
+    for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
+        printf("========== Cat file ==========\n");
+        istream = new KVDiskFileInputStream(*iter);
+        while (istream->read(&key, &value)) {
+            printf("[%s] [%s]\n", key, value);
+        }
+        delete istream;
+    }
 }
