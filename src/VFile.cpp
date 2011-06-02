@@ -131,32 +131,29 @@ void VFile::fs_close(void)
  *-------------------------------------------------------*/
 ssize_t VFile::fs_read(void *buf, size_t count)
 {
-    ssize_t actually_read;
+    ssize_t bytes_read;
     
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        actually_read = (size_t)min((uint64_t)count, (Size - Offset));
-        Offset += actually_read;
+        bytes_read = (size_t)min((uint64_t)count, (Size - Offset));
+        Offset += bytes_read;
         assert(Offset <= Size);
     } else {
         size_t num;
-        uint64_t bytes_left;
 
         start_timing();
-        for (bytes_left = count; bytes_left; ) {
-            if ((num = cur_fs_read(buf, bytes_left)) == 0) {
+        for (bytes_read = 0; bytes_read < count; ) {
+            if ((num = cur_fs_read(buf + bytes_read, count - bytes_read)) == 0) {
                 break; // no bytes left in file
             }
-            bytes_left -= num;
+            bytes_read += num;
         }
         end_timing();
-
-        actually_read = count - bytes_left;
     }
 
-    Sim->inc_bytes_read(actually_read);
+    Sim->inc_bytes_read(bytes_read);
     Sim->inc_ioops(1);
     
-    return actually_read;
+    return bytes_read;
 }
 
 /*-------------------------------------------------------
@@ -171,14 +168,15 @@ ssize_t VFile::fs_write(const void *buf, size_t count)
         }
     } else {
         size_t num;
-        uint64_t bytes_left;
+        uint64_t bytes_written;
 
         start_timing();
-        for (bytes_left = count; bytes_left; ) {
-            num = cur_fs_write(buf, bytes_left);
-            bytes_left -= num;
+        for (bytes_written = 0; bytes_written < count; ) {
+            num = cur_fs_write(buf + bytes_written, count - bytes_written);
+            bytes_written += num;
         }
         end_timing();
+        assert(bytes_written == count);
     }
 
     Sim->inc_bytes_written(count);

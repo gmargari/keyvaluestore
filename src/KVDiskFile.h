@@ -22,11 +22,11 @@ public:
      */
     ~KVDiskFile();
 
-    /**
-     * file system name of this file
-     */
-    char *name();
-
+//     /**
+//      * file system name of this file
+//      */
+//     char *name();    // NOTE: a VFile can be composed of several disk files. modify function to return array of names?!
+// 
 //     /**
 //      * rewind file
 //      */

@@ -30,19 +30,26 @@ CompactionManager::~CompactionManager()
 void CompactionManager::flush_memstore(void)
 {
     const char *key, *value;
-    KVDiskFile *kvdiskfile = new KVDiskFile;
-    KVMapInputStream iscanner(&(m_memstore->m_kvmap));
-    KVDiskFileOutputStream oscanner(kvdiskfile);
+    KVDiskFile *kvdiskfile;
+    KVMapInputStream *iscanner;
+    KVDiskFileOutputStream *oscanner;
     
-    printf("========== Flush mem to [%s] ==========\n", kvdiskfile->name());
-    while (iscanner.read(&key, &value)) {
-        oscanner.write(key, value);
+    printf("========== Flush mem ==========\n");
+    kvdiskfile = new KVDiskFile;
+    iscanner = new KVMapInputStream(&(m_memstore->m_kvmap));
+    oscanner = new KVDiskFileOutputStream(kvdiskfile);
+    while (iscanner->read(&key, &value)) {
+        oscanner->write(key, value);
         printf("[%s] [%s]\n", key, value);
     }
-    oscanner.flush();
+    oscanner->flush();
+    delete iscanner;
+    delete oscanner;
+    
 //     kvdiskfile->close(); // if I close it, cannot use it next by read
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
     m_memstore->clear();
+    
 }
 
 // TEST
@@ -53,18 +60,32 @@ void CompactionManager::merge_all_files()
 {
     const char *key, *value;
     std::vector<KVDiskFile *>::iterator iter;
-    KVDiskFile *kvdiskfile = new KVDiskFile;
-    KVDiskFileOutputStream oscanner(kvdiskfile);
+    KVDiskFile *kvdiskfile;
+    KVDiskFileOutputStream *oscanner;
+    KVDiskFileInputStream *iscanner;
 
-    printf("========== Merge files to [%s] ==========\n", kvdiskfile->name());
+// NOTE: if after merging a value is greater than MAX_KVSIZE --> error!
+//     assert(strlen(key) + 1 <= MAX_KVSIZE);
+//     if (strlen(key) + 1 > MAX_KVSIZE || strlen(value) + 1> MAX_KVSIZE) {
+//         printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVSIZE);
+//         assert(0);
+//         return false;
+//     }
+
+    printf("========== Merge files to ==========\n");
+
+    kvdiskfile = new KVDiskFile;
+    oscanner = new KVDiskFileOutputStream(kvdiskfile);
     for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-        KVDiskFileInputStream scanner((*iter));
-        while (scanner.read(&key, &value)) {
-            oscanner.write(key, value);
+        iscanner = new KVDiskFileInputStream((*iter));
+        while (iscanner->read(&key, &value)) {
+            oscanner->write(key, value);
             printf("[%s] [%s]\n", key, value);
         }
+        delete iscanner;
     }
-    oscanner.flush();
+    oscanner->flush();
+    delete oscanner;
 
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
 }
@@ -77,13 +98,15 @@ void CompactionManager::catdiskfiles()
 {
     const char *key, *value;
     std::vector<KVDiskFile *>::iterator iter;
+    KVDiskFileInputStream *iscanner;
 
     for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-        printf("========== Cat file [%s] ==========\n", (*iter)->name());
-        KVDiskFileInputStream scanner((*iter));
-        while (scanner.read(&key, &value)) {
+        printf("========== Cat file ==========\n");
+        iscanner = new KVDiskFileInputStream(*iter);
+        while (iscanner->read(&key, &value)) {
             printf("[%s] [%s]\n", key, value);
         }
+        delete iscanner;
     }
 }
 

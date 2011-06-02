@@ -26,9 +26,10 @@
 #define TMPFILEPREFIX                      "fsim." // 5 chars max
 #define MAX_FILE_SIZE              2147483647LL // 2GB
 
-#define READBUFSIZE    ((size_t)(64*1024*1024))
-#define MERGEBUFSIZE   ((size_t)(64*1024*1024))
-#define SCANNERBUFSIZE            (4*1024*1024) // 4MB 
+#define READBUFSIZE                ((size_t)(64*1024*1024))
+#define MERGEBUFSIZE               ((size_t)(64*1024*1024))
+#define MAX_KVSIZE             (unsigned long)(1*1024*1024) // 1MB
+#define SCANNERBUFSIZE  (2*MAX_KVSIZE + 2*sizeof(uint64_t)) // need at least these bytes (e.g. to fully decode a kv read from disk)
 
 // byte conversion
 #define b2kb(b) ((b)/(1024.0))

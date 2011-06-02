@@ -46,6 +46,8 @@ assert(m_size == free_mem);
     m_keys = 0;
 }
 
+#include <stdio.h>
+
 /*=======================================================================*
  *                                  put
  *=======================================================================*/
@@ -57,6 +59,12 @@ bool KVMap::put(const char *key, const char *value)
     sanity_check();
     assert(key);
     assert(value);
+
+    if (strlen(key) + 1 > MAX_KVSIZE || strlen(value) + 1> MAX_KVSIZE) {
+        printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVSIZE);
+        assert(0);
+        return false;
+    }
     
     // if 'key' exists in map, delete corresponding value (it'll be replaced)
     kvmap::iterator f = m_map.find(key);
@@ -128,6 +136,8 @@ void KVMap::sanity_check()
     
     for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         map_size += strlen(iter->first) + strlen(iter->second) + 2;
+        assert(strlen(iter->first) + 1 <= MAX_KVSIZE);
+        assert(strlen(iter->second) + 1 <= MAX_KVSIZE);
     }
     assert(m_size == map_size);
     assert(m_keys == m_map.size());
