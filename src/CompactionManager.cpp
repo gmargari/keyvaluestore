@@ -49,7 +49,7 @@ void CompactionManager::flush_memstore(void)
     ostream = new KVDiskFileOutputStream(kvdiskfile);
     while (istream->read(&key, &value)) {
         ostream->write(key, value);
-        printf("[%s] [%s]\n", key, value);
+//         printf("[%s] [%s]\n", key, value);
     }
     ostream->flush();
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
@@ -61,7 +61,7 @@ void CompactionManager::flush_memstore(void)
     /* 
      * if we need to merge some disk files, merge them
      */
-    if (m_diskstore->m_diskfiles.size() > 2) {
+    if (m_diskstore->m_diskfiles.size() > 3) {
         
         printf("========== Merge files to ==========\n");
 
@@ -104,7 +104,7 @@ void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskF
     istream_heap = new KVPriorityInputStream(istreams);    
     while (istream_heap->read(&key, &value)) {
         ostream->write(key, value);
-        printf("[%s] [%s]\n", key, value);
+//         printf("[%s] [%s]\n", key, value);
     }
     ostream->flush();
     delete istream_heap;
@@ -131,11 +131,40 @@ void CompactionManager::catdiskfiles()
     KVDiskFileInputStream *istream;
 
     for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-        printf("========== Cat file ==========\n");
+        printf("[DEBUG] ==== Cat file ====\n");
         istream = new KVDiskFileInputStream(*iter);
         while (istream->read(&key, &value)) {
             printf("[%s] [%s]\n", key, value);
         }
         delete istream;
     }
+}
+
+#include <cstdlib>
+#include <cassert>
+
+// TEST
+void CompactionManager::check_disk_files_are_sorted(void)
+{
+    const char *key, *value;
+    char *prev_key;
+    vector<KVDiskFile *>::iterator iter;
+    KVDiskFileInputStream *istream;
+
+    printf("[DEBUG] Check_disk_files_are_sorted ... ");
+    prev_key = (char *)malloc(MAX_KVSIZE);
+    for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
+        istream = new KVDiskFileInputStream(*iter);
+        prev_key[0] = '\0';
+        while (istream->read(&key, &value)) {
+            if (strcmp(prev_key, key) > 0) {
+                printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);
+                assert(0);
+            }
+            strcpy(prev_key, key);
+        }
+        delete istream;
+    }
+    free(prev_key);
+    printf("OK!\n");
 }

@@ -1,14 +1,48 @@
 #include "KeyValueStore.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cassert>
 
 #define BUFSIZE 1000
 
+void randstr(char *s, const int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = '\0';
+}
+
+
 int main(void)
 {
     KeyValueStore kvstore;
+
+    char *key, *value;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    printf("seed: %d\n", tv.tv_usec);
+    srand(tv.tv_usec);
+    key = (char *)malloc(MAX_KVSIZE);
+    value = (char *)malloc(MAX_KVSIZE);
+    for (int i = 0; i < 10000; i++) {
+        randstr(key, (int)(rand() % 100) + 1);
+        randstr(value, (int)(rand() % 1000) + 1);
+        sprintf(value + strlen(value), "#%d", i);
+//         printf("[%s] [%s]\n", key, value);
+        kvstore.put(key, value);
+        if (i % 100 == 0)
+            printf("i = %d\n", i);
+    }
+    free(key);
+    free(value);
+    
 //     size_t numkvs = 13;
 //     char *strs[13][2] = {
 //         {(char *)"d",      (char *)"d1"},
@@ -39,43 +73,43 @@ int main(void)
 //     }
 
 
-    kvstore.put("a",  "a1");
-    kvstore.put("b",  "b2");
-    kvstore.put("c",  "c3");
-    kvstore.put("d",  "d4");
-    kvstore.put("e",  "e5");
-    kvstore.put("f",  "f6");
-    kvstore.put("g",  "g7");
-    kvstore.put("h",  "h8");
-    kvstore.put("j",  "j9");
-    kvstore.put("k",  "k10");
-    kvstore.put("a",  "a11");
-    kvstore.put("aa", "aa12");
-    kvstore.put("b",  "b13");
-    kvstore.put("c",  "c14");
-    kvstore.put("a",  "a15");
-    kvstore.put("c",  "c16");
-    kvstore.put("d",  "d17");
-    kvstore.put("b",  "b18");
-    kvstore.put("a",  "a1x");
-    kvstore.put("b",  "b2x");
-    kvstore.put("c",  "c3x");
-    kvstore.put("d",  "d4x");
-    kvstore.put("e",  "e5x");
-    kvstore.put("f",  "f6x");
-    kvstore.put("g",  "g7x");
-    kvstore.put("h",  "h8x");
-    kvstore.put("j",  "j9x");
-    kvstore.put("k",  "k10x");
-    kvstore.put("a",  "a11x");
-    kvstore.put("aa", "aa12x");
-    kvstore.put("b",  "b13x");
-    kvstore.put("c",  "c14x");
-    kvstore.put("a",  "a15x");
-    kvstore.put("c",  "c16x");
-    kvstore.put("d",  "d17x");
-    kvstore.put("b",  "b18x");
-    kvstore.put("lastkey",  "lalala");
+//     kvstore.put("a",  "a1");
+//     kvstore.put("b",  "b2");
+//     kvstore.put("c",  "c3");
+//     kvstore.put("d",  "d4");
+//     kvstore.put("e",  "e5");
+//     kvstore.put("f",  "f6");
+//     kvstore.put("g",  "g7");
+//     kvstore.put("h",  "h8");
+//     kvstore.put("j",  "j9");
+//     kvstore.put("k",  "k10");
+//     kvstore.put("a",  "a11");
+//     kvstore.put("aa", "aa12");
+//     kvstore.put("b",  "b13");
+//     kvstore.put("c",  "c14");
+//     kvstore.put("a",  "a15");
+//     kvstore.put("c",  "c16");
+//     kvstore.put("d",  "d17");
+//     kvstore.put("b",  "b18");
+//     kvstore.put("a",  "a1x");
+//     kvstore.put("b",  "b2x");
+//     kvstore.put("c",  "c3x");
+//     kvstore.put("d",  "d4x");
+//     kvstore.put("e",  "e5x");
+//     kvstore.put("f",  "f6x");
+//     kvstore.put("g",  "g7x");
+//     kvstore.put("h",  "h8x");
+//     kvstore.put("j",  "j9x");
+//     kvstore.put("k",  "k10x");
+//     kvstore.put("a",  "a11x");
+//     kvstore.put("aa", "aa12x");
+//     kvstore.put("b",  "b13x");
+//     kvstore.put("c",  "c14x");
+//     kvstore.put("a",  "a15x");
+//     kvstore.put("c",  "c16x");
+//     kvstore.put("d",  "d17x");
+//     kvstore.put("b",  "b18x");
+//     kvstore.put("lastkey",  "lalala");
     
 //     assert(kvstore.num_mem_keys() == numkvs - 3); // 3 duplicate keys
 //     assert(strcmp(kvstore.get((char *)"d"),     (char *)"d1") == 0);

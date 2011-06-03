@@ -106,7 +106,7 @@ return; // TODO: MPOREI NA XALAW TO SORO!
 #endif
 
     heap_len = m_heap.size();
-    assert(m_heap.size() <= (int)m_istreams.size()); // always at most 'm_istreams.size()' elements in queue
+    assert(m_heap.size() <= m_istreams.size()); // always at most 'm_istreams.size()' elements in queue
 
     // get all elements of heap
     while (!m_heap.empty()) {

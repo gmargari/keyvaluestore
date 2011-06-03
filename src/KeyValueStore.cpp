@@ -11,7 +11,7 @@
 KeyValueStore::KeyValueStore()
 {
     m_memstore = new MemStore();
-    m_memstore->set_maxsize(10);
+    m_memstore->set_maxsize(10000);
     m_diskstore = new DiskStore();
     m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
 
@@ -35,6 +35,7 @@ bool KeyValueStore::put(const char *key, const char *value)
 {
     if (m_memstore->is_full()) {
         m_compactionmanager->flush_memstore();
+        m_compactionmanager->check_disk_files_are_sorted(); // TODO: delete
     }
     
     return m_memstore->put(key,value);

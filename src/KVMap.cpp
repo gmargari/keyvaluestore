@@ -28,22 +28,19 @@ KVMap::~KVMap()
  *=======================================================================*/
 void KVMap::clear()
 {
-uint64_t free_mem = 0;
+    sanity_check();
     
     for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
-        if ((*iter).first) {
-free_mem += strlen(iter->first) + 1;
-free(const_cast<char*>(iter->first));
-        }
-        if ((*iter).second) {
-free_mem += strlen(iter->second) + 1;
-            free(iter->second);
-        }
+        assert(iter->first);
+        assert(iter->second);
+        free(const_cast<char*>(iter->first));
+        free(iter->second);
     }
-assert(m_size == free_mem);
     m_map.clear();
     m_size = 0;
     m_keys = 0;
+    
+    sanity_check();
 }
 
 #include <stdio.h>

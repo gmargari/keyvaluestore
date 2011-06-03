@@ -32,13 +32,16 @@ public:
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
     void merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream);
+
+    // TEST
+    void catdiskfiles();
+    // TEST
+    void check_disk_files_are_sorted();
     
 protected:
 
     void sanity_check();
-    // TEST
-    void catdiskfiles();
-
+    
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };
