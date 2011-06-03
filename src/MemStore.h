@@ -21,6 +21,12 @@ public:
     ~MemStore();
 
     /**
+     * get/set maximum size of memstore
+     */
+    void        set_maxsize(uint64_t maxsize);
+    uint64_t    get_maxsize(void);
+    
+    /**
      * insert a <key, value> pair into map. copies of the key and value are
      * created and inserted into the map.
      *
@@ -45,13 +51,18 @@ public:
      * @return number of <key, value> pairs in memstore
      */
     uint64_t num_keys();
-
+    
     /**
      * byte size of memstore
      *
      * @return byte size of <key, value> pairs in memstore
      */
     uint64_t size();
+
+    /**
+     * memstore is full (we probably need to flush some <k,v> pairs to disk)
+     */
+    bool is_full();
 
     /**
      * clear memstore
@@ -62,7 +73,8 @@ protected:
 
     void sanity_check();
     
-    KVMap m_kvmap;
+    KVMap       m_kvmap;
+    uint64_t    m_maxsize;
 };
 
 #endif

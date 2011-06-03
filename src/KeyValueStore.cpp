@@ -11,6 +11,7 @@
 KeyValueStore::KeyValueStore()
 {
     m_memstore = new MemStore();
+    m_memstore->set_maxsize(10);
     m_diskstore = new DiskStore();
     m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
 
@@ -32,8 +33,7 @@ KeyValueStore::~KeyValueStore()
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    if (m_memstore->num_keys() > 6) {
-//     if (m_memstore->size() > 10) {
+    if (m_memstore->is_full()) {
         m_compactionmanager->flush_memstore();
     }
     

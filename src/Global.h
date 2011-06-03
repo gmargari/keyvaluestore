@@ -11,7 +11,7 @@
 #define DBGLVL 2
 
 // default values
-#define DEFAULT_MEMSIZE            1073741824LL // 1GB
+#define DEFAULT_MEMSTORE_SIZE      1073741824LL // 1GB
 #define DEFAULT_STATS_ENABLED             false
 #define DEFAULT_STATS_STEP         1073741824LL // 1GB
 #define DEFAULT_GEOM_R                        3
@@ -19,7 +19,6 @@
 #define DEFAULT_GEOM_P_IS_CONSTANT        false
 #define DEFAULT_URF_BLOCKSIZE       268435456LL // 256MB
 #define DEFAULT_URF_FLUSHMEMSIZE            0LL  // 0 -> flush biggest range only
-#define DEFAULT_MEMSIZE            1073741824LL // 1GB
 #define DEFAULT_INSERTBYTES      104857600000LL // 100GB
 
 #define TMPFILEDIR                         "/tmp/"
