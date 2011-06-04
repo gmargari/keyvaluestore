@@ -1,4 +1,4 @@
-#include "KeyValueStore.h"
+#include "../KeyValueStore.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -12,7 +12,7 @@ void randstr(char *s, const int len) {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
 
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < len; i++) {
         s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 

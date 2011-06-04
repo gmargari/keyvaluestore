@@ -14,8 +14,9 @@ public:
     VFile(bool real_io);
     ~VFile();
 
-    void     fs_open(char *filename);
-    void     fs_open_tmp(void);
+    bool     fs_open(char *filename, bool open_existing = false);
+    bool     fs_open_existing(char *filename);
+    bool     fs_open_unique(void);
     void     fs_close(void);
     // fs_read() and fs_write() are guaranteed to read or write 'count'
     // bytes. that is, they will repeatedly call internal functions until

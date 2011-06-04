@@ -47,10 +47,13 @@ bool KeyValueStore::put(const char *key, const char *value)
 char *KeyValueStore::get(char *key)
 {
     char *value;
-    
-    if ((value = m_memstore->get(key))) {
+
+    // if key found in memstore return, since this is the most recent value
+    if ((value = m_memstore->get(key))) { 
         return value;
-    } else {
+    }
+    // else, search in diskstore
+    else {
         return m_diskstore->get(key);
     }
 }
@@ -104,4 +107,3 @@ void KeyValueStore::check_parameters()
 {
     assert(SCANNERBUFSIZE >= (2*MAX_KVSIZE + 2*sizeof(uint64_t))); // need at least these bytes (e.g. to fully decode a kv read from disk)
 }
-

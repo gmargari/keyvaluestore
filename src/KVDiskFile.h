@@ -23,6 +23,28 @@ public:
     ~KVDiskFile();
 
     /**
+     * open file for read and write (create if not existing)
+     * 
+     * @return normally, should return true
+     */
+    bool open(char *filename);
+
+
+    /**
+     * open an existing file
+     * 
+     * @return true if file exists and was succesfully opened. otherwise false
+     */
+    bool open_existing(char *filename);
+    
+    /**
+     * open a new unique file in /tmp/ (see TMPFILEDIR, TMPFILEPREFIX in Global.h)
+     * 
+     * @return normally, should return true
+     */
+    bool open_unique();
+    
+    /**
      * delete file from disk 
      */
     void delete_from_disk();
