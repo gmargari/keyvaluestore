@@ -73,7 +73,7 @@ protected:
 
     void sanity_check();
     
-    KVMap       m_kvmap;
+    KVMap      *m_kvmap;
     uint64_t    m_maxsize;
 };
 

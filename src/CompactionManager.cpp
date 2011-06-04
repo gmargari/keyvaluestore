@@ -48,7 +48,7 @@ void CompactionManager::flush_memstore(void)
     // a new file on disk and then clear memstore
     kvdiskfile = new KVDiskFile;
     kvdiskfile->open_unique();
-    istream = new KVMapInputStream(&(m_memstore->m_kvmap));
+    istream = new KVMapInputStream(m_memstore->m_kvmap);
     ostream = new KVDiskFileOutputStream(kvdiskfile);
     while (istream->read(&key, &value)) {
         ostream->write(key, value);
