@@ -41,9 +41,9 @@ public:
      *
      * @param key key to be searched
      * @return pointer to value of specified key, NULL if key does not exist in
-     * map (return value is not copied, caller must copy it)
+     * map
      */
-    char *get(char *key);
+    const char *get(const char *key);
     
     /**
      * number of <key, value> pairs in memstore

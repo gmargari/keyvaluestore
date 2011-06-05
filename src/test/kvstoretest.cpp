@@ -27,7 +27,7 @@ int main(void)
     char *key, *value;
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    printf("seed: %d\n", tv.tv_usec);
+    printf("seed: %ld\n", tv.tv_usec);
     srand(tv.tv_usec);
     key = (char *)malloc(MAX_KVSIZE);
     value = (char *)malloc(MAX_KVSIZE);

@@ -45,7 +45,7 @@ bool MemStore::put(const char *key, const char *value)
 /*========================================================================
  *                                 get
  *========================================================================*/
-char *MemStore::get(char *key)
+const char *MemStore::get(const char *key)
 {
     return m_kvmap->get(key);
 }

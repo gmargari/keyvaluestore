@@ -28,17 +28,38 @@ KVMap::~KVMap()
  *=======================================================================*/
 void KVMap::clear()
 {
+    clear(NULL, NULL, true, true);
+    assert(m_size == 0);
+    assert(m_keys == 0);
+}
+
+/*=======================================================================*
+ *                                 clear
+ *=======================================================================*/
+void KVMap::clear(const char *start_key, const char *end_key)
+{
+    clear(start_key, end_key, true, false);
+}
+
+/*=======================================================================*
+ *                                 clear
+ *=======================================================================*/
+void KVMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    kvmap::iterator iter, s_iter, e_iter;
     sanity_check();
-    
-    for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+
+    s_iter = start_iter(start_key, start_key_incl);
+    e_iter = end_iter(end_key, end_key_incl);
+    for(iter = s_iter; iter != e_iter; iter++) {
         assert(iter->first);
         assert(iter->second);
+        m_size -= strlen(iter->first) + strlen(iter->second) + 2;
+        m_keys--;
         free(const_cast<char*>(iter->first));
         free(iter->second);
     }
-    m_map.clear();
-    m_size = 0;
-    m_keys = 0;
+    m_map.erase(s_iter, e_iter);
     
     sanity_check();
 }
@@ -90,7 +111,7 @@ bool KVMap::put(const char *key, const char *value)
 /*=======================================================================*
  *                                  get
  *=======================================================================*/
-char *KVMap::get(char *key)
+const char *KVMap::get(const char *key)
 {
     sanity_check();
     kvmap::iterator f = m_map.find(key);
@@ -112,12 +133,59 @@ uint64_t KVMap::size()
 
 
 /*=======================================================================*
- *                                 size
+ *                               num_keys
  *=======================================================================*/
 uint64_t KVMap::num_keys()
 {
     sanity_check();
     return m_keys;
+}
+
+/*=======================================================================*
+ *                               num_keys
+ *=======================================================================*/
+KVMap::kvmap::iterator KVMap::start_iter(const char *key, bool key_incl)
+{
+    kvmap::iterator iter;
+
+    if (key) {
+        iter = m_map.lower_bound(key);
+        if (key_incl == false && strcmp(iter->first, key) == 0) {
+            iter++;
+        }
+    } else {
+        iter = m_map.begin();
+    }
+
+    return iter;    
+}
+
+/*=======================================================================*
+ *                               num_keys
+ *=======================================================================*/
+KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
+{
+    kvmap::iterator iter;
+    
+    if (key) {
+        // upper_bound(x) returns an iterator pointing to the first element
+        // whose key compares strictly greater than x
+        iter = m_map.upper_bound(key);
+        
+        // if 'end_key' is not inclusive, set 'iter' one position back
+        // and check if 'iter' has key equal to 'end_key'. if yes,
+        // leave it there, else forward it one position.
+        if (key_incl == false && iter != m_map.begin() /*&& iter != start_iter*/) {
+            iter--; // TODO: Mporei na min iparxei to proigoumeno! Px to iter deixnei sto lexikografika proto stoixio tou map
+            if (strcmp(iter->first, key) != 0) {
+                iter++;
+            }
+        }
+    } else {
+        iter = m_map.end();
+    }
+    
+    return iter;
 }
 
 /*=======================================================================*

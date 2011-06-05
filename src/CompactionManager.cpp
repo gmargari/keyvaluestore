@@ -99,7 +99,6 @@ void CompactionManager::flush_memstore(void)
 void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream)
 {
     const char *key, *value;
-    vector<KVDiskFile *>::iterator iter;
     KVPriorityInputStream *istream_heap;
 
     printf("[DEBUG] CompactionManager::merge_istreams\n");

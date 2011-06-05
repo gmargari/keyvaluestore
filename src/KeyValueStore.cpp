@@ -44,9 +44,9 @@ bool KeyValueStore::put(const char *key, const char *value)
 /*========================================================================
  *                                 get
  *========================================================================*/
-char *KeyValueStore::get(char *key)
+const char *KeyValueStore::get(const char *key)
 {
-    char *value;
+    const char *value;
 
     // if key found in memstore return, since this is the most recent value
     if ((value = m_memstore->get(key))) { 

@@ -30,7 +30,7 @@ DiskStore::~DiskStore()
 /*========================================================================
  *                                 get
  *========================================================================*/
-char *DiskStore::get(char *key)
+const char *DiskStore::get(const char *key)
 {
     return NULL;
 }

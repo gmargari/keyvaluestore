@@ -24,8 +24,7 @@ int main(int argc, char **argv)
     kvdiskfile->open_existing(argv[1]);
     istream = new KVDiskFileInputStream(kvdiskfile);
     while (istream->read(&key, &value)) {
-        if (strcmp(prev_key, key) > 0) { // TODO: when we'll add timestamps, also check timestamps
-            
+        if (strcmp(prev_key, key) > 0) { // TODO: when we'll add timestamps, also check timestamps            
             printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);
             exit(EXIT_FAILURE);
         }

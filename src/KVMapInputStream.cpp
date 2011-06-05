@@ -70,33 +70,8 @@ KVMapInputStream::~KVMapInputStream()
 void KVMapInputStream::reset()
 {
     assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
-    
-    if (m_start_key) {
-        m_iter = m_kvmap->m_map.lower_bound(m_start_key);
-        if (m_start_incl == false && strcmp(m_iter->first, m_start_key) == 0) {
-            m_iter++;
-        }
-    } else {
-        m_iter = m_kvmap->m_map.begin();
-    }
-
-    if (m_end_key) {
-        // upper_bound(x) returns an iterator pointing to the first element 
-        // whose key compares strictly greater than x
-        m_iter_end = m_kvmap->m_map.upper_bound(m_end_key);
-        
-        // if 'end_key' is not inclusive, set 'm_iter_end' one position back
-        // and check if 'm_iter_end' has key equal to 'end_key'. if yes, 
-        // leave it there, else forward it one position.
-        if (m_end_incl == false && m_iter_end != m_iter) {
-            m_iter_end--;
-            if (strcmp(m_iter_end->first, m_end_key) != 0) {
-                m_iter_end++;
-            }
-        }
-    } else {
-        m_iter_end = m_kvmap->m_map.end();
-    }
+    m_iter = m_kvmap->start_iter(m_start_key, m_start_incl);
+    m_iter_end = m_kvmap->end_iter(m_end_key, m_end_incl);
 }
 
 #include <cstdio>
