@@ -42,9 +42,12 @@ bool KVDiskFileOutputStream::write(const char *key, const char *value)
 {
     uint32_t len;
 
-    serialize(m_buf, m_buf_size, key, value, &len); // TODO: check for fail, return false
-    m_kvdiskfile->m_vfile->fs_write(m_buf, len);  // TODO: check for fail, return false
-    return true;
+    if (serialize(m_buf, m_buf_size, key, value, &len) &&
+          m_kvdiskfile->m_vfile->fs_write(m_buf, len)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*========================================================================

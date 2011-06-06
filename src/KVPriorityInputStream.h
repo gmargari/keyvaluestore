@@ -69,8 +69,6 @@ protected:
     };
 
     void sanity_check();
-
-    void print_heap(); // TODO: delete!!!!
     
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
     vector<KVInputStream *>                    m_istreams;

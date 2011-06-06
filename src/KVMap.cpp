@@ -175,8 +175,8 @@ KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
         // if 'end_key' is not inclusive, set 'iter' one position back
         // and check if 'iter' has key equal to 'end_key'. if yes,
         // leave it there, else forward it one position.
-        if (key_incl == false && iter != m_map.begin() /*&& iter != start_iter*/) {
-            iter--; // TODO: Mporei na min iparxei to proigoumeno! Px to iter deixnei sto lexikografika proto stoixio tou map
+        if (key_incl == false && iter != m_map.begin()) {
+            iter--;
             if (strcmp(iter->first, key) != 0) {
                 iter++;
             }
