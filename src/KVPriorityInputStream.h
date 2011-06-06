@@ -18,11 +18,11 @@ public:
     /**
      * NOTE: the order of input streams in vector 'istreams' defines their priority,
      * in case for example two input streams have the same key. for example,
-     * if both istreams[1] and istreams[4] have the same key 'k', the greatest 
+     * if both istreams[1] and istreams[4] have the same key 'k', the greatest
      * the <k,v> of istreams[1] will be considered greatest than that of istreams[4].
-     * 
+     *
      * So, when calling constructor, make sure to insert in the first position
-     * of istreams the input stream from memstore (if any), since this has the 
+     * of istreams the input stream from memstore (if any), since this has the
      * most recent value for a key, then the most recently written disk file etc.
      */
     KVPriorityInputStream(vector<KVInputStream *> istreams);
@@ -36,10 +36,10 @@ public:
      * reset priority queue
      */
     void reset();
-    
+
     /**
      * get next <key, value> pair from priority queue
-     * 
+     *
      * @return false if no <k,v> pair left. else, true.
      */
     bool read(const char **key, const char **value);
@@ -51,13 +51,13 @@ protected:
         const char *value;
         int sid;                // id of stream that we read this <k,v> from
     } heap_element;
-    
+
     class heap_cmp {
-    public:            
+    public:
         bool operator()(const heap_element *e1, const heap_element *e2) // returns true if e2 precedes e1
         {
             int cmp = strcmp(e1->key, e2->key);
-            
+
             if (cmp > 0) {
                 return true;
             } else if (cmp == 0 && e1->sid > e2->sid) {
@@ -69,7 +69,7 @@ protected:
     };
 
     void sanity_check();
-    
+
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
     vector<KVInputStream *>                    m_istreams;
     vector<heap_element *>                     m_elements;

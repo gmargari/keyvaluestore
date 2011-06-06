@@ -15,16 +15,16 @@ public:
     /**
      * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual ~KVInputStream();  
-    
+    virtual ~KVInputStream();
+
     /**
      * reset stream
      */
     virtual void reset() = 0;
-    
+
     /**
      * get next <key, value> pair from stream
-     * 
+     *
      * @return false if no <k,v> pair left. else, true.
      */
     virtual bool read(const char **key, const char **value) = 0;

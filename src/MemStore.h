@@ -7,7 +7,7 @@
 class MemStore {
 
 friend class CompactionManager;
-    
+
 public:
 
     /**
@@ -25,7 +25,7 @@ public:
      */
     void        set_maxsize(uint64_t maxsize);
     uint64_t    get_maxsize(void);
-    
+
     /**
      * insert a <key, value> pair into map. copies of the key and value are
      * created and inserted into the map.
@@ -44,14 +44,14 @@ public:
      * map
      */
     const char *get(const char *key);
-    
+
     /**
      * number of <key, value> pairs in memstore
      *
      * @return number of <key, value> pairs in memstore
      */
     uint64_t num_keys();
-    
+
     /**
      * byte size of memstore
      *
@@ -72,7 +72,7 @@ public:
 protected:
 
     void sanity_check();
-    
+
     KVMap      *m_kvmap;
     uint64_t    m_maxsize;
 };

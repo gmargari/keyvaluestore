@@ -38,11 +38,11 @@ int main(void)
 //         printf("[%s] [%s]\n", key, value);
         kvstore.put(key, value);
         if (i % 100 == 0)
-            printf("i = %d\n", i);
+            dbg_i(i);
     }
     free(key);
     free(value);
-    
+
 //     size_t numkvs = 13;
 //     char *strs[13][2] = {
 //         {(char *)"d",      (char *)"d1"},
@@ -59,15 +59,15 @@ int main(void)
 //         {(char *)"c",      (char *)"c2"},
 //         {(char *)"t",      (char *)"t2"},
 //     };
-// 
+//
 //     for (size_t i = 0; i < numkvs - 5; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
-// 
+//
 //     for (size_t i = 0; i < numkvs - 3; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
-// 
+//
 //     for (size_t i = 0; i < numkvs; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
@@ -110,7 +110,7 @@ int main(void)
 //     kvstore.put("d",  "d17x");
 //     kvstore.put("b",  "b18x");
 //     kvstore.put("lastkey",  "lalala");
-    
+
 //     assert(kvstore.num_mem_keys() == numkvs - 3); // 3 duplicate keys
 //     assert(strcmp(kvstore.get((char *)"d"),     (char *)"d1") == 0);
 //     assert(strcmp(kvstore.get((char *)"aaa"),   (char *)"aa1") != 0);    // should have been replaced
@@ -126,6 +126,6 @@ int main(void)
 //     assert(kvstore.get((char *)"\xf3") == NULL);
 //     assert(kvstore.num_mem_keys() == numkvs - 3); // 3 duplicate keys
 //
-    
+
     printf("Everything ok!\n");
 }

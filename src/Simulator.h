@@ -11,7 +11,7 @@ class Simulator
 public:
 
     enum sim_mode { SIMMODE_REAL_IO, SIMMODE_SIMULATE_IO };
-    
+
     Simulator();
     ~Simulator();
 
@@ -42,11 +42,11 @@ public:
     // fragmentation
     void add_cur_fragmentation(int disk_runs);
     float get_avg_fragmentation(void);
-    
+
 protected:
 
     void sanity_check();
-    
+
     // are we going to simulate IO or perform real IO?
     sim_mode m_sim_mode;
 

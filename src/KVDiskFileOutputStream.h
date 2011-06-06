@@ -24,7 +24,7 @@ public:
      * reset scanner
      */
     void reset();
-    
+
     /**
      * write <key, value> to stream
      *
@@ -36,16 +36,16 @@ public:
      * flush output stream buffer
      */
     void flush();
-    
+
 protected:
-    
+
     void sanity_check();
 
     KVDiskFile *m_kvdiskfile;
     char       *m_buf;
     uint32_t    m_buf_size;
     uint32_t    m_bytes_in_buf;
-    uint32_t    m_bytes_used;  
+    uint32_t    m_bytes_used;
 };
 
 #endif

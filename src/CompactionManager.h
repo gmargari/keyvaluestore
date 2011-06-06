@@ -12,7 +12,7 @@ using std::vector;
 class CompactionManager {
 
 public:
-    
+
     /**
      * constructor
      */
@@ -27,16 +27,16 @@ public:
      * sort memory <k,v> pairs by key and store them in a new disk file
      */
     void flush_memstore(void);
-    
+
     /**
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
     void merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream);
-    
+
 protected:
 
     void sanity_check();
-    
+
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };

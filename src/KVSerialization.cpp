@@ -48,7 +48,7 @@ bool deserialize(char *buf, uint32_t buflen, const char **key, const char **valu
              keylen,
              valuelen;
     char *tmpkey, *tmpvalue;
-             
+
     if (buflen < sizeof(keylen) + sizeof(valuelen)) {
         return false;
     }

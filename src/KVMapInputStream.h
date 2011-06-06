@@ -15,8 +15,8 @@ public:
     KVMapInputStream(KVMap *kvmap);
 
     /**
-     * constructor of an input stream that returns all memory <k,v> pairs with 
-     * keys between 'start_key' (inclusive) and 'end_key' (exclusive), 
+     * constructor of an input stream that returns all memory <k,v> pairs with
+     * keys between 'start_key' (inclusive) and 'end_key' (exclusive),
      * i.e. start_key <= k < end_key
      */
     KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key);
@@ -26,7 +26,7 @@ public:
      * inclusive or not
      */
     KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
-    
+
     /**
      * destructor
      */
@@ -35,7 +35,7 @@ public:
     // inherited from KVInputStream
     /**
      * reset stream
-     */    
+     */
     void reset();
 
     /**
@@ -49,7 +49,7 @@ protected:
 
     void init(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
     void sanity_check();
-    
+
     KVMap                       *m_kvmap;
     KVMap::kvmap::iterator       m_iter;
     KVMap::kvmap::iterator       m_iter_end;

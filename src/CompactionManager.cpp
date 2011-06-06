@@ -41,9 +41,6 @@ void CompactionManager::flush_memstore(void)
      * first, flush memstore to a new file on disk
      */
 
-    printf("[DEBUG]================================================\n");
-    printf("[DEBUG] CompactionManager::flush_memstore\n");
-
     // create an input stream for memstore, using it write memstore to
     // a new file on disk and then clear memstore
     kvdiskfile = new KVDiskFile;
@@ -100,8 +97,6 @@ void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskF
 {
     const char *key, *value;
     KVPriorityInputStream *istream_heap;
-
-    printf("[DEBUG] CompactionManager::merge_istreams\n");
 
     istream_heap = new KVPriorityInputStream(istreams);
     while (istream_heap->read(&key, &value)) {

@@ -70,7 +70,8 @@ bool VFile::fs_open(char *filename, bool open_existing)
 
     fname = strdup(filename);
     assert(fname);
-    printf("[DEBUG] VFile::fs_open [%s]\n", fname);
+
+    dbg_s(fname);
 
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         if (Opened) {

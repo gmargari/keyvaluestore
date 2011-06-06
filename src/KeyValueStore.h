@@ -7,7 +7,7 @@
 #include "CompactionManager.h"
 
 class KeyValueStore {
-   
+
 public:
 
     /**
@@ -48,11 +48,11 @@ public:
 
     /**
      * number of <k,v> pairs on disk
-     * 
+     *
      * @return number of <key, value> pairs on disk
      */
     uint64_t num_disk_keys();
-    
+
     /**
      * byte size of memstore
      *
@@ -66,7 +66,7 @@ public:
      * @return byte size of <key, value> pairs stored on disk
      */
     uint64_t disk_size();
-    
+
 protected:
 
     void sanity_check();

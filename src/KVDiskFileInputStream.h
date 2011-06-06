@@ -24,18 +24,18 @@ public:
      * reset scanner
      */
     void reset();
-    
+
     /**
-     * get next <key, value> pair from stream 
-     * (pointers are valid only until next call to function. if caller wants to 
+     * get next <key, value> pair from stream
+     * (pointers are valid only until next call to function. if caller wants to
      * use them after next call, he must copy key and value)
      *
      * @return false if no <k,v> pair left. else, true.
      */
     bool read(const char **key, const char **value);
-    
+
 protected:
-    
+
     void sanity_check();
 
     KVDiskFile *m_kvdiskfile;
