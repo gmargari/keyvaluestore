@@ -35,7 +35,6 @@ bool KeyValueStore::put(const char *key, const char *value)
 {
     if (m_memstore->is_full()) {
         m_compactionmanager->flush_memstore();
-        m_compactionmanager->check_disk_files_are_sorted(); // TODO: delete
     }
     
     return m_memstore->put(key,value);
