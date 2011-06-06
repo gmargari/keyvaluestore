@@ -36,7 +36,7 @@ bool KeyValueStore::put(const char *key, const char *value)
     if (m_memstore->is_full()) {
         m_compactionmanager->flush_memstore();
     }
-    
+
     return m_memstore->put(key,value);
 }
 
@@ -48,7 +48,7 @@ const char *KeyValueStore::get(const char *key)
     const char *value;
 
     // if key found in memstore return, since this is the most recent value
-    if ((value = m_memstore->get(key))) { 
+    if ((value = m_memstore->get(key))) {
         return value;
     }
     // else, search in diskstore
@@ -94,9 +94,7 @@ uint64_t KeyValueStore::disk_size()
  *=======================================================================*/
 void KeyValueStore::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }
 
 /*=======================================================================*

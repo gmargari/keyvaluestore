@@ -82,7 +82,7 @@ void KVMapInputStream::reset()
 bool KVMapInputStream::read(const char **key, const char **value)
 {
     assert(key && value);
-    
+
     if (m_iter == m_iter_end) {
         *key = NULL;
         *value = NULL;
@@ -100,7 +100,5 @@ bool KVMapInputStream::read(const char **key, const char **value)
  *=======================================================================*/
 void KVMapInputStream::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }

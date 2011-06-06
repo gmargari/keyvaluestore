@@ -60,7 +60,7 @@ void KVMap::clear(const char *start_key, const char *end_key, bool start_key_inc
         free(iter->second);
     }
     m_map.erase(s_iter, e_iter);
-    
+
     sanity_check();
 }
 
@@ -83,7 +83,7 @@ bool KVMap::put(const char *key, const char *value)
         assert(0);
         return false;
     }
-    
+
     // if 'key' exists in map, delete corresponding value (it'll be replaced)
     kvmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
@@ -95,7 +95,7 @@ bool KVMap::put(const char *key, const char *value)
         m_size += strlen(cpkey) + 1;
         m_keys++;
     }
-    
+
     cpvalue = strdup(value);
     assert(cpkey);
     assert(cpvalue);
@@ -104,7 +104,7 @@ bool KVMap::put(const char *key, const char *value)
     m_map[cpkey] = cpvalue;
 
     sanity_check();
-    
+
     return true;
 }
 
@@ -157,7 +157,7 @@ KVMap::kvmap::iterator KVMap::start_iter(const char *key, bool key_incl)
         iter = m_map.begin();
     }
 
-    return iter;    
+    return iter;
 }
 
 /*=======================================================================*
@@ -166,12 +166,12 @@ KVMap::kvmap::iterator KVMap::start_iter(const char *key, bool key_incl)
 KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
 {
     kvmap::iterator iter;
-    
+
     if (key) {
         // upper_bound(x) returns an iterator pointing to the first element
         // whose key compares strictly greater than x
         iter = m_map.upper_bound(key);
-        
+
         // if 'end_key' is not inclusive, set 'iter' one position back
         // and check if 'iter' has key equal to 'end_key'. if yes,
         // leave it there, else forward it one position.
@@ -184,7 +184,7 @@ KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
     } else {
         iter = m_map.end();
     }
-    
+
     return iter;
 }
 
@@ -195,10 +195,8 @@ void KVMap::sanity_check()
 {
     uint64_t map_size = 0;
 
-#if DBGLVL < 2
-    return;
-#endif
-    
+    return_if_dbglvl_lt_2();
+
     for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         map_size += strlen(iter->first) + strlen(iter->second) + 2;
         assert(strlen(iter->first) + 1 <= MAX_KVSIZE);

@@ -62,7 +62,7 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
         }
 
         return 0;
-    }    
+    }
 }
 
 /*=======================================================================*
@@ -70,7 +70,5 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
  *=======================================================================*/
 void KVDiskFileInputStream::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }

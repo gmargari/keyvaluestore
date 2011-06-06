@@ -36,15 +36,15 @@ void CompactionManager::flush_memstore(void)
     KVDiskFileOutputStream *ostream, *merged_ostream;
     vector<KVDiskFile *>::iterator iter;
     vector<KVInputStream *> istreams;
-    
+
     /*
      * first, flush memstore to a new file on disk
      */
 
     printf("[DEBUG]================================================\n");
     printf("[DEBUG] CompactionManager::flush_memstore\n");
-    
-    // create an input stream for memstore, using it write memstore to 
+
+    // create an input stream for memstore, using it write memstore to
     // a new file on disk and then clear memstore
     kvdiskfile = new KVDiskFile;
     kvdiskfile->open_unique();
@@ -56,15 +56,15 @@ void CompactionManager::flush_memstore(void)
     ostream->flush();
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
     m_memstore->clear();
-    
+
     delete istream;
     delete ostream;
-    
-    /* 
+
+    /*
      * if we need to merge some disk files, merge them
      */
     if (m_diskstore->m_diskfiles.size() > 3) {
-            
+
         // create vector of all input streams that will be merged
         for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
             istreams.push_back(new KVDiskFileInputStream((*iter)));
@@ -102,8 +102,8 @@ void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskF
     KVPriorityInputStream *istream_heap;
 
     printf("[DEBUG] CompactionManager::merge_istreams\n");
-    
-    istream_heap = new KVPriorityInputStream(istreams);    
+
+    istream_heap = new KVPriorityInputStream(istreams);
     while (istream_heap->read(&key, &value)) {
         ostream->write(key, value);
     }
@@ -116,7 +116,5 @@ void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskF
  *=======================================================================*/
 void CompactionManager::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }

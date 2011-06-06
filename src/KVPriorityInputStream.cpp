@@ -99,9 +99,7 @@ void KVPriorityInputStream::sanity_check()
     heap_element *top;
     int num_streams;
 
-#if DBGLVL < 2 // TODO: replace this code with something like (return_if_dbglvl_lt_2())
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 
     num_streams = m_istreams.size();
     x = (int *)malloc(num_streams * sizeof(int));

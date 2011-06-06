@@ -26,7 +26,7 @@ VFile::VFile(bool real_io)
     // TODO: for now, each VFile has a separate simulator, and we CANNOT
     // get its stats. just trying if IO is ok...
     Sim = new Simulator();
-    
+
     if (real_io) {
         Sim->set_simulation_mode(Simulator::SIMMODE_REAL_IO);
     } else {
@@ -36,7 +36,7 @@ VFile::VFile(bool real_io)
     Size = 0;
     Offset = 0;
     Opened = -1;
-    Cur = -1;    
+    Cur = -1;
 }
 
 /*-------------------------------------------------------
@@ -93,7 +93,7 @@ bool VFile::fs_open(char *filename, bool open_existing)
             fdflag = O_RDWR | O_CREAT;
         }
         fdmode = S_IRUSR | S_IWUSR;
-        
+
         if ((fd = open(fname, fdflag, fdmode)) == -1) {
             printf("[ERROR] %s('%s')\n", __FUNCTION__, fname);
             perror("");
@@ -121,7 +121,7 @@ bool VFile::fs_open_existing(char *filename)
 bool VFile::fs_open_unique(void)
 {
     char *name = tempnam(TMPFILEDIR, TMPFILEPREFIX);
-    fs_open(name);    
+    fs_open(name);
     free(name);
     return true;
 }
@@ -159,14 +159,14 @@ ssize_t VFile::fs_read(void *buf, size_t count)
     ssize_t bytes_read;
 
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         bytes_read = (size_t)min((uint64_t)count, (Size - Offset));
         Offset += bytes_read;
         assert(Offset <= Size);
     } else {
         size_t num;
-        
+
         start_timing();
         for (bytes_read = 0; bytes_read < count; ) {
             if ((num = cur_fs_read(buf + bytes_read, count - bytes_read)) == 0) {
@@ -179,7 +179,7 @@ ssize_t VFile::fs_read(void *buf, size_t count)
 
     Sim->inc_bytes_read(bytes_read);
     Sim->inc_ioops(1);
-    
+
     return bytes_read;
 }
 
@@ -189,7 +189,7 @@ ssize_t VFile::fs_read(void *buf, size_t count)
 ssize_t VFile::fs_write(const void *buf, size_t count)
 {
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         Offset += count;
         if (Offset > Size) {
@@ -210,7 +210,7 @@ ssize_t VFile::fs_write(const void *buf, size_t count)
 
     Sim->inc_bytes_written(count);
     Sim->inc_ioops(1); // TODO: maybe ioops should be increased per internas_fs_write()
-    
+
     return count;
 }
 
@@ -222,7 +222,7 @@ off_t VFile::fs_seek(off_t offs, int whence)
     off_t newoffs;
 
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         if (whence == SEEK_SET) {
             Offset = offs;
@@ -241,7 +241,7 @@ off_t VFile::fs_seek(off_t offs, int whence)
          * or next files in Filedescs and if we can get to that file. if yes,
          * advance to that file.
          */
-        
+
         // calculate the absolute offset inside the virtual file
         if (whence == SEEK_SET) {
             abs_offs = offs;
@@ -264,19 +264,19 @@ off_t VFile::fs_seek(off_t offs, int whence)
         //    1) create a file
         //    2) write 10 bytes in file
         // then offset = 10, size = 10. In this case, fileno will be '1'
-        // and offset will be '0', meaning that we have to seek to 0 byte of 
+        // and offset will be '0', meaning that we have to seek to 0 byte of
         // file 1. Instead we'll seek at fileno 0 at position 10.
         if (fileno > (int)Names.size() - 1) {
             fileno--;
             offs_in_file = MAX_FILE_SIZE;
         }
-        
+
         // advance to that file
         Cur = fileno;
-        
+
         // seek within that file
         if (lseek(Filedescs[Cur], offs_in_file, SEEK_SET) == (off_t)-1) {
-            printf("[ERROR] %s(): lseek('%s', %Ld, %s)\n", __FUNCTION__, Names[Cur], offs, 
+            printf("[ERROR] %s(): lseek('%s', %Ld, %s)\n", __FUNCTION__, Names[Cur], offs,
               (whence == SEEK_SET) ? "SEEK_SET" : ((whence == SEEK_CUR) ? "SEEK_CUR" : "SEEK_END"));
             perror("");
             exit(EXIT_FAILURE);
@@ -312,12 +312,12 @@ void VFile::fs_rewind(void)
 void VFile::fs_truncate(off_t length)
 {
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        Size = length;        
+        Size = length;
     } else {
         int new_files, num;
-        
+
         new_files = (int) ceil((float)length / (float)MAX_FILE_SIZE);
 
         // if we need to shrink the virtual file
@@ -327,7 +327,7 @@ void VFile::fs_truncate(off_t length)
             if (new_files == 0) {
                 new_files = 1;
             }
-            
+
             // delete from disk all files except the first 'new_files',
             // remove their entries from vectors Filedescs and Names
             assert(Filedescs.size() == Names.size());
@@ -368,8 +368,8 @@ void VFile::fs_truncate(off_t length)
             length = length % MAX_FILE_SIZE;
         } else if (length ) {
             length = MAX_FILE_SIZE;
-        } 
-        
+        }
+
         if (ftruncate64(Filedescs[Cur], length) == (off_t)-1) {
             printf("[ERROR] %s(): ftruncate64('%s', %Ld) \n", __FUNCTION__, Names[Cur], length);
             perror("");
@@ -377,7 +377,7 @@ void VFile::fs_truncate(off_t length)
         }
     }
 
-    // NOTE: truncate system call does not change file offset. our 
+    // NOTE: truncate system call does not change file offset. our
     // implementation sets offset to file size after truncating
     fs_seek(fs_size(), SEEK_SET);
 }
@@ -388,9 +388,9 @@ void VFile::fs_truncate(off_t length)
 void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        
+
     } else {
         assert(Names.size() == Filedescs.size());
         for (int i = 0; i < (int)Names.size(); i++) {
@@ -418,7 +418,7 @@ char *VFile::fs_name(void)
 uint64_t VFile::fs_size(void)
 {
     assert(Cur != -1);
-    
+
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         return Size;
     } else {
@@ -429,13 +429,13 @@ uint64_t VFile::fs_size(void)
             stat(Names[i], &lastfilestatus);
             assert(lastfilestatus.st_size == MAX_FILE_SIZE);
         }
-        
+
         // get size of last file
         stat(Names[Names.size() - 1], &lastfilestatus);
-        
+
         // compute and return size of virtual file
         num_files = Names.size();
-        
+
         return (num_files - 1) * MAX_FILE_SIZE + lastfilestatus.st_size;
     }
 }
@@ -448,7 +448,7 @@ void VFile::fs_sync(void)
     assert(Cur != -1);
 
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        
+
     } else {
         fsync(Filedescs[Cur]);
     }
@@ -462,7 +462,7 @@ uint64_t VFile::fs_append(VFile *fsrc, void *buf, size_t bufsize)
     size_t count;
 
     assert(Cur != -1);
-    
+
     fsrc->fs_rewind();
     while ((count = fsrc->fs_read(buf, bufsize))) {
         fs_write(buf, count);
@@ -484,9 +484,9 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
     if (fs_tell() == (int)fs_size()) {
         return 0; // no bytes lef to read
     }
-    
+
     // if we reached end of current file, check if there's a next file in
-    // Filedescs vector. if yes, advance to it. if no, error (there should be 
+    // Filedescs vector. if yes, advance to it. if no, error (there should be
     // available bytes to read).
     if (cur_fs_tell() == (int)cur_fs_size()) {
         if (cur_fs_size() == MAX_FILE_SIZE && Cur < (int)Filedescs.size() - 1) {
@@ -504,7 +504,7 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
     if (cur_fs_tell() + count > MAX_FILE_SIZE) {
         count = MAX_FILE_SIZE - cur_fs_tell();
     }
-    
+
     if ((actually_read = read(Filedescs[Cur], buf, count)) == -1) {
         printf("[ERROR] %s(): read('%s', %d)\n", __FUNCTION__, Names[Cur], count);
         perror("");
@@ -573,7 +573,7 @@ off_t VFile::cur_fs_seek(off_t offs, int whence)
 
     assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
     assert(Cur != -1);
-    
+
     if ((newoffs = lseek(Filedescs[Cur], offs, whence)) == (off_t)-1) {
         printf("[ERROR] %s(): lseek('%s', %Ld, %d)\n", __FUNCTION__, Names[Cur], offs, whence);
         perror("");
@@ -590,7 +590,7 @@ off_t VFile::cur_fs_tell(void)
 {
     assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
     assert(Cur != -1);
-    
+
     return cur_fs_seek(0, SEEK_CUR);
 }
 
@@ -635,7 +635,5 @@ void VFile::end_timing(void)
  *-------------------------------------------------------*/
 void VFile::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }

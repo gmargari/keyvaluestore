@@ -63,7 +63,5 @@ void KVDiskFileOutputStream::flush()
  *=======================================================================*/
 void KVDiskFileOutputStream::sanity_check()
 {
-#if DBGLVL < 2
-    return;
-#endif
+    return_if_dbglvl_lt_2();
 }

@@ -64,4 +64,8 @@
     #define NDEBUG // disable assertions
 #endif
 
+#define return_if_dbglvl_lt_1() do { if (DBGLVL < 1) return; } while(0)
+#define return_if_dbglvl_lt_2() do { if (DBGLVL < 2) return; } while(0)
+#define return_if_dbglvl_lt_3() do { if (DBGLVL < 3) return; } while(0)
+
 #endif
