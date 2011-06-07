@@ -11,7 +11,7 @@
 using std::vector;
 using std::priority_queue;
 
-class KVPriorityInputStream {
+class KVPriorityInputStream: public KVInputStream {
 
 public:
 
@@ -32,6 +32,7 @@ public:
      */
     ~KVPriorityInputStream();
 
+    // inherited from KVInputStream
     /**
      * reset priority queue
      */

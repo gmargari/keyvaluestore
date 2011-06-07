@@ -29,9 +29,14 @@ public:
     void flush_memstore(void);
 
     /**
+     * copy all <k,v> pairs of input stream to output stream
+     */
+    void copy_stream(KVInputStream *istream, KVOutputStream *ostream);
+    
+    /**
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
-    void merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream);
+    void merge_streams(vector<KVInputStream *> istreams, KVOutputStream *ostream);
 
 protected:
 

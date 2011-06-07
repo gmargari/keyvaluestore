@@ -30,10 +30,9 @@ CompactionManager::~CompactionManager()
  *========================================================================*/
 void CompactionManager::flush_memstore(void)
 {
-    const char *key, *value;
     KVDiskFile *kvdiskfile;
     KVMapInputStream *istream;
-    KVDiskFileOutputStream *ostream, *merged_ostream;
+    KVDiskFileOutputStream *ostream;
     vector<KVDiskFile *>::iterator iter;
     vector<KVInputStream *> istreams;
 
@@ -47,10 +46,7 @@ void CompactionManager::flush_memstore(void)
     kvdiskfile->open_unique();
     istream = new KVMapInputStream(m_memstore->m_kvmap);
     ostream = new KVDiskFileOutputStream(kvdiskfile);
-    while (istream->read(&key, &value)) {
-        ostream->write(key, value);
-    }
-    ostream->flush();
+    copy_stream(istream, ostream);
     m_diskstore->m_diskfiles.push_back(kvdiskfile);
     m_memstore->clear();
 
@@ -70,8 +66,8 @@ void CompactionManager::flush_memstore(void)
         // merge input streams, writing output to a new file
         kvdiskfile = new KVDiskFile;
         kvdiskfile->open_unique();
-        merged_ostream = new KVDiskFileOutputStream(kvdiskfile);
-        merge_istreams(istreams, merged_ostream);
+        ostream = new KVDiskFileOutputStream(kvdiskfile);
+        merge_streams(istreams, ostream);
 
         // delete all files merged
         for (int i = 0; i < (int)m_diskstore->m_diskfiles.size(); i++) {
@@ -86,23 +82,32 @@ void CompactionManager::flush_memstore(void)
         // free memory
         for (int i = 0; i < (int)istreams.size(); i++)
             delete istreams[i];
-        delete merged_ostream;
+        delete ostream;
     }
 }
 
 /*========================================================================
- *                             merge_istreams
+ *                             copy_stream
  *========================================================================*/
-void CompactionManager::merge_istreams(vector<KVInputStream *> istreams, KVDiskFileOutputStream *ostream)
+void CompactionManager::copy_stream(KVInputStream *istream, KVOutputStream *ostream)
 {
     const char *key, *value;
-    KVPriorityInputStream *istream_heap;
 
-    istream_heap = new KVPriorityInputStream(istreams);
-    while (istream_heap->read(&key, &value)) {
+    while (istream->read(&key, &value)) {
         ostream->write(key, value);
     }
     ostream->flush();
+}
+
+/*========================================================================
+ *                             merge_streams
+ *========================================================================*/
+void CompactionManager::merge_streams(vector<KVInputStream *> istreams, KVOutputStream *ostream)
+{
+    KVPriorityInputStream *istream_heap;
+
+    istream_heap = new KVPriorityInputStream(istreams);
+    copy_stream(istream_heap, ostream);
     delete istream_heap;
 }
 
