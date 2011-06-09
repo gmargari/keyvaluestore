@@ -1,21 +1,21 @@
-#ifndef KVINPUTSTREAM_H
-#define KVINPUTSTREAM_H
+#ifndef KVTINPUTSTREAM_H
+#define KVTINPUTSTREAM_H
 
 #include "Global.h"
 
-class KVInputStream {
+class KVTInputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVInputStream();
+    KVTInputStream();
 
     /**
      * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual ~KVInputStream();
+    virtual ~KVTInputStream();
 
     /**
      * reset stream

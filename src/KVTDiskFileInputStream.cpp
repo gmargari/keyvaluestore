@@ -1,27 +1,27 @@
 #include "Global.h"
-#include "KVDiskFileInputStream.h"
+#include "KVTDiskFileInputStream.h"
 #include "VFile.h"
-#include "KVSerialization.h"
+#include "KVTSerialization.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 
 /*========================================================================
- *                           KVDiskFileInputStream
+ *                           KVTDiskFileInputStream
  *========================================================================*/
-KVDiskFileInputStream::KVDiskFileInputStream(KVDiskFile *file)
+KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file)
 {
-    m_kvdiskfile = file;
+    m_kvtdiskfile = file;
     m_buf_size = SCANNERBUFSIZE;
     m_buf = (char *)malloc(m_buf_size);
     reset();
 }
 
 /*========================================================================
- *                          ~KVDiskFileInputStream
+ *                          ~KVTDiskFileInputStream
  *========================================================================*/
-KVDiskFileInputStream::~KVDiskFileInputStream()
+KVTDiskFileInputStream::~KVTDiskFileInputStream()
 {
     free(m_buf);
 }
@@ -29,17 +29,17 @@ KVDiskFileInputStream::~KVDiskFileInputStream()
 /*========================================================================
  *                                 reset
  *========================================================================*/
-void KVDiskFileInputStream::reset()
+void KVTDiskFileInputStream::reset()
 {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
-    m_kvdiskfile->m_vfile->fs_rewind();
+    m_kvtdiskfile->m_vfile->fs_rewind();
 }
 
 /*========================================================================
  *                                 read
  *========================================================================*/
-bool KVDiskFileInputStream::read(const char **key, const char **value)
+bool KVTDiskFileInputStream::read(const char **key, const char **value)
 {
     uint32_t len, unused_bytes;
 
@@ -55,7 +55,7 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
         m_bytes_used = 0;
 
         // read more bytes to buffer
-        m_bytes_in_buf += m_kvdiskfile->m_vfile->fs_read(m_buf, m_buf_size - m_bytes_used);
+        m_bytes_in_buf += m_kvtdiskfile->m_vfile->fs_read(m_buf, m_buf_size - m_bytes_used);
         if (deserialize(m_buf, m_bytes_in_buf, key, value, &len, false)) {
             m_bytes_used += len;
             return len;
@@ -68,7 +68,7 @@ bool KVDiskFileInputStream::read(const char **key, const char **value)
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVDiskFileInputStream::sanity_check()
+void KVTDiskFileInputStream::sanity_check()
 {
     return_if_dbglvl_lt_2();
 }

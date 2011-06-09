@@ -1,42 +1,42 @@
 #include "Global.h"
-#include "KVMapInputStream.h"
+#include "KVTMapInputStream.h"
 
 #include <cassert>
 #include <cstdlib>
 
 /*========================================================================
- *                           KVMapInputStream
+ *                           KVTMapInputStream
  *========================================================================*/
-KVMapInputStream::KVMapInputStream(KVMap *kvmap)
+KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap)
 {
-    init(kvmap, NULL, NULL, true, true);
+    init(kvtmap, NULL, NULL, true, true);
     reset();
 }
 
 /*========================================================================
- *                           KVMapInputStream
+ *                           KVTMapInputStream
  *========================================================================*/
-KVMapInputStream::KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key)
+KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key)
 {
-    init(kvmap, start_key, end_key, true, false);
+    init(kvtmap, start_key, end_key, true, false);
     reset();
 }
 
 /*========================================================================
- *                           KVMapInputStream
+ *                           KVTMapInputStream
  *========================================================================*/
-KVMapInputStream::KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
-    init(kvmap, start_key, end_key, start_incl, end_incl);
+    init(kvtmap, start_key, end_key, start_incl, end_incl);
     reset();
 }
 
 /*========================================================================
  *                                init
  *========================================================================*/
-void KVMapInputStream::init(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+void KVTMapInputStream::init(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
-    m_kvmap = kvmap;
+    m_kvtmap = kvtmap;
     if (start_key) {
         m_start_key = strdup(start_key);
     } else {
@@ -52,9 +52,9 @@ void KVMapInputStream::init(KVMap *kvmap, const char *start_key, const char *end
 }
 
 /*========================================================================
- *                          ~KVMapInputStream
+ *                          ~KVTMapInputStream
  *========================================================================*/
-KVMapInputStream::~KVMapInputStream()
+KVTMapInputStream::~KVTMapInputStream()
 {
     if (m_start_key) {
         free(m_start_key);
@@ -67,11 +67,11 @@ KVMapInputStream::~KVMapInputStream()
 /*========================================================================
  *                                 reset
  *========================================================================*/
-void KVMapInputStream::reset()
+void KVTMapInputStream::reset()
 {
     assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
-    m_iter = m_kvmap->start_iter(m_start_key, m_start_incl);
-    m_iter_end = m_kvmap->end_iter(m_end_key, m_end_incl);
+    m_iter = m_kvtmap->start_iter(m_start_key, m_start_incl);
+    m_iter_end = m_kvtmap->end_iter(m_end_key, m_end_incl);
 }
 
 #include <cstdio>
@@ -79,7 +79,7 @@ void KVMapInputStream::reset()
 /*========================================================================
  *                                 read
  *========================================================================*/
-bool KVMapInputStream::read(const char **key, const char **value)
+bool KVTMapInputStream::read(const char **key, const char **value)
 {
     assert(key && value);
 
@@ -98,7 +98,7 @@ bool KVMapInputStream::read(const char **key, const char **value)
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVMapInputStream::sanity_check()
+void KVTMapInputStream::sanity_check()
 {
     return_if_dbglvl_lt_2();
 }

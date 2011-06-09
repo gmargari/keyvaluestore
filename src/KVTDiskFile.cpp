@@ -1,18 +1,18 @@
 #include "Global.h"
-#include "KVDiskFile.h"
+#include "KVTDiskFile.h"
 
 /*========================================================================
- *                               KVDiskFile
+ *                               KVTDiskFile
  *========================================================================*/
-KVDiskFile::KVDiskFile()
+KVTDiskFile::KVTDiskFile()
 {
     m_vfile = new VFile(true);
 }
 
 /*========================================================================
- *                              ~KVDiskFile
+ *                              ~KVTDiskFile
  *========================================================================*/
-KVDiskFile::~KVDiskFile()
+KVTDiskFile::~KVTDiskFile()
 {
     delete m_vfile;
 }
@@ -20,7 +20,7 @@ KVDiskFile::~KVDiskFile()
 /*=======================================================================*
  *                                 open
  *=======================================================================*/
-bool KVDiskFile::open(char *filename)
+bool KVTDiskFile::open(char *filename)
 {
     return m_vfile->fs_open(filename);
 }
@@ -28,7 +28,7 @@ bool KVDiskFile::open(char *filename)
 /*=======================================================================*
  *                             open_existing
  *=======================================================================*/
-bool KVDiskFile::open_existing(char *filename)
+bool KVTDiskFile::open_existing(char *filename)
 {
     return m_vfile->fs_open_existing(filename);
 }
@@ -36,7 +36,7 @@ bool KVDiskFile::open_existing(char *filename)
 /*=======================================================================*
  *                              open_unique
  *=======================================================================*/
-bool KVDiskFile::open_unique()
+bool KVTDiskFile::open_unique()
 {
     return m_vfile->fs_open_unique();
 }
@@ -44,7 +44,7 @@ bool KVDiskFile::open_unique()
 /*=======================================================================*
  *                            delete_from_disk
  *=======================================================================*/
-void KVDiskFile::delete_from_disk()
+void KVTDiskFile::delete_from_disk()
 {
     m_vfile->fs_delete();
 }
@@ -52,12 +52,12 @@ void KVDiskFile::delete_from_disk()
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVDiskFile::sanity_check()
+void KVTDiskFile::sanity_check()
 {
     return_if_dbglvl_lt_2();
 }
 
-// char *KVDiskFile::name()     { return m_vfile->fs_name(); }
-// void KVDiskFile::rewind()    { m_vfile->fs_rewind(); }
-// void KVDiskFile::sync()      { m_vfile->fs_sync(); }
-// void KVDiskFile::close()     { m_vfile->fs_close(); }
+// char *KVTDiskFile::name()     { return m_vfile->fs_name(); }
+// void KVTDiskFile::rewind()    { m_vfile->fs_rewind(); }
+// void KVTDiskFile::sync()      { m_vfile->fs_sync(); }
+// void KVTDiskFile::close()     { m_vfile->fs_close(); }

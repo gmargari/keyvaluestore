@@ -1,18 +1,18 @@
 #include "Global.h"
-#include "KVInputStream.h"
+#include "KVTInputStream.h"
 
 /*========================================================================
- *                             KVInputStream
+ *                             KVTInputStream
  *========================================================================*/
-KVInputStream::KVInputStream()
+KVTInputStream::KVTInputStream()
 {
 
 }
 
 /*========================================================================
- *                            ~KVInputStream
+ *                            ~KVTInputStream
  *========================================================================*/
-KVInputStream::~KVInputStream()
+KVTInputStream::~KVTInputStream()
 {
 
 }

@@ -1,25 +1,25 @@
-#ifndef KVDISKFILEOUTPUTSTREAM_H
-#define KVDISKFILEOUTPUTSTREAM_H
+#ifndef KVTDISKFILEOUTPUTSTREAM_H
+#define KVTDISKFILEOUTPUTSTREAM_H
 
 #include "Global.h"
-#include "KVOutputStream.h"
-#include "KVDiskFile.h"
+#include "KVTOutputStream.h"
+#include "KVTDiskFile.h"
 
-class KVDiskFileOutputStream: public KVOutputStream {
+class KVTDiskFileOutputStream: public KVTOutputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVDiskFileOutputStream(KVDiskFile *file);
+    KVTDiskFileOutputStream(KVTDiskFile *file);
 
     /**
      * destructor
      */
-    ~KVDiskFileOutputStream();
+    ~KVTDiskFileOutputStream();
 
-    // inherited from KVOutputStream
+    // inherited from KVTOutputStream
     /**
      * reset scanner
      */
@@ -41,11 +41,11 @@ protected:
 
     void sanity_check();
 
-    KVDiskFile *m_kvdiskfile;
-    char       *m_buf;
-    uint32_t    m_buf_size;
-    uint32_t    m_bytes_in_buf;
-    uint32_t    m_bytes_used;
+    KVTDiskFile	*m_kvtdiskfile;
+    char       	*m_buf;
+    uint32_t     m_buf_size;
+    uint32_t     m_bytes_in_buf;
+    uint32_t     m_bytes_used;
 };
 
 #endif

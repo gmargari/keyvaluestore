@@ -1,38 +1,38 @@
-#ifndef KVMAPINPUTSTREAM_H
-#define KVMAPINPUTSTREAM_H
+#ifndef KVTMAPINPUTSTREAM_H
+#define KVTMAPINPUTSTREAM_H
 
 #include "Global.h"
-#include "KVInputStream.h"
-#include "KVMap.h"
+#include "KVTInputStream.h"
+#include "KVTMap.h"
 
-class KVMapInputStream: public KVInputStream {
+class KVTMapInputStream: public KVTInputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVMapInputStream(KVMap *kvmap);
+    KVTMapInputStream(KVTMap *kvtmap);
 
     /**
      * constructor of an input stream that returns all memory <k,v> pairs with
      * keys between 'start_key' (inclusive) and 'end_key' (exclusive),
      * i.e. start_key <= k < end_key
      */
-    KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key);
+    KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key);
 
     /**
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    KVMapInputStream(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
+    KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
     /**
      * destructor
      */
-    ~KVMapInputStream();
+    ~KVTMapInputStream();
 
-    // inherited from KVInputStream
+    // inherited from KVTInputStream
     /**
      * reset stream
      */
@@ -47,12 +47,12 @@ public:
 
 protected:
 
-    void init(KVMap *kvmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
+    void init(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
     void sanity_check();
 
-    KVMap                       *m_kvmap;
-    KVMap::kvmap::iterator       m_iter;
-    KVMap::kvmap::iterator       m_iter_end;
+    KVTMap                      *m_kvtmap;
+    KVTMap::kvtmap::iterator     m_iter;
+    KVTMap::kvtmap::iterator     m_iter_end;
     char *                       m_start_key;
     char *                       m_end_key;
     bool                         m_start_incl;

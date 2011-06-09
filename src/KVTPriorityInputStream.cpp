@@ -1,6 +1,6 @@
 #include "Global.h"
-#include "KVPriorityInputStream.h"
-#include "KVInputStream.h"
+#include "KVTPriorityInputStream.h"
+#include "KVTInputStream.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -8,9 +8,9 @@
 #include <cstdlib>
 
 /*========================================================================
- *                           KVPriorityInputStream
+ *                           KVTPriorityInputStream
  *========================================================================*/
-KVPriorityInputStream::KVPriorityInputStream(std::vector<KVInputStream *> istreams)
+KVTPriorityInputStream::KVTPriorityInputStream(std::vector<KVTInputStream *> istreams)
 {
     m_istreams = istreams;
     for (int i = 0; i < (int)m_istreams.size(); i++) {
@@ -22,9 +22,9 @@ KVPriorityInputStream::KVPriorityInputStream(std::vector<KVInputStream *> istrea
 }
 
 /*========================================================================
- *                          ~KVPriorityInputStream
+ *                          ~KVTPriorityInputStream
  *========================================================================*/
-KVPriorityInputStream::~KVPriorityInputStream()
+KVTPriorityInputStream::~KVTPriorityInputStream()
 {
     for (int i = 0; i < (int)m_elements.size(); i++) {
         free(m_elements[i]);
@@ -34,7 +34,7 @@ KVPriorityInputStream::~KVPriorityInputStream()
 /*========================================================================
  *                                 reset
  *========================================================================*/
-void KVPriorityInputStream::reset()
+void KVTPriorityInputStream::reset()
 {
     sanity_check();
 
@@ -56,10 +56,10 @@ void KVPriorityInputStream::reset()
 /*========================================================================
  *                                 read
  *========================================================================*/
-bool KVPriorityInputStream::read(const char **key, const char **value)
+bool KVTPriorityInputStream::read(const char **key, const char **value)
 {
-    // NOTE: if after merging a value is greater than MAX_KVSIZE --> error!
-    //     assert(strlen(key) + 1 <= MAX_KVSIZE);
+    // NOTE: if after merging a value is greater than MAX_KVTSIZE --> error!
+    //     assert(strlen(key) + 1 <= MAX_KVTSIZE);
 
     if (m_heap.empty()) {
         return false;
@@ -92,7 +92,7 @@ bool KVPriorityInputStream::read(const char **key, const char **value)
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVPriorityInputStream::sanity_check()
+void KVTPriorityInputStream::sanity_check()
 {
     int *x;
     vector<heap_element *> tmp_vector;

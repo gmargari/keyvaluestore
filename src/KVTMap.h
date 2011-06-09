@@ -1,5 +1,5 @@
-#ifndef KVMAP_H
-#define KVMAP_H
+#ifndef KVTMAP_H
+#define KVTMAP_H
 
 #include "Global.h"
 
@@ -7,21 +7,21 @@
 #include <cstring>
 #include <map>
 
-class KVMap {
+class KVTMap {
 
-friend class KVMapInputStream;
+friend class KVTMapInputStream;
 
 public:
 
     /**
      * constructor
      */
-    KVMap();
+    KVTMap();
 
     /**
      * destructor
      */
-    ~KVMap();
+    ~KVTMap();
 
     /**
      * clear all elements of map
@@ -42,11 +42,22 @@ public:
     void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
     /**
-     * insert a <key, value> pair into map. copies of the key and value are
-     * created and inserted into the map.
+     * insert a <key, value, timestamp> tuple into map. copies of the key and
+     * value are created and inserted into the map.
      *
      * @param key key to be inserted
-     * @param value value to inserted
+     * @param value value to be inserted
+     * @param timestamp timestamp to be inserted
+     * @return true for success, false for failure
+     */
+    bool put(const char *key, const char *value, uint64_t timestamp);
+
+    /**
+     * insert a <key, value> pair into map. a timestamp is automatically
+     * assigned and the pair is store as a <key, value, timestamp> tuple in map.
+     *
+     * @param key key to be inserted
+     * @param value value to be inserted
      * @return true for success, false for failure
      */
     bool put(const char *key, const char *value);
@@ -54,11 +65,30 @@ public:
     /**
      * get the value for a specific key
      *
-     * @param key key to be searched
-     * @return pointer to value of specified key, NULL if key does not exist in
-     * map
+     * @param key (in) key to be searched
+     * @param value (out) value corresponding to the searched key
+     * @param timestamp (out) timestamp of insertion
+     * @return true if key was found, false if not
      */
-    const char *get(const char *key);
+    bool get(const char *key, const char **value, uint64_t *timestamp);
+
+    // TODO: implement
+//     /**
+//      * get the value for a specific <key, timestamp> pair
+//      *
+//      * @param key (in) key to be searched
+//      * @param timestamp (in) timestamp of key
+//      * @param value (out) value corresponding to the searched <key, timestamp>
+//      * @return true if <key, timestamp> was found, false if not
+//      */
+//     bool get(const char *key, uint64_t timestamp, const char **value);
+
+    /**
+     * size of <key, value> pairs in map (in bytes)
+     *
+     * @return size of <key, value> pairs in map (in bytes)
+     */
+    uint64_t size();
 
     /**
      * number of <key, value> pairs in map
@@ -68,11 +98,17 @@ public:
     uint64_t num_keys();
 
     /**
-     * size of <key, value> pairs in map (in bytes)
-     *
-     * @return size of <key, value> pairs in map (in bytes)
+     * return current timestamp
      */
-    uint64_t size();
+    uint64_t timestamp();
+
+//     struct cmp_str { // required, in order for the map to have its keys sorted
+//         bool operator()(char const *a, char const *b) {
+//             return strcmp(a, b) < 0;
+//         }
+//     };
+//
+//     typedef std::map<const char *, char *, cmp_str> kvtmap;
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {
@@ -80,7 +116,7 @@ public:
         }
     };
 
-    typedef std::map<const char *, char *, cmp_str> kvmap;
+    typedef std::map<const char *, char *, cmp_str> kvtmap;
 
 protected:
 
@@ -95,7 +131,7 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    kvmap::iterator start_iter(const char *key, bool key_incl);
+    kvtmap::iterator start_iter(const char *key, bool key_incl);
 
     /**
      * return an iterator which points at the last element which equal or
@@ -106,9 +142,9 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    kvmap::iterator end_iter(const char *key, bool key_incl);
+    kvtmap::iterator end_iter(const char *key, bool key_incl);
 
-    kvmap       m_map;
+    kvtmap      m_map;
     uint64_t    m_size;
     uint64_t    m_keys;
 };

@@ -1,8 +1,8 @@
-#ifndef KVPRIORITYINPUTSTREAM_H
-#define KVPRIORITYINPUTSTREAM_H
+#ifndef KVTPRIORITYINPUTSTREAM_H
+#define KVTPRIORITYINPUTSTREAM_H
 
 #include "Global.h"
-#include "KVInputStream.h"
+#include "KVTInputStream.h"
 
 #include <vector>
 #include <queue>
@@ -11,7 +11,7 @@
 using std::vector;
 using std::priority_queue;
 
-class KVPriorityInputStream: public KVInputStream {
+class KVTPriorityInputStream: public KVTInputStream {
 
 public:
 
@@ -25,14 +25,14 @@ public:
      * of istreams the input stream from memstore (if any), since this has the
      * most recent value for a key, then the most recently written disk file etc.
      */
-    KVPriorityInputStream(vector<KVInputStream *> istreams);
+    KVTPriorityInputStream(vector<KVTInputStream *> istreams);
 
     /**
      * destructor
      */
-    ~KVPriorityInputStream();
+    ~KVTPriorityInputStream();
 
-    // inherited from KVInputStream
+    // inherited from KVTInputStream
     /**
      * reset priority queue
      */
@@ -72,7 +72,7 @@ protected:
     void sanity_check();
 
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
-    vector<KVInputStream *>                    m_istreams;
+    vector<KVTInputStream *>                    m_istreams;
     vector<heap_element *>                     m_elements;
     // NOTE: heap contains 'heap_element *', not 'heap_element', to avoid copying the whole struct.
     // instead, we only copy the pointer to the element. this means we must be very carefull

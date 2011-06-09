@@ -1,24 +1,26 @@
 #include "Global.h"
-#include "KVMap.h"
+#include "KVTMap.h"
 
 #include <cassert>
 #include <cstdlib>
+#include <cstdio>
+#include <sys/time.h>
 
 using namespace std;
 
 /*========================================================================
- *                                 KVMap
+ *                                 KVTMap
  *========================================================================*/
-KVMap::KVMap()
+KVTMap::KVTMap()
 {
     m_size = 0;
     m_keys = 0;
 }
 
 /*========================================================================
- *                                ~KVMap
+ *                                ~KVTMap
  *========================================================================*/
-KVMap::~KVMap()
+KVTMap::~KVTMap()
 {
     clear();
 }
@@ -26,7 +28,7 @@ KVMap::~KVMap()
 /*=======================================================================*
  *                                 clear
  *=======================================================================*/
-void KVMap::clear()
+void KVTMap::clear()
 {
     clear(NULL, NULL, true, true);
     assert(m_size == 0);
@@ -36,7 +38,7 @@ void KVMap::clear()
 /*=======================================================================*
  *                                 clear
  *=======================================================================*/
-void KVMap::clear(const char *start_key, const char *end_key)
+void KVTMap::clear(const char *start_key, const char *end_key)
 {
     clear(start_key, end_key, true, false);
 }
@@ -44,9 +46,9 @@ void KVMap::clear(const char *start_key, const char *end_key)
 /*=======================================================================*
  *                                 clear
  *=======================================================================*/
-void KVMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
-    kvmap::iterator iter, s_iter, e_iter;
+    kvtmap::iterator iter, s_iter, e_iter;
     sanity_check();
 
     s_iter = start_iter(start_key, start_key_incl);
@@ -64,12 +66,10 @@ void KVMap::clear(const char *start_key, const char *end_key, bool start_key_inc
     sanity_check();
 }
 
-#include <stdio.h>
-
 /*=======================================================================*
  *                                  put
  *=======================================================================*/
-bool KVMap::put(const char *key, const char *value)
+bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
 {
     char *cpvalue;
     const char *cpkey;
@@ -78,14 +78,14 @@ bool KVMap::put(const char *key, const char *value)
     assert(key);
     assert(value);
 
-    if (strlen(key) + 1 > MAX_KVSIZE || strlen(value) + 1> MAX_KVSIZE) {
-        printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVSIZE);
+    if (strlen(key) + 1 > MAX_KVTSIZE || strlen(value) + 1 > MAX_KVTSIZE) {
+        printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVTSIZE);
         assert(0);
         return false;
     }
 
     // if 'key' exists in map, delete corresponding value (it'll be replaced)
-    kvmap::iterator f = m_map.find(key);
+    kvtmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
         m_size -= strlen(f->second) + 1;
         free(const_cast<char*>(f->second));
@@ -109,23 +109,44 @@ bool KVMap::put(const char *key, const char *value)
 }
 
 /*=======================================================================*
+ *                                  put
+ *=======================================================================*/
+bool KVTMap::put(const char *key, const char *value)
+{
+    return put(key, value, timestamp());
+}
+
+/*=======================================================================*
  *                                  get
  *=======================================================================*/
-const char *KVMap::get(const char *key)
+bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
 {
     sanity_check();
-    kvmap::iterator f = m_map.find(key);
+    kvtmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
-        return f->second;
+        *value = f->second;
+        *timestamp = 666;
+        return true;
     } else {
-        return NULL;
+        *value = NULL;
+        *timestamp = 0;
+        return false;
     }
 }
+
+// TODO: implement
+// /*=======================================================================*
+//  *                                  get
+//  *=======================================================================*/
+// bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
+// {
+//
+// }
 
 /*=======================================================================*
  *                                 size
  *=======================================================================*/
-uint64_t KVMap::size()
+uint64_t KVTMap::size()
 {
     sanity_check();
     return m_size;
@@ -135,7 +156,7 @@ uint64_t KVMap::size()
 /*=======================================================================*
  *                               num_keys
  *=======================================================================*/
-uint64_t KVMap::num_keys()
+uint64_t KVTMap::num_keys()
 {
     sanity_check();
     return m_keys;
@@ -144,9 +165,9 @@ uint64_t KVMap::num_keys()
 /*=======================================================================*
  *                               num_keys
  *=======================================================================*/
-KVMap::kvmap::iterator KVMap::start_iter(const char *key, bool key_incl)
+KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
 {
-    kvmap::iterator iter;
+    kvtmap::iterator iter;
 
     if (key) {
         iter = m_map.lower_bound(key);
@@ -163,9 +184,9 @@ KVMap::kvmap::iterator KVMap::start_iter(const char *key, bool key_incl)
 /*=======================================================================*
  *                               num_keys
  *=======================================================================*/
-KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
+KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
 {
-    kvmap::iterator iter;
+    kvtmap::iterator iter;
 
     if (key) {
         // upper_bound(x) returns an iterator pointing to the first element
@@ -189,18 +210,31 @@ KVMap::kvmap::iterator KVMap::end_iter(const char *key, bool key_incl)
 }
 
 /*=======================================================================*
+ *                              get_timestamp
+ *=======================================================================*/
+uint64_t KVTMap::timestamp()
+{
+//     struct timeval tv;
+//
+//     gettimeofday(&tv, NULL);
+//     return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
+    static int i = 0;
+    return i++;
+}
+
+/*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVMap::sanity_check()
+void KVTMap::sanity_check()
 {
     uint64_t map_size = 0;
 
     return_if_dbglvl_lt_2();
 
-    for(kvmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+    for(kvtmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         map_size += strlen(iter->first) + strlen(iter->second) + 2;
-        assert(strlen(iter->first) + 1 <= MAX_KVSIZE);
-        assert(strlen(iter->second) + 1 <= MAX_KVSIZE);
+        assert(strlen(iter->first) + 1 <= MAX_KVTSIZE);
+        assert(strlen(iter->second) + 1 <= MAX_KVTSIZE);
     }
     assert(m_size == map_size);
     assert(m_keys == m_map.size());

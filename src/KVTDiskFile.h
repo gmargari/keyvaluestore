@@ -1,26 +1,26 @@
-#ifndef KVDISKFILE_H
-#define KVDISKFILE_H
+#ifndef KVTDISKFILE_H
+#define KVTDISKFILE_H
 
 #include "Global.h"
 #include "VFile.h"
-#include "KVSerialization.h"
+#include "KVTSerialization.h"
 
-class KVDiskFile {
+class KVTDiskFile {
 
-friend class KVDiskFileInputStream;
-friend class KVDiskFileOutputStream;
+friend class KVTDiskFileInputStream;
+friend class KVTDiskFileOutputStream;
 
 public:
 
     /**
      * constructor
      */
-    KVDiskFile();
+    KVTDiskFile();
 
     /**
      * destructor
      */
-    ~KVDiskFile();
+    ~KVTDiskFile();
 
     /**
      * open file for read and write (create if not existing)
@@ -62,7 +62,7 @@ protected:
 
     void sanity_check();
 
-    VFile       *m_vfile;
+    VFile *m_vfile;
 };
 
 #endif

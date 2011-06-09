@@ -1,5 +1,5 @@
-#ifndef KVSERIALIZATION_H
-#define KVSERIALIZATION_H
+#ifndef KVTSERIALIZATION_H
+#define KVTSERIALIZATION_H
 
 #include "Global.h"
 

@@ -1,9 +1,9 @@
-#ifndef KVOUTPUTSTREAM_H
-#define KVOUTPUTSTREAM_H
+#ifndef KVTOUTPUTSTREAM_H
+#define KVTOUTPUTSTREAM_H
 
 #include "Global.h"
 
-class KVOutputStream {
+class KVTOutputStream {
 
 public:
 
