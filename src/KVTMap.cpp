@@ -32,6 +32,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     char *cpvalue, *f_value;
     uint64_t f_timestamp;
     kvtpair new_pair;
+    kvtmap::iterator f;
 
     sanity_check();
     assert(key);
@@ -45,12 +46,11 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
 
     // if 'key' exists in map, delete corresponding value (it'll be replaced,
     // along with its timestamp)
-    kvtmap::iterator f = m_map.find(key);
-    if (f != m_map.end()) {
-
+    if ((f = m_map.find(key)) != m_map.end()) {
         f_key = const_cast<char *>(f->first);
         f_value = const_cast<char *>(f->second.first);
         f_timestamp = f->second.second;
+        assert(timestamp > f_timestamp);
 
         m_size -= strlen(f_value) + 1 + sizeof(new_pair);
         free(f_value);
