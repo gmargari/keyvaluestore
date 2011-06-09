@@ -29,8 +29,8 @@ int main(void)
     gettimeofday(&tv, NULL);
     printf("seed: %ld\n", tv.tv_usec);
     srand(tv.tv_usec);
-    key = (char *)malloc(MAX_KVSIZE);
-    value = (char *)malloc(MAX_KVSIZE);
+    key = (char *)malloc(MAX_KVTSIZE);
+    value = (char *)malloc(MAX_KVTSIZE);
     for (int i = 0; i < 10000; i++) {
         randstr(key, (int)(rand() % 100) + 1);
         randstr(value, (int)(rand() % 1000) + 1);
@@ -43,7 +43,7 @@ int main(void)
     free(key);
     free(value);
 
-//     size_t numkvs = 13;
+//     size_t numkvts = 13;
 //     char *strs[13][2] = {
 //         {(char *)"d",      (char *)"d1"},
 //         {(char *)"aaa",    (char *)"aa1"},
@@ -60,15 +60,15 @@ int main(void)
 //         {(char *)"t",      (char *)"t2"},
 //     };
 //
-//     for (size_t i = 0; i < numkvs - 5; i++) {
+//     for (size_t i = 0; i < numkvts - 5; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
 //
-//     for (size_t i = 0; i < numkvs - 3; i++) {
+//     for (size_t i = 0; i < numkvts - 3; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
 //
-//     for (size_t i = 0; i < numkvs; i++) {
+//     for (size_t i = 0; i < numkvts; i++) {
 //         kvstore.put(strs[i][0], strs[i][1]);
 //     }
 
@@ -111,7 +111,7 @@ int main(void)
 //     kvstore.put("b",  "b18x");
 //     kvstore.put("lastkey",  "lalala");
 
-//     assert(kvstore.num_mem_keys() == numkvs - 3); // 3 duplicate keys
+//     assert(kvstore.num_mem_keys() == numkvts - 3); // 3 duplicate keys
 //     assert(strcmp(kvstore.get((char *)"d"),     (char *)"d1") == 0);
 //     assert(strcmp(kvstore.get((char *)"aaa"),   (char *)"aa1") != 0);    // should have been replaced
 //     assert(strcmp(kvstore.get((char *)"aaa"),   (char *)"xxxxx1") == 0);
@@ -124,7 +124,7 @@ int main(void)
 //     assert(kvstore.get((char *)"nonexisting") == NULL);
 //     assert(kvstore.get((char *)"/") == NULL);
 //     assert(kvstore.get((char *)"\xf3") == NULL);
-//     assert(kvstore.num_mem_keys() == numkvs - 3); // 3 duplicate keys
+//     assert(kvstore.num_mem_keys() == numkvts - 3); // 3 duplicate keys
 //
 
     printf("Everything ok!\n");

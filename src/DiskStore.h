@@ -2,7 +2,7 @@
 #define DISKSTORE_H
 
 #include "Global.h"
-#include "KVDiskFile.h"
+#include "KVTDiskFile.h"
 
 #include <stdint.h>
 #include <vector>
@@ -50,7 +50,7 @@ protected:
 
     void sanity_check();
 
-    std::vector<KVDiskFile *> m_diskfiles;
+    std::vector<KVTDiskFile *> m_diskfiles;
 };
 
 #endif

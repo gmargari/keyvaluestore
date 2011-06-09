@@ -4,8 +4,8 @@
 #include "Global.h"
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "KVMapInputStream.h"
-#include "KVDiskFileOutputStream.h"
+#include "KVTMapInputStream.h"
+#include "KVTDiskFileOutputStream.h"
 
 using std::vector;
 
@@ -31,12 +31,12 @@ public:
     /**
      * copy all <k,v> pairs of input stream to output stream
      */
-    void copy_stream(KVInputStream *istream, KVOutputStream *ostream);
-    
+    void copy_stream(KVTInputStream *istream, KVTOutputStream *ostream);
+
     /**
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
-    void merge_streams(vector<KVInputStream *> istreams, KVOutputStream *ostream);
+    void merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream);
 
 protected:
 

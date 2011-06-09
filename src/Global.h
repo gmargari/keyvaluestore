@@ -27,8 +27,8 @@
 
 #define READBUFSIZE                ((size_t)(64*1024*1024))
 #define MERGEBUFSIZE               ((size_t)(64*1024*1024))
-#define MAX_KVSIZE           ((unsigned long)(1*1024*1024)) // 1MB
-#define SCANNERBUFSIZE       ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVSIZE + 2*sizeof(uint64_t))
+#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB
+#define SCANNERBUFSIZE       ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
 // byte conversion
 #define b2kb(b) ((b)/(1024.0))

@@ -1,10 +1,10 @@
 #include "Global.h"
 #include "CompactionManager.h"
-#include "KVMapInputStream.h"
-#include "KVDiskFile.h"
-#include "KVDiskFileInputStream.h"
-#include "KVDiskFileOutputStream.h"
-#include "KVPriorityInputStream.h"
+#include "KVTMapInputStream.h"
+#include "KVTDiskFile.h"
+#include "KVTDiskFileInputStream.h"
+#include "KVTDiskFileOutputStream.h"
+#include "KVTPriorityInputStream.h"
 
 #include <cstdio>
 
@@ -30,11 +30,11 @@ CompactionManager::~CompactionManager()
  *========================================================================*/
 void CompactionManager::flush_memstore(void)
 {
-    KVDiskFile *kvdiskfile;
-    KVMapInputStream *istream;
-    KVDiskFileOutputStream *ostream;
-    vector<KVDiskFile *>::iterator iter;
-    vector<KVInputStream *> istreams;
+    KVTDiskFile *kvtdiskfile;
+    KVTMapInputStream *istream;
+    KVTDiskFileOutputStream *ostream;
+    vector<KVTDiskFile *>::iterator iter;
+    vector<KVTInputStream *> istreams;
 
     /*
      * first, flush memstore to a new file on disk
@@ -42,12 +42,12 @@ void CompactionManager::flush_memstore(void)
 
     // create an input stream for memstore, using it write memstore to
     // a new file on disk and then clear memstore
-    kvdiskfile = new KVDiskFile;
-    kvdiskfile->open_unique();
-    istream = new KVMapInputStream(m_memstore->m_kvmap);
-    ostream = new KVDiskFileOutputStream(kvdiskfile);
+    kvtdiskfile = new KVTDiskFile;
+    kvtdiskfile->open_unique();
+    istream = new KVTMapInputStream(m_memstore->m_kvtmap);
+    ostream = new KVTDiskFileOutputStream(kvtdiskfile);
     copy_stream(istream, ostream);
-    m_diskstore->m_diskfiles.push_back(kvdiskfile);
+    m_diskstore->m_diskfiles.push_back(kvtdiskfile);
     m_memstore->clear();
 
     delete istream;
@@ -60,13 +60,13 @@ void CompactionManager::flush_memstore(void)
 
         // create vector of all input streams that will be merged
         for (iter = m_diskstore->m_diskfiles.begin(); iter != m_diskstore->m_diskfiles.end(); iter++) {
-            istreams.push_back(new KVDiskFileInputStream((*iter)));
+            istreams.push_back(new KVTDiskFileInputStream((*iter)));
         }
 
         // merge input streams, writing output to a new file
-        kvdiskfile = new KVDiskFile;
-        kvdiskfile->open_unique();
-        ostream = new KVDiskFileOutputStream(kvdiskfile);
+        kvtdiskfile = new KVTDiskFile;
+        kvtdiskfile->open_unique();
+        ostream = new KVTDiskFileOutputStream(kvtdiskfile);
         merge_streams(istreams, ostream);
 
         // delete all files merged
@@ -77,7 +77,7 @@ void CompactionManager::flush_memstore(void)
         m_diskstore->m_diskfiles.clear();
 
         // add new file to (currently empty) set of disk files
-        m_diskstore->m_diskfiles.push_back(kvdiskfile);
+        m_diskstore->m_diskfiles.push_back(kvtdiskfile);
 
         // free memory
         for (int i = 0; i < (int)istreams.size(); i++)
@@ -89,7 +89,7 @@ void CompactionManager::flush_memstore(void)
 /*========================================================================
  *                             copy_stream
  *========================================================================*/
-void CompactionManager::copy_stream(KVInputStream *istream, KVOutputStream *ostream)
+void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *ostream)
 {
     const char *key, *value;
 
@@ -102,11 +102,11 @@ void CompactionManager::copy_stream(KVInputStream *istream, KVOutputStream *ostr
 /*========================================================================
  *                             merge_streams
  *========================================================================*/
-void CompactionManager::merge_streams(vector<KVInputStream *> istreams, KVOutputStream *ostream)
+void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream)
 {
-    KVPriorityInputStream *istream_heap;
+    KVTPriorityInputStream *istream_heap;
 
-    istream_heap = new KVPriorityInputStream(istreams);
+    istream_heap = new KVTPriorityInputStream(istreams);
     copy_stream(istream_heap, ostream);
     delete istream_heap;
 }

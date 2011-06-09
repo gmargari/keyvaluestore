@@ -2,7 +2,7 @@
 #define MEMSTORE_H
 
 #include "Global.h"
-#include "KVMap.h"
+#include "KVTMap.h"
 
 class MemStore {
 
@@ -73,8 +73,8 @@ protected:
 
     void sanity_check();
 
-    KVMap      *m_kvmap;
-    uint64_t    m_maxsize;
+    KVTMap      *m_kvtmap;
+    uint64_t     m_maxsize;
 };
 
 #endif

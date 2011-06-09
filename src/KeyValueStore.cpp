@@ -102,5 +102,5 @@ void KeyValueStore::sanity_check()
  *=======================================================================*/
 void KeyValueStore::check_parameters()
 {
-    assert(SCANNERBUFSIZE >= (2*MAX_KVSIZE + 2*sizeof(uint64_t))); // need at least these bytes (e.g. to fully decode a kv read from disk)
+    assert(SCANNERBUFSIZE >= (2*MAX_KVTSIZE + 2*sizeof(uint64_t))); // need at least these bytes (e.g. to fully decode a kv read from disk)
 }

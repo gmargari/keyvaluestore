@@ -7,7 +7,7 @@
 MemStore::MemStore()
 {
     m_maxsize = DEFAULT_MEMSTORE_SIZE;
-    m_kvmap = new KVMap();
+    m_kvtmap = new KVTMap();
 }
 
 /*========================================================================
@@ -15,7 +15,7 @@ MemStore::MemStore()
  *========================================================================*/
 MemStore::~MemStore()
 {
-    delete m_kvmap;
+    delete m_kvtmap;
 }
 
 /*========================================================================
@@ -39,7 +39,7 @@ uint64_t MemStore::get_maxsize(void)
  *========================================================================*/
 bool MemStore::put(const char *key, const char *value)
 {
-    return m_kvmap->put(key,value);
+    return m_kvtmap->put(key,value);
 }
 
 /*========================================================================
@@ -47,7 +47,7 @@ bool MemStore::put(const char *key, const char *value)
  *========================================================================*/
 const char *MemStore::get(const char *key)
 {
-    return m_kvmap->get(key);
+    return m_kvtmap->get(key);
 }
 
 /*========================================================================
@@ -55,7 +55,7 @@ const char *MemStore::get(const char *key)
  *========================================================================*/
 uint64_t MemStore::num_keys()
 {
-    return m_kvmap->num_keys();
+    return m_kvtmap->num_keys();
 }
 
 /*========================================================================
@@ -63,7 +63,7 @@ uint64_t MemStore::num_keys()
  *========================================================================*/
 uint64_t MemStore::size()
 {
-    return m_kvmap->size();
+    return m_kvtmap->size();
 }
 
 /*========================================================================
@@ -80,7 +80,7 @@ bool MemStore::is_full()
  *========================================================================*/
 void MemStore::clear()
 {
-    m_kvmap->clear();
+    m_kvtmap->clear();
 }
 
 /*=======================================================================*

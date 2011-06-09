@@ -18,7 +18,7 @@ DiskStore::DiskStore()
  *========================================================================*/
 DiskStore::~DiskStore()
 {
-    vector<KVDiskFile *>::iterator iter;
+    vector<KVTDiskFile *>::iterator iter;
 
     for (iter = m_diskfiles.begin(); iter != m_diskfiles.end(); iter++) {
         delete *iter;
