@@ -32,6 +32,24 @@ KVTPriorityInputStream::~KVTPriorityInputStream()
 }
 
 /*========================================================================
+ *                             set_key_range
+ *========================================================================*/
+void KVTPriorityInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+{
+    for (int i = 0; i < (int)m_istreams.size(); i++) {
+        m_istreams[i]->set_key_range(start_key, end_key, start_incl, end_incl);
+    }
+}
+
+/*========================================================================
+ *                             set_key_range
+ *========================================================================*/
+void KVTPriorityInputStream::set_key_range(const char *start_key, const char *end_key)
+{
+    set_key_range(start_key, end_key, true, false);
+}
+
+/*========================================================================
  *                                 reset
  *========================================================================*/
 void KVTPriorityInputStream::reset()
@@ -80,8 +98,8 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
 
         m_heap.pop();
 
-        // 'top' elements belongs to stream 'sid'. forward that stream and
-        // insert into heap a new element from this stream
+        // the element poped from head belongs to stream 'sid'. insert into
+        // heap a new element from this stream
         if (m_istreams[sid]->read(&(m_elements[sid]->key), &(m_elements[sid]->value), &(m_elements[sid]->timestamp))) {
             m_heap.push(m_elements[sid]);
         }

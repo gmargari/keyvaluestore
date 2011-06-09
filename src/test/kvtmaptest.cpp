@@ -113,10 +113,14 @@ int main(void)
     strcpy(key3, "ttt");
 //     printf("ranges: [NULL, %s) [%s, %s) [%s, %s) [%s, NULL]\n", key1, key1, key2, key2, key3, key3);
 
-    istream1 = new KVTMapInputStream(map, NULL, key1);
-    istream2 = new KVTMapInputStream(map, key1, key2);
-    istream3 = new KVTMapInputStream(map, key2, key3);
-    istream4 = new KVTMapInputStream(map, key3, NULL);
+    istream1 = new KVTMapInputStream(map);
+    istream2 = new KVTMapInputStream(map);
+    istream3 = new KVTMapInputStream(map);
+    istream4 = new KVTMapInputStream(map);
+    istream1->set_key_range(NULL, key1);
+    istream2->set_key_range(key1, key2);
+    istream3->set_key_range(key2, key3);
+    istream4->set_key_range(key3, NULL);
     istreams.push_back(istream1);
     istreams.push_back(istream2);
     istreams.push_back(istream3);

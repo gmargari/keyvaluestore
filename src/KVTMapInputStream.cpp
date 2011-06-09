@@ -9,35 +9,30 @@
  *========================================================================*/
 KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap)
 {
-    init(kvtmap, NULL, NULL, true, true);
-    reset();
-}
-
-/*========================================================================
- *                           KVTMapInputStream
- *========================================================================*/
-KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key)
-{
-    init(kvtmap, start_key, end_key, true, false);
-    reset();
-}
-
-/*========================================================================
- *                           KVTMapInputStream
- *========================================================================*/
-KVTMapInputStream::KVTMapInputStream(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
-{
-    init(kvtmap, start_key, end_key, start_incl, end_incl);
-    reset();
-}
-
-/*========================================================================
- *                                init
- *========================================================================*/
-void KVTMapInputStream::init(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl)
-{
     m_kvtmap = kvtmap;
+    set_key_range(NULL, NULL, true, true);
+    reset();
+}
 
+/*========================================================================
+ *                          ~KVTMapInputStream
+ *========================================================================*/
+KVTMapInputStream::~KVTMapInputStream()
+{
+    if (m_start_key) {
+        free(m_start_key);
+    }
+
+    if (m_end_key) {
+        free(m_end_key);
+    }
+}
+
+/*========================================================================
+ *                             set_key_range
+ *========================================================================*/
+void KVTMapInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+{
     if (start_key) {
         m_start_key = strdup(start_key);
     } else {
@@ -55,17 +50,11 @@ void KVTMapInputStream::init(KVTMap *kvtmap, const char *start_key, const char *
 }
 
 /*========================================================================
- *                          ~KVTMapInputStream
+ *                             set_key_range
  *========================================================================*/
-KVTMapInputStream::~KVTMapInputStream()
+void KVTMapInputStream::set_key_range(const char *start_key, const char *end_key)
 {
-    if (m_start_key) {
-        free(m_start_key);
-    }
-
-    if (m_end_key) {
-        free(m_end_key);
-    }
+    set_key_range(start_key, end_key, true, false);
 }
 
 /*========================================================================

@@ -19,8 +19,8 @@ public:
     /**
      * NOTE: the order of input streams in vector 'istreams' defines their priority,
      * in case for example two input streams have the same key. for example,
-     * if both istreams[1] and istreams[4] have the same key 'k', the greatest
-     * the <k,v> of istreams[1] will be considered greatest than that of istreams[4].
+     * if both istreams[2] and istreams[4] have the same key 'k', the <k,v,t>
+     * of istreams[2] will be considered greater than that of istreams[4].
      *
      * So, when calling constructor, make sure to insert in the first position
      * of istreams the input stream from memstore (if any), since this has the
@@ -34,17 +34,13 @@ public:
     ~KVTPriorityInputStream();
 
     // inherited from KVTInputStream
-    /**
-     * reset priority queue
-     */
-    void reset();
+    void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
-    /**
-     * get next <key, value, timestamp> tuple from priority queue
-     *
-     * @return false if no tuple left. else, true.
-     */
+    void set_key_range(const char *start_key, const char *end_key);
+
     bool read(const char **key, const char **value, uint64_t *timestamp);
+
+    void reset();
 
 protected:
 

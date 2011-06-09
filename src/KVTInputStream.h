@@ -18,6 +18,18 @@ public:
     virtual ~KVTInputStream();
 
     /**
+     * return only pairs with keys between 'start_key' (inclusive) and 'end_key'
+     * (exclusive), i.e. all keys K where: start_key <= K < end_key
+     */
+    virtual void set_key_range(const char *start_key, const char *end_key) = 0;
+
+    /**
+     * as above, but user can define whether 'start_key' and 'end_key' are
+     * inclusive or not
+     */
+    virtual void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl) = 0;
+
+    /**
      * reset stream
      */
     virtual void reset() = 0;

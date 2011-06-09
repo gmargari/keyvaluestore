@@ -20,19 +20,13 @@ public:
     ~KVTDiskFileInputStream();
 
     // inherited from KVTInputStream
-    /**
-     * reset scanner
-     */
-    void reset();
+    void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
-    /**
-     * get next <key, value, timestamp> tuple from stream
-     * (pointers are valid only until next call to function. if caller wants to
-     * use them after next call, he must copy key and value)
-     *
-     * @return false if no tuple left. else, true.
-     */
+    void set_key_range(const char *start_key, const char *end_key);
+
     bool read(const char **key, const char **value, uint64_t *timestamp);
+
+    void reset();
 
 protected:
 

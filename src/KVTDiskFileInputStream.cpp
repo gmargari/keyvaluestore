@@ -27,6 +27,22 @@ KVTDiskFileInputStream::~KVTDiskFileInputStream()
 }
 
 /*========================================================================
+ *                             set_key_range
+ *========================================================================*/
+void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+{
+    // TODO: implement
+}
+
+/*========================================================================
+ *                             set_key_range
+ *========================================================================*/
+void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *end_key)
+{
+    set_key_range(start_key, end_key, true, false);
+}
+
+/*========================================================================
  *                                 reset
  *========================================================================*/
 void KVTDiskFileInputStream::reset()
