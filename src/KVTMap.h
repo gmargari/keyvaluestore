@@ -7,6 +7,8 @@
 #include <cstring>
 #include <map>
 
+using std::map;
+
 class KVTMap {
 
 friend class KVTMapInputStream;
@@ -108,7 +110,7 @@ public:
 //         }
 //     };
 //
-//     typedef std::map<const char *, char *, cmp_str> kvtmap;
+//     typedef map<const char *, char *, cmp_str> kvtmap;
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {
@@ -116,7 +118,7 @@ public:
         }
     };
 
-    typedef std::map<const char *, char *, cmp_str> kvtmap;
+    typedef map<const char *, char *, cmp_str> kvtmap;
 
 protected:
 

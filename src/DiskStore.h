@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <vector>
 
+using std::vector;
+
 class DiskStore {
 
 friend class CompactionManager;
@@ -51,7 +53,7 @@ protected:
 
     void sanity_check();
 
-    std::vector<KVTDiskFile *> m_diskfiles;
+    vector<KVTDiskFile *> m_diskfiles;
 };
 
 #endif

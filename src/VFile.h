@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 
+using std::vector;
+
 class VFile
 {
 public:
@@ -49,8 +51,8 @@ protected:
     /*
     *  variables used for real IO
     */
-    std::vector<char *> Names;  // we simulate a single virtual large file_
-    std::vector<int> Filedescs; // _using many physical files.
+    vector<char *> Names;  // we simulate a single virtual large file_
+    vector<int> Filedescs; // _using many physical files.
     int Cur;                    // where we are in Filedescs and Names vecs
 
     // in case of real IO, the Filesim simulates a single virtual large file

@@ -10,7 +10,7 @@
 /*========================================================================
  *                           KVTPriorityInputStream
  *========================================================================*/
-KVTPriorityInputStream::KVTPriorityInputStream(std::vector<KVTInputStream *> istreams)
+KVTPriorityInputStream::KVTPriorityInputStream(vector<KVTInputStream *> istreams)
 {
     m_istreams = istreams;
     for (int i = 0; i < (int)m_istreams.size(); i++) {
