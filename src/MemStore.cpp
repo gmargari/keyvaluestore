@@ -37,6 +37,14 @@ uint64_t MemStore::get_maxsize(void)
 /*========================================================================
  *                                 put
  *========================================================================*/
+bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
+{
+    return m_kvtmap->put(key, value, timestamp);
+}
+
+/*========================================================================
+ *                                 put
+ *========================================================================*/
 bool MemStore::put(const char *key, const char *value)
 {
     return m_kvtmap->put(key, value);
@@ -73,7 +81,6 @@ bool MemStore::is_full()
 {
     return (size() > m_maxsize);
 }
-
 
 /*========================================================================
  *                                 clear

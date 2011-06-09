@@ -26,13 +26,13 @@ public:
     void reset();
 
     /**
-     * get next <key, value> pair from stream
+     * get next <key, value, timestamp> tuple from stream
      * (pointers are valid only until next call to function. if caller wants to
      * use them after next call, he must copy key and value)
      *
-     * @return false if no <k,v> pair left. else, true.
+     * @return false if no tuple left. else, true.
      */
-    bool read(const char **key, const char **value);
+    bool read(const char **key, const char **value, uint64_t *timestamp);
 
 protected:
 

@@ -23,11 +23,11 @@ public:
     virtual void reset() = 0;
 
     /**
-     * get next <key, value> pair from stream
+     * get next <key, value, timestamp> tuple from stream
      *
-     * @return false if no <k,v> pair left. else, true.
+     * @return false if no tuple left. else, true.
      */
-    virtual bool read(const char **key, const char **value) = 0;
+    virtual bool read(const char **key, const char **value, uint64_t *timestamp) = 0;
 
 protected:
 

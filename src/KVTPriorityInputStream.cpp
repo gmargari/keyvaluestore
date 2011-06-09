@@ -46,7 +46,7 @@ void KVTPriorityInputStream::reset()
     // reset all streams, insert one element from each stream to heap
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_istreams[i]->reset();
-        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value))) {
+        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
             m_heap.push(m_elements[i]);
         }
     }
@@ -56,10 +56,12 @@ void KVTPriorityInputStream::reset()
 /*========================================================================
  *                                 read
  *========================================================================*/
-bool KVTPriorityInputStream::read(const char **key, const char **value)
+bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
 {
     // NOTE: if after merging a value is greater than MAX_KVTSIZE --> error!
     //     assert(strlen(key) + 1 <= MAX_KVTSIZE);
+
+    assert(key && value && timestamp);
 
     if (m_heap.empty()) {
         return false;
@@ -73,13 +75,14 @@ bool KVTPriorityInputStream::read(const char **key, const char **value)
         top = m_heap.top();
         *key = top->key;
         *value = top->value;
+        *timestamp = top->timestamp;
         sid = top->sid;
 
         m_heap.pop();
 
         // 'top' elements belongs to stream 'sid'. forward that stream and
         // insert into heap a new element from this stream
-        if (m_istreams[sid]->read(&(m_elements[sid]->key), &(m_elements[sid]->value))) {
+        if (m_istreams[sid]->read(&(m_elements[sid]->key), &(m_elements[sid]->value), &(m_elements[sid]->timestamp))) {
             m_heap.push(m_elements[sid]);
         }
 

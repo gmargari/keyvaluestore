@@ -31,13 +31,25 @@ KeyValueStore::~KeyValueStore()
 /*========================================================================
  *                                 put
  *========================================================================*/
+bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
+{
+    if (m_memstore->is_full()) {
+        m_compactionmanager->flush_memstore();
+    }
+
+    return m_memstore->put(key, value, timestamp);
+}
+
+/*========================================================================
+ *                                 put
+ *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
     if (m_memstore->is_full()) {
         m_compactionmanager->flush_memstore();
     }
 
-    return m_memstore->put(key,value);
+    return m_memstore->put(key, value);
 }
 
 /*========================================================================
@@ -45,11 +57,11 @@ bool KeyValueStore::put(const char *key, const char *value)
  *========================================================================*/
 bool KeyValueStore::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    // if key found in memstore return, since this is the most recent value
+    // if key found in memstore, return since this is the most recent value:
     if (m_memstore->get(key, value, timestamp)) {
         return true;
     }
-    // else, search in diskstore
+    // else, search in diskstore:
     else {
         return m_diskstore->get(key, value, timestamp);
     }
@@ -95,10 +107,13 @@ void KeyValueStore::sanity_check()
     return_if_dbglvl_lt_2();
 }
 
+// TODO: move elsewhere
 /*=======================================================================*
  *                           check_parameters
  *=======================================================================*/
 void KeyValueStore::check_parameters()
 {
-    assert(SCANNERBUFSIZE >= (2*MAX_KVTSIZE + 2*sizeof(uint64_t))); // need at least these bytes (e.g. to fully decode a kv read from disk)
+    // need at least these bytes (e.g. to fully decode a kvt read from disk:
+    // <keylen, valuelen, key, value, timestamp>
+    assert(SCANNERBUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
 }

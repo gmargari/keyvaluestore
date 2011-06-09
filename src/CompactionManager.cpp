@@ -92,9 +92,10 @@ void CompactionManager::flush_memstore(void)
 void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *ostream)
 {
     const char *key, *value;
+    uint64_t timestamp;
 
-    while (istream->read(&key, &value)) {
-        ostream->write(key, value);
+    while (istream->read(&key, &value, &timestamp)) {
+        ostream->write(key, value, timestamp);
     }
     ostream->flush();
 }

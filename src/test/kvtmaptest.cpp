@@ -34,20 +34,24 @@ int main(void)
     KVTDiskFileOutputStream *ostream1, *ostream2;
     KVTDiskFileInputStream *dfistream1, *dfistream2;
     vector<KVTInputStream *> istreams;
-    char *key, *value, *key1, *key2, *key3, *value1;
+    char *key, *value, *key1, *key2, *key3, *value1, *prev_key;
     const char *k1, *v1, *k2, *v2;
     struct timeval tv;
     int num_keys, num, maxkeysize, maxvaluesize;
+    uint64_t timestamp, prev_timestamp, ts1, ts2;
 
     gettimeofday(&tv, NULL);
-//  tv.tv_usec = 919177;
+// tv.tv_usec = 438701;
     printf("seed: %ld\n", tv.tv_usec);
 
     map = new KVTMap();
     srand(tv.tv_usec);
     num_keys = rand() % 5000;
+// num_keys = 10;
     maxkeysize = 10;
     maxvaluesize = 10;
+// maxkeysize = 3;
+// maxvaluesize = 3;
     printf("num keys to be inserted: %d\n", num_keys);
 
     //========================================================
@@ -58,6 +62,8 @@ int main(void)
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
+    prev_key = (char *)malloc(MAX_KVTSIZE);
+
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
@@ -72,9 +78,17 @@ int main(void)
     file1->open_unique();
     istream = new KVTMapInputStream(map);
     ostream1 = new KVTDiskFileOutputStream(file1);
-    while (istream->read(&k1, &v1)) {
-        ostream1->write(k1, v1);
+    prev_timestamp = 0;
+    prev_key[0] = '\0';
+    while (istream->read(&k1, &v1, &timestamp)) {
+        ostream1->write(k1, v1, timestamp);
+        if (strcmp(k1, prev_key) == 0) {
+            assert(timestamp > prev_timestamp);
+        }
+        prev_timestamp = timestamp;
+        strcpy(prev_key, k1);
     }
+
     ostream1->flush();
     map->clear();
 
@@ -96,9 +110,6 @@ int main(void)
     key1 = (char *)malloc(MAX_KVTSIZE);
     key2 = (char *)malloc(MAX_KVTSIZE);
     key3 = (char *)malloc(MAX_KVTSIZE);
-//     randstr(key1, 10); // ranges must be lexicographically sorted,
-//     randstr(key2, 10); // i.e. key1 < key2 < key3
-//     randstr(key3, 10);
     strcpy(key1, "fff");
     strcpy(key2, "mmm");
     strcpy(key3, "ttt");
@@ -121,9 +132,17 @@ int main(void)
     file2->open_unique();
     ostream2 = new KVTDiskFileOutputStream(file2);
     istream_heap = new KVTPriorityInputStream(istreams);
-    while (istream_heap->read(&k1, &v1)) {
-        ostream2->write(k1, v1);
+    prev_timestamp = 0;
+    prev_key[0] = '\0';
+    while (istream_heap->read(&k1, &v1, &timestamp)) {
+        ostream2->write(k1, v1, timestamp);
+        if (strcmp(k1, prev_key) == 0) {
+            assert(timestamp > prev_timestamp);
+        }
+        prev_timestamp = timestamp;
+        strcpy(prev_key, k1);
     }
+
     ostream2->flush();
     map->clear(NULL, key1);
     map->clear(key1, key2);
@@ -139,8 +158,8 @@ int main(void)
     dfistream1 = new KVTDiskFileInputStream(file1);
     dfistream2 = new KVTDiskFileInputStream(file2);
     num = 0;
-    while (dfistream1->read(&k1, &v1)) {
-        dfistream2->read(&k2, &v2);
+    while (dfistream1->read(&k1, &v1, &ts1)) {
+        dfistream2->read(&k2, &v2, &ts2);
         if (strcmp(k1, k2) != 0) {
             printf("%d) k1: %s != k2: %s\n", num, k1, k2);
             exit(EXIT_FAILURE);
@@ -151,7 +170,7 @@ int main(void)
         }
         num++;
     }
-    assert(dfistream2->read(&k2, &v2) == false);
+    assert(dfistream2->read(&k2, &v2, &ts2) == false);
 
     //========================================================
     // free mem / delete objects
@@ -162,6 +181,7 @@ int main(void)
     free(key2);
     free(key3);
     free(value1);
+    free(prev_key);
 //     file1->delete_from_disk();
 //     file2->delete_from_disk();
     delete file1;
@@ -179,4 +199,6 @@ int main(void)
     delete map;
 
     printf("Everything ok!\n");
+
+    return EXIT_SUCCESS;
 }

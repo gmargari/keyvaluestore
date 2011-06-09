@@ -27,8 +27,19 @@ public:
     uint64_t    get_maxsize(void);
 
     /**
-     * insert a <key, value> pair into map. copies of the key and value are
-     * created and inserted into the map.
+     * insert a <key, value, timestamp> tuple into memstore. copies of the key
+     * and value are created and inserted into memstore.
+     *
+     * @param key key to be inserted
+     * @param value value to be inserted
+     * @param timestamp timestamp to be inserted
+     * @return true for success, false for failure
+     */
+    bool put(const char *key, const char *value, uint64_t timestamp);
+
+    /**
+     * insert a <key, value> pair into memstore. copies of the key and value are
+     * created and inserted into memstore.
      *
      * @param key key to be inserted
      * @param value value to inserted
@@ -37,7 +48,7 @@ public:
     bool put(const char *key, const char *value);
 
     /**
-     * get the value for a specific key
+     * get the <value, timestamp> for a specific key
      *
      * @param key (in) key to be searched
      * @param value (out) value corresponding to the searched key
@@ -47,21 +58,21 @@ public:
     bool get(const char *key, const char **value, uint64_t *timestamp);
 
     /**
-     * number of <key, value> pairs in memstore
+     * number of <key, value, timestamp> tuples in memstore
      *
-     * @return number of <key, value> pairs in memstore
+     * @return number of <key, value, timestamp> tuples in memstore
      */
     uint64_t num_keys();
 
     /**
-     * byte size of memstore
+     * total byte size of tuples stored in memstore
      *
-     * @return byte size of <key, value> pairs in memstore
+     * @return total byte size of tuples stored in memstore
      */
     uint64_t size();
 
     /**
-     * memstore is full (we probably need to flush some <k,v> pairs to disk)
+     * memstore is full (we probably need to flush some <k,v,t> tuples to disk)
      */
     bool is_full();
 

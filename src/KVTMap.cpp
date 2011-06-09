@@ -24,53 +24,14 @@ KVTMap::~KVTMap()
 }
 
 /*=======================================================================*
- *                                 clear
- *=======================================================================*/
-void KVTMap::clear()
-{
-    clear(NULL, NULL, true, true);
-    assert(m_size == 0);
-    assert(m_keys == 0);
-}
-
-/*=======================================================================*
- *                                 clear
- *=======================================================================*/
-void KVTMap::clear(const char *start_key, const char *end_key)
-{
-    clear(start_key, end_key, true, false);
-}
-
-/*=======================================================================*
- *                                 clear
- *=======================================================================*/
-void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
-{
-    kvtmap::iterator iter, s_iter, e_iter;
-    sanity_check();
-
-    s_iter = start_iter(start_key, start_key_incl);
-    e_iter = end_iter(end_key, end_key_incl);
-    for(iter = s_iter; iter != e_iter; iter++) {
-        assert(iter->first);
-        assert(iter->second);
-        m_size -= strlen(iter->first) + strlen(iter->second) + 2;
-        m_keys--;
-        free(const_cast<char*>(iter->first));
-        free(iter->second);
-    }
-    m_map.erase(s_iter, e_iter);
-
-    sanity_check();
-}
-
-/*=======================================================================*
  *                                  put
  *=======================================================================*/
 bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
 {
-    char *cpvalue;
-    const char *cpkey;
+    const char *cpkey, *f_key;
+    char *cpvalue, *f_value;
+    uint64_t f_timestamp;
+    kvtpair new_pair;
 
     sanity_check();
     assert(key);
@@ -82,11 +43,17 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
         return false;
     }
 
-    // if 'key' exists in map, delete corresponding value (it'll be replaced)
+    // if 'key' exists in map, delete corresponding value (it'll be replaced,
+    // along with its timestamp)
     kvtmap::iterator f = m_map.find(key);
     if (f != m_map.end()) {
-        m_size -= strlen(f->second) + 1;
-        free(const_cast<char*>(f->second));
+
+        f_key = const_cast<char *>(f->first);
+        f_value = const_cast<char *>(f->second.first);
+        f_timestamp = f->second.second;
+
+        m_size -= strlen(f_value) + 1 + sizeof(new_pair);
+        free(f_value);
         cpkey = key;
     } else {
         cpkey = strdup(key);
@@ -98,8 +65,10 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     assert(cpkey);
     assert(cpvalue);
 
-    m_size += strlen(cpvalue) + 1;
-    m_map[cpkey] = cpvalue;
+    new_pair.first = cpvalue;
+    new_pair.second = timestamp;
+    m_size += strlen(cpvalue) + 1 + sizeof(new_pair);
+    m_map[cpkey] = new_pair;
 
     sanity_check();
 
@@ -119,11 +88,14 @@ bool KVTMap::put(const char *key, const char *value)
  *=======================================================================*/
 bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
 {
+    kvtmap::iterator f;
+
     sanity_check();
-    kvtmap::iterator f = m_map.find(key);
-    if (f != m_map.end()) {
-        *value = f->second;
-        *timestamp = 666;
+    assert(key && value && timestamp);
+
+    if ((f = m_map.find(key)) != m_map.end()) {
+        *value = f->second.first;
+        *timestamp = f->second.second;
         return true;
     } else {
         *value = NULL;
@@ -132,24 +104,20 @@ bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
     }
 }
 
-// TODO: implement
-// /*=======================================================================*
-//  *                                  get
-//  *=======================================================================*/
-// bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
-// {
-//
-// }
-
 /*=======================================================================*
- *                                 size
+ *                                  get
  *=======================================================================*/
-uint64_t KVTMap::size()
+bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
 {
-    sanity_check();
-    return m_size;
-}
+    uint64_t ts;
 
+    if (get(key, value, &ts) && ts == timestamp) {
+        return true;
+    } else {
+        *value = NULL;
+        return false;
+    }
+}
 
 /*=======================================================================*
  *                               num_keys
@@ -161,7 +129,16 @@ uint64_t KVTMap::num_keys()
 }
 
 /*=======================================================================*
- *                               num_keys
+ *                                 size
+ *=======================================================================*/
+uint64_t KVTMap::size()
+{
+    sanity_check();
+    return m_size;
+}
+
+/*=======================================================================*
+ *                               start_iter
  *=======================================================================*/
 KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
 {
@@ -180,7 +157,7 @@ KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
 }
 
 /*=======================================================================*
- *                               num_keys
+ *                               end_iter
  *=======================================================================*/
 KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
 {
@@ -208,6 +185,52 @@ KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
 }
 
 /*=======================================================================*
+ *                                 clear
+ *=======================================================================*/
+void KVTMap::clear()
+{
+    clear(NULL, NULL, true, true);
+    assert(m_size == 0);
+    assert(m_keys == 0);
+}
+
+/*=======================================================================*
+ *                                 clear
+ *=======================================================================*/
+void KVTMap::clear(const char *start_key, const char *end_key)
+{
+    clear(start_key, end_key, true, false);
+}
+
+/*=======================================================================*
+ *                                 clear
+ *=======================================================================*/
+void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    kvtmap::iterator iter, s_iter, e_iter;
+    char *key, *value;
+    uint64_t timestamp;
+    sanity_check();
+
+    s_iter = start_iter(start_key, start_key_incl);
+    e_iter = end_iter(end_key, end_key_incl);
+    for(iter = s_iter; iter != e_iter; iter++) {
+        key = const_cast<char *>(iter->first);
+        value = const_cast<char *>(iter->second.first);
+        timestamp = iter->second.second;
+        assert(key);
+        assert(value);
+        m_size -= strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        m_keys--;
+        free(key);
+        free(value);
+    }
+    m_map.erase(s_iter, e_iter);
+
+    sanity_check();
+}
+
+/*=======================================================================*
  *                              get_timestamp
  *=======================================================================*/
 uint64_t KVTMap::timestamp()
@@ -216,7 +239,7 @@ uint64_t KVTMap::timestamp()
 //
 //     gettimeofday(&tv, NULL);
 //     return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
-    static int i = 0;
+    static int i = 1;
     return i++;
 }
 
@@ -226,13 +249,20 @@ uint64_t KVTMap::timestamp()
 void KVTMap::sanity_check()
 {
     uint64_t map_size = 0;
+    const char *key, *value;
+    uint64_t timestamp;
 
     return_if_dbglvl_lt_2();
 
     for(kvtmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
-        map_size += strlen(iter->first) + strlen(iter->second) + 2;
-        assert(strlen(iter->first) + 1 <= MAX_KVTSIZE);
-        assert(strlen(iter->second) + 1 <= MAX_KVTSIZE);
+        key = iter->first;
+        value = iter->second.first;
+        timestamp = iter->second.second;
+
+        map_size += strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        assert(strlen(key) + 1 <= MAX_KVTSIZE);
+        assert(strlen(value) + 1 <= MAX_KVTSIZE);
+        assert(timestamp != 0);
     }
     assert(m_size == map_size);
     assert(m_keys == m_map.size());

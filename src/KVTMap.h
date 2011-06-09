@@ -8,6 +8,7 @@
 #include <map>
 
 using std::map;
+using std::pair;
 
 class KVTMap {
 
@@ -45,7 +46,7 @@ public:
 
     /**
      * insert a <key, value, timestamp> tuple into map. copies of the key and
-     * value are created and inserted into the map.
+     * value are created and inserted into map.
      *
      * @param key key to be inserted
      * @param value value to be inserted
@@ -55,7 +56,8 @@ public:
     bool put(const char *key, const char *value, uint64_t timestamp);
 
     /**
-     * insert a <key, value> pair into map. a timestamp is automatically
+     * insert a <key, value> pair into map. copies of the key and
+     * value are created and inserted into map. a timestamp is automatically
      * assigned and the pair is store as a <key, value, timestamp> tuple in map.
      *
      * @param key key to be inserted
@@ -74,43 +76,34 @@ public:
      */
     bool get(const char *key, const char **value, uint64_t *timestamp);
 
-    // TODO: implement
-//     /**
-//      * get the value for a specific <key, timestamp> pair
-//      *
-//      * @param key (in) key to be searched
-//      * @param timestamp (in) timestamp of key
-//      * @param value (out) value corresponding to the searched <key, timestamp>
-//      * @return true if <key, timestamp> was found, false if not
-//      */
-//     bool get(const char *key, uint64_t timestamp, const char **value);
-
     /**
-     * size of <key, value> pairs in map (in bytes)
+     * get the value for a specific <key, timestamp> pair
      *
-     * @return size of <key, value> pairs in map (in bytes)
+     * @param key (in) key to be searched
+     * @param timestamp (in) timestamp of insertion
+     * @param value (out) value corresponding to the searched <key, timestamp>
+     * @return true if <key, timestamp> was found, false if not
      */
-    uint64_t size();
+    bool get(const char *key, uint64_t timestamp, const char **value);
 
     /**
-     * number of <key, value> pairs in map
+     * number of <key, value, timestamp> tuples in map
      *
-     * @return number of <key, value> pairs in map
+     * @return number of <key, value, timestamp> tuples in map
      */
     uint64_t num_keys();
+
+    /**
+     * total byte size of tuples stored in map
+     *
+     * @return total byte size of tuples stored in map
+     */
+    uint64_t size();
 
     /**
      * return current timestamp
      */
     uint64_t timestamp();
-
-//     struct cmp_str { // required, in order for the map to have its keys sorted
-//         bool operator()(char const *a, char const *b) {
-//             return strcmp(a, b) < 0;
-//         }
-//     };
-//
-//     typedef map<const char *, char *, cmp_str> kvtmap;
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {
@@ -118,7 +111,9 @@ public:
         }
     };
 
-    typedef map<const char *, char *, cmp_str> kvtmap;
+    // map: key --> <value, timestamp>
+    typedef pair<char *, uint64_t > kvtpair;
+    typedef map<const char *, kvtpair, cmp_str> kvtmap;
 
 protected:
 

@@ -21,8 +21,19 @@ public:
     ~KeyValueStore();
 
     /**
-     * insert a <key, value> pair into map. copies of the key and value are
-     * created and inserted into the map.
+     * insert a <key, value, timestamp> tuple into store. copies of the key and
+     * value are created and inserted into the store.
+     *
+     * @param key key to be inserted
+     * @param value value to be inserted
+     * @param timestamp timestamp to be inserted
+     * @return true for success, false for failure
+     */
+    bool put(const char *key, const char *value, uint64_t timestamp);
+
+    /**
+     * insert a <key, value> tuple into store. copies of the key and value are
+     * created and inserted into the store.
      *
      * @param key key to be inserted
      * @param value value to inserted
@@ -41,30 +52,30 @@ public:
     bool get(const char *key, const char **value, uint64_t *timestamp);
 
     /**
-     * number of <k,v> pairs in memory
+     * number of <key, value, timestamp> tuples in memory
      *
-     * @return number of <key, value> pairs in memory
+     * @return number of <key, value, timestamp> tuples in memory
      */
     uint64_t num_mem_keys();
 
     /**
-     * number of <k,v> pairs on disk
+     * number of <key, value, timestamp> tuples on disk
      *
-     * @return number of <key, value> pairs on disk
+     * @return number of <key, value, timestamp> tuples on disk
      */
     uint64_t num_disk_keys();
 
     /**
-     * byte size of memstore
+     * total byte size of tuples stored in memory
      *
-     * @return byte size of <key, value> pairs stored in memory
+     * @return total byte size of tuples stored in memory
      */
     uint64_t mem_size();
 
     /**
-     * byte size of diskstore
+     * total byte size of tuples stored on disk
      *
-     * @return byte size of <key, value> pairs stored on disk
+     * @return total byte size of tuples stored on disk
      */
     uint64_t disk_size();
 

@@ -32,7 +32,7 @@ DiskStore::~DiskStore()
  *========================================================================*/
 bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    return false;
+    return false; // TODO: implement this
 }
 
 /*========================================================================
@@ -40,7 +40,7 @@ bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
  *========================================================================*/
 uint64_t DiskStore::num_keys()
 {
-    return 0;
+    return 0; // TODO: implement this
 }
 
 /*========================================================================
@@ -48,7 +48,7 @@ uint64_t DiskStore::num_keys()
  *========================================================================*/
 uint64_t DiskStore::size()
 {
-    return 0;
+    return 0; // TODO: implement this
 }
 
 /*=======================================================================*

@@ -39,9 +39,12 @@ void KVTDiskFileInputStream::reset()
 /*========================================================================
  *                                 read
  *========================================================================*/
-bool KVTDiskFileInputStream::read(const char **key, const char **value)
+bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t *timestamp)
 {
     uint32_t len, unused_bytes;
+    static int ts = 1;  // TODO: delete this and use real timestamp from disk (delete this when we start storing timestamps on disk)
+
+    *timestamp = ts++; // strictly increasing so we dont have problem on upper layers
 
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, &len, false)) {
         m_bytes_used += len;

@@ -26,11 +26,11 @@ public:
     void reset();
 
     /**
-     * write <key, value> to stream
+     * write <key, value, timestamp> tuple to stream
      *
-     * @return false if could not write <k,v> to stream. else, true.
+     * @return false if could not write tuple to stream. else, true.
      */
-    bool write(const char *key, const char *value);
+    bool write(const char *key, const char *value, uint64_t timestamp);
 
     /**
      * flush output stream buffer

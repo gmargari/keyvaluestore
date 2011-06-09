@@ -19,19 +19,22 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-
 int main(void)
 {
     KeyValueStore kvstore;
 
     char *key, *value;
     struct timeval tv;
+
     gettimeofday(&tv, NULL);
+// tv.tv_usec = 693000;
     printf("seed: %ld\n", tv.tv_usec);
     srand(tv.tv_usec);
+
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
-    for (int i = 0; i < 10000; i++) {
+
+    for (int i = 0; i < 1000; i++) {
         randstr(key, (int)(rand() % 100) + 1);
         randstr(value, (int)(rand() % 1000) + 1);
         sprintf(value + strlen(value), "#%d", i);
@@ -128,4 +131,6 @@ int main(void)
 //
 
     printf("Everything ok!\n");
+
+    return EXIT_SUCCESS;
 }
