@@ -30,9 +30,9 @@ DiskStore::~DiskStore()
 /*========================================================================
  *                                 get
  *========================================================================*/
-const char *DiskStore::get(const char *key)
+bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    return NULL;
+    return false;
 }
 
 /*========================================================================

@@ -39,11 +39,12 @@ public:
     /**
      * get the value for a specific key
      *
-     * @param key key to be searched
-     * @return pointer to value of specified key, NULL if key does not exist in
-     * map
+     * @param key (in) key to be searched
+     * @param value (out) value corresponding to the searched key
+     * @param timestamp (out) timestamp of insertion
+     * @return true if key was found, false if not
      */
-    const char *get(const char *key);
+    bool get(const char *key, const char **value, uint64_t *timestamp);
 
     /**
      * number of <key, value> pairs in memstore

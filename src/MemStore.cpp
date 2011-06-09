@@ -39,15 +39,15 @@ uint64_t MemStore::get_maxsize(void)
  *========================================================================*/
 bool MemStore::put(const char *key, const char *value)
 {
-    return m_kvtmap->put(key,value);
+    return m_kvtmap->put(key, value);
 }
 
 /*========================================================================
  *                                 get
  *========================================================================*/
-const char *MemStore::get(const char *key)
+bool MemStore::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    return m_kvtmap->get(key);
+    return m_kvtmap->get(key, value, timestamp);
 }
 
 /*========================================================================
