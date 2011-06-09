@@ -22,26 +22,30 @@ void randstr(char *s, const int len) {
 int main(void)
 {
     KeyValueStore kvstore;
-
     char *key, *value;
     struct timeval tv;
+    int num_keys, maxkeysize, maxvaluesize;
 
     gettimeofday(&tv, NULL);
-// tv.tv_usec = 693000;
+// tv.tv_usec = 166066;
     printf("seed: %ld\n", tv.tv_usec);
+
     srand(tv.tv_usec);
+    num_keys = rand() % 5000 + 2000;
+// num_keys = 3;
+    maxkeysize = 10;
+    maxvaluesize = 10;
+// maxkeysize = 3;
+// maxvaluesize = 3;
+    printf("num keys to be inserted: %d\n", num_keys);
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
 
-    for (int i = 0; i < 1000; i++) {
-        randstr(key, (int)(rand() % 100) + 1);
-        randstr(value, (int)(rand() % 1000) + 1);
-        sprintf(value + strlen(value), "#%d", i);
-//         printf("[%s] [%s]\n", key, value);
+    for (int i = 0; i < num_keys; i++) {
+        randstr(key, (int)(rand() % maxkeysize) + 1);
+        randstr(value, (int)(rand() % maxvaluesize) + 1);
         kvstore.put(key, value);
-        if (i % 100 == 0)
-            dbg_i(i);
     }
     free(key);
     free(value);

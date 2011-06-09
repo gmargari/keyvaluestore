@@ -67,7 +67,6 @@ int main(void)
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        sprintf(value + strlen(value), "#%d", i);
         map->put(key, value);
     }
 
@@ -99,7 +98,6 @@ int main(void)
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        sprintf(value + strlen(value), "#%d", i);
         map->put(key, value);
     }
 
@@ -113,7 +111,7 @@ int main(void)
     strcpy(key1, "fff");
     strcpy(key2, "mmm");
     strcpy(key3, "ttt");
-    printf("ranges: [NULL, %s) [%s, %s) [%s, %s) [%s, NULL]\n", key1, key1, key2, key2, key3, key3);
+//     printf("ranges: [NULL, %s) [%s, %s) [%s, %s) [%s, NULL]\n", key1, key1, key2, key2, key3, key3);
 
     istream1 = new KVTMapInputStream(map, NULL, key1);
     istream2 = new KVTMapInputStream(map, key1, key2);
