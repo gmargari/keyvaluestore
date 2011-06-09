@@ -64,7 +64,7 @@ protected:
             if (cmp > 0) {
                 return true;
             } else if (cmp == 0 && e1->sid > e2->sid) {
-//                 assert(e1->timestamp > e2->timestamp); // TODO: when disk timestamps are fixed, uncomment this
+                assert(e1->timestamp > e2->timestamp);
                 return true;
             } else {
                 return false;

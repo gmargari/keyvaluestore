@@ -42,8 +42,7 @@ bool KVTDiskFileOutputStream::write(const char *key, const char *value, uint64_t
 {
     uint32_t len;
 
-    // TODO: use timestamp!
-    if (serialize(m_buf, m_buf_size, key, value, &len) &&
+    if (serialize(m_buf, m_buf_size, key, value, timestamp, &len) &&
           m_kvtdiskfile->m_vfile->fs_write(m_buf, len)) {
         return true;
     } else {
