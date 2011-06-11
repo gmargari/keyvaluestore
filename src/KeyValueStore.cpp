@@ -11,7 +11,7 @@
 KeyValueStore::KeyValueStore()
 {
     m_memstore = new MemStore();
-    m_memstore->set_maxsize(10000);
+    m_memstore->set_maxsize(1000000);
     m_diskstore = new DiskStore();
     m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
 

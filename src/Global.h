@@ -12,18 +12,6 @@
 
 // default values
 #define DEFAULT_MEMSTORE_SIZE      1073741824LL // 1GB
-#define DEFAULT_STATS_ENABLED             false
-#define DEFAULT_STATS_STEP         1073741824LL // 1GB
-#define DEFAULT_GEOM_R                        3
-#define DEFAULT_GEOM_P                        0 // default disabled (no upper bound on number of partitions)
-#define DEFAULT_GEOM_P_IS_CONSTANT        false
-#define DEFAULT_URF_BLOCKSIZE       268435456LL // 256MB
-#define DEFAULT_URF_FLUSHMEMSIZE            0LL  // 0 -> flush biggest range only
-#define DEFAULT_INSERTBYTES      104857600000LL // 100GB
-
-#define TMPFILEDIR                         "/tmp/"
-#define TMPFILEPREFIX                      "fsim." // 5 chars max
-#define MAX_FILE_SIZE              2147483647LL // 2GB
 
 #define READBUFSIZE                ((size_t)(64*1024*1024))
 #define MERGEBUFSIZE               ((size_t)(64*1024*1024))
@@ -31,6 +19,10 @@
 #define SCANNERBUFSIZE       ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 #define MAX_INDEX_DIST                            (64*1024) // 64KB
 
+// vfile-related defines
+#define TMPFILEDIR              "/tmp/"
+#define TMPFILEPREFIX           "fsim." // 5 chars max
+#define MAX_FILE_SIZE     2147483647LL // 2GB
 
 // byte conversion
 #define b2kb(b) ((b)/(1024.0))

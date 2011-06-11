@@ -11,9 +11,10 @@ void randstr(char *s, const int len) {
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
+    int size = sizeof(alphanum);
 
     for (int i = 0; i < len; i++) {
-        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+        s[i] = alphanum[rand() % (size - 1)];
     }
 
     s[len] = '\0';
@@ -27,14 +28,14 @@ int main(void)
     int num_keys, maxkeysize, maxvaluesize;
 
     gettimeofday(&tv, NULL);
-// tv.tv_usec = 166066;
+// tv.tv_usec = 104845;
     printf("seed: %ld\n", tv.tv_usec);
 
     srand(tv.tv_usec);
-    num_keys = rand() % 5000 + 2000;
+    num_keys = rand() % 50000 + 2000;
 // num_keys = 3;
     maxkeysize = 10;
-    maxvaluesize = 10;
+    maxvaluesize = 1000;
 // maxkeysize = 3;
 // maxvaluesize = 3;
     printf("num keys to be inserted: %d\n", num_keys);
