@@ -1,17 +1,8 @@
-// #include "../KVTMapInputStream.h"
-// #include "../KVTPriorityInputStream.h"
-// #include "../KVTDiskFileInputStream.h"
-// #include "../KVTDiskFileInputStream.h"
-// #include "../CompactionManager.h"
 #include "../VFileIndex.h"
 
 #include <sys/time.h>
-#include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#include <stdlib.h>
-
-#define BUFSIZE 1000
 
 void randstr(char *s, const int len) {
     static const char alphanum[] =
@@ -34,8 +25,8 @@ int main(void)
     off_t off1, off2, off3, off4;
     struct timeval tv;
     int num_keys, maxkeysize;
-#define N 7
-    char *terms[N]   = {"b", "d", "g", "k", "m", "p", "x"};
+    #define N 7
+    char *terms[N]   = {(char *)"b", (char *)"d", (char *)"g", (char *)"k", (char *)"m", (char *)"p", (char *)"x"};
     off_t offsets[N] = {  0,  10,  20,  30,  40,  50,  60};
 
     gettimeofday(&tv, NULL);
@@ -70,8 +61,9 @@ int main(void)
             assert(!(index.search(key, &off3, &off4)));
         }
     }
-    assert(!index.search("a", &off1, &off2));
-    assert(!index.search("zzz", &off1, &off2));
+
+    assert(!index.search((char *)"a", &off1, &off2));
+    assert(!index.search((char *)"zzz", &off1, &off2));
 
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
@@ -82,37 +74,36 @@ int main(void)
         }
     }
 
+#if 0
     //========================================================
     // print values
     //========================================================
     srand(tv.tv_usec);
 
-#if 0
-        for (int i = 0; i < N; i++) {
-            printf("%-*s ", maxkeysize+1, terms[i]); fflush(stdout);
-            if (index.search(terms[i], &off1, &off2)) {
-                printf("(%Ld, %Ld)\n", off1, off2);
-            } else {
-                printf("not found\n");
-            }
-
-            sprintf(key, "%s%s", terms[i], "00");
-            printf("%-*s ", maxkeysize+1, key); fflush(stdout);
-            if (index.search(key, &off1, &off2)) {
-                printf("(%Ld, %Ld)\n", off1, off2);
-            } else {
-                printf("not found\n");
-            }
+    for (int i = 0; i < N; i++) {
+        printf("%-*s ", maxkeysize+1, terms[i]); fflush(stdout);
+        if (index.search(terms[i], &off1, &off2)) {
+            printf("(%Ld, %Ld)\n", off1, off2);
+        } else {
+            printf("not found\n");
         }
 
-        for (int i = 0; i < num_keys; i++) {
-            randstr(key, (int)(rand() % maxkeysize) + 1);
-            printf("%-*s ", maxkeysize+1, key); fflush(stdout);
-            if (index.search(key, &off1, &off2)) {
-                printf("(%Ld, %Ld)\n", off1, off2);
-            } else {
-                printf("not found\n");
-            }
+        sprintf(key, "%s%s", terms[i], "00");
+        printf("%-*s ", maxkeysize+1, key); fflush(stdout);
+        if (index.search(key, &off1, &off2)) {
+            printf("(%Ld, %Ld)\n", off1, off2);
+        } else {
+            printf("not found\n");
+        }
+    }
+
+    for (int i = 0; i < num_keys; i++) {
+        randstr(key, (int)(rand() % maxkeysize) + 1);
+        printf("%-*s ", maxkeysize+1, key); fflush(stdout);
+        if (index.search(key, &off1, &off2)) {
+            printf("(%Ld, %Ld)\n", off1, off2);
+        } else {
+            printf("not found\n");
         }
     }
 #endif
