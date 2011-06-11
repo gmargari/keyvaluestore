@@ -14,6 +14,7 @@ add_library (KVTPriorityInputStream     KVTPriorityInputStream.cpp)
 add_library (CompactionManager          CompactionManager.cpp)
 add_library (KVTSerialization           KVTSerialization.cpp)
 add_library (VFile                      VFile.cpp)
+add_library (VFileIndex                 VFileIndex.cpp)
 add_library (Simulator                  Simulator.cpp)
 
 target_link_libraries (KVTDiskFile               VFile)

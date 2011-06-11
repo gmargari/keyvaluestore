@@ -6,3 +6,6 @@ target_link_libraries (kvtstoretest KeyValueStore)
 
 add_executable (kvtmaptest kvtmaptest.cpp)
 target_link_libraries (kvtmaptest KeyValueStore)
+
+add_executable (vfileindextest vfileindextest.cpp)
+target_link_libraries (vfileindextest KeyValueStore VFileIndex)
