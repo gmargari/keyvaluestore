@@ -161,7 +161,7 @@ int main(void)
     dfistream2 = new KVTDiskFileInputStream(file2);
     num = 0;
     while (dfistream1->read(&k1, &v1, &ts1)) {
-        dfistream2->read(&k2, &v2, &ts2);
+        assert(dfistream2->read(&k2, &v2, &ts2));
         if (strcmp(k1, k2) != 0) {
             printf("%d) k1: %s != k2: %s\n", num, k1, k2);
             exit(EXIT_FAILURE);

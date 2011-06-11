@@ -68,6 +68,8 @@ void KVTPriorityInputStream::reset()
             m_heap.push(m_elements[i]);
         }
     }
+
+    m_last_sid = -1;
     sanity_check();
 }
 
@@ -76,38 +78,36 @@ void KVTPriorityInputStream::reset()
  *========================================================================*/
 bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
 {
-    // NOTE: if after merging a value is greater than MAX_KVTSIZE --> error!
-    //     assert(strlen(key) + 1 <= MAX_KVTSIZE);
+    heap_element *top;
 
     assert(key && value && timestamp);
 
     if (m_heap.empty()) {
         return false;
-    } else {
-        heap_element *top;
-        int sid;
-
-        sanity_check();
-
-        // get top element
-        top = m_heap.top();
-        *key = top->key;
-        *value = top->value;
-        *timestamp = top->timestamp;
-        sid = top->sid;
-
-        m_heap.pop();
-
-        // the element poped from head belongs to stream 'sid'. insert into
-        // heap a new element from this stream
-        if (m_istreams[sid]->read(&(m_elements[sid]->key), &(m_elements[sid]->value), &(m_elements[sid]->timestamp))) {
-            m_heap.push(m_elements[sid]);
-        }
-
-        sanity_check();
-
-        return true;
     }
+
+    // m_last_sid: id of stream to which the last poped element belongs to
+    if (m_last_sid != -1) {
+        // the element poped from head last time belonged to stream 'm_last_sid'.
+        // insert into heap a new element from that stream.
+        if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->timestamp))) {
+            m_heap.push(m_elements[m_last_sid]);
+        }
+    }
+
+    sanity_check();
+
+    // get top element
+    top = m_heap.top();
+    *key = top->key;
+    *value = top->value;
+    *timestamp = top->timestamp;
+    m_last_sid = top->sid;
+    m_heap.pop();
+
+    sanity_check();
+
+    return true;
 }
 
 /*=======================================================================*

@@ -61,9 +61,8 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
 
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, timestamp, &len, false)) {
         m_bytes_used += len;
-        return len;
+        return true;
     } else {
-
         // keep only unused bytes in buffer
         unused_bytes = m_bytes_in_buf - m_bytes_used;
         memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
@@ -71,15 +70,18 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
         m_bytes_used = 0;
 
         // read more bytes to buffer
-        m_bytes_in_buf += m_kvtdiskfile->m_vfile->fs_read(m_buf, m_buf_size - m_bytes_used);
+        m_bytes_in_buf += m_kvtdiskfile->m_vfile->fs_read(m_buf + m_bytes_in_buf, m_buf_size - m_bytes_in_buf);
         if (deserialize(m_buf, m_bytes_in_buf, key, value, timestamp, &len, false)) {
             m_bytes_used += len;
-            return len;
+            return true;
         }
 
+        // no more bytes left in file
+        *key = NULL;
         *value = NULL;
         *timestamp = 0;
-        return 0;
+
+        return false;
     }
 }
 

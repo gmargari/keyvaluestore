@@ -73,6 +73,7 @@ protected:
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
     vector<KVTInputStream *>      m_istreams;
     vector<heap_element *>        m_elements;
+    int                           m_last_sid; // id of stream to which the last popped element belongs to
     // heap contains 'heap_element *', not 'heap_element', to avoid copying the whole struct.
     // instead, we only copy the pointer to the element. this means we must be very carefull
     // not to insert again the same element, until it has been poped out from heap
