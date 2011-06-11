@@ -30,7 +30,6 @@ public:
      */
     bool open(char *filename);
 
-
     /**
      * open an existing file
      *
@@ -50,6 +49,16 @@ public:
      */
     void delete_from_disk();
 
+    /**
+     * number of keys (or tuples) stored on disk file
+     */
+    uint64_t num_keys();
+
+    /**
+     * size of disk file
+     */
+    uint64_t size();
+
 //     // file system name of this file
 //     char *name();    // NOTE: a VFile can be composed of several disk files. modify function to return array of names?!
 //     // rewind file
@@ -65,6 +74,7 @@ protected:
 
     VFile       *m_vfile;
     VFileIndex   m_vfile_index;
+    uint64_t     m_vfile_numkeys;
 };
 
 #endif

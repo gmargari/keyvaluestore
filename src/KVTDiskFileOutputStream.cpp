@@ -11,9 +11,10 @@
  *========================================================================*/
 KVTDiskFileOutputStream::KVTDiskFileOutputStream(KVTDiskFile *file)
 {
-
     m_vfile = file->m_vfile;
     m_vfile_index = &(file->m_vfile_index);
+    m_vfile_numkeys = &(file->m_vfile_numkeys);
+
     m_buf_size = SCANNERBUFSIZE;
     m_buf = (char *)malloc(m_buf_size);
     reset();
@@ -32,12 +33,14 @@ KVTDiskFileOutputStream::~KVTDiskFileOutputStream()
  *========================================================================*/
 void KVTDiskFileOutputStream::reset()
 {
+    m_vfile->fs_rewind();   // contents will be overwritten
+    m_vfile_index->clear(); // index will be rebuild
+    (*m_vfile_numkeys) = 0;
+
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
     m_lastoffs = -1;
     m_vfile_size = 0;
-    m_vfile->fs_rewind();   // contents will be overwritten
-    m_vfile_index->clear(); // index will be rebuild
 }
 
 /*========================================================================
@@ -58,6 +61,7 @@ bool KVTDiskFileOutputStream::write(const char *key, const char *value, uint64_t
             m_lastoffs = cur_offs;
         }
 
+        (*m_vfile_numkeys)++;
         m_vfile_size += len;
         assert(m_vfile->fs_size() == m_vfile_size);
         m_vfile_index->set_vfilesize(m_vfile_size);

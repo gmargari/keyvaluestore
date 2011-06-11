@@ -43,7 +43,8 @@ protected:
 
     VFile       *m_vfile;         // pointer to vfile
     VFileIndex  *m_vfile_index;   // pointer to vfile index
-    uint32_t     m_vfile_size;    // size of vfile on disk
+    uint64_t    *m_vfile_numkeys; // pointer to vfile's 'm_vfile_numkeys'
+    uint64_t     m_vfile_size;    // size of vfile      // TODO: remove and use vfile->fs_size(), when fs_size() is implemented without using syscalls
 
     char       	*m_buf;           // buffer used to serialize entries
     uint32_t     m_buf_size;      // buffer size

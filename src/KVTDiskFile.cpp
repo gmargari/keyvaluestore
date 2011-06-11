@@ -7,6 +7,7 @@
 KVTDiskFile::KVTDiskFile()
 {
     m_vfile = new VFile(true);
+    m_vfile_numkeys = 0;
 }
 
 /*========================================================================
@@ -22,6 +23,7 @@ KVTDiskFile::~KVTDiskFile()
  *=======================================================================*/
 bool KVTDiskFile::open(char *filename)
 {
+    m_vfile_numkeys = 0;
     return m_vfile->fs_open(filename);
 }
 
@@ -30,7 +32,15 @@ bool KVTDiskFile::open(char *filename)
  *=======================================================================*/
 bool KVTDiskFile::open_existing(char *filename)
 {
-    return m_vfile->fs_open_existing(filename);
+    if (m_vfile->fs_open_existing(filename)) {
+        // TODO: read vfile index, vfile size, vfile num keys
+        // m_vfile_index =
+        // m_vfile_size =
+        // m_vfile_numkeys =
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*=======================================================================*
@@ -38,7 +48,8 @@ bool KVTDiskFile::open_existing(char *filename)
  *=======================================================================*/
 bool KVTDiskFile::open_unique()
 {
-    return m_vfile->fs_open_unique();
+    m_vfile_numkeys = 0;
+    return (m_vfile->fs_open_unique());
 }
 
 /*=======================================================================*
@@ -48,6 +59,23 @@ void KVTDiskFile::delete_from_disk()
 {
     m_vfile->fs_delete();
 }
+
+/*=======================================================================*
+ *                            delete_from_disk
+ *=======================================================================*/
+uint64_t KVTDiskFile::num_keys()
+{
+    return m_vfile_numkeys;
+}
+
+/*=======================================================================*
+ *                            delete_from_disk
+ *=======================================================================*/
+uint64_t KVTDiskFile::size()
+{
+    return m_vfile->fs_size();
+}
+
 
 /*=======================================================================*
  *                              sanity_check

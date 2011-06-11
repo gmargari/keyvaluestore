@@ -40,7 +40,14 @@ bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
  *========================================================================*/
 uint64_t DiskStore::num_keys()
 {
-    return 0; // TODO: implement this
+    vector<KVTDiskFile *>::iterator iter;
+    uint64_t total_keys = 0;
+
+    for (iter = m_diskfiles.begin(); iter != m_diskfiles.end(); iter++) {
+        total_keys += (*iter)->num_keys();
+    }
+
+    return total_keys;
 }
 
 /*========================================================================
@@ -48,7 +55,14 @@ uint64_t DiskStore::num_keys()
  *========================================================================*/
 uint64_t DiskStore::size()
 {
-    return 0; // TODO: implement this
+    vector<KVTDiskFile *>::iterator iter;
+    uint64_t total_size = 0;
+
+    for (iter = m_diskfiles.begin(); iter != m_diskfiles.end(); iter++) {
+        total_size += (*iter)->size();
+    }
+
+    return total_size;
 }
 
 /*=======================================================================*
