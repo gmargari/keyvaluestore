@@ -2,6 +2,7 @@
 #include "VFileIndex.h"
 
 #include <cassert>
+#include <cstdlib>
 
 /*========================================================================
  *                            VFileIndex
@@ -16,18 +17,20 @@ VFileIndex::VFileIndex()
  *========================================================================*/
 VFileIndex::~VFileIndex()
 {
-
+    clear();
 }
 
 /*========================================================================
  *                                 add
  *========================================================================*/
-void VFileIndex::add(char *key, off_t offset)
+void VFileIndex::add(const char *key, off_t offset)
 {
+    char *cpkey;
     sanity_check();
-    assert(m_map.find(key) == m_map.end());
 
-    m_map[key] = offset;
+    cpkey = strdup(key);
+    assert(m_map.find(cpkey) == m_map.end());
+    m_map[cpkey] = offset;
 
     sanity_check();
 }
@@ -43,7 +46,7 @@ void VFileIndex::set_vfilesize(off_t size)
 /*========================================================================
  *                                search
  *========================================================================*/
-bool VFileIndex::search(char *key, off_t *start_off, off_t *end_off)
+bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
 {
     termoffsmap::iterator iter;
 
@@ -89,8 +92,14 @@ bool VFileIndex::search(char *key, off_t *start_off, off_t *end_off)
  *========================================================================*/
 void VFileIndex::clear()
 {
+    termoffsmap::iterator iter;
+
     sanity_check();
 
+    for (iter = m_map.begin(); iter != m_map.end(); iter++) {
+        assert(iter->first);
+        free(const_cast<char *>(iter->first));
+    }
     m_map.clear();
     m_vfilesize = 0;
 
@@ -103,11 +112,12 @@ void VFileIndex::clear()
 void VFileIndex::sanity_check()
 {
     termoffsmap::iterator iter;
-    char *prev_key = NULL;
+    const char *prev_key = NULL;
     off_t prev_offs = -1;
 
     return_if_dbglvl_lt_2();
 
+    assert(m_map.size() == 0 || (m_map.begin())->second == 0);
     for (iter = m_map.begin(); iter != m_map.end(); iter++) {
         assert(prev_key == NULL || strcmp(iter->first, prev_key) > 0);
         assert(prev_offs == -1  || iter->second > prev_offs);

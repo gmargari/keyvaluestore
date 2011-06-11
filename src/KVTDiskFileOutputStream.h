@@ -41,11 +41,16 @@ protected:
 
     void sanity_check();
 
-    KVTDiskFile	*m_kvtdiskfile;
-    char       	*m_buf;
-    uint32_t     m_buf_size;
-    uint32_t     m_bytes_in_buf;
-    uint32_t     m_bytes_used;
+    VFile       *m_vfile;         // pointer to vfile
+    VFileIndex  *m_vfile_index;   // pointer to vfile index
+    uint32_t     m_vfile_size;    // size of vfile on disk
+
+    char       	*m_buf;           // buffer used to serialize entries
+    uint32_t     m_buf_size;      // buffer size
+    uint32_t     m_bytes_in_buf;  // total bytes in byffer
+    uint32_t     m_bytes_used;    // bytes already used from buffer
+
+    off_t        m_lastoffs;      // last offset inserted in index
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "Global.h"
 #include "VFile.h"
+#include "VFileIndex.h"
 #include "KVTSerialization.h"
 
 class KVTDiskFile {
@@ -62,7 +63,8 @@ protected:
 
     void sanity_check();
 
-    VFile *m_vfile;
+    VFile       *m_vfile;
+    VFileIndex   m_vfile_index;
 };
 
 #endif

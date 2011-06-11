@@ -30,7 +30,7 @@ public:
     /**
      * add (append) a <term, offset> entry in index
      */
-    void add(char *term, off_t offset);
+    void add(const char *term, off_t offset);
 
     /**
      * set the vfile disk size (used to determine where the last entry ends,
@@ -48,7 +48,7 @@ public:
      * @param start_off (out) start offset on disk file
      * @param end_off (out) end offset on disk file
      */
-    bool search(char *term, off_t *start_off, off_t *end_off);
+    bool search(const char *term, off_t *start_off, off_t *end_off);
 
     /**
      * clear entries of index
@@ -61,14 +61,14 @@ public:
         }
     };
 
-    typedef map<char *, off_t, cmp_str> termoffsmap;
+    typedef map<const char *, off_t, cmp_str> termoffsmap;
 
 protected:
 
     void sanity_check();
 
-    termoffsmap m_map;
-    off_t       m_vfilesize; // size of vfile on disk
+    termoffsmap m_map;          // index containing <term, offset> pairs
+    off_t       m_vfilesize;    // size of vfile on disk
 };
 
 #endif
