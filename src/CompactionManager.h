@@ -34,6 +34,11 @@ public:
     void copy_stream(KVTInputStream *istream, KVTOutputStream *ostream);
 
     /**
+     * copy all <k,v> pairs of input stream with unique keys to output stream
+     */
+    void copy_stream_unique_keys(KVTInputStream *istream, KVTOutputStream *ostream);
+
+    /**
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
     void merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream);

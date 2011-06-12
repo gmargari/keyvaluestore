@@ -6,8 +6,6 @@
 #include "KVTDiskFileOutputStream.h"
 #include "KVTPriorityInputStream.h"
 
-#include <cstdio>
-
 /*========================================================================
  *                           CompactionManager
  *========================================================================*/
@@ -46,6 +44,8 @@ void CompactionManager::flush_memstore(void)
     kvtdiskfile->open_unique();
     istream = new KVTMapInputStream(m_memstore->m_kvtmap);
     ostream = new KVTDiskFileOutputStream(kvtdiskfile);
+    // we can use copy_stream() instead of copy_stream_unique_keys(), since we
+    // know that all keys are unique, due to the use of map.
     copy_stream(istream, ostream);
     m_diskstore->m_diskfiles.push_back(kvtdiskfile);
     m_memstore->clear();
@@ -101,6 +101,25 @@ void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *os
 }
 
 /*========================================================================
+ *                       copy_stream_unique_keys
+ *========================================================================*/
+void CompactionManager::copy_stream_unique_keys(KVTInputStream *istream, KVTOutputStream *ostream)
+{
+    const char *key, *value;
+    uint64_t timestamp;
+    char prev_key[MAX_KVTSIZE];
+
+    prev_key[0] = '\0';
+    while (istream->read(&key, &value, &timestamp)) {
+        if (strcmp(prev_key, key) != 0) {
+            ostream->write(key, value, timestamp);
+            strcpy(prev_key, key);
+        }
+    }
+    ostream->flush();
+}
+
+/*========================================================================
  *                             merge_streams
  *========================================================================*/
 void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream)
@@ -108,7 +127,7 @@ void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutp
     KVTPriorityInputStream *istream_heap;
 
     istream_heap = new KVTPriorityInputStream(istreams);
-    copy_stream(istream_heap, ostream);
+    copy_stream_unique_keys(istream_heap, ostream);
     delete istream_heap;
 }
 
