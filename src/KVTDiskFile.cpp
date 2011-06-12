@@ -7,6 +7,7 @@
 KVTDiskFile::KVTDiskFile()
 {
     m_vfile = new VFile(true);
+    m_vfile_index = new VFileIndex();
     m_vfile_numkeys = 0;
 }
 
@@ -16,6 +17,7 @@ KVTDiskFile::KVTDiskFile()
 KVTDiskFile::~KVTDiskFile()
 {
     delete m_vfile;
+    delete m_vfile_index;
 }
 
 /*=======================================================================*
@@ -61,7 +63,7 @@ void KVTDiskFile::delete_from_disk()
 }
 
 /*=======================================================================*
- *                            delete_from_disk
+ *                                num_keys
  *=======================================================================*/
 uint64_t KVTDiskFile::num_keys()
 {
@@ -69,7 +71,7 @@ uint64_t KVTDiskFile::num_keys()
 }
 
 /*=======================================================================*
- *                            delete_from_disk
+ *                                  size
  *=======================================================================*/
 uint64_t KVTDiskFile::size()
 {

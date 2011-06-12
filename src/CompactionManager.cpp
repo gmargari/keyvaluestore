@@ -34,6 +34,11 @@ void CompactionManager::flush_memstore(void)
     vector<KVTDiskFile *>::iterator iter;
     vector<KVTInputStream *> istreams;
 
+
+    // NOTE: TODO: every new file created by Compaction Manager should be inserted
+    // at the *front* of the vector, so the first file in vector is the most
+    // recent, the second is the second most recent etc.
+
     /*
      * first, flush memstore to a new file on disk
      */

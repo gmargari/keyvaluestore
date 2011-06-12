@@ -72,9 +72,9 @@ protected:
 
     void sanity_check();
 
-    VFile       *m_vfile;
-    VFileIndex   m_vfile_index;
-    uint64_t     m_vfile_numkeys;
+    VFile                   *m_vfile;
+    VFileIndex              *m_vfile_index;
+    uint64_t                 m_vfile_numkeys;
 };
 
 #endif

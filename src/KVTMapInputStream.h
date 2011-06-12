@@ -36,8 +36,8 @@ protected:
     KVTMap                      *m_kvtmap;
     KVTMap::kvtmap::iterator     m_iter;
     KVTMap::kvtmap::iterator     m_iter_end;
-    char *                       m_start_key;
-    char *                       m_end_key;
+    char                        *m_start_key;
+    char                        *m_end_key;
     bool                         m_start_incl;
     bool                         m_end_incl;
 };
