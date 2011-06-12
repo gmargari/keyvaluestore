@@ -80,11 +80,8 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
 {
     heap_element *top;
 
+    sanity_check();
     assert(key && value && timestamp);
-
-    if (m_heap.empty()) {
-        return false;
-    }
 
     // m_last_sid: id of stream to which the last poped element belongs to
     if (m_last_sid != -1) {
@@ -95,7 +92,9 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
         }
     }
 
-    sanity_check();
+    if (m_heap.empty()) {
+        return false;
+    }
 
     // get top element
     top = m_heap.top();
