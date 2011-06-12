@@ -1,13 +1,12 @@
 #ifndef DISKSTORE_H
 #define DISKSTORE_H
 
-#include "Global.h"
-#include "KVTDiskFile.h"
-
 #include <stdint.h>
 #include <vector>
 
 using std::vector;
+
+class KVTDiskFile;
 
 class DiskStore {
 

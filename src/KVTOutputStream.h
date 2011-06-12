@@ -1,7 +1,7 @@
 #ifndef KVTOUTPUTSTREAM_H
 #define KVTOUTPUTSTREAM_H
 
-#include "Global.h"
+#include <stdint.h>
 
 class KVTOutputStream {
 

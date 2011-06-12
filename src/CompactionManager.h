@@ -1,13 +1,14 @@
 #ifndef COMPACTIONMANAGER_H
 #define COMPACTIONMANAGER_H
 
-#include "Global.h"
-#include "MemStore.h"
-#include "DiskStore.h"
-#include "KVTMapInputStream.h"
-#include "KVTDiskFileOutputStream.h"
+#include <vector>
 
 using std::vector;
+
+class MemStore;
+class DiskStore;
+class KVTInputStream;
+class KVTOutputStream;
 
 class CompactionManager {
 

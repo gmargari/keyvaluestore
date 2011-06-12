@@ -1,9 +1,11 @@
 #include "Global.h"
 #include "DiskStore.h"
+#include "KVTDiskFile.h"
 #include "KVTDiskFileInputStream.h"
 
 #include <cstdlib>
 #include <cassert>
+#include <cstring>
 
 using namespace std;
 

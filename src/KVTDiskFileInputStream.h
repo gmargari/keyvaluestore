@@ -1,9 +1,9 @@
 #ifndef KVTDISKFILEINPUTSTREAM_H
 #define KVTDISKFILEINPUTSTREAM_H
 
-#include "Global.h"
 #include "KVTInputStream.h"
-#include "KVTDiskFile.h"
+
+class KVTDiskFile;
 
 class KVTDiskFileInputStream: public KVTInputStream {
 

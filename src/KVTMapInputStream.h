@@ -1,7 +1,6 @@
 #ifndef KVTMAPINPUTSTREAM_H
 #define KVTMAPINPUTSTREAM_H
 
-#include "Global.h"
 #include "KVTInputStream.h"
 #include "KVTMap.h"
 

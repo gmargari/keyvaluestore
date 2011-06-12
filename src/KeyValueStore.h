@@ -1,10 +1,11 @@
 #ifndef KEYVALUESTORE_H
 #define KEYVALUESTORE_H
 
-#include "Global.h"
-#include "MemStore.h"
-#include "DiskStore.h"
-#include "CompactionManager.h"
+#include <stdint.h>
+
+class MemStore;
+class DiskStore;
+class CompactionManager;
 
 class KeyValueStore {
 

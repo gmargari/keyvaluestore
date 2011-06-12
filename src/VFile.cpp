@@ -1,17 +1,18 @@
 #include "Global.h"
 #include "VFile.h"
+#include "Simulator.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <math.h>
 #include <sys/time.h>
-#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace std;
 #include <cstdio>

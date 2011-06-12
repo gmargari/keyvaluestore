@@ -1,8 +1,6 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#include "Global.h"
-
 #include <sys/time.h>
 #include <stdint.h>
 

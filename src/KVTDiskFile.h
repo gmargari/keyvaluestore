@@ -1,9 +1,10 @@
 #ifndef KVTDISKFILE_H
 #define KVTDISKFILE_H
 
-#include "Global.h"
-#include "VFile.h"
-#include "VFileIndex.h"
+#include <stdint.h>
+
+class VFile;
+class VFileIndex;
 
 class KVTDiskFile {
 

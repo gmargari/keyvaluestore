@@ -1,5 +1,6 @@
 #include "Global.h"
 #include "MemStore.h"
+#include "KVTMap.h"
 
 /*========================================================================
  *                               MemStore

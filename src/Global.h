@@ -1,8 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <stdint.h>
-
 // set debug level:
 //  0 - debugging disabled
 //  1 - light mode      (only assertions enabled)

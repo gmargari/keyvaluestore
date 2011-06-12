@@ -1,13 +1,16 @@
+#include "../Global.h"
 #include "../KVTMapInputStream.h"
+#include "../KVTDiskFile.h"
 #include "../KVTPriorityInputStream.h"
 #include "../KVTDiskFileInputStream.h"
-#include "../KVTDiskFileInputStream.h"
+#include "../KVTDiskFileOutputStream.h"
 #include "../CompactionManager.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#include <stdlib.h>
+#include <cstdlib>
+#include <sys/time.h>
 
 #define BUFSIZE 1000
 

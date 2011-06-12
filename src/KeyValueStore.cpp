@@ -1,5 +1,8 @@
 #include "Global.h"
 #include "KeyValueStore.h"
+#include "MemStore.h"
+#include "DiskStore.h"
+#include "CompactionManager.h"
 
 #include <cassert>
 

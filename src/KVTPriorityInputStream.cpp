@@ -1,6 +1,5 @@
 #include "Global.h"
 #include "KVTPriorityInputStream.h"
-#include "KVTInputStream.h"
 
 #include <cstdlib>
 #include <cstring>

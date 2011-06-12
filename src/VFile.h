@@ -1,11 +1,12 @@
 #ifndef FILESIM_H
 #define FILESIM_H
 
-#include "Global.h"
-#include "Simulator.h"
-
+#include <stdint.h>
 #include <vector>
 #include <string>
+#include <sys/time.h>
+
+class Simulator;
 
 using std::vector;
 

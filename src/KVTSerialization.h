@@ -1,8 +1,8 @@
 #ifndef KVTSERIALIZATION_H
 #define KVTSERIALIZATION_H
 
-#include "Global.h"
-#include <string.h>
+#include <cstring>
+#include <stdint.h>
 
 uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp);
 

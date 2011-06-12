@@ -1,8 +1,11 @@
+#include "../Global.h"
 #include "../KeyValueStore.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <cstring>
+#include <sys/time.h>
 
 #define BUFSIZE 1000
 

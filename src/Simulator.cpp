@@ -1,8 +1,8 @@
+#include "Global.h"
 #include "Simulator.h"
+
 #include <assert.h>
 #include <sys/time.h>
-
-// using namespace std;
 
 /*-------------------------------------------------------
  *                      Simulator

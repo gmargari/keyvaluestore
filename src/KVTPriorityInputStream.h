@@ -1,7 +1,6 @@
 #ifndef KVTPRIORITYINPUTSTREAM_H
 #define KVTPRIORITYINPUTSTREAM_H
 
-#include "Global.h"
 #include "KVTInputStream.h"
 
 #include <vector>

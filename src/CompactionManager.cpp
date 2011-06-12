@@ -1,4 +1,6 @@
 #include "Global.h"
+#include "MemStore.h"
+#include "DiskStore.h"
 #include "CompactionManager.h"
 #include "KVTMapInputStream.h"
 #include "KVTDiskFile.h"

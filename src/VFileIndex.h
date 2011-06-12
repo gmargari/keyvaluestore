@@ -1,7 +1,6 @@
 #ifndef VFILEINDEX_H
 #define VFILEINDEX_H
 
-#include "Global.h"
 #include <cstdio>
 #include <cstring>
 #include <map>

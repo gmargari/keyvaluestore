@@ -1,3 +1,4 @@
+#include "../Global.h"
 #include "../VFileIndex.h"
 
 #include <sys/time.h>
@@ -16,7 +17,6 @@ void randstr(char *s, const int len) {
 
     s[len] = '\0';
 }
-
 
 int main(void)
 {

@@ -1,9 +1,13 @@
 #ifndef KVTDISKFILEOUTPUTSTREAM_H
 #define KVTDISKFILEOUTPUTSTREAM_H
 
-#include "Global.h"
 #include "KVTOutputStream.h"
-#include "KVTDiskFile.h"
+
+#include <cstdio>
+
+class KVTDiskFile;
+class VFile;
+class VFileIndex;
 
 class KVTDiskFileOutputStream: public KVTOutputStream {
 

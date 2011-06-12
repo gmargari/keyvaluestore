@@ -1,8 +1,9 @@
 #ifndef MEMSTORE_H
 #define MEMSTORE_H
 
-#include "Global.h"
-#include "KVTMap.h"
+#include <stdint.h>
+
+class KVTMap;
 
 class MemStore {
 
