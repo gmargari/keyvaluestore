@@ -33,10 +33,15 @@ protected:
     void sanity_check();
 
     KVTDiskFile *m_kvtdiskfile;
-    char       	*m_buf;
+    char        *m_buf;
     uint32_t     m_buf_size;
     uint32_t     m_bytes_in_buf;
     uint32_t     m_bytes_used;
+
+    char        *m_start_key;
+    char        *m_end_key;
+    bool         m_start_incl;
+    bool         m_end_incl;
 };
 
 #endif

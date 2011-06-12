@@ -1,7 +1,9 @@
 #include "Global.h"
 #include "DiskStore.h"
+#include "KVTDiskFileInputStream.h"
 
 #include <cstdlib>
+#include <cassert>
 
 using namespace std;
 
@@ -30,9 +32,35 @@ DiskStore::~DiskStore()
 /*========================================================================
  *                                 get
  *========================================================================*/
-bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
+bool DiskStore::get(const char *key, char **value, uint64_t *timestamp)
 {
-    // TODO: implement this
+    vector<KVTDiskFile *>::iterator iter;
+    KVTDiskFileInputStream *istream;
+    const char *k, *constvalue;
+
+    // NOTE: TODO: every new file created by Compaction Manager should be inserted
+    // at the *front* of the vector, so the first file in vector is the most
+    // recent, the second is the second most recent etc.
+
+    // TODO: have a protected vector of istreams, one for each kvtfile,
+    // and use them to search. or else, create functions istream->set_vfile(),
+    // istream->set_vfile_index() so we can create one input stream (with
+    // its internal buffer) and use it to search all files.
+
+    // search disk files in priority order. return the first value found,
+    // since this is the most recent value
+    for (iter = m_diskfiles.begin(); iter != m_diskfiles.end(); iter++) {
+        istream = new KVTDiskFileInputStream(*iter);
+        istream->set_key_range(key, key, true, true);
+        if (istream->read(&k, &constvalue, timestamp)) {
+            assert(strcmp(k, key) == 0);
+            *value = strdup(constvalue); // copy value
+            delete istream;
+            return true;
+        }
+        delete istream;
+    }
+
     *value = NULL;
     *timestamp = 0;
     return false;
@@ -41,7 +69,7 @@ bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
 /*=======================================================================*
  *                                  get
  *=======================================================================*/
-bool DiskStore::get(const char *key, uint64_t timestamp, const char **value)
+bool DiskStore::get(const char *key, uint64_t timestamp, char **value)
 {
     uint64_t ts;
 
@@ -52,7 +80,6 @@ bool DiskStore::get(const char *key, uint64_t timestamp, const char **value)
         return false;
     }
 }
-
 
 /*========================================================================
  *                               num_keys

@@ -8,7 +8,7 @@
 
 void randstr(char *s, const int len) {
     static const char alphanum[] =
-        "0123456789"
+//         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
     int size = sizeof(alphanum);
@@ -23,31 +23,73 @@ void randstr(char *s, const int len) {
 int main(void)
 {
     KeyValueStore kvstore;
-    char *key, *value;
+    char *key, *value, *value2;
     struct timeval tv;
     int num_keys, maxkeysize, maxvaluesize;
+    uint64_t timestamp;
 
     gettimeofday(&tv, NULL);
-// tv.tv_usec = 104845;
+// tv.tv_usec = 923306;
     printf("seed: %ld\n", tv.tv_usec);
 
     srand(tv.tv_usec);
-    num_keys = rand() % 50000 + 2000;
-// num_keys = 3;
-    maxkeysize = 10;
-    maxvaluesize = 1000;
-// maxkeysize = 3;
-// maxvaluesize = 3;
+    num_keys = rand() % 30000 + 1000;
+    maxkeysize = 20;
+    maxvaluesize = 20;
+// num_keys = 2000;
+// maxkeysize = 10;
+// maxvaluesize = 10;
+    kvstore.set_memstore_maxsize(50000);
+    printf("memstore size: %Ld\n", kvstore.get_memstore_maxsize());
     printf("num keys to be inserted: %d\n", num_keys);
+    printf("maxkeysize: %d\n", maxkeysize);
+    printf("maxvaluesize: %d\n", maxvaluesize);
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
 
+    //================================================================
+    // insert values
+    //================================================================
+    printf("Insert key-values\n");
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
+        sprintf(key, "%s%d", key, i); // create unique keys, so no values are overwritten
         kvstore.put(key, value);
+        if (i % 100 == 0)
+            dbg_i(i);
     }
+
+    printf("\nSearch all keys\n");
+
+    //================================================================
+    // search values (most of them should be on disk, latest should
+    // be on memory)
+    //================================================================
+    srand(tv.tv_usec);
+    rand(); // to get the same sequence as above
+
+    for (int i = 0; i < num_keys; i++) {
+        randstr(key, (int)(rand() % maxkeysize) + 1);
+        randstr(value, (int)(rand() % maxvaluesize) + 1);
+        sprintf(key, "%s%d", key, i);
+        if (kvstore.get(key, &value2, &timestamp) == false) {
+            printf("Key [%s] was not found!\n", key);
+            return EXIT_FAILURE;
+        }
+        assert(strcmp(value, value2) == 0);
+        free(const_cast<char*>(value2)); // since value returned from get is always a copy...
+        if (i % 100 == 0)
+            dbg_i(i);
+    }
+
+    assert(kvstore.num_mem_keys() + kvstore.num_disk_keys() == num_keys);  // since keys are unique
+    printf("Memstore keys:  %Ld\n", kvstore.num_mem_keys());
+    printf("Diskstore keys: %Ld\n", kvstore.num_disk_keys());
+    printf("Memstore size:  %Ld\n", kvstore.mem_size());
+    printf("Diskstore size: %Ld\n", kvstore.disk_size());
+
     free(key);
     free(value);
 

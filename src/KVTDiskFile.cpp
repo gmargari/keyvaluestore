@@ -1,5 +1,6 @@
 #include "Global.h"
 #include "KVTDiskFile.h"
+#include "KVTSerialization.h"
 
 /*========================================================================
  *                               KVTDiskFile

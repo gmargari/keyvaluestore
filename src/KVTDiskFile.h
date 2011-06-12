@@ -4,7 +4,6 @@
 #include "Global.h"
 #include "VFile.h"
 #include "VFileIndex.h"
-#include "KVTSerialization.h"
 
 class KVTDiskFile {
 

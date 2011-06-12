@@ -26,24 +26,24 @@ public:
     ~DiskStore();
 
     /**
-     * get the value for a specific key
+     * get the (copy of) value for a specific key.
      *
      * @param key (in) key to be searched
      * @param value (out) value corresponding to the searched key
      * @param timestamp (out) timestamp of insertion
      * @return true if key was found, false if not
      */
-    bool get(const char *key, const char **value, uint64_t *timestamp);
+    bool get(const char *key, char **value, uint64_t *timestamp);
 
     /**
-     * get the value for a specific <key, timestamp> pair
+     * get the (copy of) value for a specific <key, timestamp> pair.
      *
      * @param key (in) key to be searched
      * @param timestamp (in) timestamp of insertion
      * @param value (out) value corresponding to the searched <key, timestamp>
      * @return true if <key, timestamp> was found, false if not
      */
-    bool get(const char *key, uint64_t timestamp, const char **value);
+    bool get(const char *key, uint64_t timestamp, char **value);
 
     /**
      * number of <key, value> pairs in diskstore

@@ -53,9 +53,25 @@ bool MemStore::put(const char *key, const char *value)
 /*========================================================================
  *                                 get
  *========================================================================*/
-bool MemStore::get(const char *key, const char **value, uint64_t *timestamp)
+bool MemStore::get(const char *key, char **value, uint64_t *timestamp)
 {
-    return m_kvtmap->get(key, value, timestamp);
+    const char *constvalue;
+
+    if (m_kvtmap->get(key, &constvalue, timestamp)) {
+        *value = strdup(constvalue); // copy value
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*=======================================================================*
+ *                                  get
+ *=======================================================================*/
+bool MemStore::get(const char *key, uint64_t timestamp, char **value)
+{
+    return get(key, timestamp, value);
 }
 
 /*========================================================================
