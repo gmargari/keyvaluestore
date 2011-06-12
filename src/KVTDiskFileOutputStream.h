@@ -33,7 +33,9 @@ public:
     bool write(const char *key, const char *value, uint64_t timestamp);
 
     /**
-     * flush output stream buffer
+     * flush output stream buffer. user must call this function after
+     * writing all data in order to ensure data durability and to properly
+     * create index of underlying vfile.
      */
     void flush();
 
@@ -51,7 +53,9 @@ protected:
     uint32_t     m_bytes_in_buf;  // total bytes in byffer
     uint32_t     m_bytes_used;    // bytes already used from buffer
 
-    off_t        m_lastoffs;      // last offset inserted in index
+    char        *m_last_key;      // last key written to disk
+    off_t        m_last_offs;     // offset of last key written to disk
+    off_t        m_last_idx_offs; // last offset inserted in index
 };
 
 #endif
