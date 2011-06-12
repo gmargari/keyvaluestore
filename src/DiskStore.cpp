@@ -32,8 +32,27 @@ DiskStore::~DiskStore()
  *========================================================================*/
 bool DiskStore::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    return false; // TODO: implement this
+    // TODO: implement this
+    *value = NULL;
+    *timestamp = 0;
+    return false;
 }
+
+/*=======================================================================*
+ *                                  get
+ *=======================================================================*/
+bool DiskStore::get(const char *key, uint64_t timestamp, const char **value)
+{
+    uint64_t ts;
+
+    if (get(key, value, &ts) && ts == timestamp) {
+        return true;
+    } else {
+        *value = NULL;
+        return false;
+    }
+}
+
 
 /*========================================================================
  *                               num_keys

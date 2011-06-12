@@ -11,10 +11,9 @@
 KeyValueStore::KeyValueStore()
 {
     m_memstore = new MemStore();
-    m_memstore->set_maxsize(1000000);
     m_diskstore = new DiskStore();
     m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
-
+    set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);
     check_parameters();
 }
 
@@ -26,6 +25,22 @@ KeyValueStore::~KeyValueStore()
     delete m_memstore;
     delete m_diskstore;
     delete m_compactionmanager;
+}
+
+/*========================================================================
+ *                         set_memstore_maxsize
+ *========================================================================*/
+void KeyValueStore::set_memstore_maxsize(uint64_t maxsize)
+{
+    m_memstore->set_maxsize(maxsize);
+}
+
+/*========================================================================
+ *                         set_memstore_maxsize
+ *========================================================================*/
+uint64_t KeyValueStore::get_memstore_maxsize()
+{
+    return m_memstore->get_maxsize();
 }
 
 /*========================================================================

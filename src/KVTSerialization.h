@@ -3,7 +3,7 @@
 
 #include "Global.h"
 
-uint32_t serialize_len(const char *key, const char *value, uint64_t timestamp);
+uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp);
 
 bool     serialize(char *buf, uint32_t buflen, const char *key, const char *value, uint64_t timestamp, uint32_t *len);
 

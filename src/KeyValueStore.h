@@ -21,6 +21,17 @@ public:
     ~KeyValueStore();
 
     /**
+     * set maximum byte size of memstore. when this limit is reached,
+     * compaction manager is called to flush some bytes from memory to disk.
+     */
+    void set_memstore_maxsize(uint64_t maxsize);
+
+    /**
+     * get maximum byte size of memstore
+     */
+    uint64_t get_memstore_maxsize();
+
+    /**
      * insert a <key, value, timestamp> tuple into store. copies of the key and
      * value are created and inserted into the store.
      *

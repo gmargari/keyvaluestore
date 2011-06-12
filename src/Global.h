@@ -11,8 +11,7 @@
 #define DBGLVL 2
 
 // default values
-#define DEFAULT_MEMSTORE_SIZE      1073741824LL // 1GB
-
+#define DEFAULT_MEMSTORE_SIZE                       1048576 // 1MB
 #define READBUFSIZE                ((size_t)(64*1024*1024))
 #define MERGEBUFSIZE               ((size_t)(64*1024*1024))
 #define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB
@@ -123,7 +122,7 @@
     )
 
 /* print code point (e.g. in order to see after which point does an error occur) */
-#define dbg()             STMT( if (DBGLVL) { printf("%s %s => %s:%d\n", DEBUG_PROMPT, __PRETTY_FUNCTION__, __FILE__, __LINE__); fflush(stdout); } )
+#define dbg()             STMT( if (DBGLVL) { printf("%s %s => %s:%d\n", DEBUG_PROMPT, __FUNCTION__, __FILE__, __LINE__); fflush(stdout); } )
 
 
 #endif

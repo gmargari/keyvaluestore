@@ -55,6 +55,9 @@ public:
      */
     void clear();
 
+    // TODO: delete
+    void print();
+
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {
             return strcmp(a, b) < 0;

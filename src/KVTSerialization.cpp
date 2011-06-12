@@ -27,9 +27,9 @@ bool str_is_alnum(const char *str, int len)
 /*=======================================================================*
  *                              serialize_len
  *=======================================================================*/
-uint32_t serialize_len(const char *key, const char *value, uint64_t timestamp)
+uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp)
 {
-    return (2 * sizeof(uint32_t) + sizeof(timestamp) + strlen(key) + 1 + strlen(value) + 1);
+    return (2 * sizeof(uint32_t) + sizeof(timestamp) + keylen + 1 + valuelen + 1);
 }
 
 /*=======================================================================*
@@ -49,7 +49,7 @@ bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, u
         assert(str_is_alnum(value, valuelen));
     }
 
-    if ((*len = serialize_len(key, value, timestamp)) > buflen) {
+    if ((*len = serialize_len(strlen(key), strlen(value), timestamp)) > buflen) {
         return false;
     }
 
@@ -94,7 +94,7 @@ bool deserialize(const char *buf, uint32_t buflen, const char **key, const char 
     DECODE_NUM(buf, valuelen, used);
     DECODE_NUM(buf, *timestamp, used);
 
-    if (buflen < sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) + keylen + valuelen + 2) {
+    if (buflen < serialize_len(keylen, valuelen, *timestamp)) {
         return false;
     }
 
@@ -110,7 +110,7 @@ bool deserialize(const char *buf, uint32_t buflen, const char **key, const char 
         tmpvalue = tmpkey + keylen + 1;
     }
 
-    *len = sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) + keylen + valuelen + 2;
+    *len = serialize_len(keylen, valuelen, *timestamp);
     *key = tmpkey;
     *value = tmpvalue;
 

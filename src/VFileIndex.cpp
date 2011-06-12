@@ -107,6 +107,17 @@ void VFileIndex::clear()
 }
 
 /*=======================================================================*
+ *                                  print
+ *=======================================================================*/
+void VFileIndex::print()
+{
+    for (termoffsmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+        printf("[%s] -> %Ld\n", iter->first, iter->second);
+    }
+    printf("m_vfilesize: %Ld\n", m_vfilesize);
+}
+
+/*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
 void VFileIndex::sanity_check()
