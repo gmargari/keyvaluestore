@@ -16,9 +16,8 @@ KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file)
 {
     m_kvtdiskfile = file;
     assert(file->m_vfile_index);
-    m_buf_capacity = SCANNERBUFSIZE;
-    m_buf = (char *)malloc(m_buf_capacity);
-    set_buf_size_min();
+    m_buf_size = SCANNERBUFSIZE;
+    m_buf = (char *)malloc(m_buf_size);
     set_key_range(NULL, NULL, true, true);
 }
 
@@ -61,12 +60,11 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
             return;
         }
 
+        // read in buffer all bytes between 'off1' and 'off2'. check all tuples
+        // in buffer until we find 'start_key' or the next greater term.
         m_kvtdiskfile->m_vfile->fs_seek(off1, SEEK_SET);
-
-        // check all tuples in buffer, until we find 'start_key' or the next
-        // greater term.
+        m_bytes_in_buf = m_kvtdiskfile->m_vfile->fs_read(m_buf, off2 - off1);
         m_bytes_used = 0;
-        m_bytes_in_buf = m_kvtdiskfile->m_vfile->fs_read(m_buf, m_buf_size);
         while (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, &key, &value, &timestamp, &len, false)) {
 
             m_bytes_used += len;
@@ -89,7 +87,6 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
 
         assert(m_kvtdiskfile->m_vfile->fs_tell() >= off1);
         assert(m_kvtdiskfile->m_vfile->fs_tell() <= off1 + MAX_INDEX_DIST);
-
     } else {
         m_kvtdiskfile->m_vfile->fs_rewind();
     }
@@ -170,50 +167,6 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
     *timestamp = 0;
 
     return false;
-}
-
-/*=======================================================================*
- *                            set_buf_size_min
- *=======================================================================*/
-void KVTDiskFileInputStream::set_buf_size_min()
-{
-    m_buf_size = MAX_INDEX_DIST;
-}
-
-/*=======================================================================*
- *                            set_buf_size_max
- *=======================================================================*/
-void KVTDiskFileInputStream::set_buf_size_max()
-{
-    m_buf_size = m_buf_capacity;
-}
-
-/*=======================================================================*
- *                             set_buf_size
- *=======================================================================*/
-void KVTDiskFileInputStream::set_buf_size(uint32_t size)
-{
-    if (size <= m_buf_capacity) {
-        m_buf_size = size;
-    } else {
-        assert("size > m_buf_capacity" && 0);
-    }
-}
-
-/*=======================================================================*
- *                             get_buf_size
- *=======================================================================*/
-uint32_t KVTDiskFileInputStream::get_buf_size()
-{
-    return m_buf_size;
-}
-
-/*=======================================================================*
- *                           get_buf_capacity
- *=======================================================================*/
-uint32_t KVTDiskFileInputStream::get_buf_capacity()
-{
-    return m_buf_capacity;
 }
 
 /*=======================================================================*
