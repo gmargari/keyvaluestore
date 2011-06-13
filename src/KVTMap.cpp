@@ -31,6 +31,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     const char *cpkey, *f_key;
     char *cpvalue, *f_value;
     uint64_t f_timestamp;
+    size_t strlen_key, strlen_value;
     kvtpair new_pair;
     kvtmap::iterator f;
 
@@ -38,7 +39,9 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     assert(key);
     assert(value);
 
-    if (strlen(key) + 1 > MAX_KVTSIZE || strlen(value) + 1 > MAX_KVTSIZE) {
+    strlen_key = strlen(key);
+    strlen_value = strlen(value);
+    if (strlen_key + 1 > MAX_KVTSIZE || strlen_value + 1 > MAX_KVTSIZE) {
         printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVTSIZE);
         assert(0);
         return false;
@@ -57,7 +60,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
         cpkey = key;
     } else {
         cpkey = strdup(key);
-        m_size += strlen(cpkey) + 1;
+        m_size += strlen_key + 1;
         m_keys++;
     }
 
@@ -67,7 +70,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
 
     new_pair.first = cpvalue;
     new_pair.second = timestamp;
-    m_size += strlen(cpvalue) + 1 + sizeof(new_pair);
+    m_size += strlen_value + 1 + sizeof(new_pair);
     m_map[cpkey] = new_pair;
 
     sanity_check();
