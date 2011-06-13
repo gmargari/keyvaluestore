@@ -19,7 +19,8 @@ public:
 
     /**
      * return only pairs with keys between 'start_key' (inclusive) and 'end_key'
-     * (exclusive), i.e. all keys K where: start_key <= K < end_key
+     * (exclusive), i.e. all keys K where: start_key <= K < end_key.
+     * 'start_key' and 'end_key' are not copied.
      */
     virtual void set_key_range(const char *start_key, const char *end_key) = 0;
 

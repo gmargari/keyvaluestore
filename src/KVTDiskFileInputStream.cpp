@@ -16,11 +16,9 @@ KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file)
 {
     m_kvtdiskfile = file;
     assert(file->m_vfile_index);
-
     m_buf_size = SCANNERBUFSIZE;
     m_buf = (char *)malloc(m_buf_size);
     set_key_range(NULL, NULL, true, true);
-    reset();
 }
 
 /*========================================================================
@@ -29,14 +27,6 @@ KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file)
 KVTDiskFileInputStream::~KVTDiskFileInputStream()
 {
     free(m_buf);
-
-    if (m_start_key) {
-        free(m_start_key);
-    }
-
-    if (m_end_key) {
-        free(m_end_key);
-    }
 }
 
 /*========================================================================
@@ -50,20 +40,11 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
     int cmp;
     bool ret;
 
-    if (start_key) {
-        m_start_key = strdup(start_key);
-    } else {
-        m_start_key = NULL;
-    }
-
-    if (end_key) {
-        m_end_key = strdup(end_key);
-    } else {
-        m_end_key = NULL;
-    }
-
+    m_start_key = start_key;
+    m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
+    reset();
 
     if (m_start_key) {
 

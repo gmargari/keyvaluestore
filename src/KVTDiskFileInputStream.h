@@ -38,8 +38,8 @@ protected:
     uint32_t     m_bytes_in_buf;
     uint32_t     m_bytes_used;
 
-    char        *m_start_key;
-    char        *m_end_key;
+    const char  *m_start_key;
+    const char  *m_end_key;
     bool         m_start_incl;
     bool         m_end_incl;
 };
