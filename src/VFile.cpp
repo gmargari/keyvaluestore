@@ -72,7 +72,9 @@ bool VFile::fs_open(char *filename, bool open_existing)
     fname = strdup(filename);
     assert(fname);
 
-    dbg_s(fname);
+    if (DBGLVL > 0) {
+        printf("[DEBUG]  %s [+]\n", fname);
+    }
 
     if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
         if (Opened) {
@@ -396,6 +398,11 @@ void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and 
     } else {
         assert(Names.size() == Filedescs.size());
         for (int i = 0; i < (int)Names.size(); i++) {
+
+            if (DBGLVL > 0) {
+                printf("[DEBUG]  %s [-]\n", Names[i]);
+            }
+
             if (remove(Names[i]) == -1) {
                 printf("[ERROR] %s(): remove('%s')\n", __FUNCTION__, Names[i]);
                 perror("");

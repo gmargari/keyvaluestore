@@ -52,8 +52,12 @@ bool KVTDiskFile::open_existing(char *filename)
  *=======================================================================*/
 bool KVTDiskFile::open_unique()
 {
+    static int n = 0;
+    static char filename[100];
+
     m_vfile_numkeys = 0;
-    return (m_vfile->fs_open_unique());
+    sprintf(filename, "%s%s%04d", TMPFILEDIR, TMPFILEPREFIX, n++);
+    return m_vfile->fs_open(filename);
 }
 
 /*=======================================================================*

@@ -32,17 +32,17 @@ int main(void)
     uint64_t timestamp;
 
     gettimeofday(&tv, NULL);
-// tv.tv_usec = 923306;
+// tv.tv_usec = 118817;
     printf("seed: %ld\n", tv.tv_usec);
 
     srand(tv.tv_usec);
-    num_keys = rand() % 30000 + 1000;
+    num_keys = rand() % 3000;
     maxkeysize = 20;
     maxvaluesize = 20;
-// num_keys = 2000;
+// num_keys = 700;
 // maxkeysize = 10;
 // maxvaluesize = 10;
-    kvstore.set_memstore_maxsize(50000);
+    kvstore.set_memstore_maxsize(5000);
     printf("memstore size: %Ld\n", kvstore.get_memstore_maxsize());
     printf("num keys to be inserted: %d\n", num_keys);
     printf("maxkeysize: %d\n", maxkeysize);
@@ -54,24 +54,25 @@ int main(void)
     //================================================================
     // insert values
     //================================================================
-    printf("Insert key-values\n");
+
+    printf("===== Insert key-values =====\n");
+
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
         sprintf(key, "%s%d", key, i); // create unique keys, so no values are overwritten
         kvstore.put(key, value);
-        if (i % 100 == 0)
-            dbg_i(i);
+        if (i && i % 100 == 0)
+            printf("i = %d\n", i);
     }
-
-    printf("\nSearch all keys\n");
-
     //================================================================
     // search values (most of them should be on disk, latest should
     // be on memory)
     //================================================================
     srand(tv.tv_usec);
     rand(); // to get the same sequence as above
+
+    printf("\n===== Search all keys =====\n");
 
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
@@ -83,8 +84,8 @@ int main(void)
         }
         assert(strcmp(value, value2) == 0);
         free(const_cast<char*>(value2)); // since value returned from get is always a copy...
-        if (i % 100 == 0)
-            dbg_i(i);
+        if (i && i % 100 == 0)
+            printf("i = %d\n", i);
     }
 
     assert(kvstore.num_mem_keys() + kvstore.num_disk_keys() == num_keys);  // since keys are unique
