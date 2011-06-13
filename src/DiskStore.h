@@ -7,6 +7,7 @@
 using std::vector;
 
 class KVTDiskFile;
+class KVTDiskFileInputStream;
 
 class DiskStore {
 
@@ -62,7 +63,8 @@ protected:
 
     void sanity_check();
 
-    vector<KVTDiskFile *> m_diskfiles;
+    vector<KVTDiskFile *>               m_disk_files;
+    vector<KVTDiskFileInputStream *>    m_disk_istreams;
 };
 
 #endif
