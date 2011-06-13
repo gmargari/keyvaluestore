@@ -72,14 +72,11 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
             // found 'start_key'
             if ((cmp = strcmp(key, start_key)) == 0) {
                 if (m_start_incl == true) {
-
-                    // must seek file at the beginning of 'start_key' tuple
+                    // must seek file back at the beginning of 'start_key' tuple
                     assert(m_bytes_used >= serialize_len(strlen(key), strlen(value), timestamp));
                     m_bytes_used -= serialize_len(strlen(key), strlen(value), timestamp);
-                    break;
-                } else {
-                    break; // ok, we're at first term greater then 'start_key'
                 }
+                break;
             } else if (cmp > 0) {
                 break; // ok, we're at first term greater then 'start_key'
             }
