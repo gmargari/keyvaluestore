@@ -57,7 +57,12 @@ bool KVTDiskFile::open_unique()
 
     m_vfile_numkeys = 0;
     sprintf(filename, "%s%s%04d", TMPFILEDIR, TMPFILEPREFIX, n++);
-    return m_vfile->fs_open(filename);
+    if (m_vfile->fs_open(filename)) {
+        m_vfile->fs_truncate(0); // in case file already existed
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*=======================================================================*

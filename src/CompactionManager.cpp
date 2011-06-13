@@ -72,6 +72,11 @@ void CompactionManager::flush_memstore(void)
      */
     if (m_diskstore->m_disk_files.size() > 3) {
 
+        // set buffer size to maximum, to improve merge performance
+        for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
+            m_diskstore->m_disk_istreams[i]->set_buf_size_max();
+        }
+
         // create vector of all input streams that will be merged
         for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
             disk_istreams.push_back(m_diskstore->m_disk_istreams[i]);
@@ -82,6 +87,11 @@ void CompactionManager::flush_memstore(void)
         disk_file->open_unique();
         disk_ostream = new KVTDiskFileOutputStream(disk_file);
         merge_streams(disk_istreams, disk_ostream);
+
+        // restore buffer size, to improve search (get) performance
+        for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
+            m_diskstore->m_disk_istreams[i]->set_buf_size_min();
+        }
 
         // delete all files merged, as well as their input streams
         for (int i = 0; i < (int)m_diskstore->m_disk_files.size(); i++) {

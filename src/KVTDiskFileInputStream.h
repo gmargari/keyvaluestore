@@ -28,12 +28,41 @@ public:
 
     void reset();
 
+    /**
+     * set buffer size to minimum (this is the usual case, used for searching
+     * <key, values> tuples on disk. typically, this sets buffer size to
+     * MAX_INDEX_DIST).
+     */
+    void set_buf_size_min();
+
+    /**
+     * set buffer size to maximum (used for merging disk files. this sets
+     * buffer size to buffer capacity -typically, SCANNERBUFSIZE).
+     */
+    void set_buf_size_max();
+
+    /**
+     * set buffer size to this size
+     */
+    void set_buf_size(uint32_t size);
+
+    /**
+     * get current buffer size
+     */
+    uint32_t get_buf_size();
+
+    /**
+     * get buffer capacity
+     */
+    uint32_t get_buf_capacity();
+
 protected:
 
     void sanity_check();
 
     KVTDiskFile *m_kvtdiskfile;
     char        *m_buf;
+    uint32_t     m_buf_capacity;
     uint32_t     m_buf_size;
     uint32_t     m_bytes_in_buf;
     uint32_t     m_bytes_used;
