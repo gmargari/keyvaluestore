@@ -120,11 +120,8 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
-        if (m_end_key) {
-            if ((cmp = strcmp(*key, m_end_key)) > 0
-                  || (cmp == 0 && m_end_incl == false)) {
-                return false;
-            }
+        if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
+            return false;
         }
 
         m_bytes_used += len;
@@ -146,11 +143,8 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
     if (deserialize(m_buf, m_bytes_in_buf, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
-        if (m_end_key) {
-            if ((cmp = strcmp(*key, m_end_key)) > 0
-                || (cmp == 0 && m_end_incl == false)) {
-                return false;
-            }
+        if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
+            return false;
         }
 
         m_bytes_used += len;
