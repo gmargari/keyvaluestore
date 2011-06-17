@@ -55,7 +55,6 @@ protected:
     char       	*m_buf;           // buffer used to serialize entries
     uint32_t     m_buf_size;      // buffer size
     uint32_t     m_bytes_in_buf;  // total bytes in byffer
-    uint32_t     m_bytes_used;    // bytes already used from buffer
 
     char        *m_last_key;      // last key written to disk
     off_t        m_last_offs;     // offset of last key written to disk

@@ -77,7 +77,6 @@ void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutp
 void CompactionManager::memstore_flush_to_new_diskfile()
 {
     KVTDiskFile *disk_file;
-    KVTMapInputStream *map_istream;
     KVTDiskFileInputStream *disk_istream;
     KVTDiskFileOutputStream *disk_ostream;
 
