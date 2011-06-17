@@ -2,18 +2,34 @@
 #include "KeyValueStore.h"
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "CompactionManager.h"
+#include "ImmCompactionManager.h"
+#include "LogCompactionManager.h"
+#include "GeomCompactionManager.h"
+#include "UrfCompactionManager.h"
 
 #include <cassert>
 
 /*========================================================================
  *                            KeyValueStore
  *========================================================================*/
-KeyValueStore::KeyValueStore()
+KeyValueStore::KeyValueStore(cm_type type)
 {
     m_memstore = new MemStore();
     m_diskstore = new DiskStore();
-    m_compactionmanager = new CompactionManager(m_memstore, m_diskstore);
+    switch (type) {
+        case KeyValueStore::IMM_CM:
+            m_compactionmanager = new ImmCompactionManager(m_memstore, m_diskstore);
+            break;
+        case KeyValueStore::GEOM_CM:
+            m_compactionmanager = new GeomCompactionManager(m_memstore, m_diskstore);
+            break;
+        case KeyValueStore::LOG_CM:
+            m_compactionmanager = new LogCompactionManager(m_memstore, m_diskstore);
+            break;
+        case KeyValueStore::URF_CM:
+            m_compactionmanager = new UrfCompactionManager(m_memstore, m_diskstore);
+            break;
+    }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);
     check_parameters();
 }
@@ -50,7 +66,7 @@ uint64_t KeyValueStore::get_memstore_maxsize()
 bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
 {
     if (m_memstore->is_full()) {
-        m_compactionmanager->flush_memstore();
+        m_compactionmanager->flush_bytes();
     }
 
     return m_memstore->put(key, value, timestamp);
@@ -62,7 +78,7 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
 bool KeyValueStore::put(const char *key, const char *value)
 {
     if (m_memstore->is_full()) {
-        m_compactionmanager->flush_memstore();
+        m_compactionmanager->flush_bytes();
     }
 
     return m_memstore->put(key, value);

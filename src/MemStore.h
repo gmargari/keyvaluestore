@@ -8,6 +8,10 @@ class KVTMap;
 class MemStore {
 
 friend class CompactionManager;
+friend class ImmCompactionManager;
+friend class GeomCompactionManager;
+friend class LogCompactionManager;
+friend class UrfCompactionManager;
 
 public:
 

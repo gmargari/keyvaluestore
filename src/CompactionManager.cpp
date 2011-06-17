@@ -26,85 +26,6 @@ CompactionManager::~CompactionManager()
 }
 
 /*========================================================================
- *                            flush_memstore
- *========================================================================*/
-void CompactionManager::flush_memstore(void)
-{
-    KVTDiskFile *disk_file;
-    KVTMapInputStream *map_istream;
-    KVTDiskFileInputStream *disk_istream;
-    KVTDiskFileOutputStream *disk_ostream;
-    vector<KVTInputStream *> disk_istreams;
-
-    // -------------------------------- NOTE ----------------------------------
-    // every new file created by Compaction Manager should be inserted
-    // at the *back* of the vector, so the last file in vector is the most
-    // recent one, and the first is the oldest one.
-    // the same should be done accordingly for their respective input streams
-    // -------------------------------- NOTE ----------------------------------
-
-    sanity_check();
-
-    /*
-     * first, flush memstore to a new file on disk
-     */
-
-    // create an input stream for memstore
-    map_istream = new KVTMapInputStream(m_memstore->m_kvtmap);
-
-    // write memstore to a new file on disk using streams, clear memstore
-    disk_file = new KVTDiskFile;
-    disk_file->open_unique();
-    disk_ostream = new KVTDiskFileOutputStream(disk_file);
-    copy_stream(map_istream, disk_ostream); // no need to use copy_stream_unique_keys() since map keys are unique
-    m_memstore->clear();
-
-    // add at diskstore new disk file & new input stream for it
-    m_diskstore->m_disk_files.push_back(disk_file);
-    disk_istream = new KVTDiskFileInputStream(m_diskstore->m_disk_files.back());
-    m_diskstore->m_disk_istreams.push_back(disk_istream);
-
-    delete disk_ostream;
-    delete map_istream;
-
-    /*
-     * if we need to merge some disk files, merge them
-     */
-    if (m_diskstore->m_disk_files.size() > 3) {
-
-        // create vector of all input streams that will be merged
-        for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
-            disk_istreams.push_back(m_diskstore->m_disk_istreams[i]);
-        }
-
-        // merge input streams, writing output to a new file
-        disk_file = new KVTDiskFile;
-        disk_file->open_unique();
-        disk_ostream = new KVTDiskFileOutputStream(disk_file);
-        merge_streams(disk_istreams, disk_ostream);
-
-        // delete all files merged, as well as their input streams
-        for (int i = 0; i < (int)m_diskstore->m_disk_files.size(); i++) {
-            m_diskstore->m_disk_files[i]->delete_from_disk();
-            delete m_diskstore->m_disk_files[i];
-            delete m_diskstore->m_disk_istreams[i];
-        }
-        m_diskstore->m_disk_files.clear();
-        m_diskstore->m_disk_istreams.clear();
-
-        // add new file to (currently empty) set of disk files
-        m_diskstore->m_disk_files.push_back(disk_file);
-        disk_istream = new KVTDiskFileInputStream(m_diskstore->m_disk_files.back());
-        m_diskstore->m_disk_istreams.push_back(disk_istream);
-
-        // free memory
-        delete disk_ostream;
-    }
-
-    sanity_check();
-}
-
-/*========================================================================
  *                             copy_stream
  *========================================================================*/
 void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *ostream)
@@ -149,12 +70,41 @@ void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutp
     delete istream_heap;
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
-void CompactionManager::sanity_check()
-{
-    return_if_dbglvl_lt_2();
 
-    assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
+/*========================================================================
+ *                    memstore_flush_to_new_diskfile
+ *========================================================================*/
+void CompactionManager::memstore_flush_to_new_diskfile()
+{
+    KVTDiskFile *disk_file;
+    KVTMapInputStream *map_istream;
+    KVTDiskFileInputStream *disk_istream;
+    KVTDiskFileOutputStream *disk_ostream;
+
+    // create an input stream for memstore
+    map_istream = new KVTMapInputStream(m_memstore->m_kvtmap);
+
+    // write memstore to a new file on disk using streams
+    disk_file = new KVTDiskFile;
+    disk_file->open_unique();
+    disk_ostream = new KVTDiskFileOutputStream(disk_file);
+    // (no need to use copy_stream_unique_keys() since map keys are unique)
+    copy_stream(map_istream, disk_ostream);
+
+    // append at diskstore files vector the new disk file & a new input stream for it
+    m_diskstore->m_disk_files.push_back(disk_file);
+    disk_istream = new KVTDiskFileInputStream(m_diskstore->m_disk_files.back());
+    m_diskstore->m_disk_istreams.push_back(disk_istream);
+
+    // delete map input stream and disk file output stream
+    delete map_istream;
+    delete disk_ostream;
+}
+
+/*========================================================================
+ *                           memstore_clear
+ *========================================================================*/
+void CompactionManager::memstore_clear()
+{
+    m_memstore->clear();
 }

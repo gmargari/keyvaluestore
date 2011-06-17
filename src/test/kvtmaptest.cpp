@@ -1,10 +1,9 @@
 #include "../Global.h"
 #include "../KVTMapInputStream.h"
 #include "../KVTDiskFile.h"
-#include "../KVTPriorityInputStream.h"
 #include "../KVTDiskFileInputStream.h"
 #include "../KVTDiskFileOutputStream.h"
-#include "../CompactionManager.h"
+#include "../KVTPriorityInputStream.h"
 
 #include <cstdio>
 #include <cstdlib>

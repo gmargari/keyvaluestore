@@ -12,9 +12,18 @@ class KeyValueStore {
 public:
 
     /**
+     * Memory flush & compaction manager algorithm:
+     * IMM_CM: Immediate Merge
+     * GEOM_CM: Geometric Partitioning
+     * LOG_CM: Logarithmic Merge
+     * URF_CM: Unified Range Flush
+     */
+    typedef enum { GEOM_CM, LOG_CM, URF_CM, IMM_CM } cm_type;
+
+    /**
      * constructor
      */
-    KeyValueStore();
+    KeyValueStore(cm_type type = KeyValueStore::IMM_CM);
 
     /**
      * destructor
