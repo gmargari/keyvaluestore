@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 class KVTMap;
+class KVTMapInputStream;
 
 class MemStore {
 
@@ -100,8 +101,9 @@ protected:
 
     int sanity_check();
 
-    KVTMap      *m_kvtmap;
-    uint64_t     m_maxsize;
+    KVTMap              *m_kvtmap;
+    uint64_t             m_maxsize;
+    KVTMapInputStream   *m_inputstream;
 };
 
 #endif

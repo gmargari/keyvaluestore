@@ -1,6 +1,7 @@
 #include "Global.h"
 #include "MemStore.h"
 #include "KVTMap.h"
+#include "KVTMapInputStream.h"
 
 /*========================================================================
  *                               MemStore
@@ -9,6 +10,7 @@ MemStore::MemStore()
 {
     m_maxsize = DEFAULT_MEMSTORE_SIZE;
     m_kvtmap = new KVTMap();
+    m_inputstream = new KVTMapInputStream(m_kvtmap);
 }
 
 /*========================================================================
@@ -16,6 +18,7 @@ MemStore::MemStore()
  *========================================================================*/
 MemStore::~MemStore()
 {
+    delete m_inputstream;
     delete m_kvtmap;
 }
 

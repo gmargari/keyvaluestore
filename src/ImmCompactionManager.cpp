@@ -35,7 +35,6 @@ ImmCompactionManager::~ImmCompactionManager()
 void ImmCompactionManager::flush_bytes(void)
 {
     KVTDiskFile *disk_file;
-    KVTMapInputStream *map_istream;
     KVTDiskFileInputStream *disk_istream;
     KVTDiskFileOutputStream *disk_ostream;
     vector<KVTInputStream *> disk_istreams;
@@ -65,13 +64,13 @@ void ImmCompactionManager::flush_bytes(void)
 
         // create vector of all input streams that will be merged
         for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
+            m_diskstore->m_disk_istreams[i]->reset();
             disk_istreams.push_back(m_diskstore->m_disk_istreams[i]);
         }
         if (MERGE_ONLINE == 1) {
-            // create an input stream for memstore and add it to vector of
-            // streams that will be merged
-            map_istream = new KVTMapInputStream(m_memstore->m_kvtmap);
-            disk_istreams.push_back(map_istream);
+            // add map input stream last (it contains the most recent <k,v> pairs)
+            m_memstore->m_inputstream->reset();
+            disk_istreams.push_back(m_memstore->m_inputstream);
         }
 
         // merge input streams, writing output to a new file
@@ -97,7 +96,6 @@ void ImmCompactionManager::flush_bytes(void)
 
         if (MERGE_ONLINE == 1) {
             m_memstore->clear();
-            delete map_istream;
         }
     }
 
