@@ -112,7 +112,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
     void check_parameters();
 
     MemStore            *m_memstore;

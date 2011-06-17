@@ -65,7 +65,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     vector<KVTDiskFile *>               m_disk_files;
     vector<KVTDiskFileInputStream *>    m_disk_istreams;

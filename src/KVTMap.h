@@ -115,7 +115,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     /**
      * return an iterator pointing at the first element that is equal or

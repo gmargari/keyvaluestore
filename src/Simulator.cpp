@@ -153,7 +153,7 @@ float Simulator::get_avg_fragmentation(void)
 /*-------------------------------------------------------
  *                    sanity_check
  *-------------------------------------------------------*/
-void Simulator::sanity_check()
+int Simulator::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }

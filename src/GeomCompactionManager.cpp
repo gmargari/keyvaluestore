@@ -41,17 +41,17 @@ void GeomCompactionManager::flush_bytes(void)
     // the same should be done accordingly for their respective input streams
     // -------------------------------- NOTE ----------------------------------
 
-    sanity_check();
+    assert(sanity_check());
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void GeomCompactionManager::sanity_check()
+int GeomCompactionManager::sanity_check()
 {
-    return_if_dbglvl_lt_2();
-
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
+
+    return 1;
 }

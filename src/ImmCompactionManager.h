@@ -29,7 +29,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 };
 
 #endif

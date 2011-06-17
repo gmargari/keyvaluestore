@@ -98,7 +98,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     KVTMap      *m_kvtmap;
     uint64_t     m_maxsize;

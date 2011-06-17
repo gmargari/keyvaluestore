@@ -30,7 +30,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     KVTDiskFile *m_kvtdiskfile;
     char        *m_buf;

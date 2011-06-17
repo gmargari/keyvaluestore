@@ -48,7 +48,7 @@ void ImmCompactionManager::flush_bytes(void)
     // the same should be done accordingly for their respective input streams
     // -------------------------------- NOTE ----------------------------------
 
-    sanity_check();
+    assert(sanity_check());
 
     // if we dont perform online merge, or we perform online merge but
     // this is the first time memory gets full:
@@ -101,15 +101,15 @@ void ImmCompactionManager::flush_bytes(void)
         }
     }
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void ImmCompactionManager::sanity_check()
+int ImmCompactionManager::sanity_check()
 {
-    return_if_dbglvl_lt_2();
-
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
+
+    return 1;
 }

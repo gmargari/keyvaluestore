@@ -30,7 +30,7 @@ public:
 protected:
 
     void init(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
-    void sanity_check();
+    int sanity_check();
 
     KVTMap                      *m_kvtmap;
     KVTMap::kvtmap::iterator     m_iter;

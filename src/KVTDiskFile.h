@@ -70,7 +70,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     VFile                   *m_vfile;
     VFileIndex              *m_vfile_index;

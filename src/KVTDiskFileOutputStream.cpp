@@ -98,7 +98,7 @@ void KVTDiskFileOutputStream::flush()
 /*=======================================================================*
  *                             sanity_check
  *=======================================================================*/
-void KVTDiskFileOutputStream::sanity_check()
+int KVTDiskFileOutputStream::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }

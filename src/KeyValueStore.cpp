@@ -143,14 +143,6 @@ uint64_t KeyValueStore::disk_size()
     return m_diskstore->size();
 }
 
-/*=======================================================================*
- *                             sanity_check
- *=======================================================================*/
-void KeyValueStore::sanity_check()
-{
-    return_if_dbglvl_lt_2();
-}
-
 // TODO: move elsewhere
 /*=======================================================================*
  *                           check_parameters
@@ -160,4 +152,12 @@ void KeyValueStore::check_parameters()
     // need at least these bytes (e.g. to fully decode a kvt read from disk:
     // <keylen, valuelen, key, value, timestamp>
     assert(SCANNERBUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
+}
+
+/*=======================================================================*
+ *                             sanity_check
+ *=======================================================================*/
+int KeyValueStore::sanity_check()
+{
+    return 1;
 }

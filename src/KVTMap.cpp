@@ -35,7 +35,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     kvtpair new_pair;
     kvtmap::iterator f;
 
-    sanity_check();
+    assert(sanity_check());
     assert(key);
     assert(value);
 
@@ -73,7 +73,7 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     m_size += strlen_value + 1 + sizeof(new_pair);
     m_map[cpkey] = new_pair;
 
-    sanity_check();
+    assert(sanity_check());
 
     return true;
 }
@@ -93,7 +93,7 @@ bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
 {
     kvtmap::iterator f;
 
-    sanity_check();
+    assert(sanity_check());
     assert(key && value && timestamp);
 
     if ((f = m_map.find(key)) != m_map.end()) {
@@ -127,7 +127,7 @@ bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
  *=======================================================================*/
 uint64_t KVTMap::num_keys()
 {
-    sanity_check();
+    assert(sanity_check());
     return m_keys;
 }
 
@@ -136,7 +136,7 @@ uint64_t KVTMap::num_keys()
  *=======================================================================*/
 uint64_t KVTMap::size()
 {
-    sanity_check();
+    assert(sanity_check());
     return m_size;
 }
 
@@ -213,7 +213,7 @@ void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_in
     kvtmap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp;
-    sanity_check();
+    assert(sanity_check());
 
     s_iter = start_iter(start_key, start_key_incl);
     e_iter = end_iter(end_key, end_key_incl);
@@ -230,7 +230,7 @@ void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_in
     }
     m_map.erase(s_iter, e_iter);
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*=======================================================================*
@@ -249,13 +249,11 @@ uint64_t KVTMap::timestamp()
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVTMap::sanity_check()
+int KVTMap::sanity_check()
 {
     uint64_t map_size = 0;
     const char *key, *value;
     uint64_t timestamp;
-
-    return_if_dbglvl_lt_2();
 
     for(kvtmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         key = iter->first;
@@ -269,4 +267,6 @@ void KVTMap::sanity_check()
     }
     assert(m_size == map_size);
     assert(m_keys == m_map.size());
+
+    return 1;
 }

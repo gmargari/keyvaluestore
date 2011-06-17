@@ -67,7 +67,7 @@ protected:
         }
     };
 
-    void sanity_check();
+    int sanity_check();
 
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
     vector<KVTInputStream *>      m_istreams;

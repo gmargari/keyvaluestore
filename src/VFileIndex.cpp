@@ -26,13 +26,13 @@ VFileIndex::~VFileIndex()
 void VFileIndex::add(const char *key, off_t offset)
 {
     char *cpkey;
-    sanity_check();
+    assert(sanity_check());
 
     cpkey = strdup(key);
     assert(m_map.find(cpkey) == m_map.end());
     m_map[cpkey] = offset;
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*========================================================================
@@ -50,7 +50,7 @@ bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
 {
     termoffsmap::iterator iter;
 
-    sanity_check();
+    assert(sanity_check());
     assert(key && start_off && end_off);
     assert(m_vfilesize);
 
@@ -94,7 +94,7 @@ void VFileIndex::clear()
 {
     termoffsmap::iterator iter;
 
-    sanity_check();
+    assert(sanity_check());
 
     for (iter = m_map.begin(); iter != m_map.end(); iter++) {
         assert(iter->first);
@@ -103,7 +103,7 @@ void VFileIndex::clear()
     m_map.clear();
     m_vfilesize = 0;
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*=======================================================================*
@@ -120,13 +120,11 @@ void VFileIndex::print()
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void VFileIndex::sanity_check()
+int VFileIndex::sanity_check()
 {
     termoffsmap::iterator iter;
     const char *prev_key = NULL;
     off_t prev_offs = -1;
-
-    return_if_dbglvl_lt_2();
 
     assert(m_map.size() == 0 || (m_map.begin())->second == 0);
     for (iter = m_map.begin(); iter != m_map.end(); iter++) {
@@ -136,4 +134,6 @@ void VFileIndex::sanity_check()
         prev_key = iter->first;
         prev_offs = iter->second;
     }
+
+    return 1;
 }

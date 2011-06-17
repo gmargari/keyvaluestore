@@ -41,17 +41,17 @@ void LogCompactionManager::flush_bytes(void)
     // the same should be done accordingly for their respective input streams
     // -------------------------------- NOTE ----------------------------------
 
-    sanity_check();
+    assert(sanity_check());
 
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void LogCompactionManager::sanity_check()
+int LogCompactionManager::sanity_check()
 {
-    return_if_dbglvl_lt_2();
-
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
+
+    return 1;
 }

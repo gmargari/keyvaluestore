@@ -43,7 +43,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     // are we going to simulate IO or perform real IO?
     sim_mode m_sim_mode;

@@ -92,9 +92,9 @@ uint64_t KVTDiskFile::size()
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVTDiskFile::sanity_check()
+int KVTDiskFile::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }
 
 // char *KVTDiskFile::name()     { return m_vfile->fs_name(); }

@@ -642,7 +642,7 @@ void VFile::end_timing(void)
 /*-------------------------------------------------------
  *                      sanity_check
  *-------------------------------------------------------*/
-void VFile::sanity_check()
+int VFile::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }

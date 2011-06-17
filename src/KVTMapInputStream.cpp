@@ -75,7 +75,7 @@ bool KVTMapInputStream::read(const char **key, const char **value, uint64_t *tim
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVTMapInputStream::sanity_check()
+int KVTMapInputStream::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }

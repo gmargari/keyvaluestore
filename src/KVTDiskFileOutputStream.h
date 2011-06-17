@@ -45,7 +45,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     VFile       *m_vfile;         // pointer to vfile
     VFileIndex  *m_vfile_index;   // pointer to vfile index

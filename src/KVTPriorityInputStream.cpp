@@ -53,7 +53,7 @@ void KVTPriorityInputStream::set_key_range(const char *start_key, const char *en
  *========================================================================*/
 void KVTPriorityInputStream::reset()
 {
-    sanity_check();
+    assert(sanity_check());
 
     // if heap non-empty, remove all elements
     while (!m_heap.empty()) {
@@ -69,7 +69,7 @@ void KVTPriorityInputStream::reset()
     }
 
     m_last_sid = -1;
-    sanity_check();
+    assert(sanity_check());
 }
 
 /*========================================================================
@@ -79,7 +79,7 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
 {
     heap_element *top;
 
-    sanity_check();
+    assert(sanity_check());
     assert(key && value && timestamp);
 
     // m_last_sid: id of stream to which the last poped element belongs to
@@ -103,7 +103,7 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
     m_last_sid = top->sid;
     m_heap.pop();
 
-    sanity_check();
+    assert(sanity_check());
 
     return true;
 }
@@ -111,14 +111,12 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVTPriorityInputStream::sanity_check()
+int KVTPriorityInputStream::sanity_check()
 {
     int *x;
     vector<heap_element *> tmp_vector;
     heap_element *top;
     int num_streams;
-
-    return_if_dbglvl_lt_2();
 
     num_streams = m_istreams.size();
     x = (int *)malloc(num_streams * sizeof(int));
@@ -142,4 +140,6 @@ void KVTPriorityInputStream::sanity_check()
     tmp_vector.clear();
 
     free(x);
+
+    return 1;
 }

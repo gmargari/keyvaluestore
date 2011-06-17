@@ -105,7 +105,7 @@ uint64_t DiskStore::size()
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void DiskStore::sanity_check()
+int DiskStore::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }

@@ -55,10 +55,6 @@
 
 #define STMT( stuff )     do { stuff } while(0)
 
-#define return_if_dbglvl_lt_1() STMT( if (DBGLVL < 1) return; )
-#define return_if_dbglvl_lt_2() STMT( if (DBGLVL < 2) return; )
-#define return_if_dbglvl_lt_3() STMT( if (DBGLVL < 3) return; )
-
 /* functions to print an expression and its value */
 #define DEBUG_PROMPT "[DEBUG] "
 

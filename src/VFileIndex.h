@@ -67,7 +67,7 @@ public:
 
 protected:
 
-    void sanity_check();
+    int sanity_check();
 
     termoffsmap m_map;          // index containing <term, offset> pairs
     off_t       m_vfilesize;    // size of vfile on disk

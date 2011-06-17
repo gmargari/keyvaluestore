@@ -163,7 +163,7 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
-void KVTDiskFileInputStream::sanity_check()
+int KVTDiskFileInputStream::sanity_check()
 {
-    return_if_dbglvl_lt_2();
+    return 1;
 }
