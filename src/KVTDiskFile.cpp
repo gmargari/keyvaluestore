@@ -8,7 +8,7 @@
  *========================================================================*/
 KVTDiskFile::KVTDiskFile()
 {
-    m_vfile = new VFile(true);
+    m_vfile = new VFile();
     m_vfile_index = new VFileIndex();
     m_vfile_numkeys = 0;
 }
@@ -58,7 +58,6 @@ bool KVTDiskFile::open_unique()
     m_vfile_numkeys = 0;
     sprintf(filename, "%s%s%04d", TMPFILEDIR, TMPFILEPREFIX, n++);
     if (m_vfile->fs_open(filename)) {
-        m_vfile->fs_truncate(0); // in case file already existed
         return true;
     } else {
         return false;
@@ -70,6 +69,7 @@ bool KVTDiskFile::open_unique()
  *=======================================================================*/
 void KVTDiskFile::delete_from_disk()
 {
+    m_vfile->fs_close();
     m_vfile->fs_delete();
 }
 

@@ -14,255 +14,177 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-using namespace std;
-#include <cstdio>
-
-/*-------------------------------------------------------
- *                       VFile
- *-------------------------------------------------------*/
-VFile::VFile(bool real_io)
+/*========================================================================
+ *                                VFile
+ *========================================================================*/
+VFile::VFile()
 {
-    assert(sizeof(off_t) == 8); // ensure 64bit offsets
+    assert(sizeof(off_t) == 8); // ensure 64bit offsets (TODO: move it elsewhere)
 
-    // TODO: for now, each VFile has a separate simulator, and we CANNOT
-    // get its stats. just trying if IO is ok...
-    Sim = new Simulator();
+    m_size = 0;
+    m_offset = 0;
+    m_cur = -1;
 
-    if (real_io) {
-        Sim->set_simulation_mode(Simulator::SIMMODE_REAL_IO);
-    } else {
-        Sim->set_simulation_mode(Simulator::SIMMODE_SIMULATE_IO);
-    }
+    // TODO: for now, each VFile has a separate simulator...
+    m_sim = new Simulator();
+    m_sim->set_simulation_mode(Simulator::SIMMODE_REAL_IO);
+//     m_sim->set_simulation_mode(Simulator::SIMMODE_SIMULATE_IO);
 
-    Size = 0;
-    Offset = 0;
-    Opened = -1;
-    Cur = -1;
 }
 
-/*-------------------------------------------------------
- *                       ~VFile
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               ~VFile
+ *========================================================================*/
 VFile::~VFile(void)
 {
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-
-    } else {
-        // TODO: currently, we do not delete files from disk...
-//         fs_delete(); // if we performed real io, delete file(s) from disk
+    for (int i = 0; i < (int)m_names.size(); i++) {
+        free(m_names[i]);
+        m_names[i] = NULL;
     }
 
-    // TODO: for now, each VFile has a separate simulator, and we CANNOT
-    // get its stats. just trying if IO is ok...
-    delete Sim;
-
-    for (int i = 0; i < (int)Names.size(); i++) {
-        free(Names[i]);
-        Names[i] = NULL;
+    if (m_basefilename) {
+        free(m_basefilename);
     }
+
+    delete m_sim;
 }
 
-/*-------------------------------------------------------
- *                       fs_open
- *-------------------------------------------------------*/
-bool VFile::fs_open(char *filename, bool open_existing)
+/*========================================================================
+ *                         add_new_physical_file
+ *========================================================================*/
+bool VFile::add_new_physical_file(bool open_existing)
 {
-    char *fname;
+    char newfname[100], *fname;
+    int fd, fdflag;
 
-    fname = strdup(filename);
+    sprintf(newfname, "%s.%02d", m_basefilename, m_filedescs.size());
+    fname = strdup(newfname);
     assert(fname);
 
     if (DBGLVL > 0) {
         printf("[DEBUG]  %s [+]\n", fname);
     }
 
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        if (Opened) {
-            printf("[ERROR] %s(): file already open\n", __FUNCTION__);
-            exit(EXIT_FAILURE);
-        }
-
-        Opened = true;
-        Names.push_back(fname);
-        Size = 0;
-        Offset = 0;
-        Cur = 0;
-        return true;
-    } else {
-        int fd, fdflag, fdmode;
-
-        if (open_existing) {
-            fdflag = O_RDWR;
-        } else {
-            fdflag = O_RDWR | O_CREAT;
-        }
-        fdmode = S_IRUSR | S_IWUSR;
-
-        if ((fd = open(fname, fdflag, fdmode)) == -1) {
-            printf("[ERROR] %s('%s')\n", __FUNCTION__, fname);
-            perror("");
-            return false;
-        }
-
-        Names.push_back(fname);
-        Filedescs.push_back(fd);
-        Cur = Filedescs.size() - 1;
-        return true;
+    fdflag = O_RDWR;
+    if (open_existing == false) {
+        fdflag |= O_CREAT | O_TRUNC;
     }
+
+    if ((fd = open(fname, fdflag, S_IRUSR | S_IWUSR)) == -1) {
+        printf("[ERROR] fs_open('%s')\n", fname);
+        perror("");
+        exit(EXIT_FAILURE);
+    }
+
+    m_names.push_back(fname);
+    m_filedescs.push_back(fd);
+    m_cur = m_filedescs.size() - 1;
+
+    return true;
 }
 
-/*-------------------------------------------------------
- *                   fs_open_existing
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               fs_open
+ *========================================================================*/
+bool VFile::fs_open(char *filename, bool open_existing)
+{
+    m_basefilename = strdup(filename);
+    return add_new_physical_file(open_existing);
+}
+
+/*========================================================================
+ *                           fs_open_existing
+ *========================================================================*/
 bool VFile::fs_open_existing(char *filename)
 {
     return fs_open(filename, true);
 }
 
-/*-------------------------------------------------------
- *                    fs_open_unique
- *-------------------------------------------------------*/
-bool VFile::fs_open_unique(void)
-{
-    char *name = tempnam(TMPFILEDIR, TMPFILEPREFIX);
-    fs_open(name);
-    free(name);
-    return true;
-}
-
-/*-------------------------------------------------------
- *                      close
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                close
+ *========================================================================*/
 void VFile::fs_close(void)
 {
-    assert(Cur != -1);
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        if (!Opened) {
-            printf("[ERROR] %s(): file not open\n", __FUNCTION__);
+    assert(m_cur != -1);
+
+    for (int i = 0; i < (int)m_filedescs.size(); i++) {
+        if (close(m_filedescs[i]) == -1) {
+            printf("[ERROR] fs_close(): close('%s')\n", m_names[m_cur]);
+            perror("");
             exit(EXIT_FAILURE);
         }
-
-        Opened = false;
-        Offset = 0;
-    } else {
-        for (int i = 0; i < (int)Filedescs.size(); i++) {
-            if (close(Filedescs[i]) == -1) {
-                printf("[ERROR] %s(): close('%s')\n", __FUNCTION__, Names[Cur]);
-                perror("");
-                exit(EXIT_FAILURE);
-            }
-        }
     }
+
+    m_offset = 0;
 }
 
-/*-------------------------------------------------------
- *                       fs_read
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               fs_read
+ *========================================================================*/
 ssize_t VFile::fs_read(void *buf, size_t count)
 {
-    size_t bytes_read;
+    size_t bytes_read, num;
 
-    assert(Cur != -1);
-
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        bytes_read = (size_t)min((uint64_t)count, (Size - Offset));
-        Offset += bytes_read;
-        assert(Offset <= Size);
-    } else {
-        size_t num;
-
-        start_timing();
-        for (bytes_read = 0; bytes_read < count; ) {
-            if ((num = cur_fs_read((char *)buf + bytes_read, count - bytes_read)) == 0) {
-                break; // no bytes left in file
-            }
-            bytes_read += num;
+    for (bytes_read = 0; bytes_read < count; ) {
+        if ((num = cur_fs_read((char *)buf + bytes_read, count - bytes_read)) == 0) {
+            break; // no bytes left in file
         }
-        end_timing();
+        bytes_read += num;
     }
-
-    Sim->inc_bytes_read(bytes_read);
-    Sim->inc_ioops(1);
 
     return bytes_read;
 }
 
-/*-------------------------------------------------------
- *                       fs_write
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               fs_write
+ *========================================================================*/
 ssize_t VFile::fs_write(const void *buf, size_t count)
 {
-    assert(Cur != -1);
+    size_t bytes_written, num;
 
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        Offset += count;
-        if (Offset > Size) {
-            Size = Offset;
-        }
-    } else {
-        size_t num;
-        uint64_t bytes_written;
-
-        start_timing();
-        for (bytes_written = 0; bytes_written < count; ) {
-            num = cur_fs_write((char *)buf + bytes_written, count - bytes_written);
-            bytes_written += num;
-        }
-        end_timing();
-        assert(bytes_written == count);
+    for (bytes_written = 0; bytes_written < count; ) {
+        num = cur_fs_write((char *)buf + bytes_written, count - bytes_written);
+        bytes_written += num;
     }
 
-    Sim->inc_bytes_written(count);
-    Sim->inc_ioops(1); // TODO: maybe ioops should be increased per internas_fs_write()
+    assert(bytes_written == count);
 
-    return count;
+    return bytes_written;
 }
 
-/*-------------------------------------------------------
- *                       fs_seek
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                fs_seek
+ *========================================================================*/
 off_t VFile::fs_seek(off_t offs, int whence)
 {
-    off_t newoffs;
+    off_t abs_offs, offs_in_file;
+    int fileno;
 
-    assert(Cur != -1);
+    if (whence == SEEK_SET) {
+        m_offset = offs;
+    } else if (whence == SEEK_CUR) {
+        m_offset += offs;
+    } else if (whence == SEEK_END) {
+        m_offset = m_size + offs;
+    }
 
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        if (whence == SEEK_SET) {
-            Offset = offs;
-        } else if (whence == SEEK_CUR) {
-            Offset += offs;
-        } else if (whence == SEEK_END) {
-            Offset = Size + offs;
-        }
-        newoffs = Offset;
-    } else {
-        off_t abs_offs, offs_in_file;
-        int fileno;
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
 
         /*
-         * if seek is out of current file limits, check if there are previous
-         * or next files in Filedescs and if we can get to that file. if yes,
-         * advance to that file.
-         */
+        * if seek is out of current file limits, check if there are previous
+        * or next files in m_filedescs and if we can get to that file. if yes,
+        * advance to that file.
+        */
 
-        // calculate the absolute offset inside the virtual file
-        if (whence == SEEK_SET) {
-            abs_offs = offs;
-        } else if (whence == SEEK_CUR) {
-            abs_offs = Cur * MAX_FILE_SIZE + lseek(Filedescs[Cur], 0, SEEK_CUR) + offs;
-        } else if (whence == SEEK_END) {
-            abs_offs = fs_size() + offs;
-        }
-
-        if (abs_offs > (off_t)fs_size()) {
+        // m_offset is the absolute offset inside the virtual file
+        if (m_offset > (off_t)m_size) {
             printf("Haven't yet implemented seeking beyond end of file\n");
             exit(EXIT_FAILURE);
         }
 
         // calculate the file and the offset within the file
-        fileno = abs_offs / MAX_FILE_SIZE;
-        offs_in_file = abs_offs % MAX_FILE_SIZE;
+        fileno = m_offset / MAX_FILE_SIZE;
+        offs_in_file = m_offset % MAX_FILE_SIZE;
 
         // example: if maxfilesize = 10bytes, and we:
         //    1) create a file
@@ -270,141 +192,143 @@ off_t VFile::fs_seek(off_t offs, int whence)
         // then offset = 10, size = 10. In this case, fileno will be '1'
         // and offset will be '0', meaning that we have to seek to 0 byte of
         // file 1. Instead we'll seek at fileno 0 at position 10.
-        if (fileno > (int)Names.size() - 1) {
+        if (fileno > (int)m_names.size() - 1) {
             fileno--;
             offs_in_file = MAX_FILE_SIZE;
         }
 
         // advance to that file
-        Cur = fileno;
+        m_cur = fileno;
 
         // seek within that file
-        if (lseek(Filedescs[Cur], offs_in_file, SEEK_SET) == (off_t)-1) {
-            printf("[ERROR] %s(): lseek('%s', %Ld, %s)\n", __FUNCTION__, Names[Cur], offs,
-              (whence == SEEK_SET) ? "SEEK_SET" : ((whence == SEEK_CUR) ? "SEEK_CUR" : "SEEK_END"));
+        if (lseek(m_filedescs[m_cur], offs_in_file, SEEK_SET) == (off_t)-1) {
+            printf("[ERROR] fs_seek(): lseek('%s', %Ld, SEEK_SET)\n", m_names[m_cur], offs_in_file);
             perror("");
             exit(EXIT_FAILURE);
         }
-
-        newoffs = abs_offs;
     }
 
-    return newoffs;
+    return m_offset;
 }
 
-/*-------------------------------------------------------
- *                      fs_tell
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                fs_tell
+ *========================================================================*/
 off_t VFile::fs_tell(void)
 {
-    assert(Cur != -1);
-    return fs_seek(0, SEEK_CUR);
+    return m_offset;
 }
 
-/*-------------------------------------------------------
- *                      fs_rewind
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               fs_rewind
+ *========================================================================*/
 void VFile::fs_rewind(void)
 {
-    assert(Cur != -1);
     fs_seek(0, SEEK_SET);
 }
 
-/*-------------------------------------------------------
- *                      fs_truncate
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              fs_truncate
+ *========================================================================*/
 void VFile::fs_truncate(off_t length)
 {
-    assert(Cur != -1);
+    off_t len;
+    int new_files, num;
 
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        Size = length;
-    } else {
-        int new_files, num;
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
 
         new_files = (int) ceil((float)length / (float)MAX_FILE_SIZE);
 
-        // if we need to shrink the virtual file
-        if (new_files < (int)Names.size()) {
+        /*
+         * if we need to shrink the virtual file
+         */
+        if (new_files < (int)m_names.size()) {
 
             // if length == 0 then new_files = 0. keep first file and truncate to 0
             if (new_files == 0) {
                 new_files = 1;
             }
 
-            // delete from disk all files except the first 'new_files',
-            // remove their entries from vectors Filedescs and Names
-            assert(Filedescs.size() == Names.size());
-            for (int i = new_files; i < (int)Names.size(); i++) {
-                if (remove(Names[i]) == -1) {
-                    printf("[ERROR] %s(): remove('%s')\n", __FUNCTION__, Names[i]);
+            // delete all files except the first 'new_files'
+            assert(m_filedescs.size() == m_names.size());
+            for (int i = new_files; i < (int)m_names.size(); i++) {
+
+                if (DBGLVL > 0) {
+                    printf("[DEBUG]  %s [-]\n", m_names[i]);
+                }
+
+                if (remove(m_names[i]) == -1) {
+                    printf("[ERROR] fs_truncate(): remove('%s')\n", m_names[i]);
                     perror("");
                     exit(EXIT_FAILURE);
                 }
+                free(m_names[i]);
             }
 
-            Names.erase(Names.begin() + new_files, Names.end());
-            Filedescs.erase(Filedescs.begin() + new_files, Filedescs.end());
+            m_names.erase(m_names.begin() + new_files, m_names.end());
+            m_filedescs.erase(m_filedescs.begin() + new_files, m_filedescs.end());
         }
-        // if we need to extend the virtual file
-        else if (new_files > (int)Names.size()) {
+        /*
+         * else, if we need to extend the virtual file
+         */
+        else if (new_files > (int)m_names.size()) {
 
-            // create 'new_files - Names.size()' new files.
-            num = Names.size();
+            // create 'new_files - m_names.size()' new files.
+            num = m_names.size();
             for (int i = 0; i < (int)(new_files - num); i++) {
-                fs_open_unique();
+                add_new_physical_file(false);
             }
 
-            // set the size of the first 'new_files - 1' files to MAX_FILE_SIZE.
-            assert((int)Names.size() == new_files);
+            // set the size of the first 'new_files - 1' files to MAX_FILE_SIZE
+            assert((int)m_names.size() == new_files);
             for (int i = 0; i < new_files - 1; i++) {
-                if (ftruncate64(Filedescs[i], MAX_FILE_SIZE) == (off_t)-1) {
-                    printf("[ERROR] %s(): ftruncate64('%s', %Ld) \n", __FUNCTION__, Names[i], MAX_FILE_SIZE);
+                if (ftruncate64(m_filedescs[i], MAX_FILE_SIZE) == (off_t)-1) {
+                    printf("[ERROR] fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[i], MAX_FILE_SIZE);
                     perror("");
                     exit(EXIT_FAILURE);
                 }
             }
         }
 
-        Cur = new_files - 1;
+        m_cur = new_files - 1;
 
         if (length && length % MAX_FILE_SIZE != 0) {
-            length = length % MAX_FILE_SIZE;
+            len = length % MAX_FILE_SIZE;
         } else if (length ) {
-            length = MAX_FILE_SIZE;
+            len = MAX_FILE_SIZE;
+        } else {
+            len = length;
         }
 
-        if (ftruncate64(Filedescs[Cur], length) == (off_t)-1) {
-            printf("[ERROR] %s(): ftruncate64('%s', %Ld) \n", __FUNCTION__, Names[Cur], length);
+        if (ftruncate64(m_filedescs[m_cur], len) == (off_t)-1) {
+            printf("[ERROR] fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[m_cur], len);
             perror("");
             exit(EXIT_FAILURE);
         }
     }
 
+    m_size = length;
+
     // NOTE: truncate system call does not change file offset. our
     // implementation sets offset to file size after truncating
-    fs_seek(fs_size(), SEEK_SET);
+    fs_seek(m_size, SEEK_SET);
 }
 
-/*-------------------------------------------------------
- *                      fs_delete
- *-------------------------------------------------------*/
+/*========================================================================
+ *                             fs_delete
+ *========================================================================*/
 void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
-    assert(Cur != -1);
-
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-
-    } else {
-        assert(Names.size() == Filedescs.size());
-        for (int i = 0; i < (int)Names.size(); i++) {
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+        assert(m_names.size() == m_filedescs.size());
+        for (int i = 0; i < (int)m_names.size(); i++) {
 
             if (DBGLVL > 0) {
-                printf("[DEBUG]  %s [-]\n", Names[i]);
+                printf("[DEBUG]  %s [-]\n", m_names[i]);
             }
 
-            if (remove(Names[i]) == -1) {
-                printf("[ERROR] %s(): remove('%s')\n", __FUNCTION__, Names[i]);
+            if (remove(m_names[i]) == -1) {
+                printf("[ERROR] fs_delete(): remove('%s')\n", m_names[i]);
                 perror("");
                 exit(EXIT_FAILURE);
             }
@@ -412,179 +336,167 @@ void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and 
     }
 }
 
-/*-------------------------------------------------------
- *                         fs_name
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                fs_name
+ *========================================================================*/
 char *VFile::fs_name(void)
 {
-    assert(Cur != -1);
-    return Names[Cur];
+    assert(m_cur != -1);
+    return m_names[m_cur];
 }
 
-/*-------------------------------------------------------
- *                        fs_size
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                fs_size
+ *========================================================================*/
 uint64_t VFile::fs_size(void)
 {
-    assert(Cur != -1);
-
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-        return Size;
-    } else {
-        struct stat lastfilestatus;
-        int num_files;
-
-        for (int i = 0; i < (int)Names.size() - 1; i++) {
-            stat(Names[i], &lastfilestatus);
-            assert(lastfilestatus.st_size == MAX_FILE_SIZE);
-        }
-
-        // get size of last file
-        stat(Names[Names.size() - 1], &lastfilestatus);
-
-        // compute and return size of virtual file
-        num_files = Names.size();
-
-        return (num_files - 1) * MAX_FILE_SIZE + lastfilestatus.st_size;
-    }
+    return m_size;
 }
 
-/*-------------------------------------------------------
- *                         fs_sync
- *-------------------------------------------------------*/
+/*========================================================================
+ *                                fs_sync
+ *========================================================================*/
 void VFile::fs_sync(void)
 {
-    assert(Cur != -1);
-
-    if (Sim->get_simulation_mode() == Simulator::SIMMODE_SIMULATE_IO) {
-
-    } else {
-        fsync(Filedescs[Cur]);
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+        for (int i = 0; i < (int)m_filedescs.size(); i++) {
+//             fsync(m_filedescs[i]); // TODO: remove from COMMENTS!!!
+        }
     }
 }
 
-/*-------------------------------------------------------
- *                        fs_append
- *-------------------------------------------------------*/
-uint64_t VFile::fs_append(VFile *fsrc, void *buf, size_t bufsize)
-{
-    size_t count;
-
-    assert(Cur != -1);
-
-    fsrc->fs_rewind();
-    while ((count = fsrc->fs_read(buf, bufsize))) {
-        fs_write(buf, count);
-    }
-
-    return fsrc->fs_size();
-}
-
-/*-------------------------------------------------------
- *                      cur_fs_read
- *-------------------------------------------------------*/
+/*========================================================================
+ *                             cur_fs_read
+ *========================================================================*/
 ssize_t VFile::cur_fs_read(void *buf, size_t count)
 {
     ssize_t actually_read;
 
-    assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
-    assert(Cur != -1);
+    assert(m_cur != -1);
 
-    if (fs_tell() == (int)fs_size()) {
-        return 0; // no bytes lef to read
-    }
-
-    // if we reached end of current file, check if there's a next file in
-    // Filedescs vector. if yes, advance to it. if no, error (there should be
-    // available bytes to read).
-    if (cur_fs_tell() == (int)cur_fs_size()) {
-        if (cur_fs_size() == MAX_FILE_SIZE && Cur < (int)Filedescs.size() - 1) {
-            Cur++;
-            cur_fs_rewind();
-        } else {
-            assert(0); // should not get here
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+        if (fs_tell() == (off_t)fs_size()) {
+            return 0; // no bytes lef to read
         }
+
+        // if we reached end of current file, check if there's a next file in
+        // m_filedescs vector. if yes, advance to it. if no, error (there should be
+        // available bytes to read).
+        if (cur_fs_tell() == (off_t)cur_fs_size()) {
+            if (cur_fs_size() == MAX_FILE_SIZE && m_cur < (int)m_filedescs.size() - 1) {
+                m_cur++;
+                cur_fs_rewind();
+            } else {
+                assert("shouldn't get here" && 0);
+            }
+        }
+
+        // check if we're going to cross max file size limit: if yes, we're going
+        // to write as many bytes as we can in current file and return the
+        // number of bytes written. caller must call again fs_write() to
+        // write the remaining bytes.
+        if (cur_fs_tell() + count > MAX_FILE_SIZE) {
+            count = MAX_FILE_SIZE - cur_fs_tell();
+        }
+
+        start_timing();
+        if ((actually_read = read(m_filedescs[m_cur], buf, count)) == -1) {
+            printf("[ERROR] cur_fs_read(): read('%s', %d)\n", m_names[m_cur], count);
+            perror("");
+            exit(EXIT_FAILURE);
+        }
+        end_timing();
+
+    } else {
+        actually_read = count;
     }
 
-    // check if we're going to cross max file size limit: if yes, we're going
-    // to write as many bytes as we can in current file and return the
-    // number of bytes written. caller must call again fs_write() to
-    // write the remaining bytes.
-    if (cur_fs_tell() + count > MAX_FILE_SIZE) {
-        count = MAX_FILE_SIZE - cur_fs_tell();
-    }
+    m_offset += actually_read;
 
-    if ((actually_read = read(Filedescs[Cur], buf, count)) == -1) {
-        printf("[ERROR] %s(): read('%s', %d)\n", __FUNCTION__, Names[Cur], count);
-        perror("");
-        exit(EXIT_FAILURE);
-    }
+    m_sim->inc_bytes_read(actually_read);
+    m_sim->inc_ioops(1);
+
 
     assert(actually_read);
     return actually_read;
 }
 
-/*-------------------------------------------------------
- *                      cur_fs_write
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              cur_fs_write
+ *========================================================================*/
 ssize_t VFile::cur_fs_write(const void *buf, size_t count)
 {
     ssize_t actually_written;
 
-    assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
-    assert(Cur != -1);
+    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
 
-    // if we reached end of current file, check if there's a next file in
-    // Filedescs vector. if yes, advance to it. if no, create a new file.
-    if (cur_fs_tell() == MAX_FILE_SIZE) {
-        if (Cur == (int)Filedescs.size() - 1) {
-            fs_open_unique();
-        } else {
-            Cur++;
-            cur_fs_rewind();
+        assert(m_cur != -1);
+
+        // if we reached end of current file, check if there's a next file in
+        // m_filedescs vector. if yes, advance to it. if no, create a new file.
+        if (cur_fs_tell() == MAX_FILE_SIZE) {
+            if (m_cur == (int)m_filedescs.size() - 1) {
+                add_new_physical_file(false);
+            } else {
+                m_cur++;
+                cur_fs_rewind();
+            }
         }
+
+        // (similar to cur_fs_read)
+        if (cur_fs_tell() + count > MAX_FILE_SIZE) {
+            count = MAX_FILE_SIZE - cur_fs_tell();
+        }
+
+        start_timing();
+        if ((actually_written = write(m_filedescs[m_cur], buf, count)) == -1) {
+            printf("[ERROR] cur_fs_write(): write('%s', %d)\n", m_names[m_cur], count);
+            perror("");
+            exit(EXIT_FAILURE);
+        }
+        end_timing();
+
+    } else {
+        actually_written = count;
     }
 
-    // (similar to cur_fs_read)
-    if (cur_fs_tell() + count > MAX_FILE_SIZE) {
-        count = MAX_FILE_SIZE - cur_fs_tell();
+    m_offset += actually_written;
+    if (m_offset > (off_t)m_size) {
+        m_size = m_offset;
     }
 
-    if ((actually_written = write(Filedescs[Cur], buf, count)) == -1) {
-        printf("[ERROR] %s(): write('%s', %d)\n", __FUNCTION__, Names[Cur], count);
-        perror("");
-        exit(EXIT_FAILURE);
-    }
+    m_sim->inc_bytes_written(actually_written);
+    m_sim->inc_ioops(1);
 
     return actually_written;
 }
 
-/*-------------------------------------------------------
- *                     cur_fs_size
- *-------------------------------------------------------*/
+/*========================================================================
+ *                               cur_fs_size
+ *========================================================================*/
 uint64_t VFile::cur_fs_size(void)
 {
     struct stat filestatus;
 
-    assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
-    assert(Cur != -1);
+    assert(m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
+    assert(m_cur != -1);
 
-    stat(Names[Cur], &filestatus);
+    stat(m_names[m_cur], &filestatus);
     return filestatus.st_size;
 }
 
-/*-------------------------------------------------------
- *                     cur_fs_seek
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              cur_fs_seek
+ *========================================================================*/
 off_t VFile::cur_fs_seek(off_t offs, int whence)
 {
     off_t newoffs;
 
-    assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
-    assert(Cur != -1);
+    assert(m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
+    assert(m_cur != -1);
 
-    if ((newoffs = lseek(Filedescs[Cur], offs, whence)) == (off_t)-1) {
-        printf("[ERROR] %s(): lseek('%s', %Ld, %d)\n", __FUNCTION__, Names[Cur], offs, whence);
+    if ((newoffs = lseek(m_filedescs[m_cur], offs, whence)) == (off_t)-1) {
+        printf("[ERROR] cur_fs_seek(): lseek('%s', %Ld, %d)\n", m_names[m_cur], offs, whence);
         perror("");
         exit(EXIT_FAILURE);
     }
@@ -592,38 +504,34 @@ off_t VFile::cur_fs_seek(off_t offs, int whence)
     return newoffs;
 }
 
-/*-------------------------------------------------------
- *                      cur_fs_tell
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              cur_fs_tell
+ *========================================================================*/
 off_t VFile::cur_fs_tell(void)
 {
-    assert(Sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
-    assert(Cur != -1);
-
     return cur_fs_seek(0, SEEK_CUR);
 }
 
-/*-------------------------------------------------------
- *                      cur_fs_tell
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              cur_fs_tell
+ *========================================================================*/
 off_t VFile::cur_fs_rewind(void)
 {
-    assert(Cur != -1);
     return cur_fs_seek(0, SEEK_SET);
 }
 
 
-/*-------------------------------------------------------
- *                      start_timing
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              start_timing
+ *========================================================================*/
 void VFile::start_timing(void)
 {
     gettimeofday(&starttime, NULL);
 }
 
-/*-------------------------------------------------------
- *                      end_timing
- *-------------------------------------------------------*/
+/*========================================================================
+ *                              end_timing
+ *========================================================================*/
 void VFile::end_timing(void)
 {
     time_t sec;
@@ -636,13 +544,5 @@ void VFile::end_timing(void)
         sec -= 1;
         usec += 1000000;
     }
-    Sim->inc_time_passed(sec, usec);
-}
-
-/*-------------------------------------------------------
- *                      sanity_check
- *-------------------------------------------------------*/
-int VFile::sanity_check()
-{
-    return 1;
+    m_sim->inc_time_passed(sec, usec);
 }
