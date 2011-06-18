@@ -9,3 +9,6 @@ target_link_libraries (kvtmaptest KeyValueStore KVTMapInputStream KVTDiskFileInp
 
 add_executable (vfileindextest vfileindextest.cpp)
 target_link_libraries (vfileindextest KeyValueStore VFileIndex)
+
+add_executable (vfiletest vfiletest.cpp)
+target_link_libraries (vfiletest KeyValueStore VFile)

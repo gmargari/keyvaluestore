@@ -24,19 +24,19 @@
 #define b2mb(b) ((b)/(1024.0*1024.0))
 #define b2gb(b) ((b)/(1024.0*1024.0*1024.0))
 
-#define kb2b(kb) ((numbytes)((kb)*(1024)))
-#define mb2b(mb) ((numbytes)((mb)*(1024*1024)))
-#define gb2b(gb) ((numbytes)((gb)*(1024*1024*1024)))
+#define kb2b(kb) ((uint64_t)((kb)*(1024)))
+#define mb2b(mb) ((uint64_t)((mb)*(1024*1024)))
+#define gb2b(gb) ((uint64_t)((gb)*(1024*1024*1024)))
 
 #define kb2mb(kb) ((kb)/(1024.0))
 #define kb2gb(kb) ((kb)/(1024.0*1024.0))
 
-#define mb2kb(mb) ((numbytes)((mb)*(1024)))
-#define gb2kb(gb) ((numbytes)((gb)*(1024*1024)))
+#define mb2kb(mb) ((uint64_t)((mb)*(1024)))
+#define gb2kb(gb) ((uint64_t)((gb)*(1024*1024)))
 
 #define mb2gb(mb) ((mb)/(1024.0))
 
-#define gb2mb(gb) ((numbytes)((gb)*(1024)))
+#define gb2mb(gb) ((uint64_t)((gb)*(1024)))
 
 // byte conversion
 #define sec2hour(s) ((s)/3600.0)
