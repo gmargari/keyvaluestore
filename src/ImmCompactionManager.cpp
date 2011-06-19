@@ -35,8 +35,10 @@ ImmCompactionManager::~ImmCompactionManager()
 void ImmCompactionManager::flush_bytes(void)
 {
     KVTDiskFile *disk_file;
-    KVTDiskFileOutputStream *disk_ostream;
-    vector<KVTInputStream *> istreams;
+    KVTDiskFileOutputStream *merge_ostream;
+    vector<KVTInputStream *> istreams_to_merge;
+    vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
 
     // -------------------------------- NOTE ----------------------------------
     // every new file created by Compaction Manager should be inserted
@@ -53,7 +55,7 @@ void ImmCompactionManager::flush_bytes(void)
         memstore_clear();
 
         // first time memstore is flushed, no disk file to merge with
-        if (m_diskstore->m_disk_istreams.size() == 1) {
+        if (r_disk_istreams.size() == 1) {
             assert(sanity_check());
             return;
         }
@@ -61,21 +63,21 @@ void ImmCompactionManager::flush_bytes(void)
     // else, add memstore stream first since it contains the most recent <k,v> pairs
     else {
         m_memstore->m_inputstream->reset();
-        istreams.push_back(m_memstore->m_inputstream);
+        istreams_to_merge.push_back(m_memstore->m_inputstream);
     }
 
     // add all disk input streams that will be merged, from most recent to oldest
-    for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
-        m_diskstore->m_disk_istreams[i]->reset();
-        istreams.push_back(m_diskstore->m_disk_istreams[i]);
+    for (int i = 0; i < (int)r_disk_istreams.size(); i++) {
+        r_disk_istreams[i]->reset();
+        istreams_to_merge.push_back(r_disk_istreams[i]);
     }
 
     // merge input streams, writing output to a new file
     disk_file = new KVTDiskFile;
     disk_file->open_unique();
-    disk_ostream = new KVTDiskFileOutputStream(disk_file);
-    merge_streams(istreams, disk_ostream);
-    delete disk_ostream;
+    merge_ostream = new KVTDiskFileOutputStream(disk_file);
+    merge_streams(istreams_to_merge, merge_ostream);
+    delete merge_ostream;
 
     // clear memstore
     if (ONLINE_MEMSTORE_MERGE) {
@@ -83,17 +85,17 @@ void ImmCompactionManager::flush_bytes(void)
     }
 
     // delete all files merged as well as their input streams
-    for (int i = 0; i < (int)m_diskstore->m_disk_files.size(); i++) {
-        m_diskstore->m_disk_files[i]->delete_from_disk();
-        delete m_diskstore->m_disk_files[i];
-        delete m_diskstore->m_disk_istreams[i];
+    for (int i = 0; i < (int)r_disk_files.size(); i++) {
+        r_disk_files[i]->delete_from_disk();
+        delete r_disk_files[i];
+        delete r_disk_istreams[i];
     }
-    m_diskstore->m_disk_files.clear();
-    m_diskstore->m_disk_istreams.clear();
+    r_disk_files.clear();
+    r_disk_istreams.clear();
 
     // add new file and its input stream to (currently empty) set of disk files
-    m_diskstore->m_disk_files.push_back(disk_file);
-    m_diskstore->m_disk_istreams.push_back(new KVTDiskFileInputStream(disk_file));
+    r_disk_files.push_back(disk_file);
+    r_disk_istreams.push_back(new KVTDiskFileInputStream(disk_file));
 
     assert(sanity_check());
 }
