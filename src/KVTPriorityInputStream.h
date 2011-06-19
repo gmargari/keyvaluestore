@@ -16,14 +16,7 @@ class KVTPriorityInputStream: public KVTInputStream {
 public:
 
     /**
-     * NOTE: the order of input streams in vector 'istreams' defines their priority,
-     * in case for example two input streams have the same key. for example,
-     * if both istreams[2] and istreams[4] have the same key 'k', the <k,v,t>
-     * of istreams[2] will be considered greater than that of istreams[4].
-     *
-     * So, when calling constructor, make sure to insert in the first position
-     * of istreams the input stream from memstore (if any), since this has the
-     * most recent value for a key, then the most recently written disk file etc.
+     * constructor
      */
     KVTPriorityInputStream(vector<KVTInputStream *> istreams);
 
@@ -58,8 +51,7 @@ protected:
 
             if (cmp > 0) {
                 return true;
-            } else if (cmp == 0 && e2->sid < e1->sid) {
-                assert(e2->timestamp > e1->timestamp);
+            } else if (cmp == 0 && e2->timestamp > e1->timestamp) {
                 return true;
             } else {
                 return false;
