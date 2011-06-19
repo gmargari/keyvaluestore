@@ -78,14 +78,14 @@ public:
      *
      * @return number of <key, value, timestamp> tuples in memstore
      */
-    uint64_t num_keys();
+    uint64_t get_num_keys();
 
     /**
      * total byte size of tuples stored in memstore
      *
      * @return total byte size of tuples stored in memstore
      */
-    uint64_t size();
+    uint64_t get_size();
 
     /**
      * memstore is full (we probably need to flush some <k,v,t> tuples to disk)

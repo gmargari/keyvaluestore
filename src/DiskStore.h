@@ -54,14 +54,14 @@ public:
      *
      * @return number of <key, value> pairs in diskstore
      */
-    uint64_t num_keys();
+    uint64_t get_num_keys();
 
     /**
      * byte size of diskstore
      *
      * @return byte size of <key, value> pairs in diskstore
      */
-    uint64_t size();
+    uint64_t get_size();
 
 protected:
 

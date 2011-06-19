@@ -88,11 +88,11 @@ int main(void)
             printf("i = %d\n", i);
     }
 
-    assert(kvstore.num_mem_keys() + kvstore.num_disk_keys() == num_keys);  // since keys are unique
-    printf("Memstore keys:  %Ld\n", kvstore.num_mem_keys());
-    printf("Diskstore keys: %Ld\n", kvstore.num_disk_keys());
-    printf("Memstore size:  %Ld\n", kvstore.mem_size());
-    printf("Diskstore size: %Ld\n", kvstore.disk_size());
+    assert(kvstore.get_num_mem_keys() + kvstore.get_num_disk_keys() == num_keys);  // since keys are unique
+    printf("Memstore keys:  %Ld\n", kvstore.get_num_mem_keys());
+    printf("Diskstore keys: %Ld\n", kvstore.get_num_disk_keys());
+    printf("Memstore size:  %Ld\n", kvstore.get_mem_size());
+    printf("Diskstore size: %Ld\n", kvstore.get_disk_size());
 
     free(key);
     free(value);

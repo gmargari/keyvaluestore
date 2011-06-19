@@ -89,14 +89,14 @@ public:
      *
      * @return number of <key, value, timestamp> tuples in map
      */
-    uint64_t num_keys();
+    uint64_t get_num_keys();
 
     /**
      * total byte size of tuples stored in map
      *
      * @return total byte size of tuples stored in map
      */
-    uint64_t size();
+    uint64_t get_size();
 
     /**
      * return current timestamp

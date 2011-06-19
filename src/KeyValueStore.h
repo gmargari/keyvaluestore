@@ -87,28 +87,28 @@ public:
      *
      * @return number of <key, value, timestamp> tuples in memory
      */
-    uint64_t num_mem_keys();
+    uint64_t get_num_mem_keys();
 
     /**
      * number of <key, value, timestamp> tuples on disk
      *
      * @return number of <key, value, timestamp> tuples on disk
      */
-    uint64_t num_disk_keys();
+    uint64_t get_num_disk_keys();
 
     /**
      * total byte size of tuples stored in memory
      *
      * @return total byte size of tuples stored in memory
      */
-    uint64_t mem_size();
+    uint64_t get_mem_size();
 
     /**
      * total byte size of tuples stored on disk
      *
      * @return total byte size of tuples stored on disk
      */
-    uint64_t disk_size();
+    uint64_t get_disk_size();
 
 protected:
 

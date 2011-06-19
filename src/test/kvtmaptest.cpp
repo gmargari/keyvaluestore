@@ -152,8 +152,8 @@ int main(void)
     map->clear(key1, key2);
     map->clear(key2, key3);
     map->clear(key3, NULL);
-    assert(map->size() == 0);
-    assert(map->num_keys() == 0);
+    assert(map->get_size() == 0);
+    assert(map->get_num_keys() == 0);
 
     //========================================================
     // check that the two files have identical contents

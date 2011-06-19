@@ -52,12 +52,12 @@ public:
     /**
      * number of keys (or tuples) stored on disk file
      */
-    uint64_t num_keys();
+    uint64_t get_num_keys();
 
     /**
      * size of disk file
      */
-    uint64_t size();
+    uint64_t get_size();
 
 //     // file system name of this file
 //     char *name();    // NOTE: a VFile can be composed of several disk files. modify function to return array of names?!

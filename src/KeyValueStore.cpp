@@ -112,35 +112,35 @@ bool KeyValueStore::get(const char *key, uint64_t timestamp, char **value)
 }
 
 /*========================================================================
- *                             num_mem_keys
+ *                           get_num_mem_keys
  *========================================================================*/
-uint64_t KeyValueStore::num_mem_keys()
+uint64_t KeyValueStore::get_num_mem_keys()
 {
-    return m_memstore->num_keys();
+    return m_memstore->get_num_keys();
 }
 
 /*========================================================================
- *                             num_disk_keys
+ *                           get_num_disk_keys
  *========================================================================*/
-uint64_t KeyValueStore::num_disk_keys()
+uint64_t KeyValueStore::get_num_disk_keys()
 {
-    return m_diskstore->num_keys();
+    return m_diskstore->get_num_keys();
 }
 
 /*========================================================================
- *                               mem_size
+ *                             get_mem_size
  *========================================================================*/
-uint64_t KeyValueStore::mem_size()
+uint64_t KeyValueStore::get_mem_size()
 {
-    return m_memstore->size();
+    return m_memstore->get_size();
 }
 
 /*========================================================================
- *                              disk_size
+ *                            get_disk_size
  *========================================================================*/
-uint64_t KeyValueStore::disk_size()
+uint64_t KeyValueStore::get_disk_size()
 {
-    return m_diskstore->size();
+    return m_diskstore->get_size();
 }
 
 // TODO: move elsewhere

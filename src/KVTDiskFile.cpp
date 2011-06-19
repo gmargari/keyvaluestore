@@ -74,17 +74,17 @@ void KVTDiskFile::delete_from_disk()
 }
 
 /*=======================================================================*
- *                                num_keys
+ *                              get_num_keys
  *=======================================================================*/
-uint64_t KVTDiskFile::num_keys()
+uint64_t KVTDiskFile::get_num_keys()
 {
     return m_vfile_numkeys;
 }
 
 /*=======================================================================*
- *                                  size
+ *                                get_size
  *=======================================================================*/
-uint64_t KVTDiskFile::size()
+uint64_t KVTDiskFile::get_size()
 {
     return m_vfile->fs_size();
 }

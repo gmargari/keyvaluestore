@@ -79,19 +79,19 @@ bool MemStore::get(const char *key, uint64_t timestamp, char **value)
 }
 
 /*========================================================================
- *                               num_keys
+ *                             get_num_keys
  *========================================================================*/
-uint64_t MemStore::num_keys()
+uint64_t MemStore::get_num_keys()
 {
-    return m_kvtmap->num_keys();
+    return m_kvtmap->get_num_keys();
 }
 
 /*========================================================================
- *                                 size
+ *                               get_size
  *========================================================================*/
-uint64_t MemStore::size()
+uint64_t MemStore::get_size()
 {
-    return m_kvtmap->size();
+    return m_kvtmap->get_size();
 }
 
 /*========================================================================
@@ -99,7 +99,7 @@ uint64_t MemStore::size()
  *========================================================================*/
 bool MemStore::is_full()
 {
-    return (size() > m_maxsize);
+    return (get_size() > m_maxsize);
 }
 
 /*========================================================================

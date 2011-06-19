@@ -123,18 +123,18 @@ bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
 }
 
 /*=======================================================================*
- *                               num_keys
+ *                             get_num_keys
  *=======================================================================*/
-uint64_t KVTMap::num_keys()
+uint64_t KVTMap::get_num_keys()
 {
     assert(sanity_check());
     return m_keys;
 }
 
 /*=======================================================================*
- *                                 size
+ *                               get_size
  *=======================================================================*/
-uint64_t KVTMap::size()
+uint64_t KVTMap::get_size()
 {
     assert(sanity_check());
     return m_size;
