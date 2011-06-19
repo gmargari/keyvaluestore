@@ -9,6 +9,8 @@
 
 #define BUFSIZE 1000
 
+#define UNIQUE_KEYS 0   // create unique keys, so no values are overwritten
+
 void randstr(char *s, const int len) {
     static const char alphanum[] =
 //         "0123456789"
@@ -60,7 +62,9 @@ int main(void)
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        sprintf(key, "%s%d", key, i); // create unique keys, so no values are overwritten
+        if (UNIQUE_KEYS) {
+            sprintf(key, "%s%d", key, i);
+        }
         kvstore.put(key, value);
         if (i && i % 100 == 0)
             printf("i = %d\n", i);
@@ -77,18 +81,24 @@ int main(void)
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        sprintf(key, "%s%d", key, i);
+        if (UNIQUE_KEYS) {
+            sprintf(key, "%s%d", key, i);
+        }
         if (kvstore.get(key, &value2, &timestamp) == false) {
             printf("Key [%s] was not found!\n", key);
             return EXIT_FAILURE;
         }
-        assert(strcmp(value, value2) == 0);
+        if (UNIQUE_KEYS) {
+            assert(strcmp(value, value2) == 0);
+        }
         free(const_cast<char*>(value2)); // since value returned from get is always a copy...
         if (i && i % 100 == 0)
             printf("i = %d\n", i);
     }
 
-    assert(kvstore.get_num_mem_keys() + kvstore.get_num_disk_keys() == num_keys);  // since keys are unique
+    if (UNIQUE_KEYS) {
+        assert(kvstore.get_num_mem_keys() + kvstore.get_num_disk_keys() == num_keys);
+    }
     printf("Memstore keys:  %Ld\n", kvstore.get_num_mem_keys());
     printf("Diskstore keys: %Ld\n", kvstore.get_num_disk_keys());
     printf("Memstore size:  %Ld\n", kvstore.get_mem_size());
