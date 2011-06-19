@@ -40,13 +40,14 @@ void ImmCompactionManager::flush_bytes(void)
 
     // -------------------------------- NOTE ----------------------------------
     // every new file created by Compaction Manager should be inserted
-    // at the *back* of the vector, so the last file in vector is the most
-    // recent one, and the first is the oldest one.
+    // at the *front* of the vector, so the first file in vector is the most
+    // recent one, and the last is the oldest one.
     // the same should be done accordingly for their respective input streams
     // -------------------------------- NOTE ----------------------------------
 
     assert(sanity_check());
 
+    // if we perform offline merge, flush memstore to a new file on disk
     if (ONLINE_MEMSTORE_MERGE == false) {
         memstore_flush_to_new_diskfile();
         memstore_clear();
@@ -57,17 +58,16 @@ void ImmCompactionManager::flush_bytes(void)
             return;
         }
     }
+    // else, add memstore stream first since it contains the most recent <k,v> pairs
+    else {
+        m_memstore->m_inputstream->reset();
+        istreams.push_back(m_memstore->m_inputstream);
+    }
 
-    // create vector of all input streams that will be merged
+    // add all disk input streams that will be merged, from most recent to oldest
     for (int i = 0; i < (int)m_diskstore->m_disk_istreams.size(); i++) {
         m_diskstore->m_disk_istreams[i]->reset();
         istreams.push_back(m_diskstore->m_disk_istreams[i]);
-    }
-
-    // add memstore stream last since it contains the most recent <k,v> pairs
-    if (ONLINE_MEMSTORE_MERGE) {
-        m_memstore->m_inputstream->reset();
-        istreams.push_back(m_memstore->m_inputstream);
     }
 
     // merge input streams, writing output to a new file

@@ -88,10 +88,11 @@ void CompactionManager::memstore_flush_to_new_diskfile()
     // (no need to use copy_stream_unique_keys() since map keys are unique)
     copy_stream(m_memstore->m_inputstream, disk_ostream);
 
-    // append at diskstore files vector the new disk file & a new input stream for it
-    m_diskstore->m_disk_files.push_back(disk_file);
+    // insert first, in diskstore files vector & input streams vector, as it
+    // contains the most recent <k,v> pairs
+    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), disk_file);
     disk_istream = new KVTDiskFileInputStream(m_diskstore->m_disk_files.back());
-    m_diskstore->m_disk_istreams.push_back(disk_istream);
+    m_diskstore->m_disk_istreams.insert(m_diskstore->m_disk_istreams.begin(), disk_istream);
 
     // delete map input stream and disk file output stream
     delete disk_ostream;

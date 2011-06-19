@@ -58,8 +58,8 @@ protected:
 
             if (cmp > 0) {
                 return true;
-            } else if (cmp == 0 && e1->sid > e2->sid) {
-                assert(e1->timestamp > e2->timestamp);
+            } else if (cmp == 0 && e2->sid < e1->sid) {
+                assert(e2->timestamp > e1->timestamp);
                 return true;
             } else {
                 return false;

@@ -44,7 +44,7 @@ bool DiskStore::get(const char *key, char **value, uint64_t *timestamp)
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
     assert(m_disk_files.size() == m_disk_istreams.size());
-    for (int i = m_disk_files.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < (int)m_disk_files.size(); i++) {
         disk_istream = m_disk_istreams[i];
         disk_istream->set_key_range(key, key, true, true);
         if (disk_istream->read(&k, &constvalue, timestamp)) {
