@@ -60,13 +60,13 @@ void ImmCompactionManager::flush_bytes(void)
             return;
         }
     }
-    // else, add memstore stream first since it contains the most recent <k,v> pairs
+    // else, add memstore stream
     else {
         m_memstore->m_inputstream->reset();
         istreams_to_merge.push_back(m_memstore->m_inputstream);
     }
 
-    // add all disk input streams that will be merged, from most recent to oldest
+    // add all disk input streams that will be merged
     for (int i = 0; i < (int)r_disk_istreams.size(); i++) {
         r_disk_istreams[i]->reset();
         istreams_to_merge.push_back(r_disk_istreams[i]);
