@@ -157,7 +157,7 @@ ssize_t VFile::fs_write(const void *buf, size_t count)
  *========================================================================*/
 off_t VFile::fs_seek(off_t offs, int whence)
 {
-    off_t abs_offs, offs_in_file;
+    off_t offs_in_file;
     int fileno;
 
     if (whence == SEEK_SET) {
