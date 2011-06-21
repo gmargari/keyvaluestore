@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
+#include <sys/types.h>
 
 /*========================================================================
  *                           GeomCompactionManager
@@ -56,7 +57,6 @@ void GeomCompactionManager::set_P(int p)
 {
     assert(p >= 1);
     m_P = p;
-    m_R = -1; // in order to re-adjust limits at first flush
 }
 
 /*========================================================================
@@ -68,12 +68,12 @@ int GeomCompactionManager::get_P(void)
 }
 
 /*========================================================================
- *                        partition_lower_bound
+ *                          partition_minsize
  *========================================================================*/
-int GeomCompactionManager::partition_lower_bound(int partition_num)
+int GeomCompactionManager::partition_minsize(int partition_num)
 {
     // the only difference between P being and not being constant
-    // is that in the first case partition 0 has limit R while in the
+    // is that in the first case partition 0 has maxsize R while in the
     // second case it has limit R-1.
     assert(m_R >= 2);
     if (m_P) {
@@ -85,13 +85,13 @@ int GeomCompactionManager::partition_lower_bound(int partition_num)
 }
 
 /*========================================================================
- *                        partition_upper_bound
+ *                          partition_maxsize
  *========================================================================*/
-int GeomCompactionManager::partition_upper_bound(int partition_num)
+int GeomCompactionManager::partition_maxsize(int partition_num)
 {
     // the only difference between P being and not being constant
-    // is that in the first case partition 0 has limit R while in the
-    // second case it has limit R-1.
+    // is that in the first case partition 0 has limit R maxsize in the
+    // second case it has maxsize R-1.
     assert(m_R >= 2);
     if (m_P) {
         return (int)pow(m_R, partition_num + 1);
@@ -101,18 +101,18 @@ int GeomCompactionManager::partition_upper_bound(int partition_num)
 }
 
 /*========================================================================
- *                             partition_num
+ *                           partition_num
  *========================================================================*/
 int GeomCompactionManager::partition_num(int partition_size)
 {
     for (int i = 0; ; i++) {
-        if (partition_size <= partition_upper_bound(i)) {
-            assert(partition_size >= partition_lower_bound(i));
+        if (partition_size <= partition_maxsize(i)) {
+            assert(partition_size >= partition_minsize(i));
             return i;
         }
     }
 
-    assert(0);
+    assert("can't get here" && 0);
 }
 
 
@@ -144,7 +144,7 @@ void GeomCompactionManager::flush_bytes(void)
 
     assert(sanity_check());
 
-    // if we bound number of partitions, re-adjust R so it remains <= P
+    // if we bound number of partitions, re-adjust R so num of partitions is <= P
     if (m_P) {
         set_R(compute_current_R());
     }
@@ -157,12 +157,12 @@ void GeomCompactionManager::flush_bytes(void)
     // existing partition)
     count = 0;
     size = 1; // 1 for memstore
-    for (int i = 0; i < (int)m_partition_size.size(); i++) {
+    for (uint i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i]) {
             count++;
             size += m_partition_size[i];
         }
-        if (size <= partition_upper_bound(i)) {
+        if (size <= partition_maxsize(i)) {
             break;
         }
     }
@@ -187,7 +187,7 @@ void GeomCompactionManager::flush_bytes(void)
     // clear memstore
     memstore_clear();
 
-    // delete files merged above (and their input streams)
+    // delete all files merged as well as their input streams
     for (int i = 0; i < count; i++) {
         r_disk_files[i]->delete_from_disk();
         delete r_disk_files[i];
@@ -200,19 +200,19 @@ void GeomCompactionManager::flush_bytes(void)
     r_disk_files.insert(r_disk_files.begin(), disk_file);
     r_disk_istreams.insert(r_disk_istreams.begin(), new KVTDiskFileInputStream(disk_file));
 
-    // update m_partition_size vector (zero the sizes of the 'count' partitions
-    // merged, add new partition)
-    for (int i = 0; i < (int)m_partition_size.size(); i++) {
+    // update 'm_partition_size' vector: zero the sizes of the 'count' partitions merged
+    for (uint i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i] && count > 0) {
             m_partition_size[i] = 0;
             count--;
         }
     }
+    // update 'm_partition_size' vector: add new partition
     part_num = partition_num(size);
-    assert(part_num <= (int)m_partition_size.size());
     if (part_num == (int)m_partition_size.size()) {
         m_partition_size.push_back(size);
     } else {
+        assert(part_num < (int)m_partition_size.size());
         m_partition_size[part_num] = size;
     }
 
@@ -224,9 +224,9 @@ void GeomCompactionManager::flush_bytes(void)
  *=======================================================================*/
 void GeomCompactionManager::print_partitions()
 {
-    printf("part.size: |"); for (int i = 0; i < (int)m_partition_size.size(); i++) printf("%3d |", m_partition_size[i]);       printf("\n");
-    printf("minsize:   |"); for (int i = 0; i < (int)m_partition_size.size(); i++) printf("%3d |", partition_lower_bound(i));  printf("\n");
-    printf("maxsize:   |"); for (int i = 0; i < (int)m_partition_size.size(); i++) printf("%3d |", partition_upper_bound(i));  printf("\n");
+    printf("part.size: |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", m_partition_size[i]);   printf("\n");
+    printf("minsize:   |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", partition_minsize(i));  printf("\n");
+    printf("maxsize:   |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", partition_maxsize(i));  printf("\n");
 }
 
 /*=======================================================================*
@@ -239,9 +239,9 @@ int GeomCompactionManager::sanity_check()
 
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
     assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());
-    for (int i = 0; i < (int)m_partition_size.size(); i++) {
-        assert(m_partition_size[i] == 0 || m_partition_size[i] >= partition_lower_bound(i));
-        assert(m_partition_size[i] <= partition_upper_bound(i));
+    for (uint i = 0; i < m_partition_size.size(); i++) {
+        assert(m_partition_size[i] == 0 || m_partition_size[i] >= partition_minsize(i));
+        assert(m_partition_size[i] <= partition_maxsize(i));
         cursize += m_partition_size[i];
     }
     assert(cursize == lastsize || cursize == lastsize + 1);

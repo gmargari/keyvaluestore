@@ -47,15 +47,13 @@ protected:
 
     /**
      * return the lower bound on the size of 'num'-th partition.
-     * (TODO NOTE: if 4 is returned, this means that 'num'-th partition has
-     * lower bound on size '4 * m_memstore->get_maxsize()' bytes)
      */
-    int partition_lower_bound(int num);
+    int partition_minsize(int num);
 
     /**
      * return the upper bound on the size of 'num'-th partition
      */
-    int partition_upper_bound(int num);
+    int partition_maxsize(int num);
 
     /**
      * return size of 'num'-th partition on disk.
