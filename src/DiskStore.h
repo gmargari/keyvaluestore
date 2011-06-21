@@ -63,6 +63,11 @@ public:
      */
     uint64_t get_size();
 
+    /**
+     * return number of disk files
+     */
+    int get_num_disk_files();
+
 protected:
 
     int sanity_check();
