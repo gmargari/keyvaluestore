@@ -43,7 +43,7 @@ int main(void)
     struct timeval tv;
     uint64_t timestamp, num_keys, i;
 
-    kvstore = new KeyValueStore();
+    kvstore = new KeyValueStore(KeyValueStore::GEOM_CM);
     kvstore->set_memstore_maxsize(MEMSTORE_SIZE);
 
     gettimeofday(&tv, NULL);

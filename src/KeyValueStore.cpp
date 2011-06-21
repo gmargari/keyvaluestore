@@ -8,6 +8,7 @@
 #include "UrfCompactionManager.h"
 
 #include <cassert>
+#include <cstdio>
 
 /*========================================================================
  *                            KeyValueStore
@@ -78,8 +79,11 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
+    static int dumps = 0;
+
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, value)) {
+        printf("Dumping memstore to disk %d\n", dumps++);
         m_compactionmanager->flush_bytes();
     }
 
