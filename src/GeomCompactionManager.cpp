@@ -121,13 +121,13 @@ int GeomCompactionManager::partition_num(int partition_size)
  *========================================================================*/
 int GeomCompactionManager::compute_current_R()
 {
-    uint64_t total_bytes_inserted, memory_size;
+    int size_of_bytes_inserted = 0;
 
-    assert(m_P);
-    total_bytes_inserted = m_memstore->get_size() + m_diskstore->get_size();
-    memory_size = m_memstore->get_maxsize();
-
-    return (int)ceil( pow(total_bytes_inserted / memory_size, 1.0 / m_P) );
+    size_of_bytes_inserted = 1; // 1 for memstore that will be flushed to disk
+    for (uint i = 0; i < m_partition_size.size(); i++) {
+        size_of_bytes_inserted += m_partition_size[i];
+    }
+    return (int)ceil( pow(size_of_bytes_inserted, 1.0 / m_P) );
 }
 
 /*========================================================================
@@ -246,6 +246,10 @@ int GeomCompactionManager::sanity_check()
     }
     assert(cursize == lastsize || cursize == lastsize + 1);
     lastsize = cursize;
+
+    if (m_P) {
+        assert(m_diskstore->m_disk_files.size() <= m_P);
+    }
 
     return 1;
 }
