@@ -13,17 +13,17 @@ public:
 
     /**
      * Memory flush & compaction manager algorithm:
-     * IMM_CM: Immediate Merge
-     * GEOM_CM: Geometric Partitioning
-     * LOG_CM: Logarithmic Merge
-     * URF_CM: Unified Range Flush
+     *  - IMM_CM: Immediate Merge
+     *  - GEOM_CM: Geometric Partitioning
+     *  - LOG_CM: Logarithmic Merge
+     *  - URF_CM: Unified Range Flush
      */
     typedef enum { GEOM_CM, LOG_CM, URF_CM, IMM_CM } cm_type;
 
     /**
      * constructor
      */
-    KeyValueStore(cm_type type = KeyValueStore::IMM_CM);
+    KeyValueStore(cm_type type);
 
     /**
      * destructor
@@ -83,32 +83,35 @@ public:
     bool get(const char *key, uint64_t timestamp, char **value);
 
     /**
-     * number of <key, value, timestamp> tuples in memory
-     *
-     * @return number of <key, value, timestamp> tuples in memory
+     * return number of <key, value, timestamp> tuples in memory
      */
     uint64_t get_num_mem_keys();
 
     /**
-     * number of <key, value, timestamp> tuples on disk
-     *
-     * @return number of <key, value, timestamp> tuples on disk
+     * return number of <key, value, timestamp> tuples on disk
      */
     uint64_t get_num_disk_keys();
 
     /**
-     * total byte size of tuples stored in memory
-     *
-     * @return total byte size of tuples stored in memory
+     * return total byte size of tuples stored in memory
      */
     uint64_t get_mem_size();
 
     /**
-     * total byte size of tuples stored on disk
-     *
-     * @return total byte size of tuples stored on disk
+     * return total byte size of tuples stored on disk
      */
     uint64_t get_disk_size();
+
+    /**
+     * return number of disk files
+     */
+    int get_num_disk_files();
+
+    /**
+     * return pointer to compaction manager, in case e.g. we want to modify
+     * its parameters.
+     */
+    CompactionManager *get_compaction_manager();
 
 protected:
 

@@ -79,11 +79,8 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    static int dumps = 0;
-
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, value)) {
-        printf("Dumping memstore to disk %d\n", dumps++);
         m_compactionmanager->flush_bytes();
     }
 
@@ -149,6 +146,30 @@ uint64_t KeyValueStore::get_disk_size()
     return m_diskstore->get_size();
 }
 
+/*=======================================================================*
+ *                           get_num_disk_files
+ *=======================================================================*/
+int KeyValueStore::get_num_disk_files()
+{
+    return m_diskstore->get_num_disk_files();
+}
+
+/*========================================================================
+ *                        get_compaction_manager
+ *========================================================================*/
+CompactionManager *KeyValueStore::get_compaction_manager()
+{
+    return m_compactionmanager;
+}
+
+/*=======================================================================*
+ *                             sanity_check
+ *=======================================================================*/
+int KeyValueStore::sanity_check()
+{
+    return 1;
+}
+
 // TODO: move elsewhere
 /*=======================================================================*
  *                           check_parameters
@@ -158,12 +179,4 @@ void KeyValueStore::check_parameters()
     // need at least these bytes (e.g. to fully decode a kvt read from disk:
     // <keylen, valuelen, key, value, timestamp>
     assert(SCANNERBUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
-}
-
-/*=======================================================================*
- *                             sanity_check
- *=======================================================================*/
-int KeyValueStore::sanity_check()
-{
-    return 1;
 }
