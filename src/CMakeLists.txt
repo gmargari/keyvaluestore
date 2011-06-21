@@ -43,5 +43,8 @@ target_link_libraries (LogCompactionManager MemStore DiskStore KVTMapInputStream
 target_link_libraries (UrfCompactionManager MemStore DiskStore KVTMapInputStream KVTDiskFileInputStream KVTDiskFileOutputStream KVTPriorityInputStream)
 target_link_libraries (KeyValueStore MemStore DiskStore ImmCompactionManager GeomCompactionManager LogCompactionManager UrfCompactionManager)
 
+add_executable (sim main.cpp)
+target_link_libraries (sim KeyValueStore)
+
 add_subdirectory (test)
 add_subdirectory (tools)

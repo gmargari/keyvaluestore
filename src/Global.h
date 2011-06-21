@@ -3,20 +3,23 @@
 
 // set debug level:
 //  0 - debugging disabled
-//  1 - light mode      (only assertions enabled)
-//  2 - normal mode     (assertions and sanity_check()s enabled)
-//  3 - heavy debugging (assertions, sanity_checks()s and all other debugging functions enabled)
+//  1 - normal mode     (assertions and sanity_check()s enabled)
+//  2 - heavy debugging (assertions, sanity_checks()s and all other debugging functions enabled)
 #define DBGLVL 2
 
 // default values
-#define DEFAULT_MEMSTORE_SIZE                       1048576 // 1MB
+#define DEFAULT_MEMSTORE_SIZE                   104857600LL // 100MB
 #define MAX_INDEX_DIST                                65536 // 64KB
-#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB
+#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB (max size for key and for value)
 #define SCANNERBUFSIZE       ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
 // compaction managers' default values
-#define DEFAULT_GEOM_R                        3
-#define DEFAULT_GEOM_P                        0 // default disabled (no upper bound on number of partitions)
+#define DEFAULT_GEOM_R                                    3
+#define DEFAULT_GEOM_P                                    0 // default disabled (no upper bound on number of partitions)
+#define DEFAULT_STATS_ENABLED                         false
+#define DEFAULT_STATS_STEP            DEFAULT_MEMSTORE_SIZE
+#define DEFAULT_URF_BLOCKSIZE                   268435456LL // 256MB
+#define DEFAULT_URF_FLUSHMEMSIZE                        0LL // 0 -> flush biggest range only
 
 // vfile-related defines
 #define TMPFILEDIR              "/tmp/"
