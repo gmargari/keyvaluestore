@@ -65,7 +65,8 @@ uint64_t KeyValueStore::get_memstore_maxsize()
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
 {
-    if (m_memstore->is_full()) {
+    assert(m_memstore->get_size() < m_memstore->get_maxsize());
+    if (m_memstore->will_reach_size_limit(key, value, timestamp)) {
         m_compactionmanager->flush_bytes();
     }
 
@@ -77,7 +78,8 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
  *========================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    if (m_memstore->is_full()) {
+    assert(m_memstore->get_size() <= m_memstore->get_maxsize());
+    if (m_memstore->will_reach_size_limit(key, value)) {
         m_compactionmanager->flush_bytes();
     }
 

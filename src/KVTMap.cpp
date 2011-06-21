@@ -141,6 +141,14 @@ uint64_t KVTMap::get_size()
 }
 
 /*=======================================================================*
+ *                                 new_size
+ *=======================================================================*/
+uint64_t KVTMap::new_size(const char *key, const char *value, uint64_t timestamp)
+{
+    return get_size() + sizeof(kvtpair) + strlen(key) + strlen(value) + 2;
+}
+
+/*=======================================================================*
  *                               start_iter
  *=======================================================================*/
 KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)

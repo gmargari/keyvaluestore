@@ -95,11 +95,19 @@ uint64_t MemStore::get_size()
 }
 
 /*========================================================================
- *                                is_full
+ *                         will_reach_size_limit
  *========================================================================*/
-bool MemStore::is_full()
+bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_t timestamp)
 {
-    return (get_size() > m_maxsize);
+    return (m_kvtmap->new_size(key, value, timestamp) > m_maxsize);
+}
+
+/*========================================================================
+ *                         will_reach_size_limit
+ *========================================================================*/
+bool MemStore::will_reach_size_limit(const char *key, const char *value)
+{
+    return will_reach_size_limit(key, value, 0);
 }
 
 /*========================================================================

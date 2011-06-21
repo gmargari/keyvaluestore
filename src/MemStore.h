@@ -88,9 +88,12 @@ public:
     uint64_t get_size();
 
     /**
-     * memstore is full (we probably need to flush some <k,v,t> tuples to disk)
+     * check if adding <key, value, timestamp> to memstore will reach memstore's
+     * size limit
      */
-    bool is_full();
+    bool will_reach_size_limit(const char *key, const char *value, uint64_t timestamp);
+
+    bool will_reach_size_limit(const char *key, const char *value);
 
     /**
      * clear memstore

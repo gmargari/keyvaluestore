@@ -99,6 +99,11 @@ public:
     uint64_t get_size();
 
     /**
+     * return the new size of map if we add this <key, value, timestamp> tuple
+     */
+    uint64_t new_size(const char *key, const char *value, uint64_t timestamp);
+
+    /**
      * return current timestamp
      */
     uint64_t timestamp();
