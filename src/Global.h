@@ -14,6 +14,10 @@
 #define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB
 #define SCANNERBUFSIZE       ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
+// compaction managers' default values
+#define DEFAULT_GEOM_R                        3
+#define DEFAULT_GEOM_P                        0 // default disabled (no upper bound on number of partitions)
+
 // vfile-related defines
 #define TMPFILEDIR              "/tmp/"
 #define TMPFILEPREFIX           "fsim." // 5 chars max
