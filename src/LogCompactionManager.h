@@ -1,7 +1,7 @@
 #ifndef LOG_COMPACTIONMANAGER_H
 #define LOG_COMPACTIONMANAGER_H
 
-#include "CompactionManager.h"
+#include "GeomCompactionManager.h"
 
 #include <vector>
 
@@ -10,7 +10,7 @@ using std::vector;
 class MemStore;
 class DiskStore;
 
-class LogCompactionManager: public CompactionManager {
+class LogCompactionManager: public GeomCompactionManager {
 
 public:
 
@@ -23,13 +23,6 @@ public:
      * destructor
      */
     ~LogCompactionManager();
-
-    // inherited from CompactionManager (see CompactionManager.h for description)
-    void flush_bytes(void);
-
-protected:
-
-    int sanity_check();
 };
 
 #endif
