@@ -9,6 +9,10 @@
 #include <cstring>
 #include <cassert>
 
+// if this is true, read() will return immediately false, without trying to
+// deserialize buffer contents
+bool read_return_imm_with_fail = false;
+
 /*========================================================================
  *                           KVTDiskFileInputStream
  *========================================================================*/
@@ -45,18 +49,16 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
     m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
-    reset();
 
     if (m_start_key) {
 
         // if 'start_key' was stored on disk, it would be stored between 'off1' & 'off2'
         ret = m_kvtdiskfile->m_vfile_index->search(m_start_key, &off1, &off2);
         if (ret == false) {
-
             // 'start_key' was either (lexicographically) smaller than all terms,
-            // or greater than all terms in file. lseek() to the end of file
-            // so next read() will return false
-            m_kvtdiskfile->m_vfile->fs_seek(0, SEEK_END);
+            // or greater than all terms in file. set 'read_return_imm_with_fail'
+            // so next read will return immediately false
+            read_return_imm_with_fail = true;
             return;
         }
 
@@ -73,13 +75,20 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
             if ((cmp = strcmp(key, start_key)) == 0) {
                 if (m_start_incl == true) {
                     // must seek file back at the beginning of 'start_key' tuple
-                    assert(m_bytes_used >= serialize_len(strlen(key), strlen(value), timestamp));
-                    m_bytes_used -= serialize_len(strlen(key), strlen(value), timestamp);
+                    m_bytes_used -= len;
                 }
                 break;
-            } else if (cmp > 0) {
-                break; // ok, we're at first term greater then 'start_key'
             }
+            // first term greater than 'start_key'
+            else if (cmp > 0) {
+                break;
+            }
+        }
+
+        // in special case where 'start_key' == 'end_key' (for example,
+        // DiskStore::get()) return false as term does not exist on disk
+        if (m_bytes_used == m_bytes_in_buf && strcmp(start_key, end_key) == 0) {
+            read_return_imm_with_fail = true;
         }
 
         assert(m_kvtdiskfile->m_vfile->fs_tell() >= off1);
@@ -114,6 +123,11 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
 {
     uint32_t len, unused_bytes;
     int cmp;
+
+    if (read_return_imm_with_fail) {
+        read_return_imm_with_fail = false;
+        return false;
+    }
 
     // TODO: code repetition, how could I shorten code?
 
