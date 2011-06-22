@@ -34,9 +34,6 @@ target_link_libraries (KVTDiskFileInputStream    KVTSerialization KVTInputStream
 target_link_libraries (KVTDiskFileOutputStream   KVTSerialization)
 target_link_libraries (KVTPriorityInputStream    KVTDiskFileInputStream KVTMapInputStream)
 
-# target_link_libraries (KVTDiskFileScanner KVTScanner)
-# target_link_libraries (KVTMapScanner KVTScanner)
-
 target_link_libraries (ImmCompactionManager MemStore DiskStore KVTMapInputStream KVTDiskFileInputStream KVTDiskFileOutputStream KVTPriorityInputStream)
 target_link_libraries (GeomCompactionManager MemStore DiskStore KVTMapInputStream KVTDiskFileInputStream KVTDiskFileOutputStream KVTPriorityInputStream)
 target_link_libraries (LogCompactionManager MemStore DiskStore KVTMapInputStream KVTDiskFileInputStream KVTDiskFileOutputStream KVTPriorityInputStream)

@@ -10,8 +10,6 @@ using std::vector;
 
 class MemStore;
 class DiskStore;
-class KVTDiskFile;
-class KVTDiskFileInputStream;
 
 class GeomCompactionManager: public CompactionManager {
 

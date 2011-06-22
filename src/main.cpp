@@ -44,9 +44,9 @@ void print_syntax(char *progname)
      printf("        -v valuesize:           size of values, in bytes (default: %d)\n", DEFAULT_VALUE_SIZE);
      printf("        -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
      printf("        -m memory:              memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
-     printf("        -s:                     print periodic stats at stderr\n");
-     printf("        -o statsperiod:         print periodic stats every time that many MB are inserted\n");
-     printf("                                (default: memory size)\n");
+//      printf("        -s:                     print periodic stats at stderr\n");
+//      printf("        -o statsperiod:         print periodic stats every time that many MB are inserted\n");
+//      printf("                                (default: memory size)\n");
      printf("        -h:                     print this help message and exit\n");
 }
 

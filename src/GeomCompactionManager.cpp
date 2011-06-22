@@ -8,7 +8,6 @@
 #include "KVTDiskFile.h"
 #include "KVTDiskFileInputStream.h"
 #include "KVTDiskFileOutputStream.h"
-#include "KVTPriorityInputStream.h"
 
 #include <cstdlib>
 #include <cassert>
@@ -248,7 +247,7 @@ int GeomCompactionManager::sanity_check()
     lastsize = cursize;
 
     if (m_P) {
-        assert(m_diskstore->m_disk_files.size() <= m_P);
+        assert((int)m_diskstore->m_disk_files.size() <= m_P);
     }
 
     return 1;

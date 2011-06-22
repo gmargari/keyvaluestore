@@ -31,14 +31,10 @@ public:
     ~KeyValueStore();
 
     /**
-     * set maximum byte size of memstore. when this limit is reached,
+     * set/get maximum byte size of memstore. when this limit is reached,
      * compaction manager is called to flush some bytes from memory to disk.
      */
-    void set_memstore_maxsize(uint64_t maxsize);
-
-    /**
-     * get maximum byte size of memstore
-     */
+    void     set_memstore_maxsize(uint64_t maxsize);
     uint64_t get_memstore_maxsize();
 
     /**

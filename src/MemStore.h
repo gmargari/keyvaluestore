@@ -29,8 +29,8 @@ public:
     /**
      * get/set maximum size of memstore
      */
-    void        set_maxsize(uint64_t maxsize);
-    uint64_t    get_maxsize(void);
+    void     set_maxsize(uint64_t maxsize);
+    uint64_t get_maxsize(void);
 
     /**
      * insert a <key, value, timestamp> tuple into memstore. copies of the key
