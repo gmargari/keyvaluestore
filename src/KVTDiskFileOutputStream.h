@@ -48,6 +48,7 @@ protected:
     int sanity_check();
 
     KVTDiskFile *m_kvtdiskfile;
+    uint64_t     m_vfile_size;    // size of vfile
 
     char       	*m_buf;           // buffer used to serialize entries
     uint32_t     m_buf_size;      // buffer size
