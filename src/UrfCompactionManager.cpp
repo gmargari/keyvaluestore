@@ -8,9 +8,11 @@
 #include "KVTDiskFile.h"
 #include "KVTDiskFileInputStream.h"
 #include "KVTDiskFileOutputStream.h"
-#include "KVTPriorityInputStream.h"
 
-#define MERGE_ONLINE 0
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
+#include <sys/types.h>
 
 /*========================================================================
  *                           UrfCompactionManager
@@ -30,17 +32,47 @@ UrfCompactionManager::~UrfCompactionManager()
 }
 
 /*========================================================================
+ *                             set_blocksize
+ *========================================================================*/
+void UrfCompactionManager::set_blocksize(uint64_t blocksize)
+{
+    m_blocksize = blocksize;
+}
+
+/*========================================================================
+ *                             get_blocksize
+ *========================================================================*/
+uint64_t UrfCompactionManager::get_blocksize(void)
+{
+    return m_blocksize;
+}
+
+/*========================================================================
+ *                             set_flushmem
+ *========================================================================*/
+void UrfCompactionManager::set_flushmem(uint64_t flushmem)
+{
+    if (flushmem > m_memstore->get_maxsize()) {
+        printf("Error: flushmem (%Ld) cannot be greater than max memory (%Ld)\n", flushmem, m_memstore->get_maxsize());
+        exit(EXIT_FAILURE);
+    }
+
+    m_flushmem = flushmem;
+}
+
+/*========================================================================
+ *                             get_flushmem
+ *========================================================================*/
+uint64_t UrfCompactionManager::get_flushmem(void)
+{
+    return m_flushmem;
+}
+
+/*========================================================================
  *                            flush_memstore
  *========================================================================*/
 void UrfCompactionManager::flush_bytes(void)
 {
-    // -------------------------------- NOTE ----------------------------------
-    // every new file created by Compaction Manager should be inserted
-    // at the *back* of the vector, so the last file in vector is the most
-    // recent one, and the first is the oldest one.
-    // the same should be done accordingly for their respective input streams
-    // -------------------------------- NOTE ----------------------------------
-
     assert(sanity_check());
 
     assert(sanity_check());
