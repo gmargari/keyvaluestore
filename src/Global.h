@@ -5,7 +5,7 @@
 //  0 - debugging disabled
 //  1 - normal mode     (assertions and sanity_check()s enabled)
 //  2 - heavy debugging (assertions, sanity_checks()s and all other debugging functions enabled)
-#define DBGLVL 2
+#define DBGLVL 1
 
 // default values
 #define DEFAULT_MEMSTORE_SIZE                   104857600LL // 100MB
