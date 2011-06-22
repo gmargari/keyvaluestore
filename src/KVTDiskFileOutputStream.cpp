@@ -11,13 +11,10 @@
 /*========================================================================
  *                           KVTDiskFileOutputStream
  *========================================================================*/
-KVTDiskFileOutputStream::KVTDiskFileOutputStream(KVTDiskFile *file)
+KVTDiskFileOutputStream::KVTDiskFileOutputStream(KVTDiskFile *file, uint32_t bufsize)
 {
-    m_vfile = file->m_vfile;
-    m_vfile_index = file->m_vfile_index;
-    m_vfile_numkeys = &(file->m_vfile_numkeys);
-
-    m_buf_size = SCANNERBUFSIZE;
+    m_kvtdiskfile = file;
+    m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
     m_last_key = (char *)malloc(MAX_KVTSIZE);
     reset();
@@ -37,10 +34,9 @@ KVTDiskFileOutputStream::~KVTDiskFileOutputStream()
  *========================================================================*/
 void KVTDiskFileOutputStream::reset()
 {
-    m_vfile->fs_rewind();   // contents will be overwritten
-    m_vfile_index->clear(); // index will be rebuild
-    (*m_vfile_numkeys) = 0;
-    m_vfile_size = 0;
+    m_kvtdiskfile->m_vfile->fs_rewind();   // contents will be overwritten
+    m_kvtdiskfile->m_vfile_index->clear(); // index will be rebuild
+    m_kvtdiskfile->m_vfile_numkeys = 0;
 
     m_bytes_in_buf = 0;
 
@@ -59,7 +55,7 @@ bool KVTDiskFileOutputStream::write(const char *key, const char *value, uint64_t
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
     if (m_bytes_in_buf + serialize_len(strlen(key), strlen(value), timestamp) > m_buf_size) {
-        m_vfile->fs_write(m_buf, m_bytes_in_buf);
+        m_kvtdiskfile->m_vfile->fs_write(m_buf, m_bytes_in_buf);
         m_bytes_in_buf = 0;
     }
 
@@ -68,15 +64,14 @@ bool KVTDiskFileOutputStream::write(const char *key, const char *value, uint64_t
         m_bytes_in_buf += len;
 
         // if needed, add entry to index
-        cur_offs = m_vfile_size;
+        cur_offs = m_kvtdiskfile->m_vfile->fs_size() - len;
         if (m_last_idx_offs == -1 || cur_offs + len - m_last_idx_offs > MAX_INDEX_DIST) {
-            m_vfile_index->add(key, cur_offs);
+            m_kvtdiskfile->m_vfile_index->add(key, cur_offs);
             m_last_idx_offs = cur_offs;
         }
 
-        (*m_vfile_numkeys)++;
-        m_vfile_size += len;
-        m_vfile_index->set_vfilesize(m_vfile_size);
+        m_kvtdiskfile->m_vfile_numkeys++;
+        m_kvtdiskfile->m_vfile_index->set_vfilesize(m_kvtdiskfile->m_vfile->fs_size()); // TODO: WTF?! Simplify!
 
         strcpy(m_last_key, key); // TODO: can we avoid this memcpy?
         m_last_offs = cur_offs;
@@ -92,16 +87,15 @@ bool KVTDiskFileOutputStream::write(const char *key, const char *value, uint64_t
 void KVTDiskFileOutputStream::flush()
 {
     if (m_bytes_in_buf) {
-        m_vfile->fs_write(m_buf, m_bytes_in_buf);
+        m_kvtdiskfile->m_vfile->fs_write(m_buf, m_bytes_in_buf);
     }
-    m_vfile->fs_sync();
-    assert(m_vfile->fs_size() == m_vfile_size);
+    m_kvtdiskfile->m_vfile->fs_sync();
 
     // TODO: this is possibly wrong, someone could call flush many times and not
     // just once at the end. should we add a function like 'close()' or
     // 'finalize()' and move this code there?!
     if (m_last_idx_offs != m_last_offs) {
-        m_vfile_index->add(m_last_key, m_last_offs);
+        m_kvtdiskfile->m_vfile_index->add(m_last_key, m_last_offs);
     }
 }
 

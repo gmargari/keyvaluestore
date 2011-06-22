@@ -75,7 +75,7 @@ void ImmCompactionManager::flush_bytes(void)
     // merge input streams, writing output to a new file
     disk_file = new KVTDiskFile;
     disk_file->open_unique();
-    merge_ostream = new KVTDiskFileOutputStream(disk_file);
+    merge_ostream = new KVTDiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     merge_streams(istreams_to_merge, merge_ostream);
     delete merge_ostream;
 
@@ -95,7 +95,7 @@ void ImmCompactionManager::flush_bytes(void)
 
     // add new file and its input stream to (currently empty) set of disk files
     r_disk_files.push_back(disk_file);
-    r_disk_istreams.push_back(new KVTDiskFileInputStream(disk_file));
+    r_disk_istreams.push_back(new KVTDiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
     assert(sanity_check());
 }

@@ -10,6 +10,7 @@
 #include "KVTDiskFileOutputStream.h"
 
 #include <cstdlib>
+#include <cstdio>
 #include <cassert>
 #include <cmath>
 #include <sys/types.h>
@@ -179,7 +180,7 @@ void GeomCompactionManager::flush_bytes(void)
     // merge sub-indexes with memstore, writing output to a new file
     disk_file = new KVTDiskFile;
     disk_file->open_unique();
-    disk_ostream = new KVTDiskFileOutputStream(disk_file);
+    disk_ostream = new KVTDiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     merge_streams(istreams_to_merge, disk_ostream);
     delete disk_ostream;
 
@@ -197,7 +198,7 @@ void GeomCompactionManager::flush_bytes(void)
 
     // add new file at the front, since it contains most recent <k,v> pairs
     r_disk_files.insert(r_disk_files.begin(), disk_file);
-    r_disk_istreams.insert(r_disk_istreams.begin(), new KVTDiskFileInputStream(disk_file));
+    r_disk_istreams.insert(r_disk_istreams.begin(), new KVTDiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
     // update 'm_partition_size' vector: zero the sizes of the 'count' partitions merged
     for (uint i = 0; i < m_partition_size.size(); i++) {

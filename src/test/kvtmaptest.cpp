@@ -78,7 +78,7 @@ int main(void)
     file1 = new KVTDiskFile();
     file1->open_unique();
     istream = new KVTMapInputStream(map);
-    ostream1 = new KVTDiskFileOutputStream(file1);
+    ostream1 = new KVTDiskFileOutputStream(file1, MERGE_BUFSIZE);
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
@@ -134,7 +134,7 @@ int main(void)
     //========================================================
     file2 = new KVTDiskFile();
     file2->open_unique();
-    ostream2 = new KVTDiskFileOutputStream(file2);
+    ostream2 = new KVTDiskFileOutputStream(file2, MERGE_BUFSIZE);
     istream_heap = new KVTPriorityInputStream(istreams);
     prev_timestamp = 0;
     prev_key[0] = '\0';
@@ -159,8 +159,8 @@ int main(void)
     // check that the two files have identical contents
     //========================================================
     value1 = (char *)malloc(MAX_KVTSIZE);
-    dfistream1 = new KVTDiskFileInputStream(file1);
-    dfistream2 = new KVTDiskFileInputStream(file2);
+    dfistream1 = new KVTDiskFileInputStream(file1, MERGE_BUFSIZE);
+    dfistream2 = new KVTDiskFileInputStream(file2, MERGE_BUFSIZE);
     num = 0;
     while (dfistream1->read(&k1, &v1, &ts1)) {
         dfistream2->read(&k2, &v2, &ts2);

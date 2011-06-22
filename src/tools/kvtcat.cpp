@@ -1,3 +1,4 @@
+#include "../Global.h"
 #include "../KVTDiskFile.h"
 #include "../KVTDiskFileInputStream.h"
 
@@ -18,7 +19,7 @@ int main(int argc, char **argv)
 
     kvtdiskfile = new KVTDiskFile();
     kvtdiskfile->open_existing(argv[1]);
-    istream = new KVTDiskFileInputStream(kvtdiskfile);
+    istream = new KVTDiskFileInputStream(kvtdiskfile, MERGE_BUFSIZE);
     while (istream->read(&key, &value, &timestamp)) {
         printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
     }

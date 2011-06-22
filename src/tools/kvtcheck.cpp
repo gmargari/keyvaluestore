@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     prev_key[0] = '\0';
     kvtdiskfile = new KVTDiskFile();
     kvtdiskfile->open_existing(argv[1]);
-    istream = new KVTDiskFileInputStream(kvtdiskfile);
+    istream = new KVTDiskFileInputStream(kvtdiskfile, MERGE_BUFSIZE);
     while (istream->read(&key, &value, &timestamp)) {
         if ((cmp = strcmp(prev_key, key)) > 0) {
             printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);

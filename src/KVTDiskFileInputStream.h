@@ -12,7 +12,7 @@ public:
     /**
      * constructor
      */
-    KVTDiskFileInputStream(KVTDiskFile *file);
+    KVTDiskFileInputStream(KVTDiskFile *file, uint32_t bufsize);
 
     /**
      * destructor

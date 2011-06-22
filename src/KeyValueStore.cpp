@@ -178,5 +178,5 @@ void KeyValueStore::check_parameters()
 {
     // need at least these bytes (e.g. to fully decode a kvt read from disk:
     // <keylen, valuelen, key, value, timestamp>
-    assert(SCANNERBUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
+    assert(MERGE_BUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
 }

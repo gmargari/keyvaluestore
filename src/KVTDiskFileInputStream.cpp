@@ -16,11 +16,11 @@ bool read_return_imm_with_fail = false;
 /*========================================================================
  *                           KVTDiskFileInputStream
  *========================================================================*/
-KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file)
+KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file, uint32_t bufsize)
 {
     m_kvtdiskfile = file;
     assert(file->m_vfile_index);
-    m_buf_size = SCANNERBUFSIZE;
+    m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
     set_key_range(NULL, NULL, true, true);
 }
