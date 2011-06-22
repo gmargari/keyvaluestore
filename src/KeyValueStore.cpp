@@ -81,9 +81,7 @@ bool KeyValueStore::put(const char *key, const char *value)
 {
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, value)) {
-        printf("Flushing memstore...\n");
         m_compactionmanager->flush_bytes();
-        printf("Memstore flushed, current number of runs: %d\n", m_diskstore->get_num_disk_files());
     }
 
     return m_memstore->put(key, value);

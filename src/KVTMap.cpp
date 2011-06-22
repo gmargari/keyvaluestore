@@ -263,7 +263,6 @@ int KVTMap::sanity_check()
     const char *key, *value;
     uint64_t timestamp;
 
-#if DBGLVL > 1
     for(kvtmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         key = iter->first;
         value = iter->second.first;
@@ -275,7 +274,6 @@ int KVTMap::sanity_check()
         assert(timestamp != 0);
     }
     assert(m_size == map_size);
-#endif
     assert(m_keys == m_map.size());
 
     return 1;
