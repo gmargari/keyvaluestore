@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -94,7 +95,8 @@ int main(int argc, char **argv)
     char *compmanager = NULL;
     bool periodic_stats_enabled, unique_keys;
     KeyValueStore *kvstore;
-    char key[MAX_KVTSIZE], value[MAX_KVTSIZE];
+    char *key, *value;
+    struct timeval start, end;
 
     // We need at least compaction manager
     if (argc == 1) {
@@ -362,16 +364,39 @@ int main(int argc, char **argv)
     //==============================================================
     kvstore->set_memstore_maxsize(memorysize);
 
+    key = (char *)malloc(MAX_KVTSIZE);
+    value = (char *)malloc(MAX_KVTSIZE);
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
         randstr(key, keysize);
         randstr(value, valuesize);
         if (uflag) {
-            sprintf(key, "%s%Ld", key, i);
+            sprintf(key, "%s%Ld", key, i); // make key unique
         }
         kvstore->put(key, value);
-        if (i && i % 100 == 0)
-            printf("i = %Ld, memstore size: %Ld\n", i, kvstore->get_mem_size());
+
+        // every 100 puts perform a number of gets
+        if (i && i % 10000 == 0) {
+            uint32_t total_time = 0;
+            uint64_t timestamp, search_queries;
+            char *value2;
+
+            system("echo 3 > /proc/sys/vm/drop_caches");
+            search_queries = 80; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
+            for (int j = 0; j < search_queries; j++) {
+                randstr(key, keysize);
+                if (uflag) {
+                    sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
+                }
+                gettimeofday(&start, NULL);
+                kvstore->get(key, &value2, &timestamp);
+                gettimeofday(&end, NULL);
+                total_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+            }
+            printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
+        }
     }
+    free(key);
+    free(value);
 
     delete kvstore;
 
