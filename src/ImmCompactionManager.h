@@ -3,10 +3,6 @@
 
 #include "CompactionManager.h"
 
-#include <vector>
-
-using std::vector;
-
 class MemStore;
 class DiskStore;
 

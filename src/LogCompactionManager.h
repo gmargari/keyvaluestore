@@ -3,10 +3,6 @@
 
 #include "GeomCompactionManager.h"
 
-#include <vector>
-
-using std::vector;
-
 class MemStore;
 class DiskStore;
 
