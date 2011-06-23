@@ -25,24 +25,6 @@ public:
     ~KVTMap();
 
     /**
-     * clear all elements of map
-     */
-    void clear();
-
-    /**
-     * clear all elements of map with keys in the range ['start_key', 'end_key')
-     * ('start_key' inclusive, 'end_key' exclusive)
-     */
-    void clear(const char *start_key, const char *end_key);
-
-    /**
-     * clear all elements of map with keys in the range [start_key, end_key].
-     * 'start_key' and 'end_key' may or may not be included, depending on
-     * 'start_incl' and 'end_incl'.
-     */
-    void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
-
-    /**
      * insert a <key, value, timestamp> tuple into map. copies of the key and
      * value are created and inserted into map.
      *
@@ -85,16 +67,12 @@ public:
     bool get(const char *key, uint64_t timestamp, const char **value);
 
     /**
-     * number of <key, value, timestamp> tuples in map
-     *
-     * @return number of <key, value, timestamp> tuples in map
+     * return number of <key, value, timestamp> tuples in map
      */
     uint64_t get_num_keys();
 
     /**
-     * total byte size of tuples stored in map
-     *
-     * @return total byte size of tuples stored in map
+     * return total byte size of tuples stored in map
      */
     uint64_t get_size();
 
@@ -104,9 +82,27 @@ public:
     uint64_t new_size(const char *key, const char *value, uint64_t timestamp);
 
     /**
+     * clear all elements of map
+     */
+    void clear();
+
+    /**
+     * clear all elements of map with keys in the range ['start_key', 'end_key')
+     * (i.e. 'start_key' inclusive, 'end_key' exclusive)
+     */
+    void clear(const char *start_key, const char *end_key);
+
+    /**
+     * clear all elements of map with keys in the range [start_key, end_key].
+     * 'start_key' and 'end_key' may or may not be included, depending on
+     * 'start_incl' and 'end_incl'.
+     */
+    void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
+
+    /**
      * return current timestamp
      */
-    uint64_t timestamp();
+    uint64_t timestamp(); // TODO: move to KeyValueStore class
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {

@@ -149,53 +149,6 @@ uint64_t KVTMap::new_size(const char *key, const char *value, uint64_t timestamp
 }
 
 /*=======================================================================*
- *                               start_iter
- *=======================================================================*/
-KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
-{
-    kvtmap::iterator iter;
-
-    if (key) {
-        iter = m_map.lower_bound(key);
-        if (key_incl == false && strcmp(iter->first, key) == 0) {
-            iter++;
-        }
-    } else {
-        iter = m_map.begin();
-    }
-
-    return iter;
-}
-
-/*=======================================================================*
- *                               end_iter
- *=======================================================================*/
-KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
-{
-    kvtmap::iterator iter;
-
-    if (key) {
-        // upper_bound(x) returns an iterator pointing to the first element
-        // whose key compares strictly greater than x
-        iter = m_map.upper_bound(key);
-
-        // if 'end_key' is not inclusive, set 'iter' one position back
-        // and check if 'iter' has key equal to 'end_key'. if yes,
-        // leave it there, else forward it one position.
-        if (key_incl == false && iter != m_map.begin()) {
-            iter--;
-            if (strcmp(iter->first, key) != 0) {
-                iter++;
-            }
-        }
-    } else {
-        iter = m_map.end();
-    }
-
-    return iter;
-}
-
-/*=======================================================================*
  *                                 clear
  *=======================================================================*/
 void KVTMap::clear()
@@ -252,6 +205,53 @@ uint64_t KVTMap::timestamp()
 //     return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
     static int i = 1;
     return i++;
+}
+
+/*=======================================================================*
+ *                               start_iter
+ *=======================================================================*/
+KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
+{
+    kvtmap::iterator iter;
+
+    if (key) {
+        iter = m_map.lower_bound(key);
+        if (key_incl == false && strcmp(iter->first, key) == 0) {
+            iter++;
+        }
+    } else {
+        iter = m_map.begin();
+    }
+
+    return iter;
+}
+
+/*=======================================================================*
+ *                               end_iter
+ *=======================================================================*/
+KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
+{
+    kvtmap::iterator iter;
+
+    if (key) {
+        // upper_bound(x) returns an iterator pointing to the first element
+        // whose key compares strictly greater than x
+        iter = m_map.upper_bound(key);
+
+        // if 'end_key' is not inclusive, set 'iter' one position back
+        // and check if 'iter' has key equal to 'end_key'. if yes,
+        // leave it there, else forward it one position.
+        if (key_incl == false && iter != m_map.begin()) {
+            iter--;
+            if (strcmp(iter->first, key) != 0) {
+                iter++;
+            }
+        }
+    } else {
+        iter = m_map.end();
+    }
+
+    return iter;
 }
 
 /*=======================================================================*
