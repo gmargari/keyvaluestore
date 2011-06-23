@@ -74,18 +74,27 @@ public:
     bool get(const char *key, uint64_t timestamp, char **value);
 
     /**
-     * number of <key, value, timestamp> tuples in memstore
-     *
-     * @return number of <key, value, timestamp> tuples in memstore
+     * return number of <key, value, timestamp> tuples in memstore
      */
     uint64_t get_num_keys();
 
     /**
-     * total byte size of tuples stored in memstore
-     *
-     * @return total byte size of tuples stored in memstore
+     * return total byte size of tuples stored in memstore.
      */
     uint64_t get_size();
+
+    /**
+     * return total byte size of tuples with keys in the range
+     * ['start_key', 'end_key'), i.e. 'start_key' inclusive, 'end_key' exclusive.
+     */
+    uint64_t get_size(const char *start_key, const char *end_key);
+
+    /**
+     * return total byte size of tuples with keys in the range [start_key, end_key].
+     * 'start_key' and 'end_key' may or may not be included, depending on
+     * 'start_incl' and 'end_incl'.
+     */
+    uint64_t get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
     /**
      * check if adding <key, value, timestamp> to memstore will reach memstore's
@@ -99,6 +108,19 @@ public:
      * clear memstore
      */
     void clear();
+
+    /**
+     * clear all elements of memstore with keys in the range ['start_key', 'end_key')
+     * i.e. 'start_key' inclusive, 'end_key' exclusive
+     */
+    void clear(const char *start_key, const char *end_key);
+
+    /**
+     * clear all elements of memstore with keys in the range [start_key, end_key].
+     * 'start_key' and 'end_key' may or may not be included, depending on
+     * 'start_incl' and 'end_incl'.
+     */
+    void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
 protected:
 

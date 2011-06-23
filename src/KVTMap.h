@@ -72,9 +72,22 @@ public:
     uint64_t get_num_keys();
 
     /**
-     * return total byte size of tuples stored in map
+     * return total byte size of tuples stored in map.
      */
     uint64_t get_size();
+
+    /**
+     * return total byte size of tuples with keys in the range
+     * ['start_key', 'end_key'), i.e. 'start_key' inclusive, 'end_key' exclusive.
+     */
+    uint64_t get_size(const char *start_key, const char *end_key);
+
+    /**
+     * return total byte size of tuples with keys in the range [start_key, end_key].
+     * 'start_key' and 'end_key' may or may not be included, depending on
+     * 'start_incl' and 'end_incl'.
+     */
+    uint64_t get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
     /**
      * return the new size of map if we add this <key, value, timestamp> tuple
@@ -88,7 +101,7 @@ public:
 
     /**
      * clear all elements of map with keys in the range ['start_key', 'end_key')
-     * (i.e. 'start_key' inclusive, 'end_key' exclusive)
+     * i.e. 'start_key' inclusive, 'end_key' exclusive
      */
     void clear(const char *start_key, const char *end_key);
 

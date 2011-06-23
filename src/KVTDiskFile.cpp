@@ -89,6 +89,14 @@ uint64_t KVTDiskFile::get_size()
     return m_vfile->fs_size();
 }
 
+/*========================================================================
+ *                         get_first_last_term
+ *========================================================================*/
+void KVTDiskFile::get_first_last_term(const char **first, const char **last)
+{
+    m_vfile_index->get_first_last_term(first, last);
+}
+
 /*=======================================================================*
  *                              sanity_check
  *=======================================================================*/
@@ -96,8 +104,3 @@ int KVTDiskFile::sanity_check()
 {
     return 1;
 }
-
-// char *KVTDiskFile::name()     { return m_vfile->fs_name(); }
-// void KVTDiskFile::rewind()    { m_vfile->fs_rewind(); }
-// void KVTDiskFile::sync()      { m_vfile->fs_sync(); }
-// void KVTDiskFile::close()     { m_vfile->fs_close(); }

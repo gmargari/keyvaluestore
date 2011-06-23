@@ -59,6 +59,11 @@ public:
      */
     uint64_t get_size();
 
+    /**
+     * return first and last term stored in disk file
+     */
+    void get_first_last_term(const char **first, const char **last);
+
 //     // file system name of this file
 //     char *name();    // NOTE: a VFile can be composed of several disk files. modify function to return array of names?!
 //     // rewind file

@@ -38,6 +38,11 @@ public:
     void set_vfilesize(off_t size);
 
     /**
+     * return first and last term in index
+     */
+    void get_first_last_term(const char **first, const char **last);
+
+    /**
      * find the location on disk where the value corresponding to key 'term'
      * might have been stored. normally, after this call we would read all
      * bytes stored on vfile between 'start_off' and 'end_off' and linearly

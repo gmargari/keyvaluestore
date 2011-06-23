@@ -95,6 +95,22 @@ uint64_t MemStore::get_size()
 }
 
 /*========================================================================
+ *                               get_size
+ *========================================================================*/
+uint64_t MemStore::get_size(const char *start_key, const char *end_key)
+{
+    return m_kvtmap->get_size(start_key, end_key);
+}
+
+/*========================================================================
+ *                               get_size
+ *========================================================================*/
+uint64_t MemStore::get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    return m_kvtmap->get_size(start_key, end_key, start_key_incl, end_key_incl);
+}
+
+/*========================================================================
  *                         will_reach_size_limit
  *========================================================================*/
 bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_t timestamp)
@@ -116,6 +132,22 @@ bool MemStore::will_reach_size_limit(const char *key, const char *value)
 void MemStore::clear()
 {
     m_kvtmap->clear();
+}
+
+/*========================================================================
+ *                                 clear
+ *========================================================================*/
+void MemStore::clear(const char *start_key, const char *end_key)
+{
+    m_kvtmap->clear(start_key, end_key);
+}
+
+/*========================================================================
+ *                                 clear
+ *========================================================================*/
+void MemStore::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    m_kvtmap->clear(start_key, end_key, start_key_incl, end_key_incl);
 }
 
 /*=======================================================================*
