@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -72,29 +73,43 @@ void randstr(char *s, const int len) {
  *========================================================================*/
 int main(int argc, char **argv)
 {
-    int cflag = 0,
-        rflag = 0,
-        pflag = 0,
-        bflag = 0,
-        fflag = 0,
-        mflag = 0,
-        iflag = 0,
-        nflag = 0,
-        kflag = 0,
-        vflag = 0,
-        uflag = 0,
-        oflag = 0,
-        sflag = 0,
-        myopt;
-    int i;
-    int geom_r, geom_p;
-    uint64_t blocksize, flushmemorysize, memorysize, insertbytes, periodic_stats_step;
-    uint64_t num_keys_to_insert;
-    size_t keysize, valuesize;
-    char *compmanager = NULL;
-    bool periodic_stats_enabled, unique_keys;
+    int      cflag = 0,
+             rflag = 0,
+             pflag = 0,
+             bflag = 0,
+             fflag = 0,
+             mflag = 0,
+             iflag = 0,
+             nflag = 0,
+             kflag = 0,
+             vflag = 0,
+             uflag = 0,
+             oflag = 0,
+             sflag = 0,
+             myopt,
+             i,
+             search_queries,
+             geom_r,
+             geom_p;
+    uint64_t blocksize,
+             flushmemorysize,
+             memorysize,
+             insertbytes,
+             periodic_stats_step,
+             num_keys_to_insert,
+             timestamp,
+             total_time;
+    size_t   keysize,
+             valuesize;
+    char    *compmanager = NULL,
+            *key = NULL,
+            *value = NULL,
+            *value2 = NULL;
+    bool     periodic_stats_enabled,
+             unique_keys;
     KeyValueStore *kvstore;
-    char key[MAX_KVTSIZE], value[MAX_KVTSIZE];
+    struct timeval start, end;
+
 
     // We need at least compaction manager
     if (argc == 1) {
@@ -211,8 +226,6 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-// "hc:r:p:b:f:m:i:n:k:v:o:s"
-
     //==============================================================
     // set default values
     //==============================================================
@@ -315,10 +328,10 @@ int main(int argc, char **argv)
     else if (strcmp(compmanager, "urf") == 0) {
         assert("not yet implemented" && 0);
         kvstore = new KeyValueStore(KeyValueStore::URF_CM);
-//         if (bflag)
-//             ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
-//         if (fflag)
-//             ((UrfCompactionManager *)kvstore->set_flushmem(flushmemorysize);
+        if (bflag)
+            ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
+        if (fflag)
+            ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
     }
     // other compaction manager?!
     else {
@@ -361,26 +374,39 @@ int main(int argc, char **argv)
     // execute puts and gets
     //==============================================================
     kvstore->set_memstore_maxsize(memorysize);
+    key = (char *)malloc(MAX_KVTSIZE);
+    value = (char *)malloc(MAX_KVTSIZE);
 
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
         randstr(key, keysize);
         randstr(value, valuesize);
         if (uflag) {
-            sprintf(key, "%s%Ld", key, i);
+            sprintf(key, "%s%Ld", key, i); // make key unique
         }
         kvstore->put(key, value);
-        if (i && i % 100 == 0)
-            printf("i = %Ld, memstore size: %Ld\n", i, kvstore->get_mem_size());
+
+        // every 10000 puts perform a number of gets
+        if (i && i % 10000 == 0) {
+            system("echo 3 > /proc/sys/vm/drop_caches");
+            total_time = 0;
+            search_queries = 20; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
+            for (int j = 0; j < search_queries; j++) {
+                randstr(key, keysize);
+                if (uflag) {
+                    sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
+                }
+                gettimeofday(&start, NULL);
+                kvstore->get(key, &value2, &timestamp);
+                gettimeofday(&end, NULL);
+                total_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+            }
+            printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
+        }
     }
 
+    free(key);
+    free(value);
     delete kvstore;
-
-    //==============================================================
-    // delete temporary files left
-    //==============================================================
-//    char cmd[100];
-//    sprintf(cmd, "rm -f %s/%s*", FILEDIR, FILEPREFIX);
-//    system(cmd);
 
     return EXIT_SUCCESS;
 }
