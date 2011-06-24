@@ -169,7 +169,7 @@ uint64_t KVTMap::get_size(const char *start_key, const char *end_key, bool start
         timestamp = iter->second.second;
         assert(key);
         assert(value);
-        totalsize = strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        totalsize += strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
     }
 
     assert(sanity_check());
