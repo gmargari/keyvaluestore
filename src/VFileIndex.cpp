@@ -48,7 +48,7 @@ void VFileIndex::set_vfilesize(off_t size)
  *========================================================================*/
 void VFileIndex::get_first_last_term(const char **first, const char **last)
 {
-    termoffsmap::iterator iter;
+    TermOffsetMap::iterator iter;
 
     (*first) = (m_map.begin())->first;
     iter = m_map.end();
@@ -61,7 +61,7 @@ void VFileIndex::get_first_last_term(const char **first, const char **last)
  *========================================================================*/
 bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
 {
-    termoffsmap::iterator iter;
+    TermOffsetMap::iterator iter;
 
     assert(sanity_check());
     assert(key && start_off && end_off);
@@ -105,7 +105,7 @@ bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
  *========================================================================*/
 void VFileIndex::clear()
 {
-    termoffsmap::iterator iter;
+    TermOffsetMap::iterator iter;
 
     assert(sanity_check());
 
@@ -124,7 +124,7 @@ void VFileIndex::clear()
  *=======================================================================*/
 void VFileIndex::print()
 {
-    for (termoffsmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+    for (TermOffsetMap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         printf("[%s] -> %Ld\n", iter->first, iter->second);
     }
     printf("m_vfilesize: %Ld\n", m_vfilesize);
@@ -135,7 +135,7 @@ void VFileIndex::print()
  *=======================================================================*/
 int VFileIndex::sanity_check()
 {
-    termoffsmap::iterator iter;
+    TermOffsetMap::iterator iter;
     const char *prev_key = NULL;
     off_t prev_offs = -1;
 

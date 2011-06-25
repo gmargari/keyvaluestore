@@ -68,14 +68,14 @@ public:
         }
     };
 
-    typedef map<const char *, off_t, cmp_str> termoffsmap;
+    typedef map<const char *, off_t, cmp_str> TermOffsetMap;
 
 protected:
 
     int sanity_check();
 
-    termoffsmap m_map;          // index containing <term, offset> pairs
-    off_t       m_vfilesize;    // size of vfile on disk
+    TermOffsetMap m_map;          // index containing <term, offset> pairs
+    off_t         m_vfilesize;    // size of vfile on disk
 };
 
 #endif
