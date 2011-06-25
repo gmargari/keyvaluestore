@@ -10,8 +10,6 @@
 #include "KVTDiskFileOutputStream.h"
 #include "KVTPriorityInputStream.h"
 
-const bool ONLINE_MEMSTORE_MERGE = true;
-
 /*========================================================================
  *                           ImmCompactionManager
  *========================================================================*/
@@ -40,17 +38,10 @@ void ImmCompactionManager::flush_bytes(void)
     vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
 
-    // -------------------------------- NOTE ----------------------------------
-    // every new file created by Compaction Manager should be inserted
-    // at the *front* of the vector, so the first file in vector is the most
-    // recent one, and the last is the oldest one.
-    // the same should be done accordingly for their respective input streams
-    // -------------------------------- NOTE ----------------------------------
-
     assert(sanity_check());
 
     // if we perform offline merge, flush memstore to a new file on disk
-    if (ONLINE_MEMSTORE_MERGE == false) {
+    if (get_memstore_merge_type() == CM_MERGE_OFFLINE) {
         memstore_flush_to_new_diskfile();
         memstore_clear();
 
@@ -79,8 +70,8 @@ void ImmCompactionManager::flush_bytes(void)
     merge_streams(istreams_to_merge, merge_ostream);
     delete merge_ostream;
 
-    // clear memstore
-    if (ONLINE_MEMSTORE_MERGE) {
+    // clear memstore if needed
+    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
         memstore_clear();
     }
 
