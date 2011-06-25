@@ -3,11 +3,9 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "CompactionManager.h"
 #include "KVTMapInputStream.h"
 #include "KVTDiskFile.h"
 #include "KVTDiskFileInputStream.h"
-#include "KVTDiskFileOutputStream.h"
 #include "KVTPriorityInputStream.h"
 
 /*========================================================================

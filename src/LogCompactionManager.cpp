@@ -3,8 +3,6 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "GeomCompactionManager.h"
-
 
 /*========================================================================
  *                           LogCompactionManager
