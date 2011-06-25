@@ -104,6 +104,11 @@ public:
     int get_num_disk_files();
 
     /**
+     * explicitly call compaction manager's flush_bytes()
+     */
+    void flush_bytes();
+
+    /**
      * return pointer to compaction manager, in case e.g. we want to modify
      * its parameters.
      */

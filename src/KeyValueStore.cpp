@@ -155,6 +155,14 @@ int KeyValueStore::get_num_disk_files()
 }
 
 /*========================================================================
+ *                              flush_bytes
+ *========================================================================*/
+void KeyValueStore::flush_bytes()
+{
+    m_compactionmanager->flush_bytes();
+}
+
+/*========================================================================
  *                        get_compaction_manager
  *========================================================================*/
 CompactionManager *KeyValueStore::get_compaction_manager()
