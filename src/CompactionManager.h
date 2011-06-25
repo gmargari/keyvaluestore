@@ -1,6 +1,7 @@
 #ifndef COMPACTIONMANAGER_H
 #define COMPACTIONMANAGER_H
 
+#include <stdint.h>
 #include <vector>
 
 using std::vector;
@@ -9,6 +10,7 @@ class MemStore;
 class DiskStore;
 class KVTInputStream;
 class KVTOutputStream;
+class KVTDiskFile;
 
 typedef enum { CM_MERGE_ONLINE, CM_MERGE_OFFLINE } merge_type;
 
@@ -41,6 +43,33 @@ public:
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
     void merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream);
+
+    /**
+     * same as function above, but takes as second argument a file instead of
+     * an output stream
+     */
+    void merge_streams(vector<KVTInputStream *> istreams, KVTDiskFile *diskfile);
+
+    /**
+     * same as function above, but it is left up to the function to create the
+     * file for output and return a pointer to it
+     */
+    KVTDiskFile *merge_streams(vector<KVTInputStream *> istreams);
+
+    /**
+     * same as function above, but a pointer to new file will be appended to
+     * vector 'diskfiles'
+     */
+    void merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles);
+
+    /**
+     * merge all input streams creating one or more diskfiles. each disk file
+     * will have size at most 'max_file_size'. pointers to new files created
+     * are appended to vector 'diskfiles'.
+     *
+     * @return number of new files created
+     */
+    int merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles, uint64_t max_file_size);
 // TODO: move these to something like StreamFunctions
 
     /**
