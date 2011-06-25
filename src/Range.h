@@ -27,7 +27,7 @@ public:
     /**
      * compare ranges by field 'disksize' (descending order)
      */
-    static bool cmp_by_memsize(const Range& r1, const Range& r2);
+    static bool cmp_by_disksize(const Range& r1, const Range& r2);
 
     /**
      * compare ranges lexicographically by field 'first' (ascending order)
