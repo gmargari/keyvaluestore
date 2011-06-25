@@ -57,8 +57,12 @@ bool VFile::add_new_physical_file(bool open_existing)
     char newfname[100], *fname;
     int fd, fdflag;
 
-    sprintf(newfname, "%s.%02d", m_basefilename, m_filedescs.size());
-    fname = strdup(newfname);
+    if (open_existing == false) {
+        sprintf(newfname, "%s.%02d", m_basefilename, m_filedescs.size());
+        fname = strdup(newfname);
+    } else {
+        fname = strdup(m_basefilename);
+    }
     assert(fname);
 
     if (DBGLVL > 0) {
@@ -79,6 +83,10 @@ bool VFile::add_new_physical_file(bool open_existing)
     m_names.push_back(fname);
     m_filedescs.push_back(fd);
     m_cur = m_filedescs.size() - 1;
+
+    if (open_existing) {
+        m_size = cur_fs_size();
+    }
 
     return true;
 }
@@ -360,7 +368,7 @@ void VFile::fs_sync(void)
 {
     if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
-//             fsync(m_filedescs[i]); // TODO: remove from COMMENTS!!!
+            fsync(m_filedescs[i]);
         }
     }
 }
@@ -375,6 +383,7 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
     assert(m_cur != -1);
 
     if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+
         if (fs_tell() == (off_t)fs_size()) {
             return 0; // no bytes lef to read
         }
@@ -399,23 +408,21 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
             count = MAX_FILE_SIZE - cur_fs_tell();
         }
 
-        start_timing();
+//         start_timing();
         if ((actually_read = read(m_filedescs[m_cur], buf, count)) == -1) {
             printf("[ERROR] cur_fs_read(): read('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
-        end_timing();
-
+//         end_timing();
     } else {
         actually_read = count;
     }
 
     m_offset += actually_read;
 
-    m_sim->inc_bytes_read(actually_read);
-    m_sim->inc_ioops(1);
-
+//     m_sim->inc_bytes_read(actually_read);
+//     m_sim->inc_ioops(1);
 
     assert(actually_read);
     return actually_read;
@@ -448,13 +455,13 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
             count = MAX_FILE_SIZE - cur_fs_tell();
         }
 
-        start_timing();
+//         start_timing();
         if ((actually_written = write(m_filedescs[m_cur], buf, count)) == -1) {
             printf("[ERROR] cur_fs_write(): write('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
-        end_timing();
+//         end_timing();
 
     } else {
         actually_written = count;
@@ -465,8 +472,8 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
         m_size = m_offset;
     }
 
-    m_sim->inc_bytes_written(actually_written);
-    m_sim->inc_ioops(1);
+//     m_sim->inc_bytes_written(actually_written);
+//     m_sim->inc_ioops(1);
 
     return actually_written;
 }

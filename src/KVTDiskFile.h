@@ -50,12 +50,12 @@ public:
     void delete_from_disk();
 
     /**
-     * number of keys (or tuples) stored on disk file
+     * return number of keys (or tuples) stored on disk file
      */
     uint64_t get_num_keys();
 
     /**
-     * size of disk file
+     * return size of disk file
      */
     uint64_t get_size();
 

@@ -128,7 +128,6 @@ bool KVTDiskFileInputStream::read(const char **key, const char **value, uint64_t
         read_return_imm_with_fail = false;
         return false;
     }
-
     // TODO: code repetition, how could I shorten code?
 
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, timestamp, &len, false)) {
