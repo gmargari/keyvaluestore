@@ -32,10 +32,10 @@ int main(int argc, char **argv)
         printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
     }
 
-    for (unsigned int i = 0; i < (int)istreams.size(); i++) {
+    for (unsigned int i = 0; i < istreams.size(); i++) {
         delete istreams[i];
     }
-    for (unsigned int i = 0; i < (int)kvtdiskfiles.size(); i++) {
+    for (unsigned int i = 0; i < kvtdiskfiles.size(); i++) {
         delete kvtdiskfiles[i];
     }
     delete priority_istream;
