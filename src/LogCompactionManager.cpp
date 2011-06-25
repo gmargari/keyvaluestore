@@ -1,9 +1,6 @@
 #include "Global.h"
 #include "LogCompactionManager.h"
 
-#include "MemStore.h"
-#include "DiskStore.h"
-
 /*========================================================================
  *                           LogCompactionManager
  *========================================================================*/

@@ -9,6 +9,7 @@ class KVTMapInputStream;
 class MemStore {
 
 friend class CompactionManager;
+friend class NullCompactionManager;
 friend class ImmCompactionManager;
 friend class GeomCompactionManager;
 friend class LogCompactionManager;

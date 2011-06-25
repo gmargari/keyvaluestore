@@ -33,7 +33,7 @@ const bool     DEFAULT_UNIQUE_KEYS =        false; // do not create unique keys
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
-     printf("        -c compactionmanager:   \"immediate\", \"geometric\", \"logarithmic\", \"urf\"\n");
+     printf("        -c compactionmanager:   \"null\", \"immediate\", \"geometric\", \"logarithmic\", \"urf\"\n");
      printf("        -r value:               r parameter, for geometric comp. manager only (default: %d)\n", DEFAULT_GEOM_R);
      printf("        -p value:               p parameter, for geometric comp. manager only (default: disabled)\n");
      printf("        -b blocksize:           block size in MB, for urf comp. manager only (default: %.0f)\n", b2mb(DEFAULT_URF_BLOCKSIZE));
@@ -277,9 +277,10 @@ int main(int argc, char **argv)
         printf("Error: you must set compaction manager\n");
         exit(EXIT_FAILURE);
     }
-    if (cflag && strcmp(compmanager, "immediate") != 0 && strcmp(compmanager, "geometric") != 0
-         && strcmp(compmanager, "logarithmic") != 0 && strcmp(compmanager, "urf") != 0) {
-        printf("Error: compaction manager can be \"immediate\", \"geometric\", \"logarithmic\" or \"urf\"\n");
+    if (cflag && strcmp(compmanager, "null") && strcmp(compmanager, "immediate") != 0
+         && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
+         && strcmp(compmanager, "urf") != 0) {
+        printf("Error: compaction manager can be \"null\", \"immediate\", \"geometric\", \"logarithmic\" or \"urf\"\n");
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
@@ -306,8 +307,12 @@ int main(int argc, char **argv)
     //==============================================================
     // create keyvalue store and set parameter values
     //==============================================================
+    // Null compaction manager
+    if (strcmp(compmanager, "null") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::NULL_CM);
+    }
     // Immediate compaction manager
-    if (strcmp(compmanager, "immediate") == 0) {
+    else if (strcmp(compmanager, "immediate") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::IMM_CM);
     }
     // Geometric compaction manager
@@ -326,7 +331,6 @@ int main(int argc, char **argv)
     }
     // URF compaction manager
     else if (strcmp(compmanager, "urf") == 0) {
-        assert("not yet implemented" && 0);
         kvstore = new KeyValueStore(KeyValueStore::URF_CM);
         if (bflag)
             ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
@@ -368,8 +372,6 @@ int main(int argc, char **argv)
         printf("# urf_flushmem_size:   %15.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
     }
 
-    printf("# MBytes_INS  MBytes_RW   MBytes_W   MBytes_R   frag:AVG  CUR   IO_ops   IO_x  Tmerge  Sec_Passed\n");
-
     //==============================================================
     // execute puts and gets
     //==============================================================
@@ -402,6 +404,11 @@ int main(int argc, char **argv)
             }
             printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
         }
+    }
+
+    // flush remaining memory tuples
+    while(kvstore->get_mem_size()) {
+        kvstore->flush_bytes();
     }
 
     free(key);

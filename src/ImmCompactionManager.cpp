@@ -6,7 +6,8 @@
 #include "KVTMapInputStream.h"
 #include "KVTDiskFile.h"
 #include "KVTDiskFileInputStream.h"
-#include "KVTPriorityInputStream.h"
+
+#include <cassert>
 
 /*========================================================================
  *                           ImmCompactionManager
