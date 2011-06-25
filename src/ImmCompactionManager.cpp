@@ -33,7 +33,6 @@ ImmCompactionManager::~ImmCompactionManager()
 void ImmCompactionManager::flush_bytes(void)
 {
     KVTDiskFile *disk_file;
-    KVTDiskFileOutputStream *merge_ostream;
     vector<KVTInputStream *> istreams_to_merge;
     vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
@@ -64,11 +63,7 @@ void ImmCompactionManager::flush_bytes(void)
     }
 
     // merge input streams, writing output to a new file
-    disk_file = new KVTDiskFile;
-    disk_file->open_unique();
-    merge_ostream = new KVTDiskFileOutputStream(disk_file, MERGE_BUFSIZE);
-    merge_streams(istreams_to_merge, merge_ostream);
-    delete merge_ostream;
+    disk_file = merge_streams(istreams_to_merge);
 
     // clear memstore if needed
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {

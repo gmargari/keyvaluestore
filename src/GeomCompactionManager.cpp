@@ -38,7 +38,7 @@ GeomCompactionManager::~GeomCompactionManager()
  *========================================================================*/
 void GeomCompactionManager::set_R(int r)
 {
-    assert(r >= 2);
+    assert(r >= 2 || (m_P && r >= 1));
     m_R = r;
 }
 
@@ -75,9 +75,8 @@ int GeomCompactionManager::partition_minsize(int partition_num)
     // the only difference between P being and not being constant
     // is that in the first case partition 0 has maxsize R while in the
     // second case it has limit R-1.
-    assert(m_R >= 2);
+    assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
-        assert(0); // TODO: is this correct?!
         return (int)pow(m_R, partition_num);
     } else {
         return (int)pow(m_R, partition_num);
@@ -92,7 +91,7 @@ int GeomCompactionManager::partition_maxsize(int partition_num)
     // the only difference between P being and not being constant
     // is that in the first case partition 0 has limit R maxsize in the
     // second case it has maxsize R-1.
-    assert(m_R >= 2);
+    assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
         return (int)pow(m_R, partition_num + 1);
     } else {
@@ -136,7 +135,6 @@ int GeomCompactionManager::compute_current_R()
 void GeomCompactionManager::flush_bytes(void)
 {
     KVTDiskFile *disk_file;
-    KVTDiskFileOutputStream *disk_ostream;
     vector<KVTInputStream *> istreams_to_merge;
     vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
@@ -178,11 +176,7 @@ void GeomCompactionManager::flush_bytes(void)
     }
 
     // merge sub-indexes with memstore, writing output to a new file
-    disk_file = new KVTDiskFile;
-    disk_file->open_unique();
-    disk_ostream = new KVTDiskFileOutputStream(disk_file, MERGE_BUFSIZE);
-    merge_streams(istreams_to_merge, disk_ostream);
-    delete disk_ostream;
+    disk_file = merge_streams(istreams_to_merge);
 
     // clear memstore
     memstore_clear();
