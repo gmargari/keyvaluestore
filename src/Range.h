@@ -34,6 +34,11 @@ public:
      */
     static bool cmp_by_term(const Range& r1, const Range& r2);
 
+    /**
+     * compare ranges lexicographically by field 'idx' (ascending order)
+     */
+    static bool cmp_by_file_index(const Range& r1, const Range& r2);
+
     const char   *m_first;
     const char   *m_last;
     uint64_t      m_memsize;

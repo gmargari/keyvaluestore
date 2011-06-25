@@ -46,3 +46,12 @@ bool Range::cmp_by_term(const Range& r1, const Range& r2)
 {
     return (strcmp(r1.m_first, r2.m_first) < 0); // ascending order
 }
+
+
+/*=======================================================================*
+ *                            cmp_by_file_index
+ *=======================================================================*/
+bool Range::cmp_by_file_index(const Range& r1, const Range& r2)
+{
+    return (r1.m_idx < r2.m_idx); // ascending order
+}

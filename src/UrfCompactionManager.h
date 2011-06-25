@@ -4,12 +4,10 @@
 #include "CompactionManager.h"
 
 #include <stdint.h>
-#include <vector>
-
-using std::vector;
 
 class MemStore;
 class DiskStore;
+class Range;
 
 class UrfCompactionManager: public CompactionManager {
 
@@ -41,6 +39,12 @@ public:
     void flush_bytes(void);
 
 protected:
+
+    /**
+     * based on disk files, create the vector of ranges. ranges are sorted
+     * in lexicographical order
+     */
+    void create_ranges(vector<Range>& ranges);
 
     int sanity_check();
 
