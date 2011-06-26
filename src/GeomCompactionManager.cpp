@@ -127,7 +127,7 @@ int GeomCompactionManager::compute_current_R()
 }
 
 /*========================================================================
- *                            flush_memstore
+ *                             flush_bytes
  *========================================================================*/
 void GeomCompactionManager::flush_bytes(void)
 {

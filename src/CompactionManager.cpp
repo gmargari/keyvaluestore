@@ -191,6 +191,8 @@ void CompactionManager::memstore_flush_to_new_diskfile()
 
     // delete map input stream and disk file output stream
     delete disk_ostream;
+
+    assert(m_memstore->get_size_when_serialized() == disk_file->get_size());
 }
 
 /*========================================================================

@@ -27,7 +27,7 @@ ImmCompactionManager::~ImmCompactionManager()
 }
 
 /*========================================================================
- *                            flush_memstore
+ *                              flush_bytes
  *========================================================================*/
 void ImmCompactionManager::flush_bytes(void)
 {
