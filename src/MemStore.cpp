@@ -97,17 +97,41 @@ uint64_t MemStore::get_size()
 /*========================================================================
  *                               get_size
  *========================================================================*/
-uint64_t MemStore::get_size(const char *start_key, const char *end_key)
-{
-    return m_kvtmap->get_size(start_key, end_key);
-}
-
-/*========================================================================
- *                               get_size
- *========================================================================*/
 uint64_t MemStore::get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
     return m_kvtmap->get_size(start_key, end_key, start_key_incl, end_key_incl);
+}
+
+/*=======================================================================*
+ *                         get_size_when_serialized
+ *=======================================================================*/
+uint64_t MemStore::get_size_when_serialized()
+{
+    return m_kvtmap->get_size_when_serialized();
+}
+
+/*=======================================================================*
+ *                         get_size_when_serialized
+ *=======================================================================*/
+uint64_t MemStore::get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    return m_kvtmap->get_size_when_serialized(start_key, end_key, true, false);
+}
+
+/*=======================================================================*
+ *                               get_sizes
+ *=======================================================================*/
+pair<uint64_t, uint64_t> MemStore::get_sizes()
+{
+    return m_kvtmap->get_sizes();
+}
+
+/*=======================================================================*
+ *                               get_sizes
+ *=======================================================================*/
+pair<uint64_t, uint64_t> MemStore::get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+{
+    return m_kvtmap->get_sizes(start_key, end_key, true, false);
 }
 
 /*========================================================================
@@ -132,14 +156,6 @@ bool MemStore::will_reach_size_limit(const char *key, const char *value)
 void MemStore::clear()
 {
     m_kvtmap->clear();
-}
-
-/*========================================================================
- *                                 clear
- *========================================================================*/
-void MemStore::clear(const char *start_key, const char *end_key)
-{
-    m_kvtmap->clear(start_key, end_key);
 }
 
 /*========================================================================
