@@ -169,6 +169,7 @@ void GeomCompactionManager::flush_bytes(void)
 
     // add disk streams
     for (int i = 0; i < count; i++) {
+        r_disk_istreams[i]->reset();
         istreams_to_merge.push_back(r_disk_istreams[i]);
     }
 

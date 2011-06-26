@@ -13,6 +13,9 @@
 
 #define BUFSIZE 1000
 
+/*========================================================================
+ *                               randstr
+ *========================================================================*/
 void randstr(char *s, const int len) {
     static const char alphanum[] =
         "0123456789"
@@ -26,7 +29,9 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-
+/*========================================================================
+ *                                 main
+ *========================================================================*/
 int main(void)
 {
     KVTMap *map;
@@ -43,7 +48,7 @@ int main(void)
     uint64_t timestamp, prev_timestamp, ts1, ts2;
 
     gettimeofday(&tv, NULL);
-// tv.tv_usec = 438701;
+// tv.tv_usec = 693157;
     printf("seed: %ld\n", tv.tv_usec);
 
     map = new KVTMap();
@@ -119,6 +124,7 @@ int main(void)
     istream2 = new KVTMapInputStream(map);
     istream3 = new KVTMapInputStream(map);
     istream4 = new KVTMapInputStream(map);
+
     istream1->set_key_range(NULL, key1);
     istream2->set_key_range(key1, key2);
     istream3->set_key_range(key2, key3);
@@ -146,8 +152,8 @@ int main(void)
         prev_timestamp = timestamp;
         strcpy(prev_key, k1);
     }
-
     ostream2->flush();
+
     map->clear(NULL, key1);
     map->clear(key1, key2);
     map->clear(key2, key3);

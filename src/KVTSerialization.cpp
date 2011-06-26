@@ -29,7 +29,7 @@ bool str_is_alnum(const char *str, int len)
  *=======================================================================*/
 uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp)
 {
-    return (2 * sizeof(uint32_t) + sizeof(timestamp) + keylen + 1 + valuelen + 1);
+    return (2 * sizeof(uint32_t) + sizeof(timestamp) + keylen + valuelen + 2);
 }
 
 /*=======================================================================*

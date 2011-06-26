@@ -44,8 +44,7 @@ void ImmCompactionManager::flush_bytes(void)
         memstore_clear();
 
         // first time memstore is flushed, no disk file to merge with
-        if (r_disk_istreams.size() == 1) {
-            assert(sanity_check());
+        if (r_disk_files.size() == 1) {
             return;
         }
     }
