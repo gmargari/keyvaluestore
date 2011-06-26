@@ -77,7 +77,7 @@ uint64_t UrfCompactionManager::get_flushmem(void)
 }
 
 /*========================================================================
- *                            flush_memstore
+ *                             flush_bytes
  *========================================================================*/
 void UrfCompactionManager::flush_bytes(void)
 {
@@ -90,6 +90,7 @@ void UrfCompactionManager::flush_bytes(void)
     Range rng;
     uint64_t bytes_flushed, memstore_size, memstore_maxsize;
     int i, cur_rng, newfiles, idx;
+    uint64_t dbg_memsize, dbg_memsize_serial; // for debugging only
 
     assert(sanity_check());
 
@@ -129,9 +130,9 @@ void UrfCompactionManager::flush_bytes(void)
         // check if block will overflow. in case of overflow, range will be
         // split to a number of subranges, each of which will be stored on
         // a separate block.
-        if (rng.m_memsize + rng.m_disksize > m_blocksize) {
+        if (rng.m_memsize_serialized + rng.m_disksize > m_blocksize) {
             newfiles = merge_streams(istreams_to_merge, new_disk_files, SPLIT_PERC * m_blocksize);
-            assert(newfiles > 1);
+            // assert(newfiles > 1); // this may not hold true (i.e. if all memory keys exist on disk and no split occurs)
         } else {
             // merge memory and disk istreams, creating a new file on disk.
             // set 'm_blocksize' as max file size, which will cause only
@@ -141,11 +142,16 @@ void UrfCompactionManager::flush_bytes(void)
             assert(newfiles == 1);
         }
 
+        assert((dbg_memsize = m_memstore->get_size()) || 1);
+        assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
+
         // remove from memstore tuples of current range
-        m_memstore->clear(rng.m_first, rng.m_last, true, true);
+        m_memstore->clear(rng.m_first, rng.m_last, true, false);
+
+        assert(dbg_memsize - rng.m_memsize == m_memstore->get_size());
+        assert(dbg_memsize_serial - rng.m_memsize_serialized == m_memstore->get_size_when_serialized());
 
         bytes_flushed += rng.m_memsize;
-
         cur_rng++;
 
     // flush ranges until memory size drops below 'memstore_maxsize - m_flushmem'
@@ -191,6 +197,7 @@ void UrfCompactionManager::create_ranges(vector<Range>& ranges)
     vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     Range rng;
     int i;
+    pair<uint64_t, uint64_t> sizes;
 
     // if there are files on disk
     if (r_disk_files.size()) {
@@ -220,14 +227,21 @@ void UrfCompactionManager::create_ranges(vector<Range>& ranges)
         }
 
         for (i = 0; i < (int)ranges.size(); i++) {
-            ranges[i].m_memsize = m_memstore->get_size(ranges[i].m_first, ranges[i].m_last, true, false);
+            // since we want to know exactly the size of tuples when written to
+            // disk, in order to know when a block will overflow, we use
+            // get_size_when_serialized() and not get_size().
+            sizes = m_memstore->get_sizes(ranges[i].m_first, ranges[i].m_last, true, false);
+            ranges[i].m_memsize = sizes.first;
+            ranges[i].m_memsize_serialized = sizes.second;
         }
     }
     // else, if this is the first time we flush bytes to disk (no disk file)
     else {
         rng.m_first = NULL; // to get all memory tuples
         rng.m_last = NULL;
-        rng.m_memsize = m_memstore->get_size();
+        sizes = m_memstore->get_sizes();
+        rng.m_memsize = sizes.first;
+        rng.m_memsize_serialized = sizes.second;
         rng.m_disksize = 0;
         rng.m_idx = NO_DISK_FILE;
         ranges.push_back(rng);

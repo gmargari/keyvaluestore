@@ -41,7 +41,8 @@ public:
 
     const char   *m_first;
     const char   *m_last;
-    uint64_t      m_memsize;
+    uint64_t      m_memsize;            // total byte size of memory tuples
+    uint64_t      m_memsize_serialized; // total byte size of serialized memory tuples
     uint64_t      m_disksize;
     int           m_idx;  // index in DiskStore's vector of disk files
 };
