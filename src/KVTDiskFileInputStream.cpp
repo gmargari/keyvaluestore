@@ -22,6 +22,8 @@ KVTDiskFileInputStream::KVTDiskFileInputStream(KVTDiskFile *file, uint32_t bufsi
     assert(file->m_vfile_index);
     m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
+    m_bytes_in_buf = 0;
+    m_bytes_used = 0;
     set_key_range(NULL, NULL, true, true);
 }
 
@@ -51,7 +53,6 @@ void KVTDiskFileInputStream::set_key_range(const char *start_key, const char *en
     m_end_incl = end_incl;
 
     if (m_start_key) {
-
         // if 'start_key' was stored on disk, it would be stored between 'off1' & 'off2'
         ret = m_kvtdiskfile->m_vfile_index->search(m_start_key, &off1, &off2);
         if (ret == false) {
@@ -113,7 +114,7 @@ void KVTDiskFileInputStream::reset()
 {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
-    m_kvtdiskfile->m_vfile->fs_rewind();
+    set_key_range(NULL, NULL, true, true);
 }
 
 /*========================================================================
