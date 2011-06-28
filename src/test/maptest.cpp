@@ -1,9 +1,9 @@
 #include "../Global.h"
-#include "../KVTMapInputStream.h"
-#include "../KVTDiskFile.h"
-#include "../KVTDiskFileInputStream.h"
-#include "../KVTDiskFileOutputStream.h"
-#include "../KVTPriorityInputStream.h"
+#include "../MapInputStream.h"
+#include "../DiskFile.h"
+#include "../DiskFileInputStream.h"
+#include "../DiskFileOutputStream.h"
+#include "../PriorityInputStream.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -13,9 +13,9 @@
 
 #define BUFSIZE 1000
 
-/*========================================================================
+/*============================================================================
  *                               randstr
- *========================================================================*/
+ *============================================================================*/
 void randstr(char *s, const int len) {
     static const char alphanum[] =
         "0123456789"
@@ -29,18 +29,18 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-/*========================================================================
+/*============================================================================
  *                                 main
- *========================================================================*/
+ *============================================================================*/
 int main(void)
 {
-    KVTMap *map;
-    KVTMapInputStream *istream, *istream1, *istream2, *istream3, *istream4;
-    KVTPriorityInputStream *istream_heap;
-    KVTDiskFile *file1, *file2;
-    KVTDiskFileOutputStream *ostream1, *ostream2;
-    KVTDiskFileInputStream *dfistream1, *dfistream2;
-    vector<KVTInputStream *> istreams;
+    Map *map;
+    MapInputStream *istream, *istream1, *istream2, *istream3, *istream4;
+    PriorityInputStream *istream_heap;
+    DiskFile *file1, *file2;
+    DiskFileOutputStream *ostream1, *ostream2;
+    DiskFileInputStream *dfistream1, *dfistream2;
+    vector<InputStream *> istreams;
     char *key, *value, *key1, *key2, *key3, *value1, *prev_key;
     const char *k1, *v1, *k2, *v2;
     struct timeval tv;
@@ -51,7 +51,7 @@ int main(void)
 // tv.tv_usec = 693157;
     printf("seed: %ld\n", tv.tv_usec);
 
-    map = new KVTMap();
+    map = new Map();
     srand(tv.tv_usec);
     num_keys = rand() % 5000;
 // num_keys = 10;
@@ -80,10 +80,10 @@ int main(void)
     //========================================================
     // write all values to disk file
     //========================================================
-    file1 = new KVTDiskFile();
+    file1 = new DiskFile();
     file1->open_unique();
-    istream = new KVTMapInputStream(map);
-    ostream1 = new KVTDiskFileOutputStream(file1, MERGE_BUFSIZE);
+    istream = new MapInputStream(map);
+    ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
@@ -120,10 +120,10 @@ int main(void)
     strcpy(key3, "ttt");
 //     printf("ranges: [NULL, %s) [%s, %s) [%s, %s) [%s, NULL]\n", key1, key1, key2, key2, key3, key3);
 
-    istream1 = new KVTMapInputStream(map);
-    istream2 = new KVTMapInputStream(map);
-    istream3 = new KVTMapInputStream(map);
-    istream4 = new KVTMapInputStream(map);
+    istream1 = new MapInputStream(map);
+    istream2 = new MapInputStream(map);
+    istream3 = new MapInputStream(map);
+    istream4 = new MapInputStream(map);
 
     istream1->set_key_range(NULL, key1);
     istream2->set_key_range(key1, key2);
@@ -138,10 +138,10 @@ int main(void)
     // merge the 4 streams create above, using priority stream,
     // and store results to a new file
     //========================================================
-    file2 = new KVTDiskFile();
+    file2 = new DiskFile();
     file2->open_unique();
-    ostream2 = new KVTDiskFileOutputStream(file2, MERGE_BUFSIZE);
-    istream_heap = new KVTPriorityInputStream(istreams);
+    ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
+    istream_heap = new PriorityInputStream(istreams);
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream_heap->read(&k1, &v1, &timestamp)) {
@@ -165,8 +165,8 @@ int main(void)
     // check that the two files have identical contents
     //========================================================
     value1 = (char *)malloc(MAX_KVTSIZE);
-    dfistream1 = new KVTDiskFileInputStream(file1, MERGE_BUFSIZE);
-    dfistream2 = new KVTDiskFileInputStream(file2, MERGE_BUFSIZE);
+    dfistream1 = new DiskFileInputStream(file1, MERGE_BUFSIZE);
+    dfistream2 = new DiskFileInputStream(file2, MERGE_BUFSIZE);
     num = 0;
     while (dfistream1->read(&k1, &v1, &ts1)) {
         dfistream2->read(&k2, &v2, &ts2);

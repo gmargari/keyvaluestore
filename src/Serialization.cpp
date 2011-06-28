@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "KVTSerialization.h"
+#include "Serialization.h"
 
 #include <cassert>
 #include <cstring>
@@ -12,9 +12,9 @@
 #define ENCODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_buf_) + _used_,  (_str_), (_len_)); _used_ += (_len_); } while (0)
 #define DECODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_str_), (_buf_) + _used_, (_len_)); _used_ += (_len_); } while (0)
 
-/*=======================================================================*
- *                              str_is_alnum
- *=======================================================================*/
+/*============================================================================
+ *                               str_is_alnum
+ *============================================================================*/
 bool str_is_alnum(const char *str, int len)
 {
     for (int i = 0; i < len; i++)
@@ -24,17 +24,17 @@ bool str_is_alnum(const char *str, int len)
     return true;
 }
 
-/*=======================================================================*
- *                              serialize_len
- *=======================================================================*/
+/*============================================================================
+ *                               serialize_len
+ *============================================================================*/
 uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp)
 {
     return (2 * sizeof(uint32_t) + sizeof(timestamp) + keylen + valuelen + 2);
 }
 
-/*=======================================================================*
+/*============================================================================
  *                                serialize
- *=======================================================================*/
+ *============================================================================*/
 bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, uint64_t timestamp, uint32_t *len)
 {
     uint32_t used = 0,
@@ -76,9 +76,9 @@ bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, u
     return true;
 }
 
-/*=======================================================================*
- *                               deserialize
- *=======================================================================*/
+/*============================================================================
+ *                                deserialize
+ *============================================================================*/
 bool deserialize(const char *buf, uint32_t buflen, const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue)
 {
     uint32_t used = 0,
@@ -130,9 +130,9 @@ bool deserialize(const char *buf, uint32_t buflen, const char **key, const char 
     return true;
 }
 
-/*=======================================================================*
- *                               deserialize
- *=======================================================================*/
+/*============================================================================
+ *                                deserialize
+ *============================================================================*/
 bool deserialize(const char *buf, uint32_t buflen, const char **key, uint64_t *timestamp, const char **value, uint32_t *len)
 {
     return deserialize(buf, buflen, key, value, timestamp, len, true);

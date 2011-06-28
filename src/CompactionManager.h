@@ -8,9 +8,9 @@ using std::vector;
 
 class MemStore;
 class DiskStore;
-class KVTInputStream;
-class KVTOutputStream;
-class KVTDiskFile;
+class InputStream;
+class OutputStream;
+class DiskFile;
 
 typedef enum { CM_MERGE_ONLINE, CM_MERGE_OFFLINE } merge_type;
 
@@ -32,35 +32,35 @@ public:
     /**
      * copy all <k,v> pairs of input stream to output stream
      */
-    void copy_stream(KVTInputStream *istream, KVTOutputStream *ostream);
+    void copy_stream(InputStream *istream, OutputStream *ostream);
 
     /**
      * copy all <k,v> pairs of input stream with unique keys to output stream
      */
-    void copy_stream_unique_keys(KVTInputStream *istream, KVTOutputStream *ostream);
+    void copy_stream_unique_keys(InputStream *istream, OutputStream *ostream);
 
     /**
      * merge all input streams producing one sorted output stream written to 'ostream'
      */
-    void merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream);
+    void merge_streams(vector<InputStream *> istreams, OutputStream *ostream);
 
     /**
      * same as function above, but takes as second argument a file instead of
      * an output stream
      */
-    void merge_streams(vector<KVTInputStream *> istreams, KVTDiskFile *diskfile);
+    void merge_streams(vector<InputStream *> istreams, DiskFile *diskfile);
 
     /**
      * same as function above, but it is left up to the function to create the
      * file for output and return a pointer to it
      */
-    KVTDiskFile *merge_streams(vector<KVTInputStream *> istreams);
+    DiskFile *merge_streams(vector<InputStream *> istreams);
 
     /**
      * same as function above, but a pointer to new file will be appended to
      * vector 'diskfiles'
      */
-    void merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles);
+    void merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles);
 
     /**
      * merge all input streams creating one or more diskfiles. each disk file
@@ -69,7 +69,7 @@ public:
      *
      * @return number of new files created
      */
-    int merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles, uint64_t max_file_size);
+    int merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size);
 // TODO: move these to something like StreamFunctions
 
     /**

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-class KVTOutputStream {
+class OutputStream {
 
 public:
 

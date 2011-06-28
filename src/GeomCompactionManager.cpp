@@ -3,18 +3,18 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "KVTMapInputStream.h"
-#include "KVTDiskFile.h"
-#include "KVTDiskFileInputStream.h"
+#include "MapInputStream.h"
+#include "DiskFile.h"
+#include "DiskFileInputStream.h"
 
 #include <cstdlib>
 #include <cstdio>
 #include <cassert>
 #include <cmath>
 
-/*========================================================================
- *                           GeomCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                             GeomCompactionManager
+ *============================================================================*/
 GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *diskstore)
 : CompactionManager(memstore, diskstore)
 {
@@ -22,51 +22,51 @@ GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *disk
     m_P = DEFAULT_GEOM_P;
 }
 
-/*========================================================================
- *                          ~GeomCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                            ~GeomCompactionManager
+ *============================================================================*/
 GeomCompactionManager::~GeomCompactionManager()
 {
 
 }
 
-/*========================================================================
- *                                set_R
- *========================================================================*/
+/*============================================================================
+ *                                   set_R
+ *============================================================================*/
 void GeomCompactionManager::set_R(int r)
 {
     assert(r >= 2 || (m_P && r >= 1));
     m_R = r;
 }
 
-/*========================================================================
- *                                get_R
- *========================================================================*/
+/*============================================================================
+ *                                   get_R
+ *============================================================================*/
 int GeomCompactionManager::get_R(void)
 {
     return m_R;
 }
 
-/*========================================================================
- *                                set_P
- *========================================================================*/
+/*============================================================================
+ *                                   set_P
+ *============================================================================*/
 void GeomCompactionManager::set_P(int p)
 {
     assert(p >= 1);
     m_P = p;
 }
 
-/*========================================================================
- *                                get_P
- *========================================================================*/
+/*============================================================================
+ *                                   get_P
+ *============================================================================*/
 int GeomCompactionManager::get_P(void)
 {
     return m_P;
 }
 
-/*========================================================================
- *                          partition_minsize
- *========================================================================*/
+/*============================================================================
+ *                             partition_minsize
+ *============================================================================*/
 int GeomCompactionManager::partition_minsize(int partition_num)
 {
     // the only difference between P being and not being constant
@@ -80,9 +80,9 @@ int GeomCompactionManager::partition_minsize(int partition_num)
     }
 }
 
-/*========================================================================
- *                          partition_maxsize
- *========================================================================*/
+/*============================================================================
+ *                             partition_maxsize
+ *============================================================================*/
 int GeomCompactionManager::partition_maxsize(int partition_num)
 {
     // the only difference between P being and not being constant
@@ -96,9 +96,9 @@ int GeomCompactionManager::partition_maxsize(int partition_num)
     }
 }
 
-/*========================================================================
- *                           partition_num
- *========================================================================*/
+/*============================================================================
+ *                              partition_num
+ *============================================================================*/
 int GeomCompactionManager::partition_num(int partition_size)
 {
     for (int i = 0; ; i++) {
@@ -112,9 +112,9 @@ int GeomCompactionManager::partition_num(int partition_size)
 }
 
 
-/*========================================================================
- *                          compute_current_R
- *========================================================================*/
+/*============================================================================
+ *                             compute_current_R
+ *============================================================================*/
 int GeomCompactionManager::compute_current_R()
 {
     int size_of_bytes_inserted = 0;
@@ -126,15 +126,15 @@ int GeomCompactionManager::compute_current_R()
     return (int)ceil( pow(size_of_bytes_inserted, 1.0 / m_P) );
 }
 
-/*========================================================================
- *                             flush_bytes
- *========================================================================*/
+/*============================================================================
+ *                                flush_bytes
+ *============================================================================*/
 void GeomCompactionManager::flush_bytes(void)
 {
-    KVTDiskFile *disk_file;
-    vector<KVTInputStream *> istreams_to_merge;
-    vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
-    vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
+    DiskFile *disk_file;
+    vector<InputStream *> istreams_to_merge;
+    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
     int size, count, part_num;
 
     assert(sanity_check());
@@ -190,7 +190,7 @@ void GeomCompactionManager::flush_bytes(void)
 
     // add new file at the front, since it contains most recent <k,v> pairs
     r_disk_files.insert(r_disk_files.begin(), disk_file);
-    r_disk_istreams.insert(r_disk_istreams.begin(), new KVTDiskFileInputStream(disk_file, MERGE_BUFSIZE));
+    r_disk_istreams.insert(r_disk_istreams.begin(), new DiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
     // update 'm_partition_size' vector: zero the sizes of the 'count' partitions merged
     for (uint i = 0; i < m_partition_size.size(); i++) {
@@ -211,9 +211,9 @@ void GeomCompactionManager::flush_bytes(void)
     assert(sanity_check());
 }
 
-/*=======================================================================*
- *                            print_partitions
- *=======================================================================*/
+/*============================================================================
+ *                              print_partitions
+ *============================================================================*/
 void GeomCompactionManager::print_partitions()
 {
     printf("part.size: |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", m_partition_size[i]);   printf("\n");
@@ -221,9 +221,9 @@ void GeomCompactionManager::print_partitions()
     printf("maxsize:   |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", partition_maxsize(i));  printf("\n");
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
+/*============================================================================
+ *                                sanity_check
+ *============================================================================*/
 int GeomCompactionManager::sanity_check()
 {
     static uint64_t lastsize = 0;

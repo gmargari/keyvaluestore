@@ -1,7 +1,7 @@
 #ifndef KVTPRIORITYINPUTSTREAM_H
 #define KVTPRIORITYINPUTSTREAM_H
 
-#include "KVTInputStream.h"
+#include "InputStream.h"
 
 #include <vector>
 #include <queue>
@@ -11,21 +11,21 @@
 using std::vector;
 using std::priority_queue;
 
-class KVTPriorityInputStream: public KVTInputStream {
+class PriorityInputStream: public InputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVTPriorityInputStream(vector<KVTInputStream *> istreams);
+    PriorityInputStream(vector<InputStream *> istreams);
 
     /**
      * destructor
      */
-    ~KVTPriorityInputStream();
+    ~PriorityInputStream();
 
-    // inherited from KVTInputStream
+    // inherited from InputStream
     void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
     void set_key_range(const char *start_key, const char *end_key);
@@ -62,7 +62,7 @@ protected:
     int sanity_check();
 
     priority_queue<heap_element *, vector<heap_element *>, heap_cmp>   m_heap;
-    vector<KVTInputStream *>      m_istreams;
+    vector<InputStream *>      m_istreams;
     vector<heap_element *>        m_elements;
     int                           m_last_sid; // id of stream to which the last popped element belongs to
     // heap contains 'heap_element *', not 'heap_element', to avoid copying the whole struct.

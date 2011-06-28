@@ -3,16 +3,16 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "KVTMapInputStream.h"
-#include "KVTDiskFile.h"
-#include "KVTDiskFileInputStream.h"
-#include "KVTDiskFileOutputStream.h"
-#include "KVTPriorityInputStream.h"
-#include "KVTSerialization.h"
+#include "MapInputStream.h"
+#include "DiskFile.h"
+#include "DiskFileInputStream.h"
+#include "DiskFileOutputStream.h"
+#include "PriorityInputStream.h"
+#include "Serialization.h"
 
-/*========================================================================
- *                           CompactionManager
- *========================================================================*/
+/*============================================================================
+ *                              CompactionManager
+ *============================================================================*/
 CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
 {
     m_memstore = memstore;
@@ -20,18 +20,18 @@ CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
     m_merge_type = CM_MERGE_ONLINE;
 }
 
-/*========================================================================
- *                          ~CompactionManager
- *========================================================================*/
+/*============================================================================
+ *                              ~CompactionManager
+ *============================================================================*/
 CompactionManager::~CompactionManager()
 {
 
 }
 
-/*========================================================================
- *                             copy_stream
- *========================================================================*/
-void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *ostream)
+/*============================================================================
+ *                                 copy_stream
+ *============================================================================*/
+void CompactionManager::copy_stream(InputStream *istream, OutputStream *ostream)
 {
     const char *key, *value;
     uint64_t timestamp;
@@ -42,10 +42,10 @@ void CompactionManager::copy_stream(KVTInputStream *istream, KVTOutputStream *os
     ostream->flush();
 }
 
-/*========================================================================
- *                       copy_stream_unique_keys
- *========================================================================*/
-void CompactionManager::copy_stream_unique_keys(KVTInputStream *istream, KVTOutputStream *ostream)
+/*============================================================================
+ *                           copy_stream_unique_keys
+ *============================================================================*/
+void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStream *ostream)
 {
     const char *key, *value;
     uint64_t timestamp;
@@ -61,74 +61,74 @@ void CompactionManager::copy_stream_unique_keys(KVTInputStream *istream, KVTOutp
     ostream->flush();
 }
 
-/*========================================================================
- *                             merge_streams
- *========================================================================*/
-void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTOutputStream *ostream)
+/*============================================================================
+ *                               merge_streams
+ *============================================================================*/
+void CompactionManager::merge_streams(vector<InputStream *> istreams, OutputStream *ostream)
 {
-    KVTPriorityInputStream *istream_heap;
+    PriorityInputStream *istream_heap;
 
-    istream_heap = new KVTPriorityInputStream(istreams);
+    istream_heap = new PriorityInputStream(istreams);
     copy_stream_unique_keys(istream_heap, ostream);
     delete istream_heap;
 }
 
-/*========================================================================
- *                             merge_streams
- *========================================================================*/
-void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, KVTDiskFile *diskfile)
+/*============================================================================
+ *                               merge_streams
+ *============================================================================*/
+void CompactionManager::merge_streams(vector<InputStream *> istreams, DiskFile *diskfile)
 {
-    KVTDiskFileOutputStream *ostream;
+    DiskFileOutputStream *ostream;
 
-    ostream = new KVTDiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+    ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
     merge_streams(istreams, ostream);
     delete ostream;
 }
 
-/*========================================================================
- *                             merge_streams
- *========================================================================*/
-KVTDiskFile *CompactionManager::merge_streams(vector<KVTInputStream *> istreams)
+/*============================================================================
+ *                               merge_streams
+ *============================================================================*/
+DiskFile *CompactionManager::merge_streams(vector<InputStream *> istreams)
 {
-    KVTDiskFile *diskfile;
+    DiskFile *diskfile;
 
-    diskfile = new KVTDiskFile;
+    diskfile = new DiskFile;
     diskfile->open_unique();
     merge_streams(istreams, diskfile);
 
     return diskfile;
 }
 
-/*========================================================================
- *                             merge_streams
- *========================================================================*/
-void CompactionManager::merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles)
+/*============================================================================
+ *                               merge_streams
+ *============================================================================*/
+void CompactionManager::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles)
 {
-    KVTDiskFile *diskfile;
+    DiskFile *diskfile;
 
     diskfile = merge_streams(istreams);
     diskfiles.push_back(diskfile);
 }
 
-/*========================================================================
- *                             merge_streams
- *========================================================================*/
-int CompactionManager::merge_streams(vector<KVTInputStream *> istreams, vector<KVTDiskFile *>& diskfiles, uint64_t max_file_size)
+/*============================================================================
+ *                               merge_streams
+ *============================================================================*/
+int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size)
 {
-    KVTDiskFile *diskfile;
-    KVTPriorityInputStream *istream_heap;
-    KVTDiskFileOutputStream *ostream;
+    DiskFile *diskfile;
+    PriorityInputStream *istream_heap;
+    DiskFileOutputStream *ostream;
     const char *key, *value;
     char prev_key[MAX_KVTSIZE];
     uint64_t timestamp, filesize;
     uint32_t len;
     int num_newfiles;
 
-    diskfile = new KVTDiskFile;
+    diskfile = new DiskFile;
     diskfile->open_unique();
-    ostream = new KVTDiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+    ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
 
-    istream_heap = new KVTPriorityInputStream(istreams);
+    istream_heap = new PriorityInputStream(istreams);
 
     num_newfiles = 0;
     prev_key[0] = '\0';
@@ -143,11 +143,11 @@ int CompactionManager::merge_streams(vector<KVTInputStream *> istreams, vector<K
                 diskfiles.push_back(diskfile);
                 num_newfiles++;
 
-                diskfile = new KVTDiskFile;
+                diskfile = new DiskFile;
                 filesize = 0;
                 diskfile->open_unique();
                 delete ostream;
-                ostream = new KVTDiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+                ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
             }
 
             filesize += len;
@@ -165,19 +165,19 @@ int CompactionManager::merge_streams(vector<KVTInputStream *> istreams, vector<K
     return num_newfiles;
 }
 
-/*========================================================================
- *                    memstore_flush_to_new_diskfile
- *========================================================================*/
+/*============================================================================
+ *                      memstore_flush_to_new_diskfile
+ *============================================================================*/
 void CompactionManager::memstore_flush_to_new_diskfile()
 {
-    KVTDiskFile *disk_file;
-    KVTDiskFileInputStream *disk_istream;
-    KVTDiskFileOutputStream *disk_ostream;
+    DiskFile *disk_file;
+    DiskFileInputStream *disk_istream;
+    DiskFileOutputStream *disk_ostream;
 
     // write memstore to a new file on disk using streams
-    disk_file = new KVTDiskFile();
+    disk_file = new DiskFile();
     disk_file->open_unique();
-    disk_ostream = new KVTDiskFileOutputStream(disk_file, MERGE_BUFSIZE);
+    disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     m_memstore->m_inputstream->set_key_range(NULL, NULL);
     m_memstore->m_inputstream->reset();
     // (no need to use copy_stream_unique_keys() since map keys are unique)
@@ -186,7 +186,7 @@ void CompactionManager::memstore_flush_to_new_diskfile()
     // insert first, in diskstore files vector & input streams vector, as it
     // contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), disk_file);
-    disk_istream = new KVTDiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
+    disk_istream = new DiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
     m_diskstore->m_disk_istreams.insert(m_diskstore->m_disk_istreams.begin(), disk_istream);
 
     // delete map input stream and disk file output stream
@@ -195,25 +195,25 @@ void CompactionManager::memstore_flush_to_new_diskfile()
     assert(m_memstore->get_size_when_serialized() == disk_file->get_size());
 }
 
-/*========================================================================
- *                           memstore_clear
- *========================================================================*/
+/*============================================================================
+ *                              memstore_clear
+ *============================================================================*/
 void CompactionManager::memstore_clear()
 {
     m_memstore->clear();
 }
 
-/*========================================================================
- *                       set_memstore_merge_type
- *========================================================================*/
+/*============================================================================
+ *                         set_memstore_merge_type
+ *============================================================================*/
 void CompactionManager::set_memstore_merge_type(merge_type type)
 {
     m_merge_type = type;
 }
 
-/*========================================================================
- *                       get_memstore_merge_type
- *========================================================================*/
+/*============================================================================
+ *                         get_memstore_merge_type
+ *============================================================================*/
 merge_type CompactionManager::get_memstore_merge_type()
 {
     return m_merge_type;

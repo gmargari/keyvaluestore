@@ -1,24 +1,24 @@
 #ifndef KVTMAPINPUTSTREAM_H
 #define KVTMAPINPUTSTREAM_H
 
-#include "KVTInputStream.h"
-#include "KVTMap.h"
+#include "InputStream.h"
+#include "Map.h"
 
-class KVTMapInputStream: public KVTInputStream {
+class MapInputStream: public InputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVTMapInputStream(KVTMap *kvtmap);
+    MapInputStream(Map *map);
 
     /**
      * destructor
      */
-    ~KVTMapInputStream();
+    ~MapInputStream();
 
-    // inherited from KVTInputStream
+    // inherited from InputStream
     void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
     void set_key_range(const char *start_key, const char *end_key);
@@ -29,12 +29,12 @@ public:
 
 protected:
 
-    void init(KVTMap *kvtmap, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
+    void init(Map *map, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
     int sanity_check();
 
-    KVTMap                      *m_kvtmap;
-    KVTMap::kvtmap::iterator     m_iter;
-    KVTMap::kvtmap::iterator     m_iter_end;
+    Map                      *m_map;
+    Map::KVTMap::iterator     m_iter;
+    Map::KVTMap::iterator     m_iter_end;
     const char                  *m_start_key;
     const char                  *m_end_key;
     bool                         m_start_incl;

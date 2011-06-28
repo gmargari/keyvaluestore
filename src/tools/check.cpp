@@ -1,6 +1,6 @@
 #include "../Global.h"
-#include "../KVTDiskFile.h"
-#include "../KVTDiskFileInputStream.h"
+#include "../DiskFile.h"
+#include "../DiskFileInputStream.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -10,21 +10,21 @@ int main(int argc, char **argv)
 {
     const char *key, *value;
     char *prev_key;
-    KVTDiskFile *kvtdiskfile;
-    KVTDiskFileInputStream *istream;
+    DiskFile *diskfile;
+    DiskFileInputStream *istream;
     uint64_t timestamp, prev_timestamp = 0;
     int cmp;
 
     if (argc != 2) {
-        printf("Syntax: %s <kvtdiskfile>\n", argv[0]);
+        printf("Syntax: %s <diskfile>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     prev_key = (char *)malloc(MAX_KVTSIZE);
     prev_key[0] = '\0';
-    kvtdiskfile = new KVTDiskFile();
-    kvtdiskfile->open_existing(argv[1]);
-    istream = new KVTDiskFileInputStream(kvtdiskfile, MERGE_BUFSIZE);
+    diskfile = new DiskFile();
+    diskfile->open_existing(argv[1]);
+    istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
     while (istream->read(&key, &value, &timestamp)) {
         if ((cmp = strcmp(prev_key, key)) > 0) {
             printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     }
     free(prev_key);
     delete istream;
-    delete kvtdiskfile;
+    delete diskfile;
 
     printf("OK!\n");
     return EXIT_SUCCESS;

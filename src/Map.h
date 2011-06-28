@@ -8,21 +8,21 @@
 using std::map;
 using std::pair;
 
-class KVTMap {
+class Map {
 
-friend class KVTMapInputStream;
+friend class MapInputStream;
 
 public:
 
     /**
      * constructor
      */
-    KVTMap();
+    Map();
 
     /**
      * destructor
      */
-    ~KVTMap();
+    ~Map();
 
     /**
      * insert a <key, value, timestamp> tuple into map. copies of the key and
@@ -137,8 +137,8 @@ public:
     };
 
     // map: key --> <value, timestamp>
-    typedef pair<char *, uint64_t > kvtpair;
-    typedef map<const char *, kvtpair, cmp_str> kvtmap;
+    typedef pair<char *, uint64_t > KVTPair;
+    typedef map<const char *, KVTPair, cmp_str> KVTMap;
 
 protected:
 
@@ -153,7 +153,7 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    kvtmap::iterator start_iter(const char *key, bool key_incl);
+    KVTMap::iterator start_iter(const char *key, bool key_incl);
 
     /**
      * return an iterator which points at the last element which equal or
@@ -164,9 +164,9 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    kvtmap::iterator end_iter(const char *key, bool key_incl);
+    KVTMap::iterator end_iter(const char *key, bool key_incl);
 
-    kvtmap      m_map;
+    KVTMap      m_map;
     uint64_t    m_size;            // size of map
     uint64_t    m_size_serialized; // size of map when written to disk
     uint64_t    m_keys;            // number of keys or tuples in map

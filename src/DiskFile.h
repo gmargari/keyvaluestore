@@ -6,22 +6,22 @@
 class VFile;
 class VFileIndex;
 
-class KVTDiskFile {
+class DiskFile {
 
-friend class KVTDiskFileInputStream;
-friend class KVTDiskFileOutputStream;
+friend class DiskFileInputStream;
+friend class DiskFileOutputStream;
 
 public:
 
     /**
      * constructor
      */
-    KVTDiskFile();
+    DiskFile();
 
     /**
      * destructor
      */
-    ~KVTDiskFile();
+    ~DiskFile();
 
     /**
      * open file for read and write (create if not existing)

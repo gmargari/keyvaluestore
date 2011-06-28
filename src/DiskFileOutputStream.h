@@ -1,29 +1,29 @@
 #ifndef KVTDISKFILEOUTPUTSTREAM_H
 #define KVTDISKFILEOUTPUTSTREAM_H
 
-#include "KVTOutputStream.h"
+#include "OutputStream.h"
 
 #include <cstdlib>
 
-class KVTDiskFile;
+class DiskFile;
 class VFile;
 class VFileIndex;
 
-class KVTDiskFileOutputStream: public KVTOutputStream {
+class DiskFileOutputStream: public OutputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVTDiskFileOutputStream(KVTDiskFile *file, uint32_t bufsize);
+    DiskFileOutputStream(DiskFile *file, uint32_t bufsize);
 
     /**
      * destructor
      */
-    ~KVTDiskFileOutputStream();
+    ~DiskFileOutputStream();
 
-    // inherited from KVTOutputStream
+    // inherited from OutputStream
     /**
      * reset scanner
      */
@@ -47,7 +47,7 @@ protected:
 
     int sanity_check();
 
-    KVTDiskFile *m_kvtdiskfile;
+    DiskFile *m_diskfile;
     uint64_t     m_vfile_size;    // size of vfile
 
     char       	*m_buf;           // buffer used to serialize entries

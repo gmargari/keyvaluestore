@@ -3,9 +3,9 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "KVTMapInputStream.h"
-#include "KVTDiskFile.h"
-#include "KVTDiskFileInputStream.h"
+#include "MapInputStream.h"
+#include "DiskFile.h"
+#include "DiskFileInputStream.h"
 #include "Range.h"
 
 #include <cstdio>
@@ -20,9 +20,9 @@ using std::min;
 
 #define SPLIT_PERC 0.6 // move to Global.h?
 
-/*========================================================================
- *                           UrfCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                             UrfCompactionManager
+ *============================================================================*/
 UrfCompactionManager::UrfCompactionManager(MemStore *memstore, DiskStore *diskstore)
 : CompactionManager(memstore, diskstore)
 {
@@ -30,17 +30,17 @@ UrfCompactionManager::UrfCompactionManager(MemStore *memstore, DiskStore *diskst
     set_flushmem(DEFAULT_URF_FLUSHMEMSIZE);
 }
 
-/*========================================================================
- *                          ~UrfCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                            ~UrfCompactionManager
+ *============================================================================*/
 UrfCompactionManager::~UrfCompactionManager()
 {
 
 }
 
-/*========================================================================
- *                             set_blocksize
- *========================================================================*/
+/*============================================================================
+ *                               set_blocksize
+ *============================================================================*/
 void UrfCompactionManager::set_blocksize(uint64_t blocksize)
 {
     if (blocksize) {
@@ -52,40 +52,40 @@ void UrfCompactionManager::set_blocksize(uint64_t blocksize)
     }
 }
 
-/*========================================================================
- *                             get_blocksize
- *========================================================================*/
+/*============================================================================
+ *                               get_blocksize
+ *============================================================================*/
 uint64_t UrfCompactionManager::get_blocksize(void)
 {
     return m_blocksize;
 }
 
-/*========================================================================
- *                             set_flushmem
- *========================================================================*/
+/*============================================================================
+ *                               set_flushmem
+ *============================================================================*/
 void UrfCompactionManager::set_flushmem(uint64_t flushmem)
 {
     m_flushmem = min(flushmem, m_memstore->get_maxsize());
 }
 
-/*========================================================================
- *                             get_flushmem
- *========================================================================*/
+/*============================================================================
+ *                               get_flushmem
+ *============================================================================*/
 uint64_t UrfCompactionManager::get_flushmem(void)
 {
     return m_flushmem;
 }
 
-/*========================================================================
- *                             flush_bytes
- *========================================================================*/
+/*============================================================================
+ *                               flush_bytes
+ *============================================================================*/
 void UrfCompactionManager::flush_bytes(void)
 {
-    KVTDiskFileInputStream *disk_stream;
-    vector<KVTDiskFile *> new_disk_files;
-    vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
-    vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
-    vector<KVTInputStream *> istreams_to_merge;
+    DiskFileInputStream *disk_stream;
+    vector<DiskFile *> new_disk_files;
+    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
+    vector<InputStream *> istreams_to_merge;
     vector<Range> ranges;
     Range rng;
     uint64_t bytes_flushed, memstore_size, memstore_maxsize;
@@ -183,18 +183,18 @@ void UrfCompactionManager::flush_bytes(void)
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         r_disk_files.push_back(new_disk_files[i]);
-        r_disk_istreams.push_back(new KVTDiskFileInputStream(new_disk_files[i], MERGE_BUFSIZE));
+        r_disk_istreams.push_back(new DiskFileInputStream(new_disk_files[i], MERGE_BUFSIZE));
     }
 
     assert(sanity_check());
 }
 
-/*=======================================================================*
- *                              create_ranges
- *=======================================================================*/
+/*============================================================================
+ *                               create_ranges
+ *============================================================================*/
 void UrfCompactionManager::create_ranges(vector<Range>& ranges)
 {
-    vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     Range rng;
     int i;
     pair<uint64_t, uint64_t> sizes;
@@ -248,9 +248,9 @@ void UrfCompactionManager::create_ranges(vector<Range>& ranges)
     }
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
+/*============================================================================
+ *                                sanity_check
+ *============================================================================*/
 int UrfCompactionManager::sanity_check()
 {
     vector<Range> ranges;

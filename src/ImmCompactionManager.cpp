@@ -3,38 +3,38 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "KVTMapInputStream.h"
-#include "KVTDiskFile.h"
-#include "KVTDiskFileInputStream.h"
+#include "MapInputStream.h"
+#include "DiskFile.h"
+#include "DiskFileInputStream.h"
 
 #include <cassert>
 
-/*========================================================================
- *                           ImmCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                            ImmCompactionManager
+ *============================================================================*/
 ImmCompactionManager::ImmCompactionManager(MemStore *memstore, DiskStore *diskstore)
 : CompactionManager(memstore, diskstore)
 {
 
 }
 
-/*========================================================================
- *                          ~ImmCompactionManager
- *========================================================================*/
+/*============================================================================
+ *                           ~ImmCompactionManager
+ *============================================================================*/
 ImmCompactionManager::~ImmCompactionManager()
 {
 
 }
 
-/*========================================================================
- *                              flush_bytes
- *========================================================================*/
+/*============================================================================
+ *                               flush_bytes
+ *============================================================================*/
 void ImmCompactionManager::flush_bytes(void)
 {
-    KVTDiskFile *disk_file;
-    vector<KVTInputStream *> istreams_to_merge;
-    vector<KVTDiskFile *> &r_disk_files = m_diskstore->m_disk_files;
-    vector<KVTDiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
+    DiskFile *disk_file;
+    vector<InputStream *> istreams_to_merge;
+    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
 
     assert(sanity_check());
 
@@ -79,14 +79,14 @@ void ImmCompactionManager::flush_bytes(void)
 
     // add new file and its input stream to (currently empty) set of disk files
     r_disk_files.push_back(disk_file);
-    r_disk_istreams.push_back(new KVTDiskFileInputStream(disk_file, MERGE_BUFSIZE));
+    r_disk_istreams.push_back(new DiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
     assert(sanity_check());
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
+/*============================================================================
+ *                                sanity_check
+ *============================================================================*/
 int ImmCompactionManager::sanity_check()
 {
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());

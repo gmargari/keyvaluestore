@@ -6,8 +6,8 @@
 
 using std::pair;
 
-class KVTMap;
-class KVTMapInputStream;
+class Map;
+class MapInputStream;
 
 class MemStore {
 
@@ -142,9 +142,9 @@ protected:
 
     int sanity_check();
 
-    KVTMap              *m_kvtmap;
+    Map              *m_map;
     uint64_t             m_maxsize;
-    KVTMapInputStream   *m_inputstream;
+    MapInputStream   *m_inputstream;
 };
 
 #endif

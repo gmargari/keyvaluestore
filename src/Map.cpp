@@ -1,7 +1,7 @@
 #include "Global.h"
-#include "KVTMap.h"
+#include "Map.h"
 
-#include "KVTSerialization.h"
+#include "Serialization.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -10,35 +10,35 @@
 
 using std::make_pair;
 
-/*========================================================================
- *                                 KVTMap
- *========================================================================*/
-KVTMap::KVTMap()
+/*============================================================================
+ *                                    Map
+ *============================================================================*/
+Map::Map()
 {
     m_size = 0;
     m_size_serialized = 0;
     m_keys = 0;
 }
 
-/*========================================================================
- *                                ~KVTMap
- *========================================================================*/
-KVTMap::~KVTMap()
+/*============================================================================
+ *                                   ~Map
+ *============================================================================*/
+Map::~Map()
 {
     clear();
 }
 
-/*=======================================================================*
- *                                  put
- *=======================================================================*/
-bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
+/*============================================================================
+ *                                    put
+ *============================================================================*/
+bool Map::put(const char *key, const char *value, uint64_t timestamp)
 {
     const char *cpkey, *f_key;
     char *cpvalue, *f_value;
     uint64_t f_timestamp;
     size_t strlen_key, strlen_value;
-    kvtpair new_pair;
-    kvtmap::iterator f;
+    KVTPair new_pair;
+    KVTMap::iterator f;
 
     assert(sanity_check());
     assert(key);
@@ -84,20 +84,20 @@ bool KVTMap::put(const char *key, const char *value, uint64_t timestamp)
     return true;
 }
 
-/*=======================================================================*
- *                                  put
- *=======================================================================*/
-bool KVTMap::put(const char *key, const char *value)
+/*============================================================================
+ *                                    put
+ *============================================================================*/
+bool Map::put(const char *key, const char *value)
 {
     return put(key, value, timestamp());
 }
 
-/*=======================================================================*
- *                                  get
- *=======================================================================*/
-bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
+/*============================================================================
+ *                                    get
+ *============================================================================*/
+bool Map::get(const char *key, const char **value, uint64_t *timestamp)
 {
-    kvtmap::iterator f;
+    KVTMap::iterator f;
 
     assert(sanity_check());
     assert(key && value && timestamp);
@@ -113,10 +113,10 @@ bool KVTMap::get(const char *key, const char **value, uint64_t *timestamp)
     }
 }
 
-/*=======================================================================*
- *                                  get
- *=======================================================================*/
-bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
+/*============================================================================
+ *                                    get
+ *============================================================================*/
+bool Map::get(const char *key, uint64_t timestamp, const char **value)
 {
     uint64_t ts;
 
@@ -128,60 +128,60 @@ bool KVTMap::get(const char *key, uint64_t timestamp, const char **value)
     }
 }
 
-/*=======================================================================*
- *                             get_num_keys
- *=======================================================================*/
-uint64_t KVTMap::get_num_keys()
+/*============================================================================
+ *                                get_num_keys
+ *============================================================================*/
+uint64_t Map::get_num_keys()
 {
     return m_keys;
 }
 
-/*=======================================================================*
- *                               get_size
- *=======================================================================*/
-uint64_t KVTMap::get_size()
+/*============================================================================
+ *                                 get_size
+ *============================================================================*/
+uint64_t Map::get_size()
 {
     return get_sizes().first;
 }
 
-/*=======================================================================*
- *                               get_size
- *=======================================================================*/
-uint64_t KVTMap::get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+/*============================================================================
+ *                                 get_size
+ *============================================================================*/
+uint64_t Map::get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
     return get_sizes(start_key, end_key, start_key_incl, end_key_incl).first;
 }
 
-/*=======================================================================*
- *                         get_size_when_serialized
- *=======================================================================*/
-uint64_t KVTMap::get_size_when_serialized()
+/*============================================================================
+ *                          get_size_when_serialized
+ *============================================================================*/
+uint64_t Map::get_size_when_serialized()
 {
     return get_sizes().second;
 }
 
-/*=======================================================================*
- *                         get_size_when_serialized
- *=======================================================================*/
-uint64_t KVTMap::get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+/*============================================================================
+ *                          get_size_when_serialized
+ *============================================================================*/
+uint64_t Map::get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
     return get_sizes(start_key, end_key, start_key_incl, end_key_incl).second;
 }
 
-/*=======================================================================*
- *                               get_sizes
- *=======================================================================*/
-pair<uint64_t, uint64_t> KVTMap::get_sizes()
+/*============================================================================
+ *                                get_sizes
+ *============================================================================*/
+pair<uint64_t, uint64_t> Map::get_sizes()
 {
     return make_pair(m_size, m_size_serialized);
 }
 
-/*=======================================================================*
- *                               get_sizes
- *=======================================================================*/
-pair<uint64_t, uint64_t> KVTMap::get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+/*============================================================================
+ *                                get_sizes
+ *============================================================================*/
+pair<uint64_t, uint64_t> Map::get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
-    kvtmap::iterator iter, s_iter, e_iter;
+    KVTMap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp, memsize, memsize_serialized;
     pair<uint64_t, uint64_t> ret;
@@ -198,7 +198,7 @@ pair<uint64_t, uint64_t> KVTMap::get_sizes(const char *start_key, const char *en
         timestamp = iter->second.second;
         assert(key);
         assert(value);
-        memsize += strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        memsize += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
         memsize_serialized += serialize_len(strlen(key), strlen(value), timestamp);
     }
 
@@ -209,18 +209,18 @@ pair<uint64_t, uint64_t> KVTMap::get_sizes(const char *start_key, const char *en
     return ret;
 }
 
-/*=======================================================================*
- *                                 new_size
- *=======================================================================*/
-uint64_t KVTMap::new_size(const char *key, const char *value, uint64_t timestamp)
+/*============================================================================
+ *                                  new_size
+ *============================================================================*/
+uint64_t Map::new_size(const char *key, const char *value, uint64_t timestamp)
 {
-    return get_size() + strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+    return get_size() + strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
 }
 
-/*=======================================================================*
- *                                 clear
- *=======================================================================*/
-void KVTMap::clear()
+/*============================================================================
+ *                                   clear
+ *============================================================================*/
+void Map::clear()
 {
     clear(NULL, NULL, true, true);
     assert(m_size == 0);
@@ -228,12 +228,12 @@ void KVTMap::clear()
     assert(m_keys == 0);
 }
 
-/*=======================================================================*
- *                                 clear
- *=======================================================================*/
-void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
+/*============================================================================
+ *                                   clear
+ *============================================================================*/
+void Map::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
-    kvtmap::iterator iter, s_iter, e_iter;
+    KVTMap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp;
     uint64_t dbg_mem_before, dbg_to_clean, dbg_bytes_cleaned = 0; // for debugging only
@@ -250,8 +250,8 @@ void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_in
         timestamp = iter->second.second;
         assert(key);
         assert(value);
-        assert((dbg_bytes_cleaned += strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1));
-        m_size -= strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        assert((dbg_bytes_cleaned += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1));
+        m_size -= strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
         m_size_serialized -= serialize_len(strlen(key), strlen(value), timestamp);
         m_keys--;
         free(key);
@@ -265,10 +265,10 @@ void KVTMap::clear(const char *start_key, const char *end_key, bool start_key_in
     assert(sanity_check());
 }
 
-/*=======================================================================*
- *                              get_timestamp
- *=======================================================================*/
-uint64_t KVTMap::timestamp()
+/*============================================================================
+ *                               get_timestamp
+ *============================================================================*/
+uint64_t Map::timestamp()
 {
 //     struct timeval tv;
 //
@@ -278,12 +278,12 @@ uint64_t KVTMap::timestamp()
     return i++;
 }
 
-/*=======================================================================*
- *                               start_iter
- *=======================================================================*/
-KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
+/*============================================================================
+ *                                 start_iter
+ *============================================================================*/
+Map::KVTMap::iterator Map::start_iter(const char *key, bool key_incl)
 {
-    kvtmap::iterator iter;
+    KVTMap::iterator iter;
 
     assert(sanity_check());
 
@@ -299,12 +299,12 @@ KVTMap::kvtmap::iterator KVTMap::start_iter(const char *key, bool key_incl)
     return iter;
 }
 
-/*=======================================================================*
- *                               end_iter
- *=======================================================================*/
-KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
+/*============================================================================
+ *                                  end_iter
+ *============================================================================*/
+Map::KVTMap::iterator Map::end_iter(const char *key, bool key_incl)
 {
-    kvtmap::iterator iter;
+    KVTMap::iterator iter;
 
     assert(sanity_check());
 
@@ -329,22 +329,22 @@ KVTMap::kvtmap::iterator KVTMap::end_iter(const char *key, bool key_incl)
     return iter;
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
-int KVTMap::sanity_check()
+/*============================================================================
+ *                                sanity_check
+ *============================================================================*/
+int Map::sanity_check()
 {
 #if DBGLVL > 1
     uint64_t map_size = 0, map_size_serialized = 0;
     const char *key, *value;
     uint64_t timestamp;
 
-    for(kvtmap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+    for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         key = iter->first;
         value = iter->second.first;
         timestamp = iter->second.second;
 
-        map_size += strlen(key) + 1 + sizeof(kvtpair) + strlen(value) + 1;
+        map_size += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
         map_size_serialized += serialize_len(strlen(key), strlen(value), timestamp);
         assert(strlen(key) + 1 <= MAX_KVTSIZE);
         assert(strlen(value) + 1 <= MAX_KVTSIZE);

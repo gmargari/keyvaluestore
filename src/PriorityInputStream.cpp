@@ -1,15 +1,15 @@
 #include "Global.h"
-#include "KVTPriorityInputStream.h"
+#include "PriorityInputStream.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
 
-/*========================================================================
- *                           KVTPriorityInputStream
- *========================================================================*/
-KVTPriorityInputStream::KVTPriorityInputStream(vector<KVTInputStream *> istreams)
+/*============================================================================
+ *                            PriorityInputStream
+ *============================================================================*/
+PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
 {
     m_istreams = istreams;
     for (int i = 0; i < (int)m_istreams.size(); i++) {
@@ -20,38 +20,38 @@ KVTPriorityInputStream::KVTPriorityInputStream(vector<KVTInputStream *> istreams
     reset();
 }
 
-/*========================================================================
- *                          ~KVTPriorityInputStream
- *========================================================================*/
-KVTPriorityInputStream::~KVTPriorityInputStream()
+/*============================================================================
+ *                           ~PriorityInputStream
+ *============================================================================*/
+PriorityInputStream::~PriorityInputStream()
 {
     for (int i = 0; i < (int)m_elements.size(); i++) {
         free(m_elements[i]);
     }
 }
 
-/*========================================================================
- *                             set_key_range
- *========================================================================*/
-void KVTPriorityInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+/*============================================================================
+ *                              set_key_range
+ *============================================================================*/
+void PriorityInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_istreams[i]->set_key_range(start_key, end_key, start_incl, end_incl);
     }
 }
 
-/*========================================================================
- *                             set_key_range
- *========================================================================*/
-void KVTPriorityInputStream::set_key_range(const char *start_key, const char *end_key)
+/*============================================================================
+ *                              set_key_range
+ *============================================================================*/
+void PriorityInputStream::set_key_range(const char *start_key, const char *end_key)
 {
     set_key_range(start_key, end_key, true, false);
 }
 
-/*========================================================================
- *                                 reset
- *========================================================================*/
-void KVTPriorityInputStream::reset()
+/*============================================================================
+ *                                  reset
+ *============================================================================*/
+void PriorityInputStream::reset()
 {
     assert(sanity_check());
 
@@ -72,10 +72,10 @@ void KVTPriorityInputStream::reset()
     assert(sanity_check());
 }
 
-/*========================================================================
- *                                 read
- *========================================================================*/
-bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
+/*============================================================================
+ *                                   read
+ *============================================================================*/
+bool PriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
 {
     heap_element *top;
 
@@ -108,10 +108,10 @@ bool KVTPriorityInputStream::read(const char **key, const char **value, uint64_t
     return true;
 }
 
-/*=======================================================================*
- *                              sanity_check
- *=======================================================================*/
-int KVTPriorityInputStream::sanity_check()
+/*============================================================================
+ *                                sanity_check
+ *============================================================================*/
+int PriorityInputStream::sanity_check()
 {
     int *x;
     vector<heap_element *> tmp_vector;

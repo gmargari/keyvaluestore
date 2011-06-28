@@ -1,19 +1,18 @@
 #include "Global.h"
-#include "LogCompactionManager.h"
+#include "InputStream.h"
 
 /*============================================================================
- *                             LogCompactionManager
+ *                                InputStream
  *============================================================================*/
-LogCompactionManager::LogCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: GeomCompactionManager(memstore, diskstore)
+InputStream::InputStream()
 {
-    GeomCompactionManager::set_R(2);
+
 }
 
 /*============================================================================
- *                            ~LogCompactionManager
+ *                               ~InputStream
  *============================================================================*/
-LogCompactionManager::~LogCompactionManager()
+InputStream::~InputStream()
 {
 
 }

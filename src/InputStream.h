@@ -3,19 +3,19 @@
 
 #include <stdint.h>
 
-class KVTInputStream {
+class InputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVTInputStream();
+    InputStream();
 
     /**
      * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual ~KVTInputStream();
+    virtual ~InputStream();
 
     /**
      * return only pairs with keys between 'start_key' (inclusive) and 'end_key'

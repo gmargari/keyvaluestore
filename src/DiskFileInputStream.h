@@ -1,25 +1,25 @@
 #ifndef KVTDISKFILEINPUTSTREAM_H
 #define KVTDISKFILEINPUTSTREAM_H
 
-#include "KVTInputStream.h"
+#include "InputStream.h"
 
-class KVTDiskFile;
+class DiskFile;
 
-class KVTDiskFileInputStream: public KVTInputStream {
+class DiskFileInputStream: public InputStream {
 
 public:
 
     /**
      * constructor
      */
-    KVTDiskFileInputStream(KVTDiskFile *file, uint32_t bufsize);
+    DiskFileInputStream(DiskFile *file, uint32_t bufsize);
 
     /**
      * destructor
      */
-    ~KVTDiskFileInputStream();
+    ~DiskFileInputStream();
 
-    // inherited from KVTInputStream
+    // inherited from InputStream
     void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
     void set_key_range(const char *start_key, const char *end_key);
@@ -32,7 +32,7 @@ protected:
 
     int sanity_check();
 
-    KVTDiskFile *m_kvtdiskfile;
+    DiskFile *m_diskfile;
     char        *m_buf;
     uint32_t     m_buf_size;
     uint32_t     m_bytes_in_buf;
