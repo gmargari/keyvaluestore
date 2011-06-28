@@ -27,9 +27,9 @@ const size_t   DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false; // do not create unique keys
 
-/*============================================================================
+/*========================================================================
  *                             print_syntax
- *============================================================================*/
+ *========================================================================*/
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
@@ -51,9 +51,9 @@ void print_syntax(char *progname)
      printf("        -h:                     print this help message and exit\n");
 }
 
-/*============================================================================
+/*========================================================================
  *                               randstr
- *============================================================================*/
+ *========================================================================*/
 void randstr(char *s, const int len) {
     static const char alphanum[] =
 //         "0123456789"
@@ -68,9 +68,9 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-/*============================================================================
+/*========================================================================
  *                                main
- *============================================================================*/
+ *========================================================================*/
 int main(int argc, char **argv)
 {
     int      cflag = 0,
@@ -379,56 +379,36 @@ int main(int argc, char **argv)
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
 
-    gettimeofday(&start, NULL);
-start.tv_usec = 384144;
-    printf("seed: %lld\n", start.tv_usec);
-    srand(start.tv_usec);
-
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
         randstr(key, keysize);
         randstr(value, valuesize);
-//         randstr(key, (int)(rand() % keysize) + 1);
-//         randstr(value, (int)(rand() % valuesize) + 1);
         if (uflag) {
             sprintf(key, "%s%Ld", key, i); // make key unique
         }
         kvstore->put(key, value);
 
-// NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-// gets call set_key_range(), creating problems to next memstore flushes --> different
-// istream for get()s and put()s
-// NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-
-//         // every 10000 puts perform a number of gets
-//         if (i && i % 10000 == 0) {
-//             system("echo 3 > /proc/sys/vm/drop_caches");
-//             total_time = 0;
-//             search_queries = 20; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
-//             for (int j = 0; j < search_queries; j++) {
-//                 randstr(key, keysize);
-//                 if (uflag) {
-//                     sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
-//                 }
-//                 gettimeofday(&start, NULL);
-//                 kvstore->get(key, &value2, &timestamp);
-//                 gettimeofday(&end, NULL);
-//                 total_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
-//             }
-//             printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
-//         }
-    }
-
-    if (uflag) {
-        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
+        // every 10000 puts perform a number of gets
+        if (i && i % 10000 == 0) {
+            system("echo 3 > /proc/sys/vm/drop_caches");
+            total_time = 0;
+            search_queries = 20; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
+            for (int j = 0; j < search_queries; j++) {
+                randstr(key, keysize);
+                if (uflag) {
+                    sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
+                }
+                gettimeofday(&start, NULL);
+                kvstore->get(key, &value2, &timestamp);
+                gettimeofday(&end, NULL);
+                total_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+            }
+            printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
+        }
     }
 
     // flush remaining memory tuples
     while(kvstore->get_mem_size()) {
         kvstore->flush_bytes();
-    }
-
-    if (uflag) {
-        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
     }
 
     free(key);
