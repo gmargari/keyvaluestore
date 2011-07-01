@@ -69,9 +69,6 @@ int GeomCompactionManager::get_P(void)
  *============================================================================*/
 int GeomCompactionManager::partition_minsize(int partition_num)
 {
-    // the only difference between P being and not being constant
-    // is that in the first case partition 0 has maxsize R while in the
-    // second case it has limit R-1.
     assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
         return (int)pow(m_R, partition_num);
@@ -232,7 +229,8 @@ int GeomCompactionManager::sanity_check()
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
     assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());
     for (uint i = 0; i < m_partition_size.size(); i++) {
-        assert(m_partition_size[i] == 0 || m_partition_size[i] >= partition_minsize(i));
+        // if P != 0, there's a case when R increases before a flush that the assertion below does not hold
+        assert(m_P != 0 || (m_partition_size[i] == 0 || m_partition_size[i] >= partition_minsize(i)));
         assert(m_partition_size[i] <= partition_maxsize(i));
         cursize += m_partition_size[i];
     }

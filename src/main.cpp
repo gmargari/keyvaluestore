@@ -27,9 +27,9 @@ const size_t   DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false; // do not create unique keys
 
-/*========================================================================
+/*============================================================================
  *                             print_syntax
- *========================================================================*/
+ *============================================================================*/
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
@@ -51,9 +51,9 @@ void print_syntax(char *progname)
      printf("        -h:                     print this help message and exit\n");
 }
 
-/*========================================================================
+/*============================================================================
  *                               randstr
- *========================================================================*/
+ *============================================================================*/
 void randstr(char *s, const int len) {
     static const char alphanum[] =
 //         "0123456789"
@@ -68,9 +68,9 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-/*========================================================================
+/*============================================================================
  *                                main
- *========================================================================*/
+ *============================================================================*/
 int main(int argc, char **argv)
 {
     int      cflag = 0,
@@ -98,7 +98,10 @@ int main(int argc, char **argv)
              periodic_stats_step,
              num_keys_to_insert,
              timestamp,
-             total_time;
+             build_time,
+             search_time,
+             bytes_inserted,
+             next_stats_print;
     size_t   keysize,
              valuesize;
     char    *compmanager = NULL,
@@ -108,7 +111,7 @@ int main(int argc, char **argv)
     bool     periodic_stats_enabled,
              unique_keys;
     KeyValueStore *kvstore;
-    struct timeval start, end;
+    struct timeval start_search, end_search, start_build, end_build;
 
 
     // We need at least compaction manager
@@ -264,7 +267,7 @@ int main(int argc, char **argv)
         num_keys_to_insert = insertbytes / (keysize + valuesize);
     }
     if (oflag == 0) {
-        periodic_stats_step = memorysize;
+        periodic_stats_step = memorysize/2;
     }
     if (sflag == 0) {
         periodic_stats_enabled = DEFAULT_STATS_ENABLED;
@@ -371,6 +374,7 @@ int main(int argc, char **argv)
         }
         printf("# urf_flushmem_size:   %15.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
     }
+    printf("# debug_level:         %15d\n", DBGLVL);
 
     //==============================================================
     // execute puts and gets
@@ -379,36 +383,72 @@ int main(int argc, char **argv)
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
 
+    // srand
+    gettimeofday(&start_build, NULL);
+// start_build.tv_usec = 384144;
+    printf("seed: %lld\n", start_build.tv_usec);
+    srand(start_build.tv_usec);
+
+    printf("# mb_ins  buildtime  num_runs  avg_get_ms  run_sizes\n");
+
+    bytes_inserted = 0;
+    next_stats_print = periodic_stats_step;
+    build_time = 0;
+    gettimeofday(&start_build, NULL);
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
+
         randstr(key, keysize);
         randstr(value, valuesize);
         if (uflag) {
             sprintf(key, "%s%Ld", key, i); // make key unique
         }
+
         kvstore->put(key, value);
 
-        // every 10000 puts perform a number of gets
-        if (i && i % 10000 == 0) {
+        bytes_inserted += strlen(key) + strlen(value);
+
+        // every memorysize/2 bytes inserted print stats by far and execute
+        // some gets()
+        if (bytes_inserted > next_stats_print) {
+            next_stats_print += periodic_stats_step;
+
+            gettimeofday(&end_build, NULL);
+            build_time += (end_build.tv_sec - start_build.tv_sec) * 1000000 + (end_build.tv_usec - start_build.tv_usec);
+            gettimeofday(&start_build, NULL);
+            printf("%8.0f  %9Ld  %8d  ", b2mb(bytes_inserted), build_time, kvstore->get_num_disk_files());
+
             system("echo 3 > /proc/sys/vm/drop_caches");
-            total_time = 0;
-            search_queries = 20; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
+            search_time = 0;
+            search_queries = 10; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
             for (int j = 0; j < search_queries; j++) {
+
                 randstr(key, keysize);
                 if (uflag) {
                     sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
                 }
-                gettimeofday(&start, NULL);
+
+                gettimeofday(&start_search, NULL);
                 kvstore->get(key, &value2, &timestamp);
-                gettimeofday(&end, NULL);
-                total_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+                gettimeofday(&end_search, NULL);
+                search_time += (end_search.tv_sec - start_search.tv_sec) * 1000000 + (end_search.tv_usec - start_search.tv_usec);
             }
-            printf("i: %Ld diskruns: %d avg_searchms: %8.3f\n", i, kvstore->get_num_disk_files(), (total_time/ 100.0) / search_queries);
+            printf("%10.2f  ", (search_time/ 100.0) / search_queries); fflush(stdout);
+            system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1}'");
+            printf("\n");
         }
+    }
+
+    if (uflag) {
+        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
     }
 
     // flush remaining memory tuples
     while(kvstore->get_mem_size()) {
         kvstore->flush_bytes();
+    }
+
+    if (uflag) {
+        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
     }
 
     free(key);

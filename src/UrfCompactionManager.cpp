@@ -48,7 +48,7 @@ void UrfCompactionManager::set_blocksize(uint64_t blocksize)
     } else {
         // if blocksize == 0 block splitting is disabled and Urf behaves
         // identically to Immediate Merge
-        m_blocksize = ULLONG_MAX; // practically, infinite block size
+        m_blocksize = ULONG_MAX; // practically, infinite block size
     }
 }
 
