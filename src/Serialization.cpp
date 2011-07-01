@@ -62,7 +62,8 @@ bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, u
     assert(used == *len);
     assert(buf[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen] == '\0');
     assert(buf[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + 1 + valuelen] == '\0');
-    if (DBGLVL > 1) {
+#if DBGLVL > 1
+    {
         const char *kkk, *vvv;
         uint64_t ts;
         uint32_t lll;
@@ -72,6 +73,7 @@ bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, u
         assert(ts == timestamp);
         assert(lll == *len);
     }
+#endif
 
     return true;
 }

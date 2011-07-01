@@ -236,7 +236,9 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
     KVTMap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp;
-    uint64_t dbg_mem_before, dbg_to_clean, dbg_bytes_cleaned = 0; // for debugging only
+#if DBGLVL > 0
+    uint64_t dbg_mem_before, dbg_to_clean, dbg_bytes_cleaned = 0;
+#endif
 
     assert(sanity_check());
     assert((dbg_to_clean = get_size(start_key, end_key, start_key_incl, end_key_incl)) || 1);

@@ -69,6 +69,43 @@ void randstr(char *s, const int len) {
 }
 
 /*============================================================================
+ *                              start_time
+ *============================================================================*/
+void init_time(struct timeval *time)
+{
+    time->tv_sec = 0;
+    time->tv_usec = 0;
+}
+
+/*============================================================================
+ *                              start_time
+ *============================================================================*/
+void start_time(struct timeval *starttime)
+{
+    gettimeofday(starttime, NULL);
+}
+
+/*============================================================================
+ *                              end_time
+ *============================================================================*/
+void end_time(struct timeval *time_by_far, struct timeval starttime)
+{
+    struct timeval newtime, endtime;
+
+    gettimeofday(&endtime, NULL);
+    newtime.tv_sec = endtime.tv_sec - starttime.tv_sec;
+    newtime.tv_usec = endtime.tv_usec - starttime.tv_usec;
+
+    time_by_far->tv_sec += newtime.tv_sec;
+    time_by_far->tv_usec += newtime.tv_usec;
+    assert(newtime.tv_usec < 1000000);
+    if (time_by_far->tv_usec >= 1000000) {
+        time_by_far->tv_sec += 1;
+        time_by_far->tv_usec -= 1000000;
+    }
+}
+
+/*============================================================================
  *                                main
  *============================================================================*/
 int main(int argc, char **argv)
@@ -98,8 +135,6 @@ int main(int argc, char **argv)
              periodic_stats_step,
              num_keys_to_insert,
              timestamp,
-             build_time,
-             search_time,
              bytes_inserted,
              next_stats_print;
     size_t   keysize,
@@ -111,7 +146,7 @@ int main(int argc, char **argv)
     bool     periodic_stats_enabled,
              unique_keys;
     KeyValueStore *kvstore;
-    struct timeval start_search, end_search, start_build, end_build;
+    struct timeval build_time, search_time, start_build, start_search;
 
 
     // We need at least compaction manager
@@ -386,15 +421,15 @@ int main(int argc, char **argv)
     // srand
     gettimeofday(&start_build, NULL);
 // start_build.tv_usec = 384144;
-    printf("seed: %lld\n", start_build.tv_usec);
+    printf("seed: %ld\n", start_build.tv_usec);
     srand(start_build.tv_usec);
 
-    printf("# mb_ins  buildtime  num_runs  avg_get_ms  run_sizes\n");
+    printf("# mb_ins  Tbuild_sec  num_runs  avg_get_ms  run_sizes\n");
 
     bytes_inserted = 0;
     next_stats_print = periodic_stats_step;
-    build_time = 0;
-    gettimeofday(&start_build, NULL);
+    init_time(&build_time);
+    start_time(&start_build);
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
 
         randstr(key, keysize);
@@ -412,14 +447,14 @@ int main(int argc, char **argv)
         if (bytes_inserted > next_stats_print) {
             next_stats_print += periodic_stats_step;
 
-            gettimeofday(&end_build, NULL);
-            build_time += (end_build.tv_sec - start_build.tv_sec) * 1000000 + (end_build.tv_usec - start_build.tv_usec);
-            gettimeofday(&start_build, NULL);
-            printf("%8.0f  %9Ld  %8d  ", b2mb(bytes_inserted), build_time, kvstore->get_num_disk_files());
+            end_time(&build_time, start_build);
+            start_time(&start_build);
+            printf("%8.0f  %10ld  %8d  ", b2mb(bytes_inserted), build_time.tv_sec, kvstore->get_num_disk_files());
+
+            init_time(&search_time);
+            search_queries = 10; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
 
             system("echo 3 > /proc/sys/vm/drop_caches");
-            search_time = 0;
-            search_queries = 10; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
             for (int j = 0; j < search_queries; j++) {
 
                 randstr(key, keysize);
@@ -427,13 +462,12 @@ int main(int argc, char **argv)
                     sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
                 }
 
-                gettimeofday(&start_search, NULL);
+                start_time(&start_search);
                 kvstore->get(key, &value2, &timestamp);
-                gettimeofday(&end_search, NULL);
-                search_time += (end_search.tv_sec - start_search.tv_sec) * 1000000 + (end_search.tv_usec - start_search.tv_usec);
+                end_time(&search_time, start_search);
             }
-            printf("%10.2f  ", (search_time/ 100.0) / search_queries); fflush(stdout);
-            system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1}'");
+            printf("%10.2f  ", usec2msec(search_time.tv_sec * 1000000 + search_time.tv_usec) / search_queries); fflush(stdout);
+            system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
             printf("\n");
         }
     }

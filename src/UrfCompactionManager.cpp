@@ -90,7 +90,9 @@ void UrfCompactionManager::flush_bytes(void)
     Range rng;
     uint64_t bytes_flushed, memstore_size, memstore_maxsize;
     int i, cur_rng, newfiles, idx;
-    uint64_t dbg_memsize, dbg_memsize_serial; // for debugging only
+#if DBGLVL > 0
+    uint64_t dbg_memsize, dbg_memsize_serial;
+#endif
 
     assert(sanity_check());
 

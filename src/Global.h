@@ -54,7 +54,9 @@
 #define hour2sec(h) ((h)*3600.0)
 #define min2sec(m)  ((m)*60.0)
 #define msec2sec(m) ((m)/1000.0)
-#define usec2sec(u) ((u)/1000000.0))
+#define usec2sec(u) ((u)/1000000.0)
+
+#define usec2msec(u) ((u)/1000.0)
 
 #if DBGLVL == 0
     #define NDEBUG // disable assertions
