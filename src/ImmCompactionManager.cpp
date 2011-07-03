@@ -26,8 +26,6 @@ ImmCompactionManager::~ImmCompactionManager()
 
 }
 
-#include <cstdio>
-
 /*============================================================================
  *                               flush_bytes
  *============================================================================*/
@@ -55,7 +53,6 @@ void ImmCompactionManager::flush_bytes(void)
 
     // if we perform online merge, add memstore stream to vector of streams
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
-printf("online!\n");
         m_memstore->m_inputstream->reset();
         istreams_to_merge.push_back(m_memstore->m_inputstream);
     }
