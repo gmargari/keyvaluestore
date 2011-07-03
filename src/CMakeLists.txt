@@ -21,11 +21,10 @@ add_library (Serialization              Serialization.cpp)
 add_library (Range                      Range.cpp)
 add_library (VFile                      VFile.cpp)
 add_library (VFileIndex                 VFileIndex.cpp)
-add_library (Simulator                  Simulator.cpp)
 add_library (Statistics                 Statistics.cpp)
 
 
-target_link_libraries (VFile                    VFileIndex Simulator Statistics)
+target_link_libraries (VFile                    VFileIndex Statistics)
 target_link_libraries (DiskFile                 VFile)
 target_link_libraries (DiskFileInputStream      Serialization InputStream)
 target_link_libraries (DiskFileOutputStream     Serialization)

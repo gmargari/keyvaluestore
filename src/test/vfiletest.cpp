@@ -1,5 +1,4 @@
 #include "../Global.h"
-#include "../Simulator.h"
 #include "../VFile.h"
 
 #include <stdio.h>
@@ -9,7 +8,6 @@
 
 int main(void)
 {
-    Simulator sim;
     VFile f;
     void *buf = malloc(mb2b(20));
     uint64_t bytes_left;

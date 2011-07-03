@@ -1,7 +1,6 @@
 #include "Global.h"
 #include "VFile.h"
 
-#include "Simulator.h"
 #include "Statistics.h"
 
 #include <stdio.h>
@@ -27,11 +26,7 @@ VFile::VFile()
     m_offset = 0;
     m_cur = -1;
 
-    // TODO: for now, each VFile has a separate simulator...
-    m_sim = new Simulator();
-    m_sim->set_simulation_mode(Simulator::SIMMODE_REAL_IO);
-//     m_sim->set_simulation_mode(Simulator::SIMMODE_SIMULATE_IO);
-
+    m_simmode = SIMMODE_REAL_IO;
 }
 
 /*============================================================================
@@ -47,8 +42,6 @@ VFile::~VFile(void)
     if (m_basefilename) {
         free(m_basefilename);
     }
-
-    delete m_sim;
 }
 
 /*============================================================================
@@ -178,7 +171,7 @@ off_t VFile::fs_seek(off_t offs, int whence)
         m_offset = m_size + offs;
     }
 
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
 
         /*
         * if seek is out of current file limits, check if there are previous
@@ -245,7 +238,7 @@ void VFile::fs_truncate(off_t length)
     off_t len;
     int new_files, num;
 
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
 
         new_files = (int) ceil((float)length / (float)MAX_FILE_SIZE);
 
@@ -329,7 +322,7 @@ void VFile::fs_truncate(off_t length)
  *============================================================================*/
 void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
         assert(m_names.size() == m_filedescs.size());
         for (int i = 0; i < (int)m_names.size(); i++) {
 
@@ -368,7 +361,7 @@ uint64_t VFile::fs_size(void)
  *============================================================================*/
 void VFile::fs_sync(void)
 {
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
             time_start(&(g_stats.write_time));
             fsync(m_filedescs[i]);
@@ -386,7 +379,7 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
 
     assert(m_cur != -1);
 
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
 
         if (fs_tell() == (off_t)fs_size()) {
             return 0; // no bytes lef to read
@@ -440,7 +433,7 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
 {
     ssize_t actually_written;
 
-    if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
+    if (m_simmode == SIMMODE_REAL_IO) {
 
         assert(m_cur != -1);
 
@@ -491,7 +484,7 @@ uint64_t VFile::cur_fs_size(void)
 {
     struct stat filestatus;
 
-    assert(m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
+    assert(m_simmode == SIMMODE_REAL_IO);
     assert(m_cur != -1);
 
     stat(m_names[m_cur], &filestatus);
@@ -505,7 +498,7 @@ off_t VFile::cur_fs_seek(off_t offs, int whence)
 {
     off_t newoffs;
 
-    assert(m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO);
+    assert(m_simmode == SIMMODE_REAL_IO);
     assert(m_cur != -1);
 
     if ((newoffs = lseek(m_filedescs[m_cur], offs, whence)) == (off_t)-1) {
