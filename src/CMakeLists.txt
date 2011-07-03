@@ -36,7 +36,7 @@ target_link_libraries (DiskStore                DiskFile VFile)
 
 target_link_libraries (CompactionManager        MemStore DiskStore MapInputStream DiskFile DiskFileInputStream DiskFileOutputStream PriorityInputStream Serialization)
 target_link_libraries (NullCompactionManager    CompactionManager MemStore DiskStore)
-target_link_libraries (ImmCompactionManager     CompactionManager MemStore DiskStore MapInputStream DiskFile DiskFileInputStream)
+target_link_libraries (ImmCompactionManager     GeomCompactionManager)
 target_link_libraries (GeomCompactionManager    CompactionManager MemStore DiskStore MapInputStream DiskFile DiskFileInputStream)
 target_link_libraries (LogCompactionManager     GeomCompactionManager)
 target_link_libraries (UrfCompactionManager     CompactionManager MemStore DiskStore MapInputStream DiskFile DiskFileInputStream Range)
