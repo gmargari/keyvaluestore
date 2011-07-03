@@ -415,7 +415,7 @@ int main(int argc, char **argv)
             // do not include io caused by searches (number of reads, amount of bytes read) in global stats
             global_stats_disable_gathering();
 
-            search_queries = 100; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
+            search_queries = 10; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
             total_search_time = 0;
             system("echo 3 > /proc/sys/vm/drop_caches");
             for (int j = 0; j < search_queries; j++) {
