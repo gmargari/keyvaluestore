@@ -2,6 +2,7 @@
 #include "VFile.h"
 
 #include "Simulator.h"
+#include "Statistics.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -369,7 +370,9 @@ void VFile::fs_sync(void)
 {
     if (m_sim->get_simulation_mode() == Simulator::SIMMODE_REAL_IO) {
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
+            time_start(&(g_stats.write_time));
             fsync(m_filedescs[i]);
+            time_end(&(g_stats.write_time));
         }
     }
 }
@@ -409,21 +412,22 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
             count = MAX_FILE_SIZE - cur_fs_tell();
         }
 
-//         start_timing();
+        time_start(&(g_stats.read_time));
         if ((actually_read = read(m_filedescs[m_cur], buf, count)) == -1) {
             printf("[ERROR] cur_fs_read(): read('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
-//         end_timing();
+        time_end(&(g_stats.read_time));
     } else {
         actually_read = count;
     }
 
     m_offset += actually_read;
 
-//     m_sim->inc_bytes_read(actually_read);
-//     m_sim->inc_ioops(1);
+    // update global statistics
+    bytes_inc(&g_stats.bytes_read, actually_read);
+    num_inc(&(g_stats.num_reads), 1);
 
     assert(actually_read);
     return actually_read;
@@ -456,13 +460,13 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
             count = MAX_FILE_SIZE - cur_fs_tell();
         }
 
-//         start_timing();
+        time_start(&(g_stats.write_time));
         if ((actually_written = write(m_filedescs[m_cur], buf, count)) == -1) {
             printf("[ERROR] cur_fs_write(): write('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
-//         end_timing();
+        time_end(&(g_stats.write_time));
 
     } else {
         actually_written = count;
@@ -473,8 +477,9 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
         m_size = m_offset;
     }
 
-//     m_sim->inc_bytes_written(actually_written);
-//     m_sim->inc_ioops(1);
+    // update global statistics
+    bytes_inc(&g_stats.bytes_written, actually_written);
+    num_inc(&(g_stats.num_writes), 1);
 
     return actually_written;
 }
@@ -526,31 +531,4 @@ off_t VFile::cur_fs_tell(void)
 off_t VFile::cur_fs_rewind(void)
 {
     return cur_fs_seek(0, SEEK_SET);
-}
-
-
-/*============================================================================
- *                                start_timing
- *============================================================================*/
-void VFile::start_timing(void)
-{
-    gettimeofday(&starttime, NULL);
-}
-
-/*============================================================================
- *                                end_timing
- *============================================================================*/
-void VFile::end_timing(void)
-{
-    time_t sec;
-    suseconds_t usec;
-
-    gettimeofday(&endtime, NULL);
-    sec = endtime.tv_sec - starttime.tv_sec;
-    usec = endtime.tv_usec - starttime.tv_usec;
-    if (usec < 0) {
-        sec -= 1;
-        usec += 1000000;
-    }
-    m_sim->inc_time_passed(sec, usec);
 }

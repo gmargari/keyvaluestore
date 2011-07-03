@@ -22,9 +22,10 @@ add_library (Range                      Range.cpp)
 add_library (VFile                      VFile.cpp)
 add_library (VFileIndex                 VFileIndex.cpp)
 add_library (Simulator                  Simulator.cpp)
+add_library (Statistics                 Statistics.cpp)
 
 
-target_link_libraries (VFile                    VFileIndex Simulator)
+target_link_libraries (VFile                    VFileIndex Simulator Statistics)
 target_link_libraries (DiskFile                 VFile)
 target_link_libraries (DiskFileInputStream      Serialization InputStream)
 target_link_libraries (DiskFileOutputStream     Serialization)
@@ -40,7 +41,7 @@ target_link_libraries (ImmCompactionManager     CompactionManager MemStore DiskS
 target_link_libraries (GeomCompactionManager    CompactionManager MemStore DiskStore MapInputStream DiskFile DiskFileInputStream)
 target_link_libraries (LogCompactionManager     GeomCompactionManager)
 target_link_libraries (UrfCompactionManager     CompactionManager MemStore DiskStore MapInputStream DiskFile DiskFileInputStream Range)
-target_link_libraries (KeyValueStore            MemStore DiskStore NullCompactionManager ImmCompactionManager GeomCompactionManager LogCompactionManager UrfCompactionManager)
+target_link_libraries (KeyValueStore            MemStore DiskStore NullCompactionManager ImmCompactionManager GeomCompactionManager LogCompactionManager UrfCompactionManager Statistics)
 
 add_executable (sim main.cpp)
 target_link_libraries (sim KeyValueStore)

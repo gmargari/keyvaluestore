@@ -115,6 +115,18 @@ public:
      */
     CompactionManager *get_compaction_manager();
 
+    /**
+     * function used to get statistics about keyvaluestore
+     */
+    uint32_t get_mb_read();
+    uint32_t get_mb_written();
+    uint32_t get_num_reads();
+    uint32_t get_num_writes();
+    uint32_t get_read_time_sec();
+    uint32_t get_write_time_sec();
+    uint32_t get_compaction_time_sec();
+    uint32_t get_total_time_sec();
+
 protected:
 
     int sanity_check();

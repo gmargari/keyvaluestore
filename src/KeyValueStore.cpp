@@ -8,6 +8,7 @@
 #include "LogCompactionManager.h"
 #include "GeomCompactionManager.h"
 #include "UrfCompactionManager.h"
+#include "Statistics.h"
 
 #include <cassert>
 #include <cstdio>
@@ -38,6 +39,7 @@ KeyValueStore::KeyValueStore(cm_type type)
     }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);
     check_parameters();
+    global_stats_init();
 }
 
 /*============================================================================
@@ -73,7 +75,9 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
 {
     assert(m_memstore->get_size() < m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, value, timestamp)) {
+        time_start(&(g_stats.compaction_time));
         m_compactionmanager->flush_bytes();
+        time_end(&(g_stats.compaction_time));
     }
 
     return m_memstore->put(key, value, timestamp);
@@ -86,7 +90,9 @@ bool KeyValueStore::put(const char *key, const char *value)
 {
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, value)) {
+        time_start(&(g_stats.compaction_time));
         m_compactionmanager->flush_bytes();
+        time_end(&(g_stats.compaction_time));
     }
 
     return m_memstore->put(key, value);
@@ -173,6 +179,74 @@ void KeyValueStore::flush_bytes()
 CompactionManager *KeyValueStore::get_compaction_manager()
 {
     return m_compactionmanager;
+}
+
+/*============================================================================
+ *                               get_mb_read
+ *============================================================================*/
+uint32_t KeyValueStore::get_mb_read()
+{
+    return gb2mb(bytes_get_gb(g_stats.bytes_read)) + bytes_get_mb(g_stats.bytes_read);
+}
+
+/*============================================================================
+ *                               get_mb_read
+ *============================================================================*/
+uint32_t KeyValueStore::get_mb_written()
+{
+    return gb2mb(bytes_get_gb(g_stats.bytes_written)) + bytes_get_mb(g_stats.bytes_written);
+}
+
+/*============================================================================
+ *                               get_mb_read
+ *============================================================================*/
+uint32_t KeyValueStore::get_num_reads()
+{
+    return g_stats.num_reads;
+}
+
+/*============================================================================
+ *                             get_num_writes
+ *============================================================================*/
+uint32_t KeyValueStore::get_num_writes()
+{
+    return g_stats.num_writes;
+}
+
+/*============================================================================
+ *                           get_read_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_read_time_sec()
+{
+    return time_get_secs(g_stats.read_time);
+}
+
+/*============================================================================
+ *                           get_write_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_write_time_sec()
+{
+    return time_get_secs(g_stats.write_time);
+}
+
+/*============================================================================
+ *                          get_compaction_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_compaction_time_sec()
+{
+    return time_get_secs(g_stats.compaction_time);
+}
+
+/*============================================================================
+ *                            get_total_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_total_time_sec()
+{
+    time_end(&(g_stats.total_time));
+    stats_sanity_check();
+    time_start(&(g_stats.total_time));
+
+    return time_get_secs(g_stats.total_time);
 }
 
 /*============================================================================

@@ -22,7 +22,10 @@ int main(void)
 {
     VFileIndex index;
     char key[MAX_KVTSIZE];
-    off_t off1, off2, off3, off4;
+    off_t off1, off2;
+#if DBGLVL > 0
+    off_t off3, off4;
+#endif
     struct timeval tv;
     int num_keys, maxkeysize;
     #define N 7

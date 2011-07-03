@@ -54,9 +54,6 @@ protected:
     vector<int>     m_filedescs; // _using many physical files.
     int             m_cur;       // where we are in 'm_filedescs' and 'm_names'
 
-    struct timeval  starttime;   // used from start_timing(), end_timing()
-    struct timeval  endtime;
-
     // in case of real IO, the Filesim simulates a single virtual large file
     // using many physical files (of max size MAX_FILE_SIZE). the following
     // functions set or get information about the current physical file used
@@ -67,9 +64,6 @@ protected:
     off_t           cur_fs_rewind();
     ssize_t         cur_fs_write(const void *buf, size_t count);
     ssize_t         cur_fs_read(void *buf, size_t count);
-
-    void            start_timing();
-    void            end_timing();
 };
 
 #endif

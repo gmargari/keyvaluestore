@@ -7,26 +7,35 @@
 //  2 - heavy debugging (assertions, sanity_checks()s and all other debugging functions enabled)
 #define DBGLVL 0
 
+//==============================================================================
 // default values
+//==============================================================================
 #define DEFAULT_MEMSTORE_SIZE                   104857600LL // 100MB
 #define MAX_INDEX_DIST                                65536 // 64KB
 #define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB (max size for key and for value)
 #define MERGE_BUFSIZE        ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
-
-// compaction managers' default values
-#define DEFAULT_GEOM_R                                    3
-#define DEFAULT_GEOM_P                                    0 // default disabled (no upper bound on number of partitions)
 #define DEFAULT_STATS_ENABLED                         false
 #define DEFAULT_STATS_STEP            DEFAULT_MEMSTORE_SIZE
+
+//==============================================================================
+// compaction managers' default values
+//==============================================================================
+#define DEFAULT_GEOM_R                                    3
+#define DEFAULT_GEOM_P                                    0 // default disabled (no upper bound on number of partitions)
 #define DEFAULT_URF_BLOCKSIZE                   268435456LL // 256MB
 #define DEFAULT_URF_FLUSHMEMSIZE                        0LL // 0 -> flush biggest range only
 
+//==============================================================================
 // vfile-related defines
+//==============================================================================
 #define TMPFILEDIR              "/tmp/"
 #define TMPFILEPREFIX           "fsim." // 5 chars max
 #define MAX_FILE_SIZE     2147483647LL // 2GB
 
-// byte conversion
+//==============================================================================
+// macros to convert bytes
+//==============================================================================
+
 #define b2kb(b) ((b)/(1024.0))
 #define b2mb(b) ((b)/(1024.0*1024.0))
 #define b2gb(b) ((b)/(1024.0*1024.0*1024.0))
@@ -58,13 +67,16 @@
 
 #define usec2msec(u) ((u)/1000.0)
 
-#if DBGLVL == 0
-    #define NDEBUG // disable assertions
-#endif
+//==============================================================================
+// safe execution of macros
+//==============================================================================
 
 #define STMT( stuff )     do { stuff } while(0)
 
-/* functions to print an expression and its value */
+//==============================================================================
+// macros to print an expression and its value
+//==============================================================================
+
 #define DEBUG_PROMPT "[DEBUG] "
 
 /* integers */
@@ -124,6 +136,14 @@
 
 /* print code point (e.g. in order to see after which point does an error occur) */
 #define dbg()             STMT( if (DBGLVL) { printf("%s %s => %s:%d\n", DEBUG_PROMPT, __FUNCTION__, __FILE__, __LINE__); fflush(stdout); } )
+
+//==============================================================================
+// debugging level
+//==============================================================================
+
+#if DBGLVL == 0
+    #define NDEBUG // disable assertions
+#endif
 
 
 #endif
