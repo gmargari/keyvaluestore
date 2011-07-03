@@ -128,7 +128,8 @@ int GeomCompactionManager::compute_current_R()
  *============================================================================*/
 void GeomCompactionManager::flush_bytes(void)
 {
-    DiskFile *disk_file;
+    DiskFile *disk_file, *memstore_file;
+    DiskFileInputStream *memstore_file_istream;
     vector<InputStream *> istreams_to_merge;
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
@@ -140,6 +141,11 @@ void GeomCompactionManager::flush_bytes(void)
     if (m_P) {
         set_R(compute_current_R());
     }
+
+    //--------------------------------------------------------------------------
+    // 1) select disk files to merge with memstore, add their input streams
+    //    to vector of streams to merge
+    //--------------------------------------------------------------------------
 
     // merge the memstore with the sub-index in the first partition.
     // if the merged sub-index is greater than the maximum size of the partition,
@@ -160,21 +166,48 @@ void GeomCompactionManager::flush_bytes(void)
     }
     assert(count <= (int)r_disk_files.size());
 
-    // add memstore stream
-    m_memstore->m_inputstream->reset();
-    istreams_to_merge.push_back(m_memstore->m_inputstream);
-
-    // add disk streams
     for (int i = 0; i < count; i++) {
         r_disk_istreams[i]->reset();
         istreams_to_merge.push_back(r_disk_istreams[i]);
     }
 
-    // merge sub-indexes with memstore, writing output to a new file
+    //--------------------------------------------------------------------------
+    // 2) add memstore stream to vector of streams to merge
+    //--------------------------------------------------------------------------
+
+    // if we perform online merge, add memstore stream to vector of streams
+    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
+        m_memstore->m_inputstream->reset();
+        istreams_to_merge.push_back(m_memstore->m_inputstream);
+    }
+    // else, flush memstore to new file, add file stream to vector of streams
+    else {
+        memstore_file = memstore_flush_to_diskfile();
+        memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
+        istreams_to_merge.push_back(memstore_file_istream);
+
+        memstore_clear();
+    }
+
+    //--------------------------------------------------------------------------
+    // 3) merge streams creating a new disk file
+    //--------------------------------------------------------------------------
     disk_file = merge_streams(istreams_to_merge);
 
-    // clear memstore
-    memstore_clear();
+    //--------------------------------------------------------------------------
+    // 4) delete merged files and corresponding streams from DiskStore
+    //--------------------------------------------------------------------------
+
+    // if we performed online merge, clear memstore
+    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
+        memstore_clear();
+    }
+    // else, memstore already cleared, delete the memstore file and disk stream
+    else {
+        memstore_file->delete_from_disk();
+        delete memstore_file;
+        delete memstore_file_istream;
+    }
 
     // delete all files merged as well as their input streams
     for (int i = 0; i < count; i++) {
@@ -185,18 +218,26 @@ void GeomCompactionManager::flush_bytes(void)
     r_disk_files.erase(r_disk_files.begin(), r_disk_files.begin() + count);
     r_disk_istreams.erase(r_disk_istreams.begin(), r_disk_istreams.begin() + count);
 
+    //--------------------------------------------------------------------------
+    // 5) add new file and corresponding stream to DiskStore
+    //--------------------------------------------------------------------------
+
     // add new file at the front, since it contains most recent <k,v> pairs
     r_disk_files.insert(r_disk_files.begin(), disk_file);
     r_disk_istreams.insert(r_disk_istreams.begin(), new DiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
-    // update 'm_partition_size' vector: zero the sizes of the 'count' partitions merged
+    //--------------------------------------------------------------------------
+    // 6) update vector of partitions
+    //--------------------------------------------------------------------------
+
+    // update partitions vector: zero the sizes of the 'count' partitions merged
     for (uint i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i] && count > 0) {
             m_partition_size[i] = 0;
             count--;
         }
     }
-    // update 'm_partition_size' vector: add new partition
+    // update partitions vector: add new partition
     part_num = partition_num(size);
     if (part_num == (int)m_partition_size.size()) {
         m_partition_size.push_back(size);

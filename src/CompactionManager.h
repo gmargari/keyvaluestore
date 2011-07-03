@@ -73,10 +73,10 @@ public:
 // TODO: move these to something like StreamFunctions
 
     /**
-     * flush memstore to disk, creating a new disk file (and a corresponding
-     * input stream) that is appended at the end of diskstore files vector.
+     * flush memstore to disk, creating a new disk file. return pointer to new
+     * disk file created
      */
-    void memstore_flush_to_new_diskfile();
+    DiskFile *memstore_flush_to_diskfile();
 
     /**
      * clear memstore

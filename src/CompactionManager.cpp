@@ -166,33 +166,26 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
 }
 
 /*============================================================================
- *                      memstore_flush_to_new_diskfile
+ *                        memstore_flush_to_diskfile
  *============================================================================*/
-void CompactionManager::memstore_flush_to_new_diskfile()
+DiskFile *CompactionManager::memstore_flush_to_diskfile()
 {
     DiskFile *disk_file;
-    DiskFileInputStream *disk_istream;
     DiskFileOutputStream *disk_ostream;
 
-    // write memstore to a new file on disk using streams
+    // write memstore to a new file on disk
     disk_file = new DiskFile();
     disk_file->open_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     m_memstore->m_inputstream->set_key_range(NULL, NULL);
     m_memstore->m_inputstream->reset();
-    // (no need to use copy_stream_unique_keys() since map keys are unique)
+    // no need to use copy_stream_unique_keys() since map keys are unique
     copy_stream(m_memstore->m_inputstream, disk_ostream);
-
-    // insert first, in diskstore files vector & input streams vector, as it
-    // contains the most recent <k,v> pairs
-    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), disk_file);
-    disk_istream = new DiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
-    m_diskstore->m_disk_istreams.insert(m_diskstore->m_disk_istreams.begin(), disk_istream);
-
-    // delete map input stream and disk file output stream
     delete disk_ostream;
 
     assert(m_memstore->get_size_when_serialized() == disk_file->get_size());
+
+    return disk_file;
 }
 
 /*============================================================================

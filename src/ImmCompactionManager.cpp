@@ -26,46 +26,66 @@ ImmCompactionManager::~ImmCompactionManager()
 
 }
 
+#include <cstdio>
+
 /*============================================================================
  *                               flush_bytes
  *============================================================================*/
 void ImmCompactionManager::flush_bytes(void)
 {
-    DiskFile *disk_file;
+    DiskFile *disk_file, *memstore_file;
+    DiskFileInputStream *memstore_file_istream;
     vector<InputStream *> istreams_to_merge;
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
 
     assert(sanity_check());
 
-    // if we perform offline merge, flush memstore to a new file on disk
-    if (get_memstore_merge_type() == CM_MERGE_OFFLINE) {
-        memstore_flush_to_new_diskfile();
-        memstore_clear();
-
-        // first time memstore is flushed, no disk file to merge with
-        if (r_disk_files.size() == 1) {
-            return;
-        }
+    //--------------------------------------------------------------------------
+    // 1) add input streams of disk file to vector of streams to merge
+    //--------------------------------------------------------------------------
+    if (r_disk_istreams.size()) {
+        r_disk_istreams[0]->reset();
+        istreams_to_merge.push_back(r_disk_istreams[0]);
     }
-    // else, add memstore stream
-    else {
+
+    //--------------------------------------------------------------------------
+    // 2) add memstore stream to vector of streams to merge
+    //--------------------------------------------------------------------------
+
+    // if we perform online merge, add memstore stream to vector of streams
+    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
+printf("online!\n");
         m_memstore->m_inputstream->reset();
         istreams_to_merge.push_back(m_memstore->m_inputstream);
     }
+    // else, flush memstore to new file, add file stream to vector of streams
+    else {
+        memstore_file = memstore_flush_to_diskfile();
+        memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
+        istreams_to_merge.push_back(memstore_file_istream);
 
-    // add all disk input streams that will be merged
-    for (int i = 0; i < (int)r_disk_istreams.size(); i++) {
-        r_disk_istreams[i]->reset();
-        istreams_to_merge.push_back(r_disk_istreams[i]);
+        memstore_clear();
     }
 
-    // merge input streams, writing output to a new file
+    //--------------------------------------------------------------------------
+    // 3) merge streams creating a new disk file
+    //--------------------------------------------------------------------------
     disk_file = merge_streams(istreams_to_merge);
 
-    // clear memstore if needed
+    //--------------------------------------------------------------------------
+    // 4) delete merged files and corresponding streams from DiskStore
+    //--------------------------------------------------------------------------
+
+    // if we performed online merge, clear memstore
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
         memstore_clear();
+    }
+    // else, memstore already cleared, delete the memstore file and disk stream
+    else {
+        memstore_file->delete_from_disk();
+        delete memstore_file;
+        delete memstore_file_istream;
     }
 
     // delete all files merged as well as their input streams
@@ -77,7 +97,10 @@ void ImmCompactionManager::flush_bytes(void)
     r_disk_files.clear();
     r_disk_istreams.clear();
 
-    // add new file and its input stream to (currently empty) set of disk files
+    //--------------------------------------------------------------------------
+    // 5) add new file and corresponding stream to (currently empty) DiskStore
+    //--------------------------------------------------------------------------
+
     r_disk_files.push_back(disk_file);
     r_disk_istreams.push_back(new DiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
