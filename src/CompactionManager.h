@@ -12,8 +12,6 @@ class InputStream;
 class OutputStream;
 class DiskFile;
 
-typedef enum { CM_MERGE_ONLINE, CM_MERGE_OFFLINE } merge_type;
-
 class CompactionManager {
 
 public:

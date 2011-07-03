@@ -182,6 +182,14 @@ CompactionManager *KeyValueStore::get_compaction_manager()
 }
 
 /*============================================================================
+ *                         get_memstore_merge_type
+ *============================================================================*/
+merge_type KeyValueStore::get_memstore_merge_type()
+{
+    return m_compactionmanager->get_memstore_merge_type();
+}
+
+/*============================================================================
  *                               get_mb_read
  *============================================================================*/
 uint32_t KeyValueStore::get_mb_read()
