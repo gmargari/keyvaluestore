@@ -1,12 +1,12 @@
 #ifndef IMM_COMPACTIONMANAGER_H
 #define IMM_COMPACTIONMANAGER_H
 
-#include "CompactionManager.h"
+#include "GeomCompactionManager.h"
 
 class MemStore;
 class DiskStore;
 
-class ImmCompactionManager: public CompactionManager {
+class ImmCompactionManager: public GeomCompactionManager {
 
 public:
 
@@ -19,13 +19,6 @@ public:
      * destructor
      */
     ~ImmCompactionManager();
-
-    // inherited from CompactionManager (see CompactionManager.h for description)
-    void flush_bytes(void);
-
-protected:
-
-    int sanity_check();
 };
 
 #endif
