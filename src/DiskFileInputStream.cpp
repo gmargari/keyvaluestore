@@ -9,22 +9,24 @@
 #include <cstring>
 #include <cassert>
 
-// if this is true, read() will return immediately false, without trying to
-// deserialize buffer contents
-bool read_return_imm_with_fail = false;
-
 /*============================================================================
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
 {
-    m_diskfile = file;
     assert(file->m_vfile_index);
+
+    m_diskfile = file;
     m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
+
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
-    set_key_range(NULL, NULL, true, true);
+
+    m_start_key = NULL;
+    m_end_key = NULL;
+    m_start_incl = true;
+    m_end_incl = true;
 }
 
 /*============================================================================
@@ -40,63 +42,13 @@ DiskFileInputStream::~DiskFileInputStream()
  *============================================================================*/
 void DiskFileInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
-    off_t off1, off2;
-    const char *key, *value;
-    uint64_t timestamp;
-    uint32_t len;
-    int cmp;
-    bool ret;
-
     m_start_key = start_key;
     m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
-    if (start_key) {
-        // if 'start_key' was stored on disk, it would be stored between 'off1' & 'off2'
-        ret = m_diskfile->m_vfile_index->search(start_key, &off1, &off2);
-        if (ret == false) {
-            // 'start_key' was either (lexicographically) smaller than all terms,
-            // or greater than all terms in file. set 'read_return_imm_with_fail'
-            // so next read will return immediately false
-            read_return_imm_with_fail = true;
-            return;
-        }
-
-        // read in buffer all bytes between 'off1' and 'off2'. check all tuples
-        // in buffer until we find 'start_key' or the next greater term.
-        m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
-        m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
-        m_bytes_used = 0;
-        while (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, &key, &value, &timestamp, &len, false)) {
-
-            m_bytes_used += len;
-
-            // found 'start_key'
-            if ((cmp = strcmp(key, start_key)) == 0) {
-                if (m_start_incl == true) {
-                    // must seek file back at the beginning of 'start_key' tuple
-                    m_bytes_used -= len;
-                }
-                break;
-            }
-            // first term greater than 'start_key'
-            else if (cmp > 0) {
-                break;
-            }
-        }
-
-        // in special case where 'start_key' == 'end_key' (for example,
-        // DiskStore::get()) return false as term does not exist on disk
-        if (m_bytes_used == m_bytes_in_buf && end_key && strcmp(start_key, end_key) == 0) {
-            read_return_imm_with_fail = true;
-        }
-
-        assert(m_diskfile->m_vfile->fs_tell() >= off1);
-        assert(m_diskfile->m_vfile->fs_tell() <= off1 + MAX_INDEX_DIST);
-    } else {
-        m_diskfile->m_vfile->fs_rewind();
-    }
+    m_bytes_in_buf = 0;
+    m_bytes_used = 0;
 }
 
 /*============================================================================
@@ -124,13 +76,66 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 {
     uint32_t len, unused_bytes;
     int cmp;
+    off_t off1, off2;
+    const char *disk_key, *disk_value;
+    bool ret;
 
-    if (read_return_imm_with_fail) {
-        read_return_imm_with_fail = false;
-        return false;
+    //--------------------------------------------------------------------------
+    // this code is executed only the first time read() is called, after reset()
+    // or set_key_range(): seek to the first valid key on disk
+    //--------------------------------------------------------------------------
+    if (m_bytes_in_buf == 0) {
+
+        // if caller defined a start_key, seek to the first valid key on disk
+        if (m_start_key) {
+
+            // if 'm_start_key' was stored on disk, it would be stored between 'off1' & 'off2'
+            ret = m_diskfile->m_vfile_index->search(m_start_key, &off1, &off2);
+            if (ret == false) {
+                // 'm_start_key' was either (lexicographically) smaller than all terms,
+                // or greater than all terms in file.
+                return false;
+            }
+
+            // read in buffer all bytes between 'off1' and 'off2'. check all tuples
+            // in buffer until we find 'm_start_key' or the next greater term.
+            m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
+            m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
+            m_bytes_used = 0;
+            while (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, &disk_key, &disk_value, timestamp, &len, false)) {
+
+                m_bytes_used += len;
+
+                // found 'm_start_key'
+                if ((cmp = strcmp(disk_key, m_start_key)) == 0) {
+                    if (m_start_incl == true) {
+                        // must seek file back at the beginning of 'm_start_key' tuple
+                        m_bytes_used -= len;
+                    }
+                    break;
+                }
+                // first term greater than 'm_start_key'
+                else if (cmp > 0) {
+                    break;
+                }
+            }
+
+            // in special case where 'm_start_key' == 'm_end_key' (for example,
+            // DiskStore::get()) return false as term does not exist on disk
+            if (m_bytes_used == m_bytes_in_buf && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
+                return false;
+            }
+
+            assert(m_diskfile->m_vfile->fs_tell() >= off1);
+            assert(m_diskfile->m_vfile->fs_tell() <= off1 + MAX_INDEX_DIST);
+        }
+        // else, seek to the first key on disk
+        else {
+            m_diskfile->m_vfile->fs_rewind();
+        }
     }
-    // TODO: code repetition, how could I shorten code?
 
+    // TODO: code repetition, how could I shorten code?
     if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
