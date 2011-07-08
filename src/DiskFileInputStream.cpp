@@ -52,9 +52,9 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
-    if (m_start_key) {
+    if (start_key) {
         // if 'start_key' was stored on disk, it would be stored between 'off1' & 'off2'
-        ret = m_diskfile->m_vfile_index->search(m_start_key, &off1, &off2);
+        ret = m_diskfile->m_vfile_index->search(start_key, &off1, &off2);
         if (ret == false) {
             // 'start_key' was either (lexicographically) smaller than all terms,
             // or greater than all terms in file. set 'read_return_imm_with_fail'
@@ -88,7 +88,7 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
 
         // in special case where 'start_key' == 'end_key' (for example,
         // DiskStore::get()) return false as term does not exist on disk
-        if (m_bytes_used == m_bytes_in_buf && strcmp(start_key, end_key) == 0) {
+        if (m_bytes_used == m_bytes_in_buf && end_key && strcmp(start_key, end_key) == 0) {
             read_return_imm_with_fail = true;
         }
 
