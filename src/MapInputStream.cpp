@@ -10,7 +10,11 @@
 MapInputStream::MapInputStream(Map *map)
 {
     m_map = map;
-    set_key_range(NULL, NULL, true, true);
+
+    m_start_key = NULL;
+    m_end_key = NULL;
+    m_start_incl = true;
+    m_end_incl = true;
 }
 
 /*============================================================================
@@ -30,6 +34,7 @@ void MapInputStream::set_key_range(const char *start_key, const char *end_key, b
     m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
+
     reset();
 }
 

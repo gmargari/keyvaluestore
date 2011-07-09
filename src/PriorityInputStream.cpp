@@ -17,7 +17,10 @@ PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
         m_elements.back()->sid = i;
     }
 
-    reset();
+    m_start_key = NULL;
+    m_end_key = NULL;
+    m_start_incl = true;
+    m_end_incl = true;
 }
 
 /*============================================================================
@@ -35,9 +38,12 @@ PriorityInputStream::~PriorityInputStream()
  *============================================================================*/
 void PriorityInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
-    for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_istreams[i]->set_key_range(start_key, end_key, start_incl, end_incl);
-    }
+    m_start_key = start_key;
+    m_end_key = end_key;
+    m_start_incl = start_incl;
+    m_end_incl = end_incl;
+
+    reset();
 }
 
 /*============================================================================
@@ -62,7 +68,9 @@ void PriorityInputStream::reset()
 
     // reset all streams, insert one element from each stream to heap
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_istreams[i]->reset();
+        // set_key_range() calls reset() at the end, no need to call it here
+        // explicitly
+        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
         if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
             m_heap.push(m_elements[i]);
         }

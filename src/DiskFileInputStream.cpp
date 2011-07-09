@@ -49,6 +49,8 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
 
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
+
+    reset();
 }
 
 /*============================================================================
@@ -66,7 +68,6 @@ void DiskFileInputStream::reset()
 {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
-    set_key_range(NULL, NULL, true, true);
 }
 
 /*============================================================================
