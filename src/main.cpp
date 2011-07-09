@@ -5,6 +5,7 @@
 #include "LogCompactionManager.h"
 #include "UrfCompactionManager.h"
 #include "Statistics.h"
+#include "RangeScanner.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -22,11 +23,18 @@ using namespace std;
 
 #define CHECK_DUPLICATE_ARG(flag,opt) do {if (flag) { printf("Error: you have already set '-%c' argument\n", opt); exit(EXIT_FAILURE); }} while(0)
 
+//------------------------------------------------------------------------------
+// default values
+//------------------------------------------------------------------------------
+
 const uint64_t DEFAULT_INSERTBYTES = 1048576000LL; // 1GB
 const size_t   DEFAULT_KEY_SIZE =             100; // 100 bytes
 const size_t   DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false; // do not create unique keys
+const int      DEFAULT_NUM_POINT_GETS =         0;
+const int      DEFAULT_NUM_RANGE_GETS =         0;
+const bool     DEFAULT_FLUSH_PAGE_CACHE =   false;
 
 /*============================================================================
  *                             print_syntax
@@ -45,10 +53,15 @@ void print_syntax(char *progname)
      printf("        -k keysize:             size of keys, in bytes (default: %d)\n", DEFAULT_KEY_SIZE);
      printf("        -v valuesize:           size of values, in bytes (default: %d)\n", DEFAULT_VALUE_SIZE);
      printf("        -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
-     printf("        -m memory:              memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
-//      printf("        -s:                     print periodic stats at stderr\n");
-//      printf("        -o statsperiod:         print periodic stats every time that many MB are inserted\n");
-//      printf("                                (default: memory size)\n");
+     printf("        -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
+     printf("        -o statsperiod:         every time that many MB are inserted, print stats by far.\n");
+     printf("                                also, executed a number of gets() and print related stats\n");
+     printf("                                (default: memorysize/2)\n");
+     printf("        -g numofpointgets:      how many point get()s we will perform every 'statsperiod'\n");
+     printf("                                bytes of data inserted. '-g' and '-G' are mutually exclusive\n");
+     printf("        -G numofrangegets:      how many range get()s we will perform every 'statsperiod'\n");
+     printf("                                bytes of data inserted. '-g' and '-G' are mutually exclusive\n");
+     printf("        -x:                     flush page cache before performing get()s (default: %s)\n", (DEFAULT_FLUSH_PAGE_CACHE) ? "true " : "false");
      printf("        -h:                     print this help message and exit\n");
 }
 
@@ -86,10 +99,14 @@ int main(int argc, char **argv)
              vflag = 0,
              uflag = 0,
              oflag = 0,
-             sflag = 0,
+             gflag = 0,
+             Gflag = 0,
+             xflag = 0,
              myopt,
              i,
-             search_queries,
+             num_point_gets,
+             num_range_gets,
+             num_gets,
              geom_r,
              geom_p;
     uint64_t blocksize,
@@ -101,18 +118,20 @@ int main(int argc, char **argv)
              timestamp,
              bytes_inserted,
              next_stats_print,
-             total_search_time;
+             total_search_time = 0;
     size_t   keysize,
              valuesize;
     char    *compmanager = NULL,
             *key = NULL,
+            *key_copy = NULL,
             *value = NULL,
-            *value2 = NULL;
-    bool     periodic_stats_enabled,
-             unique_keys;
+            *value_copy = NULL,
+            *end_key = NULL;
+    bool     unique_keys,
+             flush_page_cache;
     KeyValueStore *kvstore;
     struct timeval search_start, search_end;
-
+    RangeScanner *scanner;
 
     // We need at least compaction manager
     if (argc == 1) {
@@ -120,10 +139,10 @@ int main(int argc, char **argv)
          exit(EXIT_FAILURE);
     }
 
-    //==============================================================
+    //--------------------------------------------------------------------------
     // get arguments
-    //==============================================================
-    while ((myopt = getopt (argc, argv, "hc:r:p:b:f:m:i:n:k:v:uo:s")) != -1) {
+    //--------------------------------------------------------------------------
+    while ((myopt = getopt (argc, argv, "hc:r:p:b:f:m:i:n:k:v:uo:g:G:x")) != -1) {
         switch (myopt)  {
 
         case 'h':
@@ -202,15 +221,30 @@ int main(int argc, char **argv)
             periodic_stats_step = mb2b(atof(optarg));
             break;
 
-        case 's':
-            CHECK_DUPLICATE_ARG(sflag, myopt);
-            sflag = 1;
-            periodic_stats_enabled = true;
+        case 'g':
+            CHECK_DUPLICATE_ARG(gflag, myopt);
+            gflag = 1;
+            num_point_gets = atoi(optarg);
+            break;
+
+        case 'G':
+            CHECK_DUPLICATE_ARG(Gflag, myopt);
+            Gflag = 1;
+            num_range_gets = atoi(optarg);
+            break;
+
+        case 'x':
+            CHECK_DUPLICATE_ARG(xflag, myopt);
+            xflag = 1;
+            flush_page_cache = true;
             break;
 
         case '?':
-            if (optopt == 'c' || optopt == 'm' || optopt == 'i' || optopt == 'r'
-                 || optopt == 'p' || optopt == 'b' || optopt == 'f') {
+            if (optopt == 'c' || optopt == 'r' || optopt == 'p' || optopt == 'b'
+                  || optopt == 'f' || optopt == 'm' || optopt == 'i'
+                  || optopt == 'n' || optopt == 'k' || optopt == 'v'
+                  || optopt == 'u' || optopt == 'o' || optopt == 'g'
+                  || optopt == 'G') {
                 fprintf (stderr, "Error: option -%c requires an argument.\n", optopt);
             } else if (isprint(optopt)) {
                 fprintf (stderr, "Error: unknown option '-%c'.\n", optopt);
@@ -229,9 +263,9 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    //==============================================================
+    //--------------------------------------------------------------------------
     // set default values
-    //==============================================================
+    //--------------------------------------------------------------------------
     if (rflag == 0) {
         geom_r = DEFAULT_GEOM_R;
     }
@@ -269,13 +303,19 @@ int main(int argc, char **argv)
     if (oflag == 0) {
         periodic_stats_step = memorysize/2;
     }
-    if (sflag == 0) {
-        periodic_stats_enabled = DEFAULT_STATS_ENABLED;
+    if (gflag == 0) {
+        num_point_gets = DEFAULT_NUM_POINT_GETS;
+    }
+    if (Gflag == 0) {
+        num_range_gets = DEFAULT_NUM_RANGE_GETS;
+    }
+    if (xflag == 0) {
+        flush_page_cache = DEFAULT_FLUSH_PAGE_CACHE;
     }
 
-    //==============================================================
+    //--------------------------------------------------------------------------
     // check values
-    //==============================================================
+    //--------------------------------------------------------------------------
     if (!cflag) {
         printf("Error: you must set compaction manager\n");
         exit(EXIT_FAILURE);
@@ -306,10 +346,14 @@ int main(int argc, char **argv)
         printf("Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters\n");
         exit(EXIT_FAILURE);
     }
+    if (gflag && Gflag) {
+        printf("Error: you cannot execute both gets ('-g') and range gets ('-G')\n");
+        exit(EXIT_FAILURE);
+    }
 
-    //==============================================================
+    //--------------------------------------------------------------------------
     // create keyvalue store and set parameter values
-    //==============================================================
+    //--------------------------------------------------------------------------
     // Null compaction manager
     if (strcmp(compmanager, "null") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::NULL_CM);
@@ -335,10 +379,12 @@ int main(int argc, char **argv)
     // URF compaction manager
     else if (strcmp(compmanager, "urf") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::URF_CM);
-        if (bflag)
+        if (bflag) {
             ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
-        if (fflag)
+        }
+        if (fflag) {
             ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
+        }
     }
     // other compaction manager?!
     else {
@@ -346,9 +392,9 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    //==============================================================
-    // print simulation parameters
-    //==============================================================
+    //--------------------------------------------------------------------------
+    // print values of parameters
+    //--------------------------------------------------------------------------
     printf("# compaction_manager:  %15s\n", compmanager);
     printf("# memory_size:         %15.0f MB %s\n", b2mb(memorysize), (mflag == 0) ? "(default)" : "");
     printf("# insert_bytes:        %15.0f MB %s\n", b2mb(insertbytes), (iflag == 0) ? "(default)" : "");
@@ -356,10 +402,10 @@ int main(int argc, char **argv)
     printf("# value_size:          %15d    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
     printf("# keys_to_insert:      %15Ld\n", num_keys_to_insert);
     printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
-    printf("# periodic_stats:      %15s    %s\n", (sflag) ? "true" : "false", (sflag == 0) ? "(default)" : "");
-    if (sflag) {
-         printf("# print_stats_every:   %15.0f MB %s\n", b2mb(periodic_stats_step), (oflag == 0) ? "(default)" : "");
-    }
+    printf("# num_gets:            %15d    %s\n", num_point_gets, (gflag == 0) ? "(default)" : "");
+    printf("# num_range_gets:      %15d    %s\n", num_range_gets, (Gflag == 0) ? "(default)" : "");
+    printf("# flush_page_cache:    %15s    %s\n", (flush_page_cache) ? "true" : "false", (xflag == 0) ? "(default)" : "");
+    printf("# print_stats_every:   %15.0f MB %s\n", b2mb(periodic_stats_step), (oflag == 0) ? "(default)" : "");
     if (strcmp(compmanager, "geometric") == 0) {
         if (pflag == 0) {
             printf("# geometric_r:         %15d    %s\n", geom_r, (rflag == 0) ? "(default)" : "");
@@ -374,71 +420,136 @@ int main(int argc, char **argv)
         }
         printf("# urf_flushmem_size:   %15.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
     }
+    printf("# memstore_merge_mode: %15s\n", (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline"));
     printf("# debug_level:         %15d\n", DBGLVL);
-
-    //==============================================================
-    // execute puts and gets
-    //==============================================================
-    kvstore->set_memstore_maxsize(memorysize);
-    key = (char *)malloc(MAX_KVTSIZE);
-    value = (char *)malloc(MAX_KVTSIZE);
-
     printf("# mb_ins  Ttotal  Tcompac   Tread  Twrite  Tother   mb_read  mb_write   num_reads  num_writes  #runs  avg_get_ms  run_sizes\n");
 
+    //--------------------------------------------------------------------------
+    // initialize variables
+    //--------------------------------------------------------------------------
+    kvstore->set_memstore_maxsize(memorysize);
+    key = (char *)malloc(MAX_KVTSIZE);
+    end_key = (char *)malloc(MAX_KVTSIZE);
+    value = (char *)malloc(MAX_KVTSIZE);
     bytes_inserted = 0;
     next_stats_print = periodic_stats_step;
+
+    //--------------------------------------------------------------------------
+    // until we have inserted all keys
+    //--------------------------------------------------------------------------
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
 
+        //----------------------------------------------------------------------
+        // create a random key and a random value
+        //----------------------------------------------------------------------
         randstr(key, keysize);
         randstr(value, valuesize);
         if (uflag) {
             sprintf(key, "%s%Ld", key, i); // make key unique
         }
 
+        //----------------------------------------------------------------------
+        // insert <key, value> into store
+        //----------------------------------------------------------------------
         kvstore->put(key, value);
 
         bytes_inserted += strlen(key) + strlen(value);
 
-        // every memorysize/2 bytes inserted print stats by far and execute
-        // some gets()
+        //----------------------------------------------------------------------
+        // every 'periodic_stats_step' bytes inserted:
+        // - print stats by far
+        // - execute a number of point gets or range gets
+        //----------------------------------------------------------------------
         if (bytes_inserted > next_stats_print) {
             next_stats_print += periodic_stats_step;
 
             printf("%8.0f  %6u  %7u  %6u  %6u  %6u  %8u  %8u  %10u  %10u  %5d  ",
-                   b2mb(bytes_inserted),
-                   kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(),
-                   kvstore->get_read_time_sec(), kvstore->get_write_time_sec(), kvstore->get_total_time_sec() - kvstore->get_compaction_time_sec(),
-                   kvstore->get_mb_read(), kvstore->get_mb_written(),
-                   kvstore->get_num_reads(), kvstore->get_num_writes(),
-                   kvstore->get_num_disk_files());
+              b2mb(bytes_inserted),
+              kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(),
+              kvstore->get_read_time_sec(), kvstore->get_write_time_sec(),
+              kvstore->get_total_time_sec() - kvstore->get_compaction_time_sec(),
+              kvstore->get_mb_read(), kvstore->get_mb_written(),
+              kvstore->get_num_reads(), kvstore->get_num_writes(),
+              kvstore->get_num_disk_files());
 
-            // do not include io caused by searches (number of reads, amount of bytes read) in global stats
+            // do not include io caused by searches (number of reads, amount of
+            // bytes read) in global stats
             global_stats_disable_gathering();
 
-            search_queries = 10; // if sq = 1000, and runsize = 100MB, then reading 1000 x 64KB = 64MB, many queries may be a cache hit
-            total_search_time = 0;
-            system("echo 3 > /proc/sys/vm/drop_caches");
-            for (int j = 0; j < search_queries; j++) {
+            //------------------------------------------------------------------
+            // if needed, flush page cache before executing get()s. this ensures
+            // data will be read from disk and not from page cache.
+            //------------------------------------------------------------------
+            if (flush_page_cache) {
+                system("echo 3 > /proc/sys/vm/drop_caches");
+            }
 
+            // if we will perform range gets
+            if (Gflag) {
+                scanner = new RangeScanner(kvstore);
+                num_gets = num_range_gets;
+            }
+            // else, we perform point gets
+            else {
+                num_gets = num_point_gets;
+            }
+
+            //--------------------------------------------------------------------------
+            // until we have executed all gets or range gets
+            //--------------------------------------------------------------------------
+            total_search_time = 0;
+            for (int j = 0; j < num_gets; j++) {
+
+                //--------------------------------------------------------------
+                // create a random key
+                //--------------------------------------------------------------
                 randstr(key, keysize);
                 if (uflag) {
                     sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
                 }
 
                 gettimeofday(&search_start, NULL);
-                kvstore->get(key, &value2, &timestamp);
+
+                //--------------------------------------------------------------
+                // execute get()
+                //--------------------------------------------------------------
+                if (gflag) {
+                    kvstore->get(key, &value_copy, &timestamp);
+                    free(value_copy); // since 'value_copy'' is a copy
+                }
+                //--------------------------------------------------------------
+                // execute range get()
+                //--------------------------------------------------------------
+                else if (Gflag) {
+                    strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
+                    end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
+
+                    scanner->set_key_range(key, end_key);
+                    while (scanner->get_next(&key_copy, &value_copy, &timestamp)) {
+                        assert(strcmp(key_copy, key) >= 0 && strcmp(key_copy, end_key) < 0);
+                        free(key_copy);
+                        free(value_copy);
+                    }
+                }
+
                 gettimeofday(&search_end, NULL);
                 total_search_time += (search_end.tv_sec - search_start.tv_sec) * 1000000 + (search_end.tv_usec - search_start.tv_usec);
             }
 
+            if (Gflag) {
+                delete scanner;
+            }
+
             global_stats_enable_gathering();
 
-            printf("%10.2f  ", usec2msec(total_search_time) / search_queries); fflush(stdout);
+            // print get() stats and number of disk files
+            printf("%10.2f  ", (num_gets ? usec2msec(total_search_time) / num_gets : 0)); fflush(stdout);
             system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
             printf("\n");
         }
     }
 
+    // if we crete unique keys, assert num keys in store equals num keys inserted
     if (uflag) {
         assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
     }
@@ -449,10 +560,12 @@ int main(int argc, char **argv)
     }
 
     if (uflag) {
-        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
+        assert(kvstore->get_num_mem_keys() == 0);
+        assert(kvstore->get_num_disk_keys() == num_keys_to_insert);
     }
 
     free(key);
+    free(end_key);
     free(value);
     delete kvstore;
 
