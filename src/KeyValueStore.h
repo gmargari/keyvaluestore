@@ -9,6 +9,8 @@ class CompactionManager;
 
 class KeyValueStore {
 
+friend class RangeScanner;
+
 public:
 
     /**
