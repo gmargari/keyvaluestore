@@ -6,19 +6,19 @@
 class MemStore;
 class DiskStore;
 
-class NullCompactionManager: public CompactionManager {
+class NomergeCompactionManager: public CompactionManager {
 
 public:
 
     /**
      * constructor
      */
-    NullCompactionManager(MemStore *memstore, DiskStore *diskstore);
+    NomergeCompactionManager(MemStore *memstore, DiskStore *diskstore);
 
     /**
      * destructor
      */
-    ~NullCompactionManager();
+    ~NomergeCompactionManager();
 
     // inherited from CompactionManager (see CompactionManager.h for description)
     void flush_bytes(void);

@@ -15,13 +15,13 @@ public:
 
     /**
      * Memory flush & compaction manager algorithm:
-     *  - NULL_CM: Null compaction manager (no merge, just flush memstore to disk)
-     *  - IMM_CM: Immediate Merge
-     *  - GEOM_CM: Geometric Partitioning
-     *  - LOG_CM: Logarithmic Merge
-     *  - URF_CM: Unified Range Flush
+     *  - NOMERGE_CM: No Merge compaction manager
+     *  - IMM_CM:     Immediate Merge compaction manager
+     *  - GEOM_CM:    Geometric Partitioning compaction manager
+     *  - LOG_CM:     Logarithmic Merge compaction manager
+     *  - URF_CM:     Unified Range Flush compaction manager
      */
-    typedef enum { NULL_CM, IMM_CM, GEOM_CM, LOG_CM, URF_CM  } cm_type;
+    typedef enum { NOMERGE_CM, IMM_CM, GEOM_CM, LOG_CM, URF_CM  } cm_type;
 
     /**
      * constructor

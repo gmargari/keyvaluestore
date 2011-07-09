@@ -3,7 +3,7 @@
 
 #include "MemStore.h"
 #include "DiskStore.h"
-#include "NullCompactionManager.h"
+#include "NomergeCompactionManager.h"
 #include "ImmCompactionManager.h"
 #include "LogCompactionManager.h"
 #include "GeomCompactionManager.h"
@@ -21,8 +21,8 @@ KeyValueStore::KeyValueStore(cm_type type)
     m_memstore = new MemStore();
     m_diskstore = new DiskStore();
     switch (type) {
-        case KeyValueStore::NULL_CM:
-            m_compactionmanager = new NullCompactionManager(m_memstore, m_diskstore);
+        case KeyValueStore::NOMERGE_CM:
+            m_compactionmanager = new NomergeCompactionManager(m_memstore, m_diskstore);
             break;
         case KeyValueStore::IMM_CM:
             m_compactionmanager = new ImmCompactionManager(m_memstore, m_diskstore);

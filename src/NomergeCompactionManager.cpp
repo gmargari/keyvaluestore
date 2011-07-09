@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "NullCompactionManager.h"
+#include "NomergeCompactionManager.h"
 
 #include "MemStore.h"
 #include "DiskStore.h"
@@ -9,18 +9,18 @@
 #include <cassert>
 
 /*============================================================================
- *                             NullCompactionManager
+ *                             NomergeCompactionManager
  *============================================================================*/
-NullCompactionManager::NullCompactionManager(MemStore *memstore, DiskStore *diskstore)
+NomergeCompactionManager::NomergeCompactionManager(MemStore *memstore, DiskStore *diskstore)
 : CompactionManager(memstore, diskstore)
 {
 
 }
 
 /*============================================================================
- *                            ~NullCompactionManager
+ *                            ~NomergeCompactionManager
  *============================================================================*/
-NullCompactionManager::~NullCompactionManager()
+NomergeCompactionManager::~NomergeCompactionManager()
 {
 
 }
@@ -28,7 +28,7 @@ NullCompactionManager::~NullCompactionManager()
 /*============================================================================
  *                               flush_memstore
  *============================================================================*/
-void NullCompactionManager::flush_bytes(void)
+void NomergeCompactionManager::flush_bytes(void)
 {
     DiskFile *memstore_file;
     DiskFileInputStream *memstore_file_istream;
@@ -50,7 +50,7 @@ void NullCompactionManager::flush_bytes(void)
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int NullCompactionManager::sanity_check()
+int NomergeCompactionManager::sanity_check()
 {
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
 

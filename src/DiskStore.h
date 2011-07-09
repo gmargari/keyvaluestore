@@ -12,7 +12,7 @@ class DiskFileInputStream;
 class DiskStore {
 
 friend class CompactionManager;
-friend class NullCompactionManager;
+friend class NomergeCompactionManager;
 friend class ImmCompactionManager;
 friend class GeomCompactionManager;
 friend class LogCompactionManager;

@@ -42,7 +42,7 @@ const bool     DEFAULT_FLUSH_PAGE_CACHE =   false;
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
-     printf("        -c compactionmanager:   \"null\", \"immediate\", \"geometric\", \"logarithmic\", \"urf\"\n");
+     printf("        -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"urf\"\n");
      printf("        -r value:               r parameter, for geometric comp. manager only (default: %d)\n", DEFAULT_GEOM_R);
      printf("        -p value:               p parameter, for geometric comp. manager only (default: disabled)\n");
      printf("        -b blocksize:           block size in MB, for urf comp. manager only (default: %.0f)\n", b2mb(DEFAULT_URF_BLOCKSIZE));
@@ -320,10 +320,10 @@ int main(int argc, char **argv)
         printf("Error: you must set compaction manager\n");
         exit(EXIT_FAILURE);
     }
-    if (cflag && strcmp(compmanager, "null") && strcmp(compmanager, "immediate") != 0
+    if (cflag && strcmp(compmanager, "nomerge") && strcmp(compmanager, "immediate") != 0
          && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
          && strcmp(compmanager, "urf") != 0) {
-        printf("Error: compaction manager can be \"null\", \"immediate\", \"geometric\", \"logarithmic\" or \"urf\"\n");
+        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"urf\"\n");
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
@@ -355,8 +355,8 @@ int main(int argc, char **argv)
     // create keyvalue store and set parameter values
     //--------------------------------------------------------------------------
     // Null compaction manager
-    if (strcmp(compmanager, "null") == 0) {
-        kvstore = new KeyValueStore(KeyValueStore::NULL_CM);
+    if (strcmp(compmanager, "nomerge") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::NOMERGE_CM);
     }
     // Immediate compaction manager
     else if (strcmp(compmanager, "immediate") == 0) {
