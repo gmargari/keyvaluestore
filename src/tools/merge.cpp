@@ -2,6 +2,7 @@
 #include "../DiskFile.h"
 #include "../DiskFileInputStream.h"
 #include "../PriorityInputStream.h"
+#include "../Statistics.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -13,7 +14,7 @@ int main(int argc, char **argv)
     const char *key, *value;
     vector<DiskFile *> diskfiles;
     vector<InputStream *> istreams;
-    PriorityInputStream *priority_istream;
+    PriorityInputStream *pistream;
     uint64_t timestamp;
 
     if (argc < 2) {
@@ -21,14 +22,17 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    global_stats_init(); // avoid assertion error...
+
     for (int i = 0; i < argc - 1; i++) {
         diskfiles.push_back(new DiskFile());;
         diskfiles.back()->open_existing(argv[i+1]);
         istreams.push_back(new DiskFileInputStream(diskfiles.back(), MERGE_BUFSIZE));
     }
 
-    priority_istream = new PriorityInputStream(istreams);
-    while (priority_istream->read(&key, &value, &timestamp)) {
+    pistream = new PriorityInputStream(istreams);
+    pistream->set_key_range(NULL, NULL);
+    while (pistream->read(&key, &value, &timestamp)) {
         printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
     }
 
@@ -38,7 +42,7 @@ int main(int argc, char **argv)
     for (unsigned int i = 0; i < diskfiles.size(); i++) {
         delete diskfiles[i];
     }
-    delete priority_istream;
+    delete pistream;
 
     return EXIT_SUCCESS;
 }

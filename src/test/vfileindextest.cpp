@@ -1,5 +1,6 @@
 #include "../Global.h"
 #include "../VFileIndex.h"
+#include "../Statistics.h"
 
 #include <sys/time.h>
 #include <cstdlib>
@@ -31,6 +32,8 @@ int main(void)
     #define N 7
     char *terms[N]   = {(char *)"b", (char *)"d", (char *)"g", (char *)"k", (char *)"m", (char *)"p", (char *)"x"};
     off_t offsets[N] = {  0,  10,  20,  30,  40,  50,  60};
+
+    global_stats_init(); // avoid assertion error...
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 438701;

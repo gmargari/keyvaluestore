@@ -1,6 +1,7 @@
 #include "../Global.h"
 #include "../DiskFile.h"
 #include "../DiskFileInputStream.h"
+#include "../Statistics.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +17,8 @@ int main(int argc, char **argv)
         printf("Syntax: %s <diskfile>\n", argv[0]);
         return EXIT_FAILURE;
     }
+
+    global_stats_init(); // avoid assertion error...
 
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);

@@ -4,6 +4,7 @@
 #include "../DiskFileInputStream.h"
 #include "../DiskFileOutputStream.h"
 #include "../PriorityInputStream.h"
+#include "../Statistics.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,7 +37,7 @@ int main(void)
 {
     Map *map;
     MapInputStream *istream, *istream1, *istream2, *istream3, *istream4;
-    PriorityInputStream *istream_heap;
+    PriorityInputStream *pistream;
     DiskFile *file1, *file2;
     DiskFileOutputStream *ostream1, *ostream2;
     DiskFileInputStream *dfistream1, *dfistream2;
@@ -60,6 +61,8 @@ int main(void)
 // maxkeysize = 3;
 // maxvaluesize = 3;
     printf("num keys to be inserted: %d\n", num_keys);
+
+    global_stats_init(); // avoid assertion error...
 
     //========================================================
     // insert values in memstore
@@ -141,10 +144,11 @@ int main(void)
     file2 = new DiskFile();
     file2->open_unique();
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
-    istream_heap = new PriorityInputStream(istreams);
+    pistream = new PriorityInputStream(istreams);
+    pistream->set_key_range(NULL, NULL); // get all keys
     prev_timestamp = 0;
     prev_key[0] = '\0';
-    while (istream_heap->read(&k1, &v1, &timestamp)) {
+    while (pistream->read(&k1, &v1, &timestamp)) {
         ostream2->write(k1, v1, timestamp);
         if (strcmp(k1, prev_key) == 0) {
             assert(timestamp > prev_timestamp);
@@ -205,7 +209,7 @@ int main(void)
     delete ostream2;
     delete dfistream1;
     delete dfistream2;
-    delete istream_heap;
+    delete pistream;
     delete map;
 
     printf("Everything ok!\n");

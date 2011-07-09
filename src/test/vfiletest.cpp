@@ -1,5 +1,6 @@
 #include "../Global.h"
 #include "../VFile.h"
+#include "../Statistics.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,11 +13,9 @@ int main(void)
     void *buf = malloc(mb2b(20));
     uint64_t bytes_left;
 
+    global_stats_init(); // avoid assertion error...
+
     memset(buf, 0, mb2b(20));
-//     if (MAX_FILE_SIZE != 10485760) {
-//         printf("set MAX_FILE_SIZE = 10485760 in global.h for the test.\n");
-//         exit(EXIT_FAILURE);
-//     }
 
     // open()            -->   size: 0MB, offset: 0MB
 dbg();
@@ -254,4 +253,8 @@ dbg();
     assert(f.fs_tell() == (off_t)mb2b(18));
 
     free(buf);
+
+    printf("Everything ok!\n");
+
+    return EXIT_SUCCESS;
 }
