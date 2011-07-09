@@ -185,7 +185,8 @@ void UrfCompactionManager::flush_bytes(void)
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         r_disk_files.push_back(new_disk_files[i]);
-        r_disk_istreams.push_back(new DiskFileInputStream(new_disk_files[i], MERGE_BUFSIZE));
+        disk_stream = new DiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
+        r_disk_istreams.push_back(disk_stream);
     }
 
     assert(sanity_check());

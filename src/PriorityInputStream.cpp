@@ -16,7 +16,7 @@ PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
 {
     m_istreams = istreams;
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_elements.push_back((heap_element *)malloc(sizeof(heap_element)));
+        m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
         m_elements.back()->sid = i;
     }
 
@@ -70,15 +70,15 @@ void PriorityInputStream::reset()
 {
     assert(sanity_check());
 
-    // if heap non-empty, remove all elements
-    while (!m_heap.empty()) {
-        m_heap.pop();
+    // if priority queue non-empty, remove all elements
+    while (!m_pqueue.empty()) {
+        m_pqueue.pop();
     }
 
-    // reset all streams, insert one element from each stream to heap
+    // reset all streams, insert one element from each stream to priority queue
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
-            m_heap.push(m_elements[i]);
+            m_pqueue.push(m_elements[i]);
         }
     }
 
@@ -91,7 +91,7 @@ void PriorityInputStream::reset()
  *============================================================================*/
 bool PriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
 {
-    heap_element *top;
+    pq_elem *top;
 
     assert(sanity_check());
     assert(key && value && timestamp);
@@ -104,24 +104,24 @@ bool PriorityInputStream::read(const char **key, const char **value, uint64_t *t
 
     if (m_last_sid != -1) {
         // the element poped from head last time belonged to stream 'm_last_sid'.
-        // insert into heap a new element from that stream.
+        // insert into priority queue a new element from that stream.
         assert(m_last_sid < (int)m_istreams.size());
         if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->timestamp))) {
-            m_heap.push(m_elements[m_last_sid]);
+            m_pqueue.push(m_elements[m_last_sid]);
         }
     }
 
-    if (m_heap.empty()) {
+    if (m_pqueue.empty()) {
         return false;
     }
 
     // get top element
-    top = m_heap.top();
+    top = m_pqueue.top();
     *key = top->key;
     *value = top->value;
     *timestamp = top->timestamp;
     m_last_sid = top->sid;
-    m_heap.pop();
+    m_pqueue.pop();
 
     assert(sanity_check());
 
@@ -134,28 +134,28 @@ bool PriorityInputStream::read(const char **key, const char **value, uint64_t *t
 int PriorityInputStream::sanity_check()
 {
     int *x;
-    vector<heap_element *> tmp_vector;
-    heap_element *top;
+    vector<pq_elem *> tmp_vector;
+    pq_elem *top;
     int num_streams;
 
     num_streams = m_istreams.size();
     x = (int *)malloc(num_streams * sizeof(int));
     memset(x, 0, num_streams*sizeof(int));
-    assert(m_heap.size() <= (unsigned)num_streams); // always at most 'm_istreams.size()' elements in queue
+    assert(m_pqueue.size() <= (unsigned)num_streams); // always at most 'm_istreams.size()' elements in queue
 
-    // get all elements of heap, check everything is ok
-    while (!m_heap.empty()) {
-        top = m_heap.top();
+    // get all elements of priority queue, check everything is ok
+    while (!m_pqueue.empty()) {
+        top = m_pqueue.top();
         assert(top->sid < num_streams);
         x[top->sid]++;
         assert(x[top->sid] <= 1);
         tmp_vector.push_back(top);
-        m_heap.pop();
+        m_pqueue.pop();
     }
 
-    // reinsert elements to heap
+    // reinsert elements to priority queue
     for (int i = 0; i < (int)tmp_vector.size(); i++) {
-        m_heap.push(tmp_vector[i]);
+        m_pqueue.push(tmp_vector[i]);
     }
     tmp_vector.clear();
 

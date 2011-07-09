@@ -66,11 +66,11 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
  *============================================================================*/
 void CompactionManager::merge_streams(vector<InputStream *> istreams, OutputStream *ostream)
 {
-    PriorityInputStream *istream_heap;
+    PriorityInputStream *pistream;
 
-    istream_heap = new PriorityInputStream(istreams);
-    copy_stream_unique_keys(istream_heap, ostream);
-    delete istream_heap;
+    pistream = new PriorityInputStream(istreams);
+    copy_stream_unique_keys(pistream, ostream);
+    delete pistream;
 }
 
 /*============================================================================
@@ -116,7 +116,7 @@ void CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Dis
 int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size)
 {
     DiskFile *diskfile;
-    PriorityInputStream *istream_heap;
+    PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;
     const char *key, *value;
     char prev_key[MAX_KVTSIZE];
@@ -128,13 +128,13 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     diskfile->open_unique();
     ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
 
-    istream_heap = new PriorityInputStream(istreams);
+    pistream = new PriorityInputStream(istreams);
 
     num_newfiles = 0;
     prev_key[0] = '\0';
     filesize = 0;
 
-    while (istream_heap->read(&key, &value, &timestamp)) {
+    while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
             // if we appending current tuple to file will lead to a file size
             // greater than 'max_file_size', crete a new file for remaining tuples
@@ -160,7 +160,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     diskfiles.push_back(diskfile);
     num_newfiles++;
 
-    delete istream_heap;
+    delete pistream;
     delete ostream;
 
     return num_newfiles;
