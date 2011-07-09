@@ -23,6 +23,7 @@ int main(int argc, char **argv)
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
+    istream->set_key_range(NULL, NULL);
     while (istream->read(&key, &value, &timestamp)) {
         printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
     }

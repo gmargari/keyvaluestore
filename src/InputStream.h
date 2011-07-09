@@ -31,11 +31,6 @@ public:
     virtual void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl) = 0;
 
     /**
-     * reset stream
-     */
-    virtual void reset() = 0;
-
-    /**
      * get next <key, value, timestamp> tuple from stream
      *
      * @return false if no tuple left. else, true.

@@ -25,11 +25,8 @@ public:
 
     bool read(const char **key, const char **value, uint64_t *timestamp);
 
-    void reset();
-
 protected:
 
-    void init(Map *map, const char *start_key, const char *end_key, bool start_incl, bool end_incl);
     int sanity_check();
 
     Map                      *m_map;

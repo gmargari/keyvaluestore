@@ -87,6 +87,7 @@ int main(void)
     file1->open_unique();
     istream = new MapInputStream(map);
     ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
+    istream->set_key_range(NULL, NULL);
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
@@ -171,6 +172,8 @@ int main(void)
     value1 = (char *)malloc(MAX_KVTSIZE);
     dfistream1 = new DiskFileInputStream(file1, MERGE_BUFSIZE);
     dfistream2 = new DiskFileInputStream(file2, MERGE_BUFSIZE);
+    dfistream1->set_key_range(NULL, NULL);
+    dfistream2->set_key_range(NULL, NULL);
     num = 0;
     while (dfistream1->read(&k1, &v1, &ts1)) {
         dfistream2->read(&k2, &v2, &ts2);

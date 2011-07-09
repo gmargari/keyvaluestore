@@ -167,7 +167,7 @@ void GeomCompactionManager::flush_bytes(void)
     assert(count <= (int)r_disk_files.size());
 
     for (int i = 0; i < count; i++) {
-        r_disk_istreams[i]->reset();
+        r_disk_istreams[i]->set_key_range(NULL, NULL);
         istreams_to_merge.push_back(r_disk_istreams[i]);
     }
 
@@ -177,13 +177,14 @@ void GeomCompactionManager::flush_bytes(void)
 
     // if we perform online merge, add memstore stream to vector of streams
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
-        m_memstore->m_inputstream->reset();
+        m_memstore->m_inputstream->set_key_range(NULL, NULL);
         istreams_to_merge.push_back(m_memstore->m_inputstream);
     }
     // else, flush memstore to new file, add file stream to vector of streams
     else {
         memstore_file = memstore_flush_to_diskfile();
         memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
+        memstore_file_istream->set_key_range(NULL, NULL);
         istreams_to_merge.push_back(memstore_file_istream);
 
         memstore_clear();

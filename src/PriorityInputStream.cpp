@@ -5,6 +5,9 @@
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
+#include <climits>
+
+static const int SID_NOT_INITIALIZED = INT_MAX;
 
 /*============================================================================
  *                            PriorityInputStream
@@ -21,6 +24,8 @@ PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
     m_end_key = NULL;
     m_start_incl = true;
     m_end_incl = true;
+
+    m_last_sid = SID_NOT_INITIALIZED;
 }
 
 /*============================================================================
@@ -42,6 +47,10 @@ void PriorityInputStream::set_key_range(const char *start_key, const char *end_k
     m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
+
+    for (int i = 0; i < (int)m_istreams.size(); i++) {
+        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
+    }
 
     reset();
 }
@@ -68,9 +77,6 @@ void PriorityInputStream::reset()
 
     // reset all streams, insert one element from each stream to heap
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        // set_key_range() calls reset() at the end, no need to call it here
-        // explicitly
-        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
         if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
             m_heap.push(m_elements[i]);
         }
@@ -91,9 +97,15 @@ bool PriorityInputStream::read(const char **key, const char **value, uint64_t *t
     assert(key && value && timestamp);
 
     // m_last_sid: id of stream to which the last poped element belongs to
+    if (m_last_sid == SID_NOT_INITIALIZED) {
+        reset();
+        assert(m_last_sid != SID_NOT_INITIALIZED);
+    }
+
     if (m_last_sid != -1) {
         // the element poped from head last time belonged to stream 'm_last_sid'.
         // insert into heap a new element from that stream.
+        assert(m_last_sid < (int)m_istreams.size());
         if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->timestamp))) {
             m_heap.push(m_elements[m_last_sid]);
         }

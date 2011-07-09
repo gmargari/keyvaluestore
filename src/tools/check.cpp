@@ -25,6 +25,7 @@ int main(int argc, char **argv)
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
+    istream->set_key_range(NULL, NULL);
     while (istream->read(&key, &value, &timestamp)) {
         if ((cmp = strcmp(prev_key, key)) > 0) {
             printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);

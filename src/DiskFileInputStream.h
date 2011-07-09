@@ -26,8 +26,6 @@ public:
 
     bool read(const char **key, const char **value, uint64_t *timestamp);
 
-    void reset();
-
 protected:
 
     int sanity_check();

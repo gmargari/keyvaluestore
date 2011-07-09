@@ -35,7 +35,9 @@ void MapInputStream::set_key_range(const char *start_key, const char *end_key, b
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
-    reset();
+    assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
+    m_iter = m_map->start_iter(m_start_key, m_start_incl);
+    m_iter_end = m_map->end_iter(m_end_key, m_end_incl);
 }
 
 /*============================================================================
@@ -44,16 +46,6 @@ void MapInputStream::set_key_range(const char *start_key, const char *end_key, b
 void MapInputStream::set_key_range(const char *start_key, const char *end_key)
 {
     set_key_range(start_key, end_key, true, false);
-}
-
-/*============================================================================
- *                                  reset
- *============================================================================*/
-void MapInputStream::reset()
-{
-    assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
-    m_iter = m_map->start_iter(m_start_key, m_start_incl);
-    m_iter_end = m_map->end_iter(m_end_key, m_end_incl);
 }
 
 /*============================================================================

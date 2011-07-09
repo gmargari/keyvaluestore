@@ -133,6 +133,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     num_newfiles = 0;
     prev_key[0] = '\0';
     filesize = 0;
+
     while (istream_heap->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
             // if we appending current tuple to file will lead to a file size
@@ -178,7 +179,6 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
     disk_file->open_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     m_memstore->m_inputstream->set_key_range(NULL, NULL);
-    m_memstore->m_inputstream->reset();
     // no need to use copy_stream_unique_keys() since map keys are unique
     copy_stream(m_memstore->m_inputstream, disk_ostream);
     delete disk_ostream;
