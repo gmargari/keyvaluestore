@@ -259,7 +259,12 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
         free(key);
         free(value);
     }
-    m_map.erase(s_iter, e_iter);
+
+    if (start_key != NULL || end_key != NULL) {
+        m_map.erase(s_iter, e_iter);
+    } else {
+        m_map.clear();
+    }
 
     assert(dbg_to_clean == dbg_bytes_cleaned);
     assert(get_size(start_key, end_key, start_key_incl, end_key_incl) == 0);
