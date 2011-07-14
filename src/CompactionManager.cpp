@@ -37,7 +37,7 @@ void CompactionManager::copy_stream(InputStream *istream, OutputStream *ostream)
     uint64_t timestamp;
 
     while (istream->read(&key, &value, &timestamp)) {
-        ostream->write(key, value, timestamp);
+        ostream->write(key, strlen(key), value, strlen(value), timestamp);
     }
     ostream->flush();
 }
@@ -54,7 +54,7 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
     prev_key[0] = '\0';
     while (istream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
-            ostream->write(key, value, timestamp);
+            ostream->write(key, strlen(key), value, strlen(value), timestamp);
             strcpy(prev_key, key);
         }
     }
@@ -123,6 +123,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     uint64_t timestamp, filesize;
     uint32_t len;
     int num_newfiles;
+    size_t keylen, valuelen;
 
     diskfile = new DiskFile;
     diskfile->open_unique();
@@ -136,9 +137,11 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
 
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
+            keylen = strlen(key);
+            valuelen = strlen(value);
             // if we appending current tuple to file will lead to a file size
             // greater than 'max_file_size', crete a new file for remaining tuples
-            len = serialize_len(strlen(key), strlen(value), timestamp);
+            len = serialize_len(keylen, valuelen, timestamp);
             if (filesize + len > max_file_size) {
                 ostream->flush();
                 diskfiles.push_back(diskfile);
@@ -152,11 +155,12 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
             }
 
             filesize += len;
-            ostream->write(key, value, timestamp);
+            ostream->write(key, keylen, value, valuelen, timestamp);
             strcpy(prev_key, key);
         }
     }
     ostream->flush();
+
     diskfiles.push_back(diskfile);
     num_newfiles++;
 

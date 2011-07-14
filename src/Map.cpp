@@ -36,7 +36,7 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
     const char *cpkey, *f_key;
     char *cpvalue, *f_value;
     uint64_t f_timestamp;
-    size_t strlen_key, strlen_value;
+    size_t strlen_key, strlen_value, f_valuelen;
     KVTPair new_pair;
     KVTMap::iterator f;
 
@@ -60,8 +60,9 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
         f_timestamp = f->second.second;
         assert(timestamp > f_timestamp);
 
-        m_size -= strlen_key + 1 + strlen(f_value) + 1 + sizeof(new_pair);
-        m_size_serialized -= serialize_len(strlen_key, strlen(f_value), timestamp);
+        f_valuelen = strlen(f_value);
+        m_size -= strlen_key + 1 + f_valuelen + 1 + sizeof(new_pair);
+        m_size_serialized -= serialize_len(strlen_key, f_valuelen, timestamp);
         free(f_value);
         cpkey = key;
     } else {
@@ -185,6 +186,7 @@ pair<uint64_t, uint64_t> Map::get_sizes(const char *start_key, const char *end_k
     char *key, *value;
     uint64_t timestamp, memsize, memsize_serialized;
     pair<uint64_t, uint64_t> ret;
+    size_t strlen_key, strlen_value;
 
     assert(sanity_check());
 
@@ -198,8 +200,10 @@ pair<uint64_t, uint64_t> Map::get_sizes(const char *start_key, const char *end_k
         timestamp = iter->second.second;
         assert(key);
         assert(value);
-        memsize += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
-        memsize_serialized += serialize_len(strlen(key), strlen(value), timestamp);
+        strlen_key = strlen(key);
+        strlen_value = strlen(value);
+        memsize += strlen_key + 1 + sizeof(KVTPair) + strlen_value + 1;
+        memsize_serialized += serialize_len(strlen_key, strlen_value, timestamp);
     }
 
     assert(sanity_check());
@@ -223,6 +227,7 @@ uint64_t Map::new_size(const char *key, const char *value, uint64_t timestamp)
 void Map::clear()
 {
     clear(NULL, NULL, true, true);
+
     assert(m_size == 0);
     assert(m_size_serialized == 0);
     assert(m_keys == 0);
@@ -236,6 +241,7 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
     KVTMap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp;
+    size_t strlen_key, strlen_value;
 #if DBGLVL > 0
     uint64_t dbg_mem_before, dbg_to_clean, dbg_bytes_cleaned = 0;
 #endif
@@ -250,11 +256,13 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
         key = const_cast<char *>(iter->first);
         value = const_cast<char *>(iter->second.first);
         timestamp = iter->second.second;
+        strlen_key = strlen(key);
+        strlen_value = strlen(value);
         assert(key);
         assert(value);
-        assert((dbg_bytes_cleaned += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1));
-        m_size -= strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
-        m_size_serialized -= serialize_len(strlen(key), strlen(value), timestamp);
+        assert((dbg_bytes_cleaned += strlen_key + 1 + sizeof(KVTPair) + strlen_value + 1));
+        m_size -= strlen_key + 1 + sizeof(KVTPair) + strlen_value + 1;
+        m_size_serialized -= serialize_len(strlen_key, strlen_value, timestamp);
         m_keys--;
         free(key);
         free(value);
@@ -345,16 +353,18 @@ int Map::sanity_check()
     uint64_t map_size = 0, map_size_serialized = 0;
     const char *key, *value;
     uint64_t timestamp;
+    size_t strlen_key, strlen_value;
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
         key = iter->first;
         value = iter->second.first;
         timestamp = iter->second.second;
-
-        map_size += strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
-        map_size_serialized += serialize_len(strlen(key), strlen(value), timestamp);
-        assert(strlen(key) + 1 <= MAX_KVTSIZE);
-        assert(strlen(value) + 1 <= MAX_KVTSIZE);
+        strlen_key = strlen(key);
+        strlen_value = strlen(value);
+        map_size += strlen_key + 1 + sizeof(KVTPair) + strlen_value + 1;
+        map_size_serialized += serialize_len(strlen_key, strlen_value, timestamp);
+        assert(strlen_key + 1 <= MAX_KVTSIZE);
+        assert(strlen_value + 1 <= MAX_KVTSIZE);
         assert(timestamp != 0);
     }
     assert(m_size == map_size);
