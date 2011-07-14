@@ -270,12 +270,7 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
         free(key);
         free(value);
     }
-
-    if (start_key != NULL || end_key != NULL) {
-        m_map.erase(s_iter, e_iter);
-    } else {
-        m_map.clear();
-    }
+    m_map.erase(s_iter, e_iter);
 
     time_end(&(g_stats.free_time));
 
