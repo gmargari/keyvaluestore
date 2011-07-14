@@ -91,7 +91,7 @@ int main(void)
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
-        ostream1->write(k1, v1, timestamp);
+        ostream1->write(k1, strlen(k1), v1, strlen(v1), timestamp);
         if (strcmp(k1, prev_key) == 0) {
             assert(timestamp > prev_timestamp);
         }
@@ -150,7 +150,7 @@ int main(void)
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (pistream->read(&k1, &v1, &timestamp)) {
-        ostream2->write(k1, v1, timestamp);
+        ostream2->write(k1, strlen(k1), v1, strlen(v1), timestamp);
         if (strcmp(k1, prev_key) == 0) {
             assert(timestamp > prev_timestamp);
         }

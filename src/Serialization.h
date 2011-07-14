@@ -6,7 +6,7 @@
 
 uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp); // TODO: make it macro or inline
 
-bool     serialize(char *buf, uint32_t buflen, const char *key, const char *value, uint64_t timestamp, uint32_t *len);
+bool     serialize(char *buf, uint32_t buflen, const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp, uint32_t *len);
 
 // NOTE: in case 'copy_keyvalue = false', strings pointed by 'key' and 'value' are valid only until next call of deserialize.
 //       caller must copy them if he wants to use them after next call to deserialize

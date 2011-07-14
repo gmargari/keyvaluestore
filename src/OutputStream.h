@@ -2,6 +2,7 @@
 #define KVTOUTPUTSTREAM_H
 
 #include <stdint.h>
+#include <unistd.h>
 
 class OutputStream {
 
@@ -17,7 +18,7 @@ public:
      *
      * @return false if could not write tuple to stream. else, true.
      */
-    virtual bool write(const char *key, const char *value, uint64_t timestamp) = 0;
+    virtual bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp) = 0;
 
     /**
      * flush output stream buffer
