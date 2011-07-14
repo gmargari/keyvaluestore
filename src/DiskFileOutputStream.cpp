@@ -50,19 +50,19 @@ void DiskFileOutputStream::reset()
 /*============================================================================
  *                                  write
  *============================================================================*/
-bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool DiskFileOutputStream::write(const char *key, const char *value, uint64_t timestamp)
 {
     uint32_t len;
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
-    if (m_bytes_in_buf + serialize_len(keylen, valuelen, timestamp) > m_buf_size) {
+    if (m_bytes_in_buf + serialize_len(strlen(key), strlen(value), timestamp) > m_buf_size) {
         m_diskfile->m_vfile->fs_write(m_buf, m_bytes_in_buf);
         m_bytes_in_buf = 0;
     }
 
     // serialize and add new pair to buffer
-    if (serialize(m_buf + m_bytes_in_buf, m_buf_size - m_bytes_in_buf, key, keylen, value, valuelen, timestamp, &len)) {
+    if (serialize(m_buf + m_bytes_in_buf, m_buf_size - m_bytes_in_buf, key, value, timestamp, &len)) {
         m_bytes_in_buf += len;
 
         // if needed, add entry to index

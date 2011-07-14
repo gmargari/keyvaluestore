@@ -34,7 +34,7 @@ public:
      *
      * @return false if could not write tuple to stream. else, true.
      */
-    bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
+    bool write(const char *key, const char *value, uint64_t timestamp);
 
     /**
      * flush output stream buffer. user must call this function after

@@ -35,10 +35,11 @@ uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp)
 /*============================================================================
  *                                serialize
  *============================================================================*/
-bool serialize(char *buf, uint32_t buflen, const char *key, size_t keylen,
-               const char *value, size_t valuelen, uint64_t timestamp, uint32_t *len)
+bool serialize(char *buf, uint32_t buflen, const char *key, const char *value, uint64_t timestamp, uint32_t *len)
 {
-    uint32_t used = 0;
+    uint32_t used = 0,
+             keylen = strlen(key),
+             valuelen = strlen(value);
 
     assert(key && value);
     assert(keylen <= MAX_KVTSIZE);
@@ -48,7 +49,7 @@ bool serialize(char *buf, uint32_t buflen, const char *key, size_t keylen,
         assert(str_is_alnum(value, valuelen));
     }
 
-    if ((*len = serialize_len(keylen, valuelen, timestamp)) > buflen) {
+    if ((*len = serialize_len(strlen(key), strlen(value), timestamp)) > buflen) {
         return false;
     }
 
