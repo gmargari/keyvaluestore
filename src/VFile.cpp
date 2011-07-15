@@ -364,7 +364,7 @@ void VFile::fs_sync(void)
     if (m_simmode == SIMMODE_REAL_IO) {
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
             time_start(&(g_stats.write_time));
-            fsync(m_filedescs[i]);
+//             fsync(m_filedescs[i]);
             time_end(&(g_stats.write_time));
         }
     }
