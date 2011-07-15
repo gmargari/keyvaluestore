@@ -462,7 +462,7 @@ int main(int argc, char **argv)
         printf("# urf_flushmem_size:   %15.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
     }
     printf("# memstore_merge_mode: %15s\n", (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline"));
-    printf("# read_from_stdin:     %15d\n", (sflag) ? "true" : "false");
+    printf("# read_from_stdin:     %15s\n", (sflag) ? "true" : "false");
     printf("# debug_level:         %15d\n", DBGLVL);
     fflush(stdout);
     system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
