@@ -146,7 +146,7 @@ void time_end(time_stats *timestats)
 /*============================================================================
  *                              time_get_secs
  *============================================================================*/
-time_t time_get_secs(time_stats timestats)
+uint32_t time_get_secs(time_stats timestats)
 {
     assert(initialized);
     return timestats.total.tv_sec;
@@ -155,7 +155,7 @@ time_t time_get_secs(time_stats timestats)
 /*============================================================================
  *                              time_get_usecs
  *============================================================================*/
-suseconds_t time_get_usecs(time_stats timestats)
+uint32_t time_get_usecs(time_stats timestats)
 {
     assert(initialized);
     return timestats.total.tv_usec;
@@ -199,10 +199,12 @@ void global_stats_init()
     bytes_init(&(g_stats.bytes_read));
     num_init(&(g_stats.num_writes));
     num_init(&(g_stats.num_reads));
+    time_init(&(g_stats.total_time));
+    time_init(&(g_stats.compaction_time));
     time_init(&(g_stats.read_time));
     time_init(&(g_stats.write_time));
-    time_init(&(g_stats.compaction_time));
-    time_init(&(g_stats.total_time));
+    time_init(&(g_stats.merge_time));
+    time_init(&(g_stats.free_time));
 
     time_start(&(g_stats.total_time));
 }
@@ -228,8 +230,7 @@ void global_stats_disable_gathering()
  *============================================================================*/
 void stats_sanity_check()
 {
-    // read time can be increased also from gets!
-    assert(time_get_secs(g_stats.read_time)+ time_get_secs(g_stats.write_time) <= time_get_secs(g_stats.compaction_time));
-//     assert(time_get_secs(g_stats.write_time) <= time_get_secs(g_stats.compaction_time));
-    assert(time_get_secs(g_stats.compaction_time) <= time_get_secs(g_stats.total_time));
+//     assert(time_get_secs(g_stats.total_time) >= time_get_secs(g_stats.compaction_time));
+//     assert(time_get_secs(g_stats.compaction_time) >= time_get_secs(g_stats.merge_time) + time_get_secs(g_stats.free_time));
+//     assert(time_get_secs(g_stats.merge_time) >= time_get_secs(g_stats.read_time) + time_get_secs(g_stats.write_time));
 }

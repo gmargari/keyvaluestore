@@ -230,6 +230,79 @@ uint32_t KeyValueStore::get_num_writes()
 }
 
 /*============================================================================
+ *                            get_total_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_total_time_sec()
+{
+    time_end(&(g_stats.total_time));    // NOTE: this should not be done here!
+    time_start(&(g_stats.total_time));  // the problem is that get_total_time_sec() must be called first, in order to update properly total_time, and then call rest functions
+
+    return time_get_secs(g_stats.total_time);
+}
+
+/*============================================================================
+ *                            get_put_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_put_time_sec()
+{
+    int32_t time = time_get_secs(g_stats.total_time) - get_compaction_time_sec();
+
+    return (time < 0 ? 0 : time );
+}
+
+/*============================================================================
+ *                          get_compaction_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_compaction_time_sec()
+{
+    return time_get_secs(g_stats.compaction_time);
+}
+
+/*============================================================================
+ *                           get_merge_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_merge_time_sec()
+{
+    return time_get_secs(g_stats.merge_time);
+}
+
+/*============================================================================
+ *                           get_free_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_free_time_sec()
+{
+    return time_get_secs(g_stats.free_time);
+}
+
+/*============================================================================
+ *                          get_cmrest_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_cmrest_time_sec()
+{
+    int32_t time = get_compaction_time_sec() - get_merge_time_sec() - get_free_time_sec();
+
+    return (time < 0 ? 0 : time );
+}
+
+/*============================================================================
+ *                           get_mem_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_mem_time_sec()
+{
+    int32_t time = get_merge_time_sec() - get_read_time_sec() - get_write_time_sec();
+
+    return (time < 0 ? 0 : time );
+}
+
+/*============================================================================
+ *                            get_io_time_sec
+ *============================================================================*/
+uint32_t KeyValueStore::get_io_time_sec()
+{
+    return get_read_time_sec() + get_write_time_sec();
+}
+
+/*============================================================================
  *                           get_read_time_sec
  *============================================================================*/
 uint32_t KeyValueStore::get_read_time_sec()
@@ -243,26 +316,6 @@ uint32_t KeyValueStore::get_read_time_sec()
 uint32_t KeyValueStore::get_write_time_sec()
 {
     return time_get_secs(g_stats.write_time);
-}
-
-/*============================================================================
- *                          get_compaction_time_sec
- *============================================================================*/
-uint32_t KeyValueStore::get_compaction_time_sec()
-{
-    return time_get_secs(g_stats.compaction_time);
-}
-
-/*============================================================================
- *                            get_total_time_sec
- *============================================================================*/
-uint32_t KeyValueStore::get_total_time_sec()
-{
-    time_end(&(g_stats.total_time));
-    stats_sanity_check();
-    time_start(&(g_stats.total_time));
-
-    return time_get_secs(g_stats.total_time);
 }
 
 /*============================================================================

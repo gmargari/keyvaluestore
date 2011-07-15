@@ -2,6 +2,7 @@
 #include "Map.h"
 
 #include "Serialization.h"
+#include "Statistics.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -250,6 +251,8 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
     assert((dbg_to_clean = get_size(start_key, end_key, start_key_incl, end_key_incl)) || 1);
     assert((dbg_mem_before = get_size()) || 1);
 
+    time_start(&(g_stats.free_time));
+
     s_iter = start_iter(start_key, start_key_incl);
     e_iter = end_iter(end_key, end_key_incl);
     for(iter = s_iter; iter != e_iter; iter++) {
@@ -273,6 +276,8 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
     } else {
         m_map.clear();
     }
+
+    time_end(&(g_stats.free_time));
 
     assert(dbg_to_clean == dbg_bytes_cleaned);
     assert(get_size(start_key, end_key, start_key_incl, end_key_incl) == 0);

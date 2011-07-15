@@ -9,6 +9,7 @@
 #include "DiskFileOutputStream.h"
 #include "PriorityInputStream.h"
 #include "Serialization.h"
+#include "Statistics.h"
 
 /*============================================================================
  *                              CompactionManager
@@ -36,10 +37,14 @@ void CompactionManager::copy_stream(InputStream *istream, OutputStream *ostream)
     const char *key, *value;
     uint64_t timestamp;
 
+    time_start(&(g_stats.merge_time));
+
     while (istream->read(&key, &value, &timestamp)) {
         ostream->write(key, strlen(key), value, strlen(value), timestamp);
     }
     ostream->flush();
+
+    time_end(&(g_stats.merge_time));
 }
 
 /*============================================================================
@@ -51,6 +56,8 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
     uint64_t timestamp;
     char prev_key[MAX_KVTSIZE];
 
+    time_start(&(g_stats.merge_time));
+
     prev_key[0] = '\0';
     while (istream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
@@ -59,6 +66,8 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
         }
     }
     ostream->flush();
+
+    time_end(&(g_stats.merge_time));
 }
 
 /*============================================================================
@@ -135,6 +144,8 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     prev_key[0] = '\0';
     filesize = 0;
 
+    time_start(&(g_stats.merge_time));
+
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
             keylen = strlen(key);
@@ -160,6 +171,8 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
         }
     }
     ostream->flush();
+
+    time_end(&(g_stats.merge_time));
 
     diskfiles.push_back(diskfile);
     num_newfiles++;

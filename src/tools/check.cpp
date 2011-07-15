@@ -1,6 +1,7 @@
 #include "../Global.h"
 #include "../DiskFile.h"
 #include "../DiskFileInputStream.h"
+#include "../Statistics.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -20,6 +21,8 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    global_stats_init(); // avoid assertion error...
+
     prev_key = (char *)malloc(MAX_KVTSIZE);
     prev_key[0] = '\0';
     diskfile = new DiskFile();
@@ -35,11 +38,6 @@ int main(int argc, char **argv)
             printf("Error: prev_key: %s == cur_key: %s\n", prev_key, key);
             return EXIT_FAILURE;
         }
-//         // this was used when duplicate keys were permitted
-//         else if (cmp == 0 && prev_timestamp > timestamp) {
-//             printf("Error: prev_timestamp: %Ld > cur_timestamp: %Ld\n", prev_timestamp, timestamp);
-//             return EXIT_FAILURE;
-//         }
         strcpy(prev_key, key);
         prev_timestamp = timestamp;
     }

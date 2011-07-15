@@ -8,7 +8,7 @@
 #include <sys/time.h>
 
 //==============================================================================
-// stuct to hold global statistics
+// structs to hold statistics
 //==============================================================================
 
 typedef struct {
@@ -24,15 +24,31 @@ typedef struct {
     struct timeval total;
 } time_stats;
 
-typedef struct { // add new field -> update global_stats_init() and stats_sanity_check()
+/*
+ * Ttotal   = Tput + Tcompact            (Tput = Ttotal - Tcompact)
+ * Tcompact = Tmerge + Tfree + Tcmrest   (Tcmrest = Tcompact - Tmerge - Tfree)
+ * Tmerge   = Tmem + Tio                 (Tmem = Tmerge - Tio)
+ * Tio      = Tread + Twrite
+ *
+ * Tmerge:   time for merge_streams() and memstore_flush_to_diskfile
+ * Tfree:    time for Map::clear()
+ * Tcmrest:  rest code of compaction manager, besides Tmerge and Tfree (e.g.
+ *           update of 'runs' vector for Geometric, creation of 'ranges' vector
+ *           for Urf, create and insert streams in DiskStore for new files, etc)
+ * Tmem:     time for string comparisons and string copies (strcmp & strcpy)
+ */
+
+typedef struct { // NOTE: add new field -> update global_stats_init() and stats_sanity_check()
     byte_stats bytes_written;
     byte_stats bytes_read;
     uint32_t   num_writes;
     uint32_t   num_reads;
-    time_stats read_time;
-    time_stats write_time;
-    time_stats compaction_time;
-    time_stats total_time;
+    time_stats total_time;      // Ttotal
+    time_stats compaction_time; // Tcompact
+    time_stats read_time;       // Twrite
+    time_stats write_time;      // Tread
+    time_stats merge_time;      // Tmerge
+    time_stats free_time;       // Tfree
 } keyvaluestore_stats;
 
 //==============================================================================
@@ -53,8 +69,8 @@ uint32_t    bytes_get_b(byte_stats bytestats);
 void        time_init(time_stats *timestats);
 void        time_start(time_stats *timestats);
 void        time_end(time_stats *timestats);
-time_t      time_get_secs(time_stats timestats);
-suseconds_t time_get_usecs(time_stats timestats);
+uint32_t    time_get_secs(time_stats timestats);
+uint32_t    time_get_usecs(time_stats timestats);
 
 //==============================================================================
 // functions used to gather integer statistics
