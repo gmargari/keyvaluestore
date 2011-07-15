@@ -379,6 +379,16 @@ int main(int argc, char **argv)
             vflag = 0;
             valuesize = DEFAULT_VALUE_SIZE;
         }
+        if (uflag) {
+            printf("Ignoring '-u' flag (unique keys): keys will be read from stdin\n");
+            uflag = 0;
+            unique_keys = DEFAULT_UNIQUE_KEYS;
+        }
+        if (zflag) {
+            printf("Ignoring '-z' flag (zipf keys): keys will be read from stdin\n");
+            zflag = 0;
+            zipf_keys = DEFAULT_ZIPF_KEYS;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -491,7 +501,6 @@ int main(int argc, char **argv)
             // read key and value from stdin
             //----------------------------------------------------------------------
             scanf("%s %s", key, value);
-            printf("%s %s\n", key, value);
         } else {
             //----------------------------------------------------------------------
             // create a random key or zipfian key, and a random value
