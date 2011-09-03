@@ -79,6 +79,7 @@ void print_syntax(char *progname)
      printf("        -G numofrangegets:      how many range get()s we will perform every 'statsperiod'\n");
      printf("                                bytes of data inserted. '-g' and '-G' are mutually exclusive\n");
      printf("        -s:                     read key-values from stdin\n");
+     printf("        -e:                     print key-values that would be inserted and exit\n");
      printf("        -x:                     flush page cache before performing get()s (default: %s)\n", (DEFAULT_FLUSH_PAGE_CACHE) ? "true " : "false");
      printf("        -h:                     print this help message and exit\n");
 }
@@ -104,6 +105,7 @@ int main(int argc, char **argv)
              gflag = 0,
              Gflag = 0,
              sflag = 0,
+             eflag = 0,
              xflag = 0,
              myopt,
              i,
@@ -132,7 +134,8 @@ int main(int argc, char **argv)
             *end_key = NULL;
     bool     unique_keys,
              zipf_keys,
-             flush_page_cache;
+             flush_page_cache,
+             print_kv_and_continue = false;
     KeyValueStore *kvstore;
     struct timeval search_start, search_end;
     RangeScanner *scanner;
@@ -241,6 +244,12 @@ int main(int argc, char **argv)
             CHECK_DUPLICATE_ARG(Gflag, myopt);
             Gflag = 1;
             num_range_gets = atoi(optarg);
+            break;
+
+        case 'e':
+            CHECK_DUPLICATE_ARG(eflag, myopt);
+            eflag = 1;
+            print_kv_and_continue = true;
             break;
 
         case 's':
@@ -514,6 +523,14 @@ int main(int argc, char **argv)
                 sprintf(key, "%s.%Ld", key, i); // make key unique by appending a unique number
             }
             randstr(value, valuesize);
+        }
+
+        //----------------------------------------------------------------------
+        // just print <key, value> to stdout, do not insert into kvstore
+        //----------------------------------------------------------------------
+        if (print_kv_and_continue) {
+            printf("%s %s\n", key, value);
+            continue;
         }
 
         //----------------------------------------------------------------------

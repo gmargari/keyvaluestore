@@ -144,7 +144,7 @@ protected:
     int sanity_check();
 
     Map              *m_map;
-    uint64_t             m_maxsize;
+    uint64_t          m_maxsize;
     MapInputStream   *m_inputstream;
 };
 
