@@ -91,10 +91,8 @@ int main(void)
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
+        assert(strcmp(k1, prev_key) != 0);
         ostream1->write(k1, strlen(k1), v1, strlen(v1), timestamp);
-        if (strcmp(k1, prev_key) == 0) {
-            assert(timestamp > prev_timestamp);
-        }
         prev_timestamp = timestamp;
         strcpy(prev_key, k1);
     }
@@ -146,14 +144,11 @@ int main(void)
     file2->open_unique();
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
     pistream = new PriorityInputStream(istreams);
-    pistream->set_key_range(NULL, NULL); // get all keys
     prev_timestamp = 0;
     prev_key[0] = '\0';
     while (pistream->read(&k1, &v1, &timestamp)) {
+        assert(strcmp(k1, prev_key) != 0);
         ostream2->write(k1, strlen(k1), v1, strlen(v1), timestamp);
-        if (strcmp(k1, prev_key) == 0) {
-            assert(timestamp > prev_timestamp);
-        }
         prev_timestamp = timestamp;
         strcpy(prev_key, k1);
     }
@@ -199,8 +194,8 @@ int main(void)
     free(key3);
     free(value1);
     free(prev_key);
-//     file1->delete_from_disk();
-//     file2->delete_from_disk();
+    file1->delete_from_disk();
+    file2->delete_from_disk();
     delete file1;
     delete file2;
     delete istream;
