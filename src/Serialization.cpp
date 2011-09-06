@@ -6,12 +6,6 @@
 #include <cctype>
 #include <cstdlib>
 
-// TODO: make these portable!
-#define ENCODE_NUM(_buf_, _num_, _used_) do { memcpy((_buf_) + _used_,  &(_num_), sizeof(_num_)); _used_ += sizeof(_num_); } while (0)
-#define DECODE_NUM(_buf_, _num_, _used_) do { memcpy(&(_num_), (_buf_) + _used_, sizeof(_num_)); _used_ += sizeof(_num_); } while (0)
-#define ENCODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_buf_) + _used_,  (_str_), (_len_)); _used_ += (_len_); } while (0)
-#define DECODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_str_), (_buf_) + _used_, (_len_)); _used_ += (_len_); } while (0)
-
 /*============================================================================
  *                               str_is_alnum
  *============================================================================*/
@@ -27,16 +21,16 @@ bool str_is_alnum(const char *str, int len)
 /*============================================================================
  *                               serialize_len
  *============================================================================*/
-uint32_t serialize_len(size_t keylen, size_t valuelen, uint64_t timestamp)
+uint32_t serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp)
 {
-    return (2 * sizeof(uint32_t) + sizeof(timestamp) + keylen + valuelen + 2);
+    return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + valuelen + 2);
 }
 
 /*============================================================================
  *                                serialize
  *============================================================================*/
-bool serialize(char *buf, uint32_t buflen, const char *key, size_t keylen,
-               const char *value, size_t valuelen, uint64_t timestamp, uint32_t *len)
+bool serialize(char *buf, uint32_t buflen, const char *key, uint32_t keylen,
+               const char *value, uint32_t valuelen, uint64_t timestamp, uint32_t *len)
 {
     uint32_t used = 0;
 
@@ -82,9 +76,7 @@ bool serialize(char *buf, uint32_t buflen, const char *key, size_t keylen,
  *============================================================================*/
 bool deserialize(const char *buf, uint32_t buflen, const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue)
 {
-    uint32_t used = 0,
-             keylen,
-             valuelen;
+    uint32_t used = 0, keylen, valuelen;
     char *tmpkey, *tmpvalue;
 
     if (buflen < sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp)) {
@@ -119,8 +111,10 @@ bool deserialize(const char *buf, uint32_t buflen, const char **key, const char 
     assert(*value);
     assert(keylen <= MAX_KVTSIZE);
     assert(valuelen <= MAX_KVTSIZE);
-    assert((*key + keylen  < buf + buflen) && (*key)[keylen] == '\0');
-    assert((*value + valuelen < buf + buflen) && (*value)[valuelen] == '\0');
+    assert(*key + keylen < buf + buflen);
+    assert((*key)[keylen] == '\0');
+    assert(*value + valuelen < buf + buflen);
+    assert((*value)[valuelen] == '\0');
     assert(strlen(*key) == keylen);
     assert(strlen(*value) == valuelen);
     if (DBGLVL > 1) {
