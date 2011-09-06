@@ -102,7 +102,7 @@ DiskFile *CompactionManager::merge_streams(vector<InputStream *> istreams)
     DiskFile *diskfile;
 
     diskfile = new DiskFile;
-    diskfile->open_unique();
+    diskfile->open_new_unique();
     merge_streams(istreams, diskfile);
 
     return diskfile;
@@ -132,10 +132,10 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
     uint64_t timestamp, filesize;
     uint32_t len;
     int num_newfiles;
-    size_t keylen, valuelen;
+    uint32_t keylen, valuelen;
 
     diskfile = new DiskFile;
-    diskfile->open_unique();
+    diskfile->open_new_unique();
     ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
 
     pistream = new PriorityInputStream(istreams);
@@ -159,10 +159,10 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
                 num_newfiles++;
 
                 diskfile = new DiskFile;
-                filesize = 0;
-                diskfile->open_unique();
+                diskfile->open_new_unique();
                 delete ostream;
                 ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+                filesize = 0;
             }
 
             filesize += len;
@@ -193,7 +193,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
 
     // write memstore to a new file on disk
     disk_file = new DiskFile();
-    disk_file->open_unique();
+    disk_file->open_new_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
     m_memstore->m_inputstream->set_key_range(NULL, NULL);
     // no need to use copy_stream_unique_keys() since map keys are unique

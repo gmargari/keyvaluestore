@@ -75,7 +75,7 @@ void PriorityInputStream::reset()
         m_pqueue.pop();
     }
 
-    // reset all streams, insert one element from each stream to priority queue
+    // insert one element from each stream to priority queue
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
             m_pqueue.push(m_elements[i]);
