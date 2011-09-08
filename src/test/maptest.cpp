@@ -84,7 +84,7 @@ int main(void)
     // write all values to disk file
     //========================================================
     file1 = new DiskFile();
-    file1->open_unique();
+    file1->open_new_unique();
     istream = new MapInputStream(map);
     ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
@@ -141,7 +141,7 @@ int main(void)
     // and store results to a new file
     //========================================================
     file2 = new DiskFile();
-    file2->open_unique();
+    file2->open_new_unique();
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
     pistream = new PriorityInputStream(istreams);
     prev_timestamp = 0;

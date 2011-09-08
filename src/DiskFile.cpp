@@ -23,15 +23,6 @@ DiskFile::~DiskFile()
 }
 
 /*============================================================================
- *                                   open
- *============================================================================*/
-bool DiskFile::open(char *filename)
-{
-    m_vfile_numkeys = 0;
-    return m_vfile->fs_open(filename);
-}
-
-/*============================================================================
  *                               open_existing
  *============================================================================*/
 bool DiskFile::open_existing(char *filename)
@@ -48,9 +39,9 @@ bool DiskFile::open_existing(char *filename)
 }
 
 /*============================================================================
- *                                open_unique
+ *                              open_new_unique
  *============================================================================*/
-bool DiskFile::open_unique()
+bool DiskFile::open_new_unique()
 {
     static int n = 0;
     static char filename[100];

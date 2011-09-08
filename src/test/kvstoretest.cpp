@@ -51,7 +51,7 @@ int main(void)
     printf("seed: %ld\n", tv.tv_usec);
 
     srand(tv.tv_usec);
-    num_keys = rand() % 100000;
+//     num_keys = rand() % 100000;
     num_keys = BYTES_TO_INSERT / (MAX_KEY_SIZE + MAX_VALUE_SIZE);
 
     printf("memstore size:   %12Ld\n", MEMSTORE_SIZE);
@@ -87,7 +87,7 @@ int main(void)
     // search values (most of them should be on disk, latest should
     // be on memory)
     //================================================================
-    printf("\n===== Search all keys =====\n");
+    printf("\n===== Search every %dth key =====\n", SEARCH_SKIP_KEYS);
     srand(tv.tv_usec);
 
     for (i = 0; i < num_keys; i++) {
@@ -105,7 +105,7 @@ int main(void)
         }
         if (kvstore->get(key, &value2, &timestamp) == false) {
             printf("Key [%s] was not found!\n", key);
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
         if (UNIQUE_KEYS) {
             assert(strcmp(value, value2) == 0);
@@ -121,7 +121,11 @@ int main(void)
     printf("Diskstore size: %Ld\n", kvstore->get_disk_size());
 
     if (UNIQUE_KEYS) {
-        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys);
+        if (kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() != num_keys) {
+            printf("mem keys (%Ld) + disk keys (%Ld) != keys inserted (%Ld)\n",
+              kvstore->get_num_mem_keys(), kvstore->get_num_disk_keys(), num_keys);
+            exit(EXIT_FAILURE);
+        }
     }
 
     free(key);
