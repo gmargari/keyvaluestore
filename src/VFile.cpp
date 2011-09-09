@@ -34,14 +34,15 @@ VFile::VFile()
  *============================================================================*/
 VFile::~VFile(void)
 {
+    fs_sync();
+    make_persistent();
+
     for (int i = 0; i < (int)m_names.size(); i++) {
         free(m_names[i]);
         m_names[i] = NULL;
     }
 
-    if (m_basefilename) {
-        free(m_basefilename);
-    }
+    free(m_basefilename);
 }
 
 /*============================================================================
@@ -52,12 +53,8 @@ bool VFile::add_new_physical_file(bool open_existing)
     char newfname[100], *fname;
     int fd, fdflag;
 
-    if (open_existing == false) {
-        sprintf(newfname, "%s.%02d", m_basefilename, m_filedescs.size());
-        fname = strdup(newfname);
-    } else {
-        fname = strdup(m_basefilename);
-    }
+    sprintf(newfname, "%s%s%02d", m_basefilename, VFILE_PART_PREFIX, (int)m_filedescs.size());
+    fname = strdup(newfname);
     assert(fname);
 
     if (DBGLVL > 0) {
@@ -70,7 +67,7 @@ bool VFile::add_new_physical_file(bool open_existing)
     }
 
     if ((fd = open(fname, fdflag, S_IRUSR | S_IWUSR)) == -1) {
-        printf("[ERROR] fs_open('%s')\n", fname);
+        printf("[ERROR] add_new_physical_file: open('%s')\n", fname);
         perror("");
         exit(EXIT_FAILURE);
     }
@@ -79,20 +76,16 @@ bool VFile::add_new_physical_file(bool open_existing)
     m_filedescs.push_back(fd);
     m_cur = m_filedescs.size() - 1;
 
-    if (open_existing) {
-        m_size = cur_fs_size();
-    }
-
     return true;
 }
 
 /*============================================================================
- *                                 fs_open
+ *                               fs_open_new
  *============================================================================*/
-bool VFile::fs_open(char *filename, bool open_existing)
+bool VFile::fs_open_new(char *filename)
 {
     m_basefilename = strdup(filename);
-    return add_new_physical_file(open_existing);
+    return add_new_physical_file(false);
 }
 
 /*============================================================================
@@ -100,7 +93,49 @@ bool VFile::fs_open(char *filename, bool open_existing)
  *============================================================================*/
 bool VFile::fs_open_existing(char *filename)
 {
-    return fs_open(filename, true);
+    char fname[100], vfilename[100];
+    FILE *fp;
+    struct stat filestatus;
+    long int filesize;
+
+    m_basefilename = strdup(filename);
+
+    sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
+    if ((fp = fopen(fname, "r")) == NULL) {
+        printf("[ERROR] fs_open_existing: fopen('%s')\n", fname);
+        perror("");
+        exit(EXIT_FAILURE);
+    }
+
+    while(fscanf(fp, "%s %ld\n", vfilename, &filesize) == 2) {
+        printf("opening: %s (%ld)\n", vfilename, filesize);
+
+        // check file size of file to be opened is the one expected.
+        stat(vfilename, &filestatus);
+        if (filestatus.st_size != filesize) {
+            printf("[ERROR] File [%s] should have size %ld but has %d\n", vfilename, filesize, filestatus.st_size);
+            exit(EXIT_FAILURE);
+        }
+
+        // the only thing we actually need from info file is the number of
+        // vfile files. if there are 3 files, then these should be named as
+        // m_basefilename.VFILE_PART_PREFIX.[00|01|02].
+        // the first time add_new_physical_file() is called, it will try to
+        // open m_basefilename.VFILE_PART_PREFIX.00. the next time, XXX.01,
+        // next time XXX.02 etc.
+        add_new_physical_file(true);
+        m_size += filesize;
+
+        // check file opened from add_new_physical_file() is the one expected.
+        if (strcmp(m_names.back(), vfilename) != 0) {
+            printf("[ERROR] File opened should be [%s] but is [%s]\n", vfilename, m_names.back());
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    fclose(fp);
+
+    return true;
 }
 
 /*============================================================================
@@ -323,6 +358,8 @@ void VFile::fs_truncate(off_t length)
 void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
     if (m_simmode == SIMMODE_REAL_IO) {
+        char fname[100];
+
         assert(m_names.size() == m_filedescs.size());
         for (int i = 0; i < (int)m_names.size(); i++) {
 
@@ -335,7 +372,12 @@ void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and 
                 perror("");
                 exit(EXIT_FAILURE);
             }
+
+            free(m_names[i]);
         }
+
+        m_names.erase(m_names.begin(), m_names.end());
+        m_filedescs.erase(m_filedescs.begin(), m_filedescs.end());
     }
 }
 
@@ -344,8 +386,7 @@ void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and 
  *============================================================================*/
 char *VFile::fs_name(void)
 {
-    assert(m_cur != -1);
-    return m_names[m_cur];
+    return m_basefilename;
 }
 
 /*============================================================================
@@ -377,17 +418,20 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
 {
     ssize_t actually_read;
 
+    // TODO: remove/reduce calls to cur_fs_size/cur_fs_tell, they are syscalls
+
     assert(m_cur != -1);
 
     if (m_simmode == SIMMODE_REAL_IO) {
 
+        // if we reached end of vfile, then no bytes left to read
         if (fs_tell() == (off_t)fs_size()) {
-            return 0; // no bytes lef to read
+            return 0;
         }
+        assert(fs_tell() <= (off_t)fs_size());
 
-        // if we reached end of current file, check if there's a next file in
-        // m_filedescs vector. if yes, advance to it. if no, error (there should be
-        // available bytes to read).
+        // if we reached end of current physical file, check if there's a next
+        // file in m_filedescs vector. if yes, advance to it. if no, error
         if (cur_fs_tell() == (off_t)cur_fs_size()) {
             if (cur_fs_size() == MAX_FILE_SIZE && m_cur < (int)m_filedescs.size() - 1) {
                 m_cur++;
@@ -398,9 +442,9 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
         }
 
         // check if we're going to cross max file size limit: if yes, we're going
-        // to write as many bytes as we can in current file and return the
-        // number of bytes written. caller must call again fs_write() to
-        // write the remaining bytes.
+        // to read as many bytes as we can from current file and return the
+        // number of bytes read. caller must call again fs_read() to
+        // read the remaining bytes.
         if (cur_fs_tell() + count > MAX_FILE_SIZE) {
             count = MAX_FILE_SIZE - cur_fs_tell();
         }
@@ -524,4 +568,32 @@ off_t VFile::cur_fs_tell(void)
 off_t VFile::cur_fs_rewind(void)
 {
     return cur_fs_seek(0, SEEK_SET);
+}
+
+/*============================================================================
+ *                              make_persistent
+ *============================================================================*/
+int VFile::make_persistent()
+{
+    char fname[100];
+    FILE *fp;
+    struct stat filestatus;
+
+    if (m_filedescs.size()) {
+        sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
+        if ((fp = fopen(fname, "w")) == NULL) {
+            printf("[ERROR] save_info: fopen('%s')\n", fname);
+            perror("");
+            exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < (int)m_filedescs.size(); i++) {
+            stat(m_names[i], &filestatus);
+            fprintf(fp, "%s %ld\n", m_names[i], filestatus.st_size);
+        }
+
+        fclose(fp);
+    }
+
+    return 1;
 }

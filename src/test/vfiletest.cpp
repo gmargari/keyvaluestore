@@ -19,7 +19,7 @@ int main(void)
 
     // open()            -->   size: 0MB, offset: 0MB
 dbg();
-    f.fs_open((char *)"vfiletest");
+    f.fs_open_new((char *)"vfiletest");
 dbg();
     assert(f.fs_size() == 0);
 dbg();

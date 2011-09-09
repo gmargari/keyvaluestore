@@ -28,8 +28,11 @@
 //==============================================================================
 // vfile-related defines
 //==============================================================================
-#define TMPFILEDIR              "/tmp/"
-#define TMPFILEPREFIX           "fsim." // 5 chars max
+#define ROOT_DIR                    "/tmp/"
+#define DISKFILE_PREFIX             "dfile."
+#define VFILE_PART_PREFIX           ".part"
+#define VFILE_INFO_SUFFIX           ".info"
+#define VFILE_INDEX_SUFFIX          ".index"
 #define MAX_FILE_SIZE     2147483647LL // 2GB
 
 //==============================================================================

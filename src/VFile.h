@@ -26,7 +26,7 @@ public:
      */
     ~VFile();
 
-    bool            fs_open(char *filename, bool open_existing = false);
+    bool            fs_open_new(char *filename);
     bool            fs_open_existing(char *filename);
     void            fs_close();
     // fs_read() and fs_write() are guaranteed to read or write 'count'
@@ -66,6 +66,7 @@ protected:
     off_t           cur_fs_rewind();
     ssize_t         cur_fs_write(const void *buf, size_t count);
     ssize_t         cur_fs_read(void *buf, size_t count);
+    int             make_persistent();
 };
 
 #endif

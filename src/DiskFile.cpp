@@ -47,8 +47,8 @@ bool DiskFile::open_new_unique()
     static char filename[100];
 
     m_vfile_numkeys = 0;
-    sprintf(filename, "%s%s%04d", TMPFILEDIR, TMPFILEPREFIX, n++);
-    if (m_vfile->fs_open(filename)) {
+    sprintf(filename, "%s%s%04d", ROOT_DIR, DISKFILE_PREFIX, n++);
+    if (m_vfile->fs_open_new(filename)) {
         return true;
     } else {
         return false;
