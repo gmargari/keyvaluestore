@@ -72,8 +72,6 @@ public:
 
 protected:
 
-    int sanity_check();
-
     vector<DiskFile *>               m_disk_files;
     vector<DiskFileInputStream *>    m_disk_istreams;
 };

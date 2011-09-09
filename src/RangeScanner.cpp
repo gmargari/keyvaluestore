@@ -64,11 +64,3 @@ bool RangeScanner::get_next(char **key, char **value, uint64_t *timestamp)
         return false;
     }
 }
-
-/*============================================================================
- *                              sanity_check
- *============================================================================*/
-int RangeScanner::sanity_check()
-{
-    return 1;
-}

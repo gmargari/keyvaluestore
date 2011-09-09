@@ -166,11 +166,3 @@ void MemStore::clear(const char *start_key, const char *end_key, bool start_key_
 {
     m_map->clear(start_key, end_key, start_key_incl, end_key_incl);
 }
-
-/*============================================================================
- *                                sanity_check
- *============================================================================*/
-int MemStore::sanity_check()
-{
-    return 1;
-}

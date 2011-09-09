@@ -168,11 +168,3 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
     return false;
 }
-
-/*============================================================================
- *                               sanity_check
- *============================================================================*/
-int DiskFileInputStream::sanity_check()
-{
-    return 1;
-}

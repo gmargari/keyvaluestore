@@ -28,8 +28,6 @@ public:
 
 protected:
 
-    int sanity_check();
-
     DiskFile *m_diskfile;
     char        *m_buf;
     uint32_t     m_buf_size;

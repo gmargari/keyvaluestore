@@ -27,8 +27,6 @@ public:
 
 protected:
 
-    int sanity_check();
-
     Map                      *m_map;
     Map::KVTMap::iterator     m_iter;
     Map::KVTMap::iterator     m_iter_end;

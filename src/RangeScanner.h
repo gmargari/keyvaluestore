@@ -43,8 +43,6 @@ public:
 
 protected:
 
-    int sanity_check();
-
     PriorityInputStream *m_pistream;
 };
 

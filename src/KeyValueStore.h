@@ -148,8 +148,6 @@ public:
     uint32_t get_write_time_sec();
 
 protected:
-
-    int sanity_check();
     void check_parameters();
 
     MemStore            *m_memstore;

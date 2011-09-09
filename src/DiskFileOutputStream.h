@@ -45,8 +45,6 @@ public:
 
 protected:
 
-    int sanity_check();
-
     DiskFile *m_diskfile;
     uint64_t     m_vfile_size;    // size of vfile
 

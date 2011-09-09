@@ -68,11 +68,3 @@ bool MapInputStream::read(const char **key, const char **value, uint64_t *timest
         return true;
     }
 }
-
-/*============================================================================
- *                               sanity_check
- *============================================================================*/
-int MapInputStream::sanity_check()
-{
-    return 1;
-}

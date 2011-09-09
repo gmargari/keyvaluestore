@@ -101,11 +101,3 @@ void DiskFileOutputStream::flush()
         m_diskfile->m_vfile_index->add(m_last_key, m_last_offs);
     }
 }
-
-/*============================================================================
- *                              sanity_check
- *============================================================================*/
-int DiskFileOutputStream::sanity_check()
-{
-    return 1;
-}

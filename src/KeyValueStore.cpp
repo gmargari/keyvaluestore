@@ -318,13 +318,6 @@ uint32_t KeyValueStore::get_write_time_sec()
     return time_get_secs(g_stats.write_time);
 }
 
-/*============================================================================
- *                              sanity_check
- *============================================================================*/
-int KeyValueStore::sanity_check()
-{
-    return 1;
-}
 
 // TODO: move elsewhere
 /*============================================================================
