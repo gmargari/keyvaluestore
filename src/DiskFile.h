@@ -57,8 +57,11 @@ public:
      */
     void get_first_last_term(const char **first, const char **last);
 
-//     // file system name of this file
-//     char *name();    // NOTE: a VFile can be composed of several disk files. modify function to return array of names?!
+    /*
+     * name of this disk file
+     */
+    char *get_name();
+
 //     // rewind file
 //     void rewind();
 //     // flush all pending writes to disk

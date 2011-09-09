@@ -43,10 +43,10 @@ bool DiskFile::open_existing(char *filename)
 bool DiskFile::open_new_unique()
 {
     static int n = 0;
-    static char filename[100];
+    char filename[100];
 
     m_vfile_numkeys = 0;
-    sprintf(filename, "%s%s%04d", ROOT_DIR, DISKFILE_PREFIX, n++);
+    sprintf(filename, "%s/%s%04d", ROOT_DIR, DISKFILE_PREFIX, n++);
     if (m_vfile->fs_open_new(filename)) {
         return true;
     } else {
@@ -85,6 +85,14 @@ uint64_t DiskFile::get_size()
 void DiskFile::get_first_last_term(const char **first, const char **last)
 {
     m_vfile_index->get_first_last_term(first, last);
+}
+
+/*============================================================================
+ *                                  get_name
+ *============================================================================*/
+char *DiskFile::get_name()
+{
+    return m_vfile->fs_name();
 }
 
 /*============================================================================
