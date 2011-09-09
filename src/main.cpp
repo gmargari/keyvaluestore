@@ -37,8 +37,8 @@ double rand_val(int seed);
 //------------------------------------------------------------------------------
 
 const uint64_t DEFAULT_INSERTBYTES = 1048576000LL; // 1GB
-const size_t   DEFAULT_KEY_SIZE =             100; // 100 bytes
-const size_t   DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
+const uint32_t DEFAULT_KEY_SIZE =             100; // 100 bytes
+const uint32_t DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
@@ -66,8 +66,8 @@ void print_syntax(char *progname)
      printf("                                when memory is full flush only the biggest range)\n");
      printf("        -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
      printf("        -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
-     printf("        -k keysize:             size of keys, in bytes (default: %d)\n", DEFAULT_KEY_SIZE);
-     printf("        -v valuesize:           size of values, in bytes (default: %d)\n", DEFAULT_VALUE_SIZE);
+     printf("        -k keysize:             size of keys, in bytes (default: %u)\n", DEFAULT_KEY_SIZE);
+     printf("        -v valuesize:           size of values, in bytes (default: %u)\n", DEFAULT_VALUE_SIZE);
      printf("        -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
      printf("        -z:                     create zipfian keys (default: uniform keys)\n");
      printf("        -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
              bytes_inserted,
              next_stats_print,
              total_search_time = 0;
-    size_t   keysize,
+    uint32_t keysize,
              valuesize;
     char    *compmanager = NULL,
             *key = NULL,
@@ -447,8 +447,8 @@ int main(int argc, char **argv)
     printf("# compaction_manager:  %15s\n", compmanager);
     printf("# memory_size:         %15.0f MB %s\n", b2mb(memorysize), (mflag == 0) ? "(default)" : "");
     printf("# insert_bytes:        %15.0f MB %s\n", b2mb(insertbytes), (iflag == 0) ? "(default)" : "");
-    printf("# key_size:            %15d    %s\n", keysize, (kflag == 0) ? "(default)" : "");
-    printf("# value_size:          %15d    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
+    printf("# key_size:            %15u    %s\n", keysize, (kflag == 0) ? "(default)" : "");
+    printf("# value_size:          %15u    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
     printf("# keys_to_insert:      %15Ld\n", num_keys_to_insert);
     printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
     printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");

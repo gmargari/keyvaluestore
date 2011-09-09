@@ -108,7 +108,6 @@ bool VFile::fs_open_existing(char *filename)
     }
 
     while(fscanf(fp, "%s %ld\n", vfilename, &filesize) == 2) {
-        printf("opening: %s (%ld)\n", vfilename, filesize);
 
         // check file size of file to be opened is the one expected.
         stat(vfilename, &filestatus);

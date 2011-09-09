@@ -31,7 +31,7 @@ public:
     bool open_existing(char *filename);
 
     /**
-     * open a new unique file in /tmp/ (see TMPFILEDIR, TMPFILEPREFIX in Global.h)
+     * create a new, unique file in $ROOT_DIR (see Global.h)
      *
      * @return normally, should return true
      */

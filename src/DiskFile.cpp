@@ -28,9 +28,8 @@ DiskFile::~DiskFile()
 bool DiskFile::open_existing(char *filename)
 {
     if (m_vfile->fs_open_existing(filename)) {
-        // TODO: read vfile index, vfile size, vfile num keys
+        // TODO: read vfile index, vfile num keys
         // m_vfile_index =
-        // m_vfile_size =
         // m_vfile_numkeys =
         return true;
     } else {
