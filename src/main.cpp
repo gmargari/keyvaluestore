@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     // get arguments
     //--------------------------------------------------------------------------
-    while ((myopt = getopt (argc, argv, "hc:r:p:b:f:m:i:n:k:v:uzo:g:G:sx")) != -1) {
+    while ((myopt = getopt (argc, argv, "hc:r:p:b:f:m:i:n:k:v:uzo:g:G:sex")) != -1) {
         switch (myopt)  {
 
         case 'h':
