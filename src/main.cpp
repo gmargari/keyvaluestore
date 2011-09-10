@@ -446,12 +446,21 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     printf("# compaction_manager:  %15s\n", compmanager);
     printf("# memory_size:         %15.0f MB %s\n", b2mb(memorysize), (mflag == 0) ? "(default)" : "");
-    printf("# insert_bytes:        %15.0f MB %s\n", b2mb(insertbytes), (iflag == 0) ? "(default)" : "");
-    printf("# key_size:            %15u    %s\n", keysize, (kflag == 0) ? "(default)" : "");
-    printf("# value_size:          %15u    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
-    printf("# keys_to_insert:      %15Ld\n", num_keys_to_insert);
-    printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
-    printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");
+    if (sflag) {
+        printf("# insert_bytes:        %15s    (keys and values will be read from stdin)\n", "?");
+        printf("# key_size:            %15s    (keys and values will be read from stdin)\n", "?");
+        printf("# value_size:          %15s    (keys and values will be read from stdin)\n", "?");
+        printf("# keys_to_insert:      %15s    (keys and values will be read from stdin)\n", "?");
+        printf("# unique_keys:         %15s    (keys and values will be read from stdin)\n", "?");
+        printf("# zipf_keys:           %15s    (keys and values will be read from stdin)\n", "?");
+    } else {
+        printf("# insert_bytes:        %15.0f MB %s\n", b2mb(insertbytes), (iflag == 0) ? "(default)" : "");
+        printf("# key_size:            %15u    %s\n", keysize, (kflag == 0) ? "(default)" : "");
+        printf("# value_size:          %15u    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
+        printf("# keys_to_insert:      %15Ld\n", num_keys_to_insert);
+        printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
+        printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");
+    }
     printf("# num_gets:            %15d    %s\n", num_point_gets, (gflag == 0) ? "(default)" : "");
     printf("# num_range_gets:      %15d    %s\n", num_range_gets, (Gflag == 0) ? "(default)" : "");
     printf("# flush_page_cache:    %15s    %s\n", (flush_page_cache) ? "true" : "false", (xflag == 0) ? "(default)" : "");
@@ -500,6 +509,11 @@ int main(int argc, char **argv)
 //     exit(0);
     //--------------------------------------------------------------------------
 
+    // if we read keys and values from stdin, set num_keys_to_insert to 'infinity'
+    if (sflag) {
+        num_keys_to_insert = -1; // ('num_keys_to_insert' is uint64_t)
+    }
+
     //--------------------------------------------------------------------------
     // until we have inserted all keys
     //--------------------------------------------------------------------------
@@ -509,7 +523,9 @@ int main(int argc, char **argv)
             //----------------------------------------------------------------------
             // read key and value from stdin
             //----------------------------------------------------------------------
-            scanf("%s %s", key, value);
+            if (scanf("%s %s", key, value) != 2) {
+                break;
+            }
         } else {
             //----------------------------------------------------------------------
             // create a random key or zipfian key, and a random value
@@ -637,18 +653,20 @@ int main(int argc, char **argv)
         }
     }
 
-    // print stats one last time
-    printf("%8.0f   %6u  %6u  %6u   %6u  %6u  %6u    %6u  %6u  %6u   %7u  %7u  %7u  %7u  %5d   ",
-        b2mb(bytes_inserted),
-        kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(), kvstore->get_put_time_sec(),
-        kvstore->get_merge_time_sec(), kvstore->get_free_time_sec(), kvstore->get_cmrest_time_sec(),
-        kvstore->get_mem_time_sec(), kvstore->get_read_time_sec(), kvstore->get_write_time_sec(),
-        kvstore->get_mb_read(), kvstore->get_mb_written(),
-        kvstore->get_num_reads(), kvstore->get_num_writes(),
-        kvstore->get_num_disk_files());
-    printf("%7.2f  ", (num_gets ? usec2msec(total_search_time) / num_gets : 0)); fflush(stdout);
-    system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
-    printf("\n");
+    if (!print_kv_and_continue) {
+        // print stats one last time
+        printf("%8.0f   %6u  %6u  %6u   %6u  %6u  %6u    %6u  %6u  %6u   %7u  %7u  %7u  %7u  %5d   ",
+            b2mb(bytes_inserted),
+            kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(), kvstore->get_put_time_sec(),
+            kvstore->get_merge_time_sec(), kvstore->get_free_time_sec(), kvstore->get_cmrest_time_sec(),
+            kvstore->get_mem_time_sec(), kvstore->get_read_time_sec(), kvstore->get_write_time_sec(),
+            kvstore->get_mb_read(), kvstore->get_mb_written(),
+            kvstore->get_num_reads(), kvstore->get_num_writes(),
+            kvstore->get_num_disk_files());
+        printf("%7.2f  ", (num_gets ? usec2msec(total_search_time) / num_gets : 0)); fflush(stdout);
+        system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
+        printf("\n");
+    }
 
     // if we crete unique keys, assert num keys in store equals num keys inserted
     if (uflag) {
@@ -656,7 +674,7 @@ int main(int argc, char **argv)
     }
 
     // flush remaining memory tuples
-    while(kvstore->get_mem_size()) {
+    while (kvstore->get_mem_size()) {
         kvstore->flush_bytes();
     }
 
