@@ -16,10 +16,10 @@
  *                             GeomCompactionManager
  *============================================================================*/
 GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: CompactionManager(memstore, diskstore)
+    : CompactionManager(memstore, diskstore),
+      m_R(DEFAULT_GEOM_R), m_P(DEFAULT_GEOM_P), m_partition_size()
 {
-    m_R = DEFAULT_GEOM_R;
-    m_P = DEFAULT_GEOM_P;
+
 }
 
 /*============================================================================

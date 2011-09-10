@@ -5,7 +5,7 @@
  *                             LogCompactionManager
  *============================================================================*/
 LogCompactionManager::LogCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: GeomCompactionManager(memstore, diskstore)
+    : GeomCompactionManager(memstore, diskstore)
 {
     GeomCompactionManager::set_R(2);
 }

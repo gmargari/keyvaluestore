@@ -8,8 +8,8 @@
  *                                 MemStore
  *============================================================================*/
 MemStore::MemStore()
+    : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_inputstream()
 {
-    m_maxsize = DEFAULT_MEMSTORE_SIZE;
     m_map = new Map();
     m_inputstream = new MapInputStream(m_map);
 }

@@ -12,7 +12,7 @@
  *                             NomergeCompactionManager
  *============================================================================*/
 NomergeCompactionManager::NomergeCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: CompactionManager(memstore, diskstore)
+    : CompactionManager(memstore, diskstore)
 {
 
 }

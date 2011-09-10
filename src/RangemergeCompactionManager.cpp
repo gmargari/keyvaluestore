@@ -24,10 +24,10 @@ using std::min;
  *                        RangemergeCompactionManager
  *============================================================================*/
 RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: CompactionManager(memstore, diskstore)
+    : CompactionManager(memstore, diskstore),
+      m_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE), m_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE)
 {
-    set_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE);
-    set_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE);
+
 }
 
 /*============================================================================

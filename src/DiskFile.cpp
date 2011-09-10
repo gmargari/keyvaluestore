@@ -9,10 +9,10 @@ int DiskFile::m_max_dfile_num = 0;
  *                                 DiskFile
  *============================================================================*/
 DiskFile::DiskFile()
+    : m_vfile(), m_vfile_index(), m_vfile_numkeys(0)
 {
     m_vfile = new VFile();
     m_vfile_index = new VFileIndex();
-    m_vfile_numkeys = 0;
 }
 
 /*============================================================================

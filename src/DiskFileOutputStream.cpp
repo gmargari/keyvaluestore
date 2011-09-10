@@ -13,10 +13,9 @@
  *                            DiskFileOutputStream
  *============================================================================*/
 DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
+    : m_diskfile(file), m_vfile_size(0), m_buf(NULL), m_buf_size(bufsize),
+      m_bytes_in_buf(0), m_last_key(NULL), m_last_offs(-1), m_last_idx_offs(-1)
 {
-    m_diskfile = file;
-    m_vfile_size = 0;
-    m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
     m_last_key = (char *)malloc(MAX_KVTSIZE);
     reset();

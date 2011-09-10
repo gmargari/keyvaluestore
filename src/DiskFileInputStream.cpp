@@ -13,20 +13,13 @@
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
+    : m_diskfile(file), m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0),
+      m_bytes_used(0), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
+      m_end_incl(true)
 {
     assert(file->m_vfile_index);
 
-    m_diskfile = file;
-    m_buf_size = bufsize;
     m_buf = (char *)malloc(m_buf_size);
-
-    m_bytes_in_buf = 0;
-    m_bytes_used = 0;
-
-    m_start_key = NULL;
-    m_end_key = NULL;
-    m_start_incl = true;
-    m_end_incl = true;
 }
 
 /*============================================================================

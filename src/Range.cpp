@@ -7,13 +7,10 @@
  *                                  Range
  *============================================================================*/
 Range::Range()
+    : m_first(NULL), m_last(NULL), m_memsize(0), m_memsize_serialized(0),
+      m_disksize(0), m_idx(NO_DISK_FILE)
 {
-    m_first = NULL;
-    m_last = NULL;
-    m_memsize = 0;
-    m_memsize_serialized = 0;
-    m_disksize = 0;
-    m_idx = NO_DISK_FILE;
+
 }
 
 /*============================================================================

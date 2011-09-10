@@ -17,6 +17,7 @@
  *                               KeyValueStore
  *============================================================================*/
 KeyValueStore::KeyValueStore(cm_type type)
+    : m_memstore(), m_diskstore(), m_compactionmanager()
 {
     m_memstore = new MemStore();
     m_diskstore = new DiskStore();

@@ -19,14 +19,10 @@
  *                                 VFile
  *============================================================================*/
 VFile::VFile()
+    : m_simmode(SIMMODE_REAL_IO), m_basefilename(NULL), m_size(0), m_offset(0),
+      m_names(), m_filedescs(), m_cur(-1)
 {
     assert(sizeof(off_t) == 8); // ensure 64bit offsets (TODO: move it elsewhere)
-
-    m_size = 0;
-    m_offset = 0;
-    m_cur = -1;
-
-    m_simmode = SIMMODE_REAL_IO;
 }
 
 /*============================================================================

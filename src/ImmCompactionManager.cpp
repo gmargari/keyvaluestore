@@ -5,7 +5,7 @@
  *                             ImmCompactionManager
  *============================================================================*/
 ImmCompactionManager::ImmCompactionManager(MemStore *memstore, DiskStore *diskstore)
-: GeomCompactionManager(memstore, diskstore)
+    : GeomCompactionManager(memstore, diskstore)
 {
     GeomCompactionManager::set_P(1);
 }

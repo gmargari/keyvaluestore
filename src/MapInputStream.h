@@ -27,13 +27,13 @@ public:
 
 protected:
 
-    Map                      *m_map;
-    Map::KVTMap::iterator     m_iter;
-    Map::KVTMap::iterator     m_iter_end;
-    const char                  *m_start_key;
-    const char                  *m_end_key;
-    bool                         m_start_incl;
-    bool                         m_end_incl;
+    Map                    *m_map;
+    Map::KVTMap::iterator   m_iter;
+    Map::KVTMap::iterator   m_iter_end;
+    const char             *m_start_key;
+    const char             *m_end_key;
+    bool                    m_start_incl;
+    bool                    m_end_incl;
 };
 
 #endif

@@ -13,19 +13,13 @@ static const int SID_NOT_INITIALIZED = INT_MAX;
  *                            PriorityInputStream
  *============================================================================*/
 PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
+    : m_pqueue(), m_istreams(istreams), m_elements(), m_last_sid(SID_NOT_INITIALIZED),
+      m_start_key(NULL), m_end_key(NULL), m_start_incl(true), m_end_incl(true)
 {
-    m_istreams = istreams;
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
         m_elements.back()->sid = i;
     }
-
-    m_start_key = NULL;
-    m_end_key = NULL;
-    m_start_incl = true;
-    m_end_incl = true;
-
-    m_last_sid = SID_NOT_INITIALIZED;
 }
 
 /*============================================================================

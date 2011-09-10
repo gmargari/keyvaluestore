@@ -12,6 +12,7 @@
  *                               RangeScanner
  *============================================================================*/
 RangeScanner::RangeScanner(KeyValueStore *kvstore)
+    : m_pistream()
 {
     vector<InputStream *> istreams;
 

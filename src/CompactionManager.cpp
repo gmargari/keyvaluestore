@@ -15,10 +15,9 @@
  *                              CompactionManager
  *============================================================================*/
 CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
+    : m_memstore(memstore), m_diskstore(diskstore), m_merge_type(CM_MERGE_ONLINE)
 {
-    m_memstore = memstore;
-    m_diskstore = diskstore;
-    m_merge_type = CM_MERGE_ONLINE;
+
 }
 
 /*============================================================================
