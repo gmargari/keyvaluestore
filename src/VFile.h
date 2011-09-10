@@ -66,7 +66,6 @@ protected:
     off_t           cur_fs_rewind();
     ssize_t         cur_fs_write(const void *buf, size_t count);
     ssize_t         cur_fs_read(void *buf, size_t count);
-    int             make_persistent();
 };
 
 #endif

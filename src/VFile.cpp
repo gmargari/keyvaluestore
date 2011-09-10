@@ -34,8 +34,7 @@ VFile::VFile()
  *============================================================================*/
 VFile::~VFile(void)
 {
-    fs_sync();
-    make_persistent();
+    fs_close();
 
     for (int i = 0; i < (int)m_names.size(); i++) {
         free(m_names[i]);
@@ -142,14 +141,32 @@ bool VFile::fs_open_existing(char *filename)
  *============================================================================*/
 void VFile::fs_close(void)
 {
-    assert(m_cur != -1);
+    char fname[100];
+    FILE *fp;
+    struct stat filestatus;
 
-    for (int i = 0; i < (int)m_filedescs.size(); i++) {
-        if (close(m_filedescs[i]) == -1) {
-            printf("[ERROR] fs_close(): close('%s')\n", m_names[m_cur]);
+    fs_sync();
+
+    // save VFile metadata to disk and close all physical files of this VFile
+    if (m_filedescs.size()) {
+        sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
+        if ((fp = fopen(fname, "w")) == NULL) {
+            printf("[ERROR] save_info: fopen('%s')\n", fname);
             perror("");
             exit(EXIT_FAILURE);
         }
+
+        for (int i = 0; i < (int)m_filedescs.size(); i++) {
+            stat(m_names[i], &filestatus);
+            fprintf(fp, "%s %ld\n", m_names[i], filestatus.st_size);
+            if (close(m_filedescs[i]) == -1) {
+                printf("[ERROR] fs_close(): close('%s')\n", m_names[i]);
+                perror("");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        fclose(fp);
     }
 
     m_offset = 0;
@@ -567,32 +584,4 @@ off_t VFile::cur_fs_tell(void)
 off_t VFile::cur_fs_rewind(void)
 {
     return cur_fs_seek(0, SEEK_SET);
-}
-
-/*============================================================================
- *                              make_persistent
- *============================================================================*/
-int VFile::make_persistent()
-{
-    char fname[100];
-    FILE *fp;
-    struct stat filestatus;
-
-    if (m_filedescs.size()) {
-        sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
-        if ((fp = fopen(fname, "w")) == NULL) {
-            printf("[ERROR] save_info: fopen('%s')\n", fname);
-            perror("");
-            exit(EXIT_FAILURE);
-        }
-
-        for (int i = 0; i < (int)m_filedescs.size(); i++) {
-            stat(m_names[i], &filestatus);
-            fprintf(fp, "%s %ld\n", m_names[i], filestatus.st_size);
-        }
-
-        fclose(fp);
-    }
-
-    return 1;
 }
