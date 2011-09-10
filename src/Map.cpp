@@ -290,12 +290,10 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
  *============================================================================*/
 uint64_t Map::timestamp()
 {
-//     struct timeval tv;
-//
-//     gettimeofday(&tv, NULL);
-//     return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
-    static int i = 1;
-    return i++;
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
 }
 
 /*============================================================================
