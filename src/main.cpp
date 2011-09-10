@@ -3,7 +3,7 @@
 #include "ImmCompactionManager.h"
 #include "GeomCompactionManager.h"
 #include "LogCompactionManager.h"
-#include "UrfCompactionManager.h"
+#include "RangemergeCompactionManager.h"
 #include "Statistics.h"
 #include "RangeScanner.h"
 
@@ -58,11 +58,11 @@ long int zipf_n = 1000000;     // parameter for zipf() function
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
-     printf("        -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"urf\"\n");
+     printf("        -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\"\n");
      printf("        -r value:               r parameter, for geometric comp. manager only (default: %d)\n", DEFAULT_GEOM_R);
      printf("        -p value:               p parameter, for geometric comp. manager only (default: disabled)\n");
-     printf("        -b blocksize:           block size in MB, for urf comp. manager only (default: %.0f)\n", b2mb(DEFAULT_URF_BLOCKSIZE));
-     printf("        -f flushmem:            flush memory size in MB, for urf comp. manager only (default: 0,\n");
+     printf("        -b blocksize:           block size in MB, for rangemerge comp. manager only (default: %.0f)\n", b2mb(DEFAULT_RNGMERGE_BLOCKSIZE));
+     printf("        -f flushmem:            flush memory size in MB, for rangemerge comp. manager only (default: 0,\n");
      printf("                                when memory is full flush only the biggest range)\n");
      printf("        -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
      printf("        -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
@@ -297,10 +297,10 @@ int main(int argc, char **argv)
         geom_p = DEFAULT_GEOM_P;
     }
     if (bflag == 0) {
-        blocksize = DEFAULT_URF_BLOCKSIZE;
+        blocksize = DEFAULT_RNGMERGE_BLOCKSIZE;
     }
     if (fflag == 0) {
-        flushmemorysize = DEFAULT_URF_FLUSHMEMSIZE;
+        flushmemorysize = DEFAULT_RNGMERGE_FLUSHMEMSIZE;
     }
     if (mflag == 0) {
         memorysize = DEFAULT_MEMSTORE_SIZE;
@@ -349,8 +349,8 @@ int main(int argc, char **argv)
     }
     if (cflag && strcmp(compmanager, "nomerge") && strcmp(compmanager, "immediate") != 0
          && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
-         && strcmp(compmanager, "urf") != 0) {
-        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"urf\"\n");
+         && strcmp(compmanager, "rangemerge") != 0) {
+        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\"\n");
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
@@ -425,14 +425,14 @@ int main(int argc, char **argv)
     else if (strcmp(compmanager, "logarithmic") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::LOG_CM);
     }
-    // URF compaction manager
-    else if (strcmp(compmanager, "urf") == 0) {
-        kvstore = new KeyValueStore(KeyValueStore::URF_CM);
+    // Rangemerge compaction manager
+    else if (strcmp(compmanager, "rangemerge") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::RNGMERGE_CM);
         if (bflag) {
-            ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
+            ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
         }
         if (fflag) {
-            ((UrfCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
+            ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
         }
     }
     // other compaction manager?!
@@ -471,13 +471,13 @@ int main(int argc, char **argv)
         } else {
             printf("# geometric_p:         %15d    %s\n", geom_p, (pflag == 0) ? "(default, disabled)" : "");
         }
-    } else if (strcmp(compmanager, "urf") == 0) {
+    } else if (strcmp(compmanager, "rangemerge") == 0) {
         if (blocksize == 0) {
-            printf("# urf_block_size:      %15s MB\n", "inf");
+            printf("# rngmerge_block_size: %15s MB\n", "inf");
         } else {
-            printf("# urf_block_size:      %15.0f MB %s\n", b2mb(blocksize), (bflag == 0) ? "(default)" : "");
+            printf("# rngmerge_block_size: %15.0f MB %s\n", b2mb(blocksize), (bflag == 0) ? "(default)" : "");
         }
-        printf("# urf_flushmem_size:   %15.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
+        printf("# rngmerge_flushmem_size: %12.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
     }
     printf("# memstore_merge_mode: %15s\n", (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline"));
     printf("# read_from_stdin:     %15s\n", (sflag) ? "true" : "false");

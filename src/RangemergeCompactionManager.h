@@ -1,5 +1,5 @@
-#ifndef URF_COMPACTIONMANAGER_H
-#define URF_COMPACTIONMANAGER_H
+#ifndef RANGEMERGE_COMPACTIONMANAGER_H
+#define RANGEMERGE_COMPACTIONMANAGER_H
 
 #include "CompactionManager.h"
 
@@ -9,19 +9,19 @@ class MemStore;
 class DiskStore;
 class Range;
 
-class UrfCompactionManager: public CompactionManager {
+class RangemergeCompactionManager: public CompactionManager {
 
 public:
 
     /**
      * constructor
      */
-    UrfCompactionManager(MemStore *memstore, DiskStore *diskstore);
+    RangemergeCompactionManager(MemStore *memstore, DiskStore *diskstore);
 
     /**
      * destructor
      */
-    ~UrfCompactionManager();
+    ~RangemergeCompactionManager();
 
     /**
      * set/get the size of disk block

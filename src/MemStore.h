@@ -16,7 +16,7 @@ friend class NomergeCompactionManager;
 friend class ImmCompactionManager;
 friend class GeomCompactionManager;
 friend class LogCompactionManager;
-friend class UrfCompactionManager;
+friend class RangemergeCompactionManager;
 friend class RangeScanner;
 
 public:

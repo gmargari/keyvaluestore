@@ -7,7 +7,7 @@
 #include "ImmCompactionManager.h"
 #include "LogCompactionManager.h"
 #include "GeomCompactionManager.h"
-#include "UrfCompactionManager.h"
+#include "RangemergeCompactionManager.h"
 #include "Statistics.h"
 
 #include <cassert>
@@ -33,8 +33,8 @@ KeyValueStore::KeyValueStore(cm_type type)
         case KeyValueStore::LOG_CM:
             m_compactionmanager = new LogCompactionManager(m_memstore, m_diskstore);
             break;
-        case KeyValueStore::URF_CM:
-            m_compactionmanager = new UrfCompactionManager(m_memstore, m_diskstore);
+        case KeyValueStore::RNGMERGE_CM:
+            m_compactionmanager = new RangemergeCompactionManager(m_memstore, m_diskstore);
             break;
     }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);

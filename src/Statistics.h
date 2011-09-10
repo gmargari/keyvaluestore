@@ -34,7 +34,7 @@ typedef struct {
  * Tfree:    time for Map::clear()
  * Tcmrest:  rest code of compaction manager, besides Tmerge and Tfree (e.g.
  *           update of 'runs' vector for Geometric, creation of 'ranges' vector
- *           for Urf, create and insert streams in DiskStore for new files, etc)
+ *           for Rangemerge, create and insert streams in DiskStore for new files, etc)
  * Tmem:     time for string comparisons and string copies (strcmp & strcpy)
  */
 

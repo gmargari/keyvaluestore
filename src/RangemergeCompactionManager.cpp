@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "UrfCompactionManager.h"
+#include "RangemergeCompactionManager.h"
 
 #include "MemStore.h"
 #include "DiskStore.h"
@@ -21,19 +21,19 @@ using std::min;
 #define SPLIT_PERC 0.6 // move to Global.h?
 
 /*============================================================================
- *                             UrfCompactionManager
+ *                        RangemergeCompactionManager
  *============================================================================*/
-UrfCompactionManager::UrfCompactionManager(MemStore *memstore, DiskStore *diskstore)
+RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, DiskStore *diskstore)
 : CompactionManager(memstore, diskstore)
 {
-    set_blocksize(DEFAULT_URF_BLOCKSIZE);
-    set_flushmem(DEFAULT_URF_FLUSHMEMSIZE);
+    set_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE);
+    set_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE);
 }
 
 /*============================================================================
- *                            ~UrfCompactionManager
+ *                       ~RangemergeCompactionManager
  *============================================================================*/
-UrfCompactionManager::~UrfCompactionManager()
+RangemergeCompactionManager::~RangemergeCompactionManager()
 {
 
 }
@@ -41,12 +41,12 @@ UrfCompactionManager::~UrfCompactionManager()
 /*============================================================================
  *                               set_blocksize
  *============================================================================*/
-void UrfCompactionManager::set_blocksize(uint64_t blocksize)
+void RangemergeCompactionManager::set_blocksize(uint64_t blocksize)
 {
     if (blocksize) {
         m_blocksize = blocksize;
     } else {
-        // if blocksize == 0 block splitting is disabled and Urf behaves
+        // if blocksize == 0 block splitting is disabled and Rangemerge behaves
         // identically to Immediate Merge
         m_blocksize = ULONG_MAX; // practically, infinite block size
     }
@@ -55,7 +55,7 @@ void UrfCompactionManager::set_blocksize(uint64_t blocksize)
 /*============================================================================
  *                               get_blocksize
  *============================================================================*/
-uint64_t UrfCompactionManager::get_blocksize(void)
+uint64_t RangemergeCompactionManager::get_blocksize(void)
 {
     return m_blocksize;
 }
@@ -63,7 +63,7 @@ uint64_t UrfCompactionManager::get_blocksize(void)
 /*============================================================================
  *                               set_flushmem
  *============================================================================*/
-void UrfCompactionManager::set_flushmem(uint64_t flushmem)
+void RangemergeCompactionManager::set_flushmem(uint64_t flushmem)
 {
     m_flushmem = min(flushmem, m_memstore->get_maxsize());
 }
@@ -71,7 +71,7 @@ void UrfCompactionManager::set_flushmem(uint64_t flushmem)
 /*============================================================================
  *                               get_flushmem
  *============================================================================*/
-uint64_t UrfCompactionManager::get_flushmem(void)
+uint64_t RangemergeCompactionManager::get_flushmem(void)
 {
     return m_flushmem;
 }
@@ -79,7 +79,7 @@ uint64_t UrfCompactionManager::get_flushmem(void)
 /*============================================================================
  *                               flush_bytes
  *============================================================================*/
-void UrfCompactionManager::flush_bytes(void)
+void RangemergeCompactionManager::flush_bytes(void)
 {
     DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;
@@ -180,7 +180,7 @@ void UrfCompactionManager::flush_bytes(void)
     //--------------------------------------------------------------------------
     // add new files to diskstore
     //--------------------------------------------------------------------------
-    // doesn't matter where we insert them in vector: in Urf each key is
+    // doesn't matter where we insert them in vector: in Rangemerge each key is
     // stored in exaclty one file on disk, so there is no need to search
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
@@ -195,7 +195,7 @@ void UrfCompactionManager::flush_bytes(void)
 /*============================================================================
  *                               create_ranges
  *============================================================================*/
-void UrfCompactionManager::create_ranges(vector<Range>& ranges)
+void RangemergeCompactionManager::create_ranges(vector<Range>& ranges)
 {
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     Range rng;
@@ -254,7 +254,7 @@ void UrfCompactionManager::create_ranges(vector<Range>& ranges)
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int UrfCompactionManager::sanity_check()
+int RangemergeCompactionManager::sanity_check()
 {
     vector<Range> ranges;
 
