@@ -62,6 +62,13 @@ public:
      */
     char *get_name();
 
+    /**
+     * set/get value of 'max_dfile_num' (set once, during initialization of
+     * diskstore)
+     */
+    static void set_max_dfile_num(int num);
+    static int  get_max_dfile_num();
+
 //     // rewind file
 //     void rewind();
 //     // flush all pending writes to disk
@@ -74,6 +81,7 @@ protected:
     VFile                   *m_vfile;
     VFileIndex              *m_vfile_index;
     uint64_t                 m_vfile_numkeys;
+    static int               m_max_dfile_num; // create unique filenames
 };
 
 #endif

@@ -3,6 +3,8 @@
 #include "VFile.h"
 #include "VFileIndex.h"
 
+int DiskFile::m_max_dfile_num = 0;
+
 /*============================================================================
  *                                 DiskFile
  *============================================================================*/
@@ -42,11 +44,10 @@ bool DiskFile::open_existing(char *filename)
  *============================================================================*/
 bool DiskFile::open_new_unique()
 {
-    static int n = 0;
     char filename[100];
 
     m_vfile_numkeys = 0;
-    sprintf(filename, "%s/%s%04d", ROOT_DIR, DISKFILE_PREFIX, n++);
+    sprintf(filename, "%s%s%04d", ROOT_DIR, DISKFILE_PREFIX, m_max_dfile_num++);
     if (m_vfile->fs_open_new(filename)) {
         return true;
     } else {
@@ -93,4 +94,20 @@ void DiskFile::get_first_last_term(const char **first, const char **last)
 char *DiskFile::get_name()
 {
     return m_vfile->fs_name();
+}
+
+/*============================================================================
+ *                             set_max_dfile_num
+ *============================================================================*/
+void DiskFile::set_max_dfile_num(int num)
+{
+    m_max_dfile_num = num;
+}
+
+/*============================================================================
+ *                             set_max_dfile_num
+ *============================================================================*/
+int DiskFile::get_max_dfile_num()
+{
+    return m_max_dfile_num;
 }

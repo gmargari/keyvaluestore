@@ -28,7 +28,8 @@
 //==============================================================================
 // vfile-related defines
 //==============================================================================
-#define ROOT_DIR                    "/tmp/kvstore/"
+#define ROOT_DIR                    "/tmp/kvstore/" // dont forget trailing '/'
+#define DISKSTORE_FILENAME          "dstore.info"
 #define DISKFILE_PREFIX             "dfile."
 #define VFILE_PART_PREFIX           ".part"
 #define VFILE_INFO_SUFFIX           ".info"
