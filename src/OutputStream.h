@@ -8,6 +8,8 @@ class OutputStream {
 
 public:
 
+    virtual ~OutputStream() { };
+
     /**
      * reset stream
      */
