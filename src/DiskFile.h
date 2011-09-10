@@ -57,7 +57,7 @@ public:
      */
     void get_first_last_term(const char **first, const char **last);
 
-    /*
+    /**
      * name of this disk file
      */
     char *get_name();
@@ -78,10 +78,10 @@ public:
 
 protected:
 
-    VFile                   *m_vfile;
-    VFileIndex              *m_vfile_index;
-    uint64_t                 m_vfile_numkeys;
-    static int               m_max_dfile_num; // create unique filenames
+    VFile       *m_vfile;
+    VFileIndex  *m_vfile_index;
+    uint64_t     m_vfile_numkeys;
+    static int   m_max_dfile_num; // create unique filenames
 };
 
 #endif
