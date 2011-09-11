@@ -21,7 +21,7 @@ public:
     ~NomergeCompactionManager();
 
     // inherited from CompactionManager (see CompactionManager.h for description)
-    void flush_bytes(void);
+    void flush_bytes();
 
 protected:
 

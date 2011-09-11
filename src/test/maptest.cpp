@@ -33,7 +33,7 @@ void randstr(char *s, const int len) {
 /*============================================================================
  *                                 main
  *============================================================================*/
-int main(void)
+int main()
 {
     Map *map;
     MapInputStream *istream, *istream1, *istream2, *istream3, *istream4;

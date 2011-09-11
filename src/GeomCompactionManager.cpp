@@ -89,7 +89,7 @@ void GeomCompactionManager::set_R(int r)
 /*============================================================================
  *                                   get_R
  *============================================================================*/
-int GeomCompactionManager::get_R(void)
+int GeomCompactionManager::get_R()
 {
     return m_R;
 }
@@ -106,7 +106,7 @@ void GeomCompactionManager::set_P(int p)
 /*============================================================================
  *                                   get_P
  *============================================================================*/
-int GeomCompactionManager::get_P(void)
+int GeomCompactionManager::get_P()
 {
     return m_P;
 }
@@ -173,7 +173,7 @@ int GeomCompactionManager::compute_current_R()
 /*============================================================================
  *                                flush_bytes
  *============================================================================*/
-void GeomCompactionManager::flush_bytes(void)
+void GeomCompactionManager::flush_bytes()
 {
     DiskFile *disk_file, *memstore_file;
     DiskFileInputStream *memstore_file_istream;

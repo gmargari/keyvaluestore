@@ -28,7 +28,7 @@ NomergeCompactionManager::~NomergeCompactionManager()
 /*============================================================================
  *                               flush_memstore
  *============================================================================*/
-void NomergeCompactionManager::flush_bytes(void)
+void NomergeCompactionManager::flush_bytes()
 {
     DiskFile *memstore_file;
     DiskFileInputStream *memstore_file_istream;

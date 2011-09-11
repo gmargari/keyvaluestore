@@ -36,7 +36,7 @@ void randstr(char *s, const int len) {
 /*============================================================================
  *                                main
  *============================================================================*/
-int main(void)
+int main()
 {
     KeyValueStore *kvstore;
     char *key, *value, *value2;

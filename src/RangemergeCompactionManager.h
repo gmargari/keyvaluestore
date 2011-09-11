@@ -27,16 +27,16 @@ public:
      * set/get the size of disk block
      */
     void     set_blocksize(uint64_t blocksize);
-    uint64_t get_blocksize(void);
+    uint64_t get_blocksize();
 
     /**
      * set/get the size of memory flushed each time memory gets full
      */
     void     set_flushmem(uint64_t flushmem);
-    uint64_t get_flushmem(void);
+    uint64_t get_flushmem();
 
     // inherited from CompactionManager (see CompactionManager.h for description)
-    void flush_bytes(void);
+    void flush_bytes();
 
 protected:
 

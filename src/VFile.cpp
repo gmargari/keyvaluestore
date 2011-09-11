@@ -28,7 +28,7 @@ VFile::VFile()
 /*============================================================================
  *                                ~VFile
  *============================================================================*/
-VFile::~VFile(void)
+VFile::~VFile()
 {
     fs_close();
 
@@ -135,7 +135,7 @@ bool VFile::fs_open_existing(char *filename)
 /*============================================================================
  *                                  close
  *============================================================================*/
-void VFile::fs_close(void)
+void VFile::fs_close()
 {
     char fname[100];
     FILE *fp;
@@ -264,7 +264,7 @@ off_t VFile::fs_seek(off_t offs, int whence)
 /*============================================================================
  *                                  fs_tell
  *============================================================================*/
-off_t VFile::fs_tell(void)
+off_t VFile::fs_tell()
 {
     return m_offset;
 }
@@ -272,7 +272,7 @@ off_t VFile::fs_tell(void)
 /*============================================================================
  *                                 fs_rewind
  *============================================================================*/
-void VFile::fs_rewind(void)
+void VFile::fs_rewind()
 {
     fs_seek(0, SEEK_SET);
 }
@@ -367,7 +367,7 @@ void VFile::fs_truncate(off_t length)
 /*============================================================================
  *                               fs_delete
  *============================================================================*/
-void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
+void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
     if (m_simmode == SIMMODE_REAL_IO) {
         char fname[100];
@@ -396,7 +396,7 @@ void VFile::fs_delete(void) // TODO: rename this function to fs_rm (public) and 
 /*============================================================================
  *                                 fs_name
  *============================================================================*/
-char *VFile::fs_name(void)
+char *VFile::fs_name()
 {
     return m_basefilename;
 }
@@ -404,7 +404,7 @@ char *VFile::fs_name(void)
 /*============================================================================
  *                                 fs_size
  *============================================================================*/
-uint64_t VFile::fs_size(void)
+uint64_t VFile::fs_size()
 {
     return m_size;
 }
@@ -412,7 +412,7 @@ uint64_t VFile::fs_size(void)
 /*============================================================================
  *                                 fs_sync
  *============================================================================*/
-void VFile::fs_sync(void)
+void VFile::fs_sync()
 {
     if (m_simmode == SIMMODE_REAL_IO) {
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
@@ -536,7 +536,7 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
 /*============================================================================
  *                                 cur_fs_size
  *============================================================================*/
-uint64_t VFile::cur_fs_size(void)
+uint64_t VFile::cur_fs_size()
 {
     struct stat filestatus;
 
@@ -569,7 +569,7 @@ off_t VFile::cur_fs_seek(off_t offs, int whence)
 /*============================================================================
  *                                cur_fs_tell
  *============================================================================*/
-off_t VFile::cur_fs_tell(void)
+off_t VFile::cur_fs_tell()
 {
     return cur_fs_seek(0, SEEK_CUR);
 }
@@ -577,7 +577,7 @@ off_t VFile::cur_fs_tell(void)
 /*============================================================================
  *                                cur_fs_tell
  *============================================================================*/
-off_t VFile::cur_fs_rewind(void)
+off_t VFile::cur_fs_rewind()
 {
     return cur_fs_seek(0, SEEK_SET);
 }

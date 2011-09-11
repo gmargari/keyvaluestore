@@ -55,7 +55,7 @@ void RangemergeCompactionManager::set_blocksize(uint64_t blocksize)
 /*============================================================================
  *                               get_blocksize
  *============================================================================*/
-uint64_t RangemergeCompactionManager::get_blocksize(void)
+uint64_t RangemergeCompactionManager::get_blocksize()
 {
     return m_blocksize;
 }
@@ -71,7 +71,7 @@ void RangemergeCompactionManager::set_flushmem(uint64_t flushmem)
 /*============================================================================
  *                               get_flushmem
  *============================================================================*/
-uint64_t RangemergeCompactionManager::get_flushmem(void)
+uint64_t RangemergeCompactionManager::get_flushmem()
 {
     return m_flushmem;
 }
@@ -79,7 +79,7 @@ uint64_t RangemergeCompactionManager::get_flushmem(void)
 /*============================================================================
  *                               flush_bytes
  *============================================================================*/
-void RangemergeCompactionManager::flush_bytes(void)
+void RangemergeCompactionManager::flush_bytes()
 {
     DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;

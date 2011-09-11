@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <string.h>
 
-int main(void)
+int main()
 {
     VFile f;
     void *buf = malloc(mb2b(20));

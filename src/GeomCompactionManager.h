@@ -26,20 +26,20 @@ public:
     ~GeomCompactionManager();
 
     // inherited from CompactionManager (see CompactionManager.h for description)
-    void flush_bytes(void);
+    void flush_bytes();
 
     /**
      * set/get value of parameter R of Geometric Partitioning
      */
     void set_R(int r);
-    int  get_R(void);
+    int  get_R();
 
     /**
      * set/get value of parameter P (maximum number of disk partitions) of
      * Geometric Partitioning.
      */
     void set_P(int p);
-    int  get_P(void);
+    int  get_P();
 
 protected:
 

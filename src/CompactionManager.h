@@ -94,7 +94,7 @@ public:
     /**
      * flush <k,v> pairs from memory to disk, creating free space for new pairs
      */
-    virtual void flush_bytes(void) = 0;
+    virtual void flush_bytes() = 0;
 
 protected:
 

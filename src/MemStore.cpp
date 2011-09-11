@@ -34,7 +34,7 @@ void MemStore::set_maxsize(uint64_t maxsize)
 /*============================================================================
  *                               get_maxsize
  *============================================================================*/
-uint64_t MemStore::get_maxsize(void)
+uint64_t MemStore::get_maxsize()
 {
     return m_maxsize;
 }
