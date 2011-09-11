@@ -60,7 +60,7 @@ GeomCompactionManager::~GeomCompactionManager()
     if (m_partition_size.size()) {
         sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
         if ((fp = fopen(fname, "w")) == NULL) {
-            printf("[ERROR] ~DiskStore: fopen('%s')\n", fname);
+            printf("Error: fopen('%s')\n", fname);
             perror("");
             exit(EXIT_FAILURE);
         }

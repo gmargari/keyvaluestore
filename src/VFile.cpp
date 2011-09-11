@@ -62,7 +62,7 @@ bool VFile::add_new_physical_file(bool open_existing)
     }
 
     if ((fd = open(fname, fdflag, S_IRUSR | S_IWUSR)) == -1) {
-        printf("[ERROR] add_new_physical_file: open('%s')\n", fname);
+        printf("Error: add_new_physical_file: open('%s')\n", fname);
         perror("");
         exit(EXIT_FAILURE);
     }
@@ -97,7 +97,7 @@ bool VFile::fs_open_existing(char *filename)
 
     sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
     if ((fp = fopen(fname, "r")) == NULL) {
-        printf("[ERROR] fs_open_existing: fopen('%s')\n", fname);
+        printf("Error: fs_open_existing: fopen('%s')\n", fname);
         perror("");
         exit(EXIT_FAILURE);
     }
@@ -107,7 +107,7 @@ bool VFile::fs_open_existing(char *filename)
         // check file size of file to be opened is the one expected.
         stat(vfilename, &filestatus);
         if (filestatus.st_size != filesize) {
-            printf("[ERROR] File [%s] should have size %ld but has %d\n", vfilename, filesize, filestatus.st_size);
+            printf("Error: File [%s] should have size %ld but has %d\n", vfilename, filesize, filestatus.st_size);
             exit(EXIT_FAILURE);
         }
 
@@ -122,7 +122,7 @@ bool VFile::fs_open_existing(char *filename)
 
         // check file opened from add_new_physical_file() is the one expected.
         if (strcmp(m_names.back(), vfilename) != 0) {
-            printf("[ERROR] File opened should be [%s] but is [%s]\n", vfilename, m_names.back());
+            printf("Error: File opened should be [%s] but is [%s]\n", vfilename, m_names.back());
             exit(EXIT_FAILURE);
         }
     }
@@ -147,7 +147,7 @@ void VFile::fs_close()
     if (m_filedescs.size()) {
         sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
         if ((fp = fopen(fname, "w")) == NULL) {
-            printf("[ERROR] save_info: fopen('%s')\n", fname);
+            printf("Error: save_info: fopen('%s')\n", fname);
             perror("");
             exit(EXIT_FAILURE);
         }
@@ -156,7 +156,7 @@ void VFile::fs_close()
             stat(m_names[i], &filestatus);
             fprintf(fp, "%s %ld\n", m_names[i], filestatus.st_size);
             if (close(m_filedescs[i]) == -1) {
-                printf("[ERROR] fs_close(): close('%s')\n", m_names[i]);
+                printf("Error: fs_close(): close('%s')\n", m_names[i]);
                 perror("");
                 exit(EXIT_FAILURE);
             }
@@ -252,7 +252,7 @@ off_t VFile::fs_seek(off_t offs, int whence)
 
         // seek within that file
         if (lseek(m_filedescs[m_cur], offs_in_file, SEEK_SET) == (off_t)-1) {
-            printf("[ERROR] fs_seek(): lseek('%s', %Ld, SEEK_SET)\n", m_names[m_cur], offs_in_file);
+            printf("Error: fs_seek(): lseek('%s', %Ld, SEEK_SET)\n", m_names[m_cur], offs_in_file);
             perror("");
             exit(EXIT_FAILURE);
         }
@@ -308,7 +308,7 @@ void VFile::fs_truncate(off_t length)
                 }
 
                 if (remove(m_names[i]) == -1) {
-                    printf("[ERROR] fs_truncate(): remove('%s')\n", m_names[i]);
+                    printf("Error: fs_truncate(): remove('%s')\n", m_names[i]);
                     perror("");
                     exit(EXIT_FAILURE);
                 }
@@ -333,7 +333,7 @@ void VFile::fs_truncate(off_t length)
             assert((int)m_names.size() == new_files);
             for (int i = 0; i < new_files - 1; i++) {
                 if (ftruncate64(m_filedescs[i], MAX_FILE_SIZE) == (off_t)-1) {
-                    printf("[ERROR] fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[i], MAX_FILE_SIZE);
+                    printf("Error: fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[i], MAX_FILE_SIZE);
                     perror("");
                     exit(EXIT_FAILURE);
                 }
@@ -351,7 +351,7 @@ void VFile::fs_truncate(off_t length)
         }
 
         if (ftruncate64(m_filedescs[m_cur], len) == (off_t)-1) {
-            printf("[ERROR] fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[m_cur], len);
+            printf("Error: fs_truncate(): ftruncate64('%s', %Ld) \n", m_names[m_cur], len);
             perror("");
             exit(EXIT_FAILURE);
         }
@@ -370,21 +370,17 @@ void VFile::fs_truncate(off_t length)
 void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
     if (m_simmode == SIMMODE_REAL_IO) {
-        char fname[100];
-
         assert(m_names.size() == m_filedescs.size());
         for (int i = 0; i < (int)m_names.size(); i++) {
-
             if (DBGLVL > 0) {
                 printf("[DEBUG]  %s [-]\n", m_names[i]);
             }
 
             if (remove(m_names[i]) == -1) {
-                printf("[ERROR] fs_delete(): remove('%s')\n", m_names[i]);
+                printf("Error: fs_delete(): remove('%s')\n", m_names[i]);
                 perror("");
                 exit(EXIT_FAILURE);
             }
-
             free(m_names[i]);
         }
 
@@ -463,7 +459,7 @@ ssize_t VFile::cur_fs_read(void *buf, size_t count)
 
         time_start(&(g_stats.read_time));
         if ((actually_read = read(m_filedescs[m_cur], buf, count)) == -1) {
-            printf("[ERROR] cur_fs_read(): read('%s', %d)\n", m_names[m_cur], count);
+            printf("Error: cur_fs_read(): read('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
@@ -511,7 +507,7 @@ ssize_t VFile::cur_fs_write(const void *buf, size_t count)
 
         time_start(&(g_stats.write_time));
         if ((actually_written = write(m_filedescs[m_cur], buf, count)) == -1) {
-            printf("[ERROR] cur_fs_write(): write('%s', %d)\n", m_names[m_cur], count);
+            printf("Error: cur_fs_write(): write('%s', %d)\n", m_names[m_cur], count);
             perror("");
             exit(EXIT_FAILURE);
         }
@@ -558,7 +554,7 @@ off_t VFile::cur_fs_seek(off_t offs, int whence)
     assert(m_cur != -1);
 
     if ((newoffs = lseek(m_filedescs[m_cur], offs, whence)) == (off_t)-1) {
-        printf("[ERROR] cur_fs_seek(): lseek('%s', %Ld, %d)\n", m_names[m_cur], offs, whence);
+        printf("Error: cur_fs_seek(): lseek('%s', %Ld, %d)\n", m_names[m_cur], offs, whence);
         perror("");
         exit(EXIT_FAILURE);
     }
