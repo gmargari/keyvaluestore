@@ -29,12 +29,13 @@
 // vfile-related defines
 //==============================================================================
 #define ROOT_DIR                    "/tmp/kvstore/" // dont forget trailing '/'
+#define CMMANAGER_FILENAME          "cmmanager.info"
 #define DISKSTORE_FILENAME          "dstore.info"
 #define DISKFILE_PREFIX             "dfile."
 #define VFILE_PART_PREFIX           ".part"
 #define VFILE_INFO_SUFFIX           ".info"
 #define VFILE_INDEX_SUFFIX          ".index"
-#define MAX_FILE_SIZE     2147483647LL // 2GB
+#define MAX_FILE_SIZE               2147483647LL // 2GB
 
 //==============================================================================
 // types, structs and enums

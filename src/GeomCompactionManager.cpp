@@ -12,6 +12,8 @@
 #include <cassert>
 #include <cmath>
 
+uint64_t dbg_lastsize = 0; // used for sanity_check()
+
 /*============================================================================
  *                             GeomCompactionManager
  *============================================================================*/
@@ -19,7 +21,27 @@ GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *disk
     : CompactionManager(memstore, diskstore),
       m_R(DEFAULT_GEOM_R), m_P(DEFAULT_GEOM_P), m_partition_size()
 {
+    char fname[100];
+    FILE *fp;
+    int num_partitions, part_size;
 
+    // open existing diskstore, if any
+    sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
+    if ((fp = fopen(fname, "r")) != NULL) {
+        fscanf(fp, "R: %d\n", &m_R);
+        fscanf(fp, "P: %d\n", &m_P);
+        fscanf(fp, "partitions: %d\n", &num_partitions);
+        for (uint i = 0; i < num_partitions; i++) {
+            fscanf(fp, "%d\n", &part_size);
+            m_partition_size.push_back(part_size);
+            dbg_lastsize += part_size;
+        }
+
+        assert(m_partition_size.size() == num_partitions);
+        sanity_check();
+
+        fclose(fp);
+    }
 }
 
 /*============================================================================
@@ -27,7 +49,26 @@ GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *disk
  *============================================================================*/
 GeomCompactionManager::~GeomCompactionManager()
 {
+    char fname[100];
+    FILE *fp;
 
+    if (m_partition_size.size()) {
+        sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
+        if ((fp = fopen(fname, "w")) == NULL) {
+            printf("[ERROR] ~DiskStore: fopen('%s')\n", fname);
+            perror("");
+            exit(EXIT_FAILURE);
+        }
+
+        fprintf(fp, "R: %d\n", m_R);
+        fprintf(fp, "P: %d\n", m_P);
+        fprintf(fp, "partitions: %d\n", m_partition_size.size());
+        for (uint i = 0; i < m_partition_size.size(); i++) {
+            fprintf(fp, "%d\n", m_partition_size[i]);
+        }
+
+        fclose(fp);
+    }
 }
 
 /*============================================================================
@@ -265,7 +306,6 @@ void GeomCompactionManager::print_partitions()
  *============================================================================*/
 int GeomCompactionManager::sanity_check()
 {
-    static uint64_t lastsize = 0;
     uint64_t cursize = 0;
 
     assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
@@ -276,8 +316,8 @@ int GeomCompactionManager::sanity_check()
         assert(m_partition_size[i] <= partition_maxsize(i));
         cursize += m_partition_size[i];
     }
-    assert(cursize == lastsize || cursize == lastsize + 1);
-    lastsize = cursize;
+    assert(cursize == dbg_lastsize || cursize == dbg_lastsize + 1);
+    dbg_lastsize = cursize;
 
     if (m_P) {
         assert((int)m_diskstore->m_disk_files.size() <= m_P);
