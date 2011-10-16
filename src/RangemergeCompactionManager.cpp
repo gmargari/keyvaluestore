@@ -185,7 +185,7 @@ void RangemergeCompactionManager::flush_bytes()
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         r_disk_files.push_back(new_disk_files[i]);
-        disk_stream = new DiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
+        disk_stream = new DiskFileInputStream(r_disk_files.back(), MERGE_BUFSIZE);
         r_disk_istreams.push_back(disk_stream);
     }
 
