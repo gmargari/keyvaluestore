@@ -89,6 +89,7 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
+    char    *allargs = "hc:r:p:b:f:m:i:n:k:v:uzo:g:G:sex";
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
@@ -131,7 +132,8 @@ int main(int argc, char **argv)
             *key_copy = NULL,
             *value = NULL,
             *value_copy = NULL,
-            *end_key = NULL;
+            *end_key = NULL,
+            *ptr;
     bool     unique_keys,
              zipf_keys,
              flush_page_cache,
@@ -149,7 +151,7 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     // get arguments
     //--------------------------------------------------------------------------
-    while ((myopt = getopt (argc, argv, "hc:r:p:b:f:m:i:n:k:v:uzo:g:G:sex")) != -1) {
+    while ((myopt = getopt (argc, argv, allargs)) != -1) {
         switch (myopt)  {
 
         case 'h':
@@ -264,12 +266,8 @@ int main(int argc, char **argv)
             break;
 
         case '?':
-            if (optopt == 'c' || optopt == 'r' || optopt == 'p' || optopt == 'b'
-                  || optopt == 'f' || optopt == 'm' || optopt == 'i'
-                  || optopt == 'n' || optopt == 'k' || optopt == 'v'
-                  || optopt == 'u' || optopt == 'o' || optopt == 'g'
-                  || optopt == 'G') {
-                fprintf (stderr, "Error: option -%c requires an argument.\n", optopt);
+            if ((ptr = strchr(allargs, optopt)) && *(ptr+1) == ':') {
+                fprintf (stderr, "Error: option '-%c' requires an argument.\n", optopt);
             } else if (isprint(optopt)) {
                 fprintf (stderr, "Error: unknown option '-%c'.\n", optopt);
             } else {
