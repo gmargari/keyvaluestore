@@ -4,6 +4,7 @@
 #include "VFile.h"
 #include "VFileIndex.h"
 #include "Serialization.h"
+#include "Buffer.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -13,13 +14,11 @@
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
-    : m_diskfile(file), m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0),
-      m_bytes_used(0), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
+    : m_diskfile(file), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
       m_end_incl(true)
 {
+    m_buf = new Buffer(bufsize);
     assert(file->m_vfile_index);
-
-    m_buf = (char *)malloc(m_buf_size);
 }
 
 /*============================================================================
@@ -27,7 +26,7 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
  *============================================================================*/
 DiskFileInputStream::~DiskFileInputStream()
 {
-    free(m_buf);
+    delete m_buf;
 }
 
 /*============================================================================
@@ -40,8 +39,8 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
-    m_bytes_in_buf = 0;
-    m_bytes_used = 0;
+    m_buf->m_bytes_in_buf = 0;
+    m_buf->m_bytes_used = 0;
 }
 
 /*============================================================================
@@ -67,7 +66,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     // this code is executed only the first time read() is called, after reset()
     // or set_key_range(): seek to the first valid key on disk
     //--------------------------------------------------------------------------
-    if (m_bytes_in_buf == 0) {
+    if (m_buf->m_bytes_in_buf == 0) {
 
         // if caller defined a start_key, seek to the first valid key on disk
         if (m_start_key) {
@@ -83,17 +82,17 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
             // read in buffer all bytes between 'off1' and 'off2'. check all tuples
             // in buffer until we find 'm_start_key' or the next greater term.
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
-            m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
-            m_bytes_used = 0;
-            while (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, &disk_key, &disk_value, timestamp, &len, false)) {
+            m_buf->m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
+            m_buf->m_bytes_used = 0;
+            while (deserialize(m_buf->m_buf + m_buf->m_bytes_used, m_buf->m_bytes_in_buf - m_buf->m_bytes_used, &disk_key, &disk_value, timestamp, &len, false)) {
 
-                m_bytes_used += len;
+                m_buf->m_bytes_used += len;
 
                 // found 'm_start_key'
                 if ((cmp = strcmp(disk_key, m_start_key)) == 0) {
                     if (m_start_incl == true) {
                         // must seek file back at the beginning of 'm_start_key' tuple
-                        m_bytes_used -= len;
+                        m_buf->m_bytes_used -= len;
                     }
                     break;
                 }
@@ -105,7 +104,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
             // in special case where 'm_start_key' == 'm_end_key' (for example,
             // DiskStore::get()) return false as term does not exist on disk
-            if (m_bytes_used == m_bytes_in_buf && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
+            if (m_buf->m_bytes_used == m_buf->m_bytes_in_buf && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
                 return false;
             }
 
@@ -119,14 +118,14 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     }
 
     // TODO: code repetition, how could I shorten code?
-    if (deserialize(m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used, key, value, timestamp, &len, false)) {
+    if (deserialize(m_buf->m_buf + m_buf->m_bytes_used, m_buf->m_bytes_in_buf - m_buf->m_bytes_used, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
 
-        m_bytes_used += len;
+        m_buf->m_bytes_used += len;
         return true;
     }
 
@@ -135,26 +134,26 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
      */
 
     // keep only unused bytes in buffer
-    unused_bytes = m_bytes_in_buf - m_bytes_used;
-    memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
-    m_bytes_in_buf = unused_bytes;
-    m_bytes_used = 0;
+    unused_bytes = m_buf->m_bytes_in_buf - m_buf->m_bytes_used;
+    memmove(m_buf->m_buf, m_buf->m_buf + m_buf->m_bytes_used, unused_bytes);
+    m_buf->m_bytes_in_buf = unused_bytes;
+    m_buf->m_bytes_used = 0;
     // read more bytes to buffer
-    m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf + m_bytes_in_buf, m_buf_size - m_bytes_in_buf);
+    m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->m_buf_size - m_buf->m_bytes_in_buf);
 
-    if (deserialize(m_buf, m_bytes_in_buf, key, value, timestamp, &len, false)) {
+    if (deserialize(m_buf->m_buf, m_buf->m_bytes_in_buf, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
 
-        m_bytes_used += len;
+        m_buf->m_bytes_used += len;
         return true;
     }
 
     // no more bytes left in file
-    assert(m_bytes_in_buf - m_bytes_used == 0);
+    assert(m_buf->m_bytes_in_buf - m_buf->m_bytes_used == 0);
     *key = NULL;
     *value = NULL;
     *timestamp = 0;

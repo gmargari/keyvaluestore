@@ -4,6 +4,7 @@
 #include "InputStream.h"
 
 class DiskFile;
+class Buffer;
 
 class DiskFileInputStream: public InputStream {
 
@@ -28,12 +29,8 @@ public:
 
 protected:
 
-    DiskFile *m_diskfile;
-    char        *m_buf;
-    uint32_t     m_buf_size;
-    uint32_t     m_bytes_in_buf;
-    uint32_t     m_bytes_used;
-
+    DiskFile    *m_diskfile;
+    Buffer      *m_buf;         // buffer used for I/O
     const char  *m_start_key;
     const char  *m_end_key;
     bool         m_start_incl;
