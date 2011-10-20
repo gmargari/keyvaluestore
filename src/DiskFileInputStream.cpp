@@ -84,9 +84,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
             m_buf->m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
             m_buf->m_bytes_used = 0;
-            while (deserialize(m_buf->m_buf + m_buf->m_bytes_used, m_buf->m_bytes_in_buf - m_buf->m_bytes_used, &disk_key, &disk_value, timestamp, &len, false)) {
-
-                m_buf->m_bytes_used += len;
+            while (deserialize(m_buf, &disk_key, &disk_value, timestamp, &len, false)) {
 
                 // found 'm_start_key'
                 if ((cmp = strcmp(disk_key, m_start_key)) == 0) {
@@ -118,14 +116,13 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     }
 
     // TODO: code repetition, how could I shorten code?
-    if (deserialize(m_buf->m_buf + m_buf->m_bytes_used, m_buf->m_bytes_in_buf - m_buf->m_bytes_used, key, value, timestamp, &len, false)) {
+    if (deserialize(m_buf, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
 
-        m_buf->m_bytes_used += len;
         return true;
     }
 
@@ -141,14 +138,13 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     // read more bytes to buffer
     m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->m_buf_size - m_buf->m_bytes_in_buf);
 
-    if (deserialize(m_buf->m_buf, m_buf->m_bytes_in_buf, key, value, timestamp, &len, false)) {
+    if (deserialize(m_buf, key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
 
-        m_buf->m_bytes_used += len;
         return true;
     }
 

@@ -62,8 +62,7 @@ bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *val
     }
 
     // serialize and add new pair to buffer
-    if (serialize(m_buf->m_buf + m_buf->m_bytes_in_buf, m_buf->m_buf_size - m_buf->m_bytes_in_buf, key, keylen, value, valuelen, timestamp, &len)) {
-        m_buf->m_bytes_in_buf += len;
+    if (serialize(m_buf, key, keylen, value, valuelen, timestamp, &len)) {
 
         // if needed, add entry to index
         cur_offs = m_vfile_size;

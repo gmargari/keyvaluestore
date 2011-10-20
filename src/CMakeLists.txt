@@ -26,6 +26,7 @@ add_library (RangeScanner               RangeScanner.cpp)
 add_library (Buffer	                    Buffer.cpp)
 
 
+target_link_libraries (Serialization            Buffer)
 target_link_libraries (VFile                    VFileIndex Statistics)
 target_link_libraries (DiskFile                 VFile)
 target_link_libraries (DiskFileInputStream      Serialization InputStream Buffer)
