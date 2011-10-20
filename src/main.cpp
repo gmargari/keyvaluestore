@@ -109,7 +109,6 @@ int main(int argc, char **argv)
              eflag = 0,
              xflag = 0,
              myopt,
-             i,
              num_point_gets,
              num_range_gets,
              num_gets,
@@ -280,7 +279,7 @@ int main(int argc, char **argv)
         }
     }
 
-    for (i = optind; i < argc; i++) {
+    for (int i = optind; i < argc; i++) {
         printf ("Error: non-option argument: '%s'\n", argv[i]);
         exit(EXIT_FAILURE);
     }

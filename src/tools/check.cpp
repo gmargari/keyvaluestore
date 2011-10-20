@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     char *prev_key;
     DiskFile *diskfile;
     DiskFileInputStream *istream;
-    uint64_t timestamp, prev_timestamp = 0;
+    uint64_t timestamp;
     int cmp;
 
     if (argc != 2) {
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
         strcpy(prev_key, key);
-        prev_timestamp = timestamp;
     }
     free(prev_key);
     delete istream;

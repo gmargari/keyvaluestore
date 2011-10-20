@@ -46,7 +46,7 @@ int main()
     const char *k1, *v1, *k2, *v2;
     struct timeval tv;
     int num_keys, num, maxkeysize, maxvaluesize;
-    uint64_t timestamp, prev_timestamp, ts1, ts2;
+    uint64_t timestamp, ts1, ts2;
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 693157;
@@ -88,12 +88,10 @@ int main()
     istream = new MapInputStream(map);
     ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
-    prev_timestamp = 0;
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
         ostream1->write(k1, strlen(k1), v1, strlen(v1), timestamp);
-        prev_timestamp = timestamp;
         strcpy(prev_key, k1);
     }
 
@@ -144,12 +142,10 @@ int main()
     file2->open_new_unique();
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
     pistream = new PriorityInputStream(istreams);
-    prev_timestamp = 0;
     prev_key[0] = '\0';
     while (pistream->read(&k1, &v1, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
         ostream2->write(k1, strlen(k1), v1, strlen(v1), timestamp);
-        prev_timestamp = timestamp;
         strcpy(prev_key, k1);
     }
     ostream2->flush();
