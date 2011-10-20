@@ -33,7 +33,7 @@ Map::~Map()
  *============================================================================*/
 bool Map::put(const char *key, const char *value, uint64_t timestamp)
 {
-    const char *cpkey, *old_key;
+    const char *cpkey;
     char *cpvalue, *old_value;
     uint64_t old_timestamp;
     size_t keylen, valuelen, old_valuelen;
@@ -55,7 +55,6 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
     // if 'key' exists in map, delete corresponding value (it'll be replaced,
     // along with its timestamp)
     if ((iter = m_map.find(key)) != m_map.end()) {
-        old_key = const_cast<char *>(iter->first);
         old_value = const_cast<char *>(iter->second.first);
         old_timestamp = iter->second.second;
         assert(timestamp > old_timestamp);
@@ -90,7 +89,7 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
  *============================================================================*/
 bool Map::put(const char *key, const char *value)
 {
-    return put(key, value, timestamp());
+    return put(key, value, get_timestamp());
 }
 
 /*============================================================================
@@ -194,7 +193,7 @@ pair<uint64_t, uint64_t> Map::get_sizes(const char *start_key, const char *end_k
     e_iter = end_iter(end_key, end_key_incl);
     memsize = 0;
     memsize_serialized = 0;
-    for(iter = s_iter; iter != e_iter; iter++) {
+    for(iter = s_iter; iter != e_iter; ++iter) {
         key = const_cast<char *>(iter->first);
         value = const_cast<char *>(iter->second.first);
         timestamp = iter->second.second;
@@ -254,7 +253,7 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
 
     s_iter = start_iter(start_key, start_key_incl);
     e_iter = end_iter(end_key, end_key_incl);
-    for(iter = s_iter; iter != e_iter; iter++) {
+    for(iter = s_iter; iter != e_iter; ++iter) {
         key = const_cast<char *>(iter->first);
         value = const_cast<char *>(iter->second.first);
         timestamp = iter->second.second;
@@ -287,7 +286,7 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
 /*============================================================================
  *                               get_timestamp
  *============================================================================*/
-uint64_t Map::timestamp()
+uint64_t Map::get_timestamp()
 {
     struct timeval tv;
 
@@ -307,7 +306,7 @@ Map::KVTMap::iterator Map::start_iter(const char *key, bool key_incl)
     if (key) {
         iter = m_map.lower_bound(key);
         if (key_incl == false && strcmp(iter->first, key) == 0) {
-            iter++;
+            ++iter;
         }
     } else {
         iter = m_map.begin();
@@ -334,9 +333,9 @@ Map::KVTMap::iterator Map::end_iter(const char *key, bool key_incl)
         // and check if 'iter' has key equal to 'end_key'. if yes,
         // leave it there, else forward it one position.
         if (key_incl == false && iter != m_map.begin()) {
-            iter--;
+            --iter;
             if (strcmp(iter->first, key) != 0) {
-                iter++;
+                ++iter;
             }
         }
     } else {
@@ -357,7 +356,7 @@ int Map::sanity_check()
     uint64_t timestamp;
     size_t keylen, valuelen;
 
-    for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); iter++) {
+    for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first;
         value = iter->second.first;
         timestamp = iter->second.second;

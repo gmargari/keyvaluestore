@@ -128,7 +128,7 @@ public:
     /**
      * return current timestamp
      */
-    uint64_t timestamp(); // TODO: move to KeyValueStore class
+    uint64_t get_timestamp(); // TODO: move to KeyValueStore class
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {

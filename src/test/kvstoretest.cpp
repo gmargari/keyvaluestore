@@ -76,7 +76,7 @@ int main()
         randstr(key, MAX_KEY_SIZE);
         randstr(value, MAX_VALUE_SIZE);
         if (UNIQUE_KEYS) {
-            sprintf(key, "%s%Ld", key, i);
+            sprintf(key + strlen(key), "%Ld", i);
         }
         kvstore->put(key, value);
         if (i && i % 100 == 0)
@@ -101,7 +101,7 @@ int main()
             continue;
 
         if (UNIQUE_KEYS) {
-            sprintf(key, "%s%Ld", key, i);
+            sprintf(key + strlen(key), "%Ld", i);
         }
         if (kvstore->get(key, &value2, &timestamp) == false) {
             printf("Key [%s] was not found!\n", key);

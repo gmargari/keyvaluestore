@@ -114,29 +114,29 @@ int GeomCompactionManager::get_P()
 /*============================================================================
  *                             partition_minsize
  *============================================================================*/
-int GeomCompactionManager::partition_minsize(int partition_num)
+int GeomCompactionManager::partition_minsize(int part_num)
 {
     assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
-        return (int)pow(m_R, partition_num);
+        return (int)pow(m_R, part_num);
     } else {
-        return (int)pow(m_R, partition_num);
+        return (int)pow(m_R, part_num);
     }
 }
 
 /*============================================================================
  *                             partition_maxsize
  *============================================================================*/
-int GeomCompactionManager::partition_maxsize(int partition_num)
+int GeomCompactionManager::partition_maxsize(int part_num)
 {
     // the only difference between P being and not being constant
     // is that in the first case partition 0 has limit R maxsize in the
     // second case it has maxsize R-1.
     assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
-        return (int)pow(m_R, partition_num + 1);
+        return (int)pow(m_R, part_num + 1);
     } else {
-        return (m_R - 1) * (int)pow(m_R, partition_num);
+        return (m_R - 1) * (int)pow(m_R, part_num);
     }
 }
 

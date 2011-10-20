@@ -534,7 +534,7 @@ int main(int argc, char **argv)
                 randstr(key, keysize);
             }
             if (uflag) {
-                sprintf(key, "%s.%Ld", key, i); // make key unique by appending a unique number
+                sprintf(key + strlen(key), ".%Ld", i); // make key unique by appending a unique number
             }
             randstr(value, valuesize);
         }
@@ -607,7 +607,7 @@ int main(int argc, char **argv)
                 //--------------------------------------------------------------
                 randstr(key, keysize);
                 if (uflag) {
-                    sprintf(key, "%s%Ld.%d", key, i, j); // make key unique
+                    sprintf(key + strlen(key), ".%Ld.%d", i, j); // make key unique by appending a unique number
                 }
 
                 gettimeofday(&search_start, NULL);
