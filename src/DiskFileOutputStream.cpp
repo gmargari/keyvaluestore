@@ -4,7 +4,6 @@
 #include "DiskFile.h"
 #include "VFile.h"
 #include "VFileIndex.h"
-#include "Serialization.h"
 #include "Buffer.h"
 
 #include <cstdlib>
@@ -56,13 +55,13 @@ bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *val
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
-    if (m_buf->m_bytes_in_buf + serialize_len(keylen, valuelen, timestamp) > m_buf->m_buf_size) {
+    if (m_buf->m_bytes_in_buf + Buffer::serialize_len(keylen, valuelen, timestamp) > m_buf->m_buf_size) {
         m_diskfile->m_vfile->fs_write(m_buf);
         m_buf->m_bytes_in_buf = 0;
     }
 
     // serialize and add new pair to buffer
-    if (serialize(m_buf, key, keylen, value, valuelen, timestamp, &len)) {
+    if (m_buf->serialize(key, keylen, value, valuelen, timestamp, &len)) {
 
         // if needed, add entry to index
         cur_offs = m_vfile_size;

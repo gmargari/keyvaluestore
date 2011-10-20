@@ -8,7 +8,7 @@
 #include "DiskFileInputStream.h"
 #include "DiskFileOutputStream.h"
 #include "PriorityInputStream.h"
-#include "Serialization.h"
+#include "Buffer.h"
 #include "Statistics.h"
 
 /*============================================================================
@@ -151,7 +151,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
             valuelen = strlen(value);
             // if we appending current tuple to file will lead to a file size
             // greater than 'max_file_size', crete a new file for remaining tuples
-            len = serialize_len(keylen, valuelen, timestamp);
+            len = Buffer::serialize_len(keylen, valuelen, timestamp);
             if (filesize + len > max_file_size) {
                 ostream->flush();
                 diskfiles.push_back(diskfile);

@@ -3,7 +3,6 @@
 #include "DiskFile.h"
 #include "VFile.h"
 #include "VFileIndex.h"
-#include "Serialization.h"
 #include "Buffer.h"
 
 #include <cstdlib>
@@ -84,7 +83,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
             m_buf->m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
             m_buf->m_bytes_used = 0;
-            while (deserialize(m_buf, &disk_key, &disk_value, timestamp, &len, false)) {
+            while (m_buf->deserialize(&disk_key, &disk_value, timestamp, &len, false)) {
 
                 // found 'm_start_key'
                 if ((cmp = strcmp(disk_key, m_start_key)) == 0) {
@@ -116,7 +115,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     }
 
     // TODO: code repetition, how could I shorten code?
-    if (deserialize(m_buf, key, value, timestamp, &len, false)) {
+    if (m_buf->deserialize(key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
@@ -138,7 +137,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     // read more bytes to buffer
     m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->m_buf_size - m_buf->m_bytes_in_buf);
 
-    if (deserialize(m_buf, key, value, timestamp, &len, false)) {
+    if (m_buf->deserialize(key, value, timestamp, &len, false)) {
 
         // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
