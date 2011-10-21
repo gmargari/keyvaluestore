@@ -38,8 +38,7 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
-    m_buf->m_bytes_in_buf = 0;
-    m_buf->m_bytes_used = 0;
+    m_buf->clear();
 }
 
 /*============================================================================
@@ -65,7 +64,9 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     // this code is executed only the first time read() is called, after reset()
     // or set_key_range(): seek to the first valid key on disk
     //--------------------------------------------------------------------------
-    if (m_buf->m_bytes_in_buf == 0) {
+    if (m_buf->size() == 0) {
+
+        assert(m_buf->used() == 0);
 
         // if caller defined a start_key, seek to the first valid key on disk
         if (m_start_key) {
@@ -82,7 +83,6 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
             // in buffer until we find 'm_start_key' or the next greater term.
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
             m_buf->m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
-            m_buf->m_bytes_used = 0;
             while (m_buf->deserialize(&disk_key, &disk_value, timestamp, &len, false)) {
 
                 // found 'm_start_key'
@@ -101,7 +101,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
             // in special case where 'm_start_key' == 'm_end_key' (for example,
             // DiskStore::get()) return false as term does not exist on disk
-            if (m_buf->m_bytes_used == m_buf->m_bytes_in_buf && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
+            if (m_buf->unused() == 0 && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
                 return false;
             }
 
@@ -130,12 +130,10 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
      */
 
     // keep only unused bytes in buffer
-    unused_bytes = m_buf->m_bytes_in_buf - m_buf->m_bytes_used;
-    memmove(m_buf->m_buf, m_buf->m_buf + m_buf->m_bytes_used, unused_bytes);
-    m_buf->m_bytes_in_buf = unused_bytes;
-    m_buf->m_bytes_used = 0;
+    m_buf->keep_unused();
+
     // read more bytes to buffer
-    m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->m_buf_size - m_buf->m_bytes_in_buf);
+    m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->free_space());
 
     if (m_buf->deserialize(key, value, timestamp, &len, false)) {
 
@@ -148,7 +146,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     }
 
     // no more bytes left in file
-    assert(m_buf->m_bytes_in_buf - m_buf->m_bytes_used == 0);
+    assert(m_buf->unused() == 0);
     *key = NULL;
     *value = NULL;
     *timestamp = 0;

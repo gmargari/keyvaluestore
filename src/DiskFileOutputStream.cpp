@@ -39,7 +39,7 @@ void DiskFileOutputStream::reset()
     m_diskfile->m_vfile_index->clear(); // index will be rebuild
     m_diskfile->m_vfile_numkeys = 0;
 
-    m_buf->m_bytes_in_buf = 0;
+    m_buf->clear();
 
     m_last_key[0] = '\0';
     m_last_offs = -1;
@@ -55,9 +55,9 @@ bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *val
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
-    if (m_buf->m_bytes_in_buf + Buffer::serialize_len(keylen, valuelen, timestamp) > m_buf->m_buf_size) {
+    if (Buffer::serialize_len(keylen, valuelen, timestamp) > m_buf->free_space()) {
         m_diskfile->m_vfile->fs_write(m_buf);
-        m_buf->m_bytes_in_buf = 0;
+        m_buf->clear();
     }
 
     // serialize and add new pair to buffer
@@ -89,6 +89,7 @@ void DiskFileOutputStream::flush()
 {
     m_diskfile->m_vfile->fs_write(m_buf);
     m_diskfile->m_vfile->fs_sync();
+    m_buf->clear();
 
     // TODO: this is possibly wrong, someone could call flush many times and not
     // just once at the end. should we add a function like 'close()' or
