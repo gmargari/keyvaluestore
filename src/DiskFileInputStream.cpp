@@ -73,43 +73,30 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
         assert(m_buf->used() == 0);
 
-        // if caller defined a start_key, seek to the first valid key on disk
+        // if caller defined a startkey, seek to the first valid key on disk
         if (m_start_key) {
 
-            // if 'm_start_key' was stored on disk, it would be stored between
-            // 'off1' & 'off2'. if search returns false, 'm_start_key' was
-            // either smaller or greater than all terms in file
+            // if m_start_key was stored on disk it would be between off1 & off2
             ret = m_diskfile->m_vfile_index->search(m_start_key, &off1, &off2);
             if (ret == false) {
                 return false;
             }
 
-            // read in buffer all bytes between 'off1' and 'off2'. check all
-            // buffer tuples until we find 'm_start_key' or a greater term
+            // read in buffer all bytes between 'off1' and 'off2'
             m_buf->clear();
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
             m_buf->fill(m_diskfile->m_vfile, off2 - off1);
 
+            // check all buffer tuples until we find a key >= startkey
             while (m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, &len, false)) {
                 if ((cmp = strcmp(tmpkey, m_start_key)) >= 0) {
-                    if (cmp == 0  && m_start_incl == false) { // need to get next term
-                        continue;
-                    } else {
-                        break; // found first valid key
-                    }
+                    break;
                 }
             }
 
-            if (cmp == 0  && m_start_incl == true) {
+            if (cmp > 0 || (cmp == 0 && m_start_incl == true)) {
                 // must seek back at beginning of key tuple
                 m_buf->m_bytes_used -= len;
-            }
-
-
-            // in special case where 'm_start_key' == 'm_end_key' (for example,
-            // DiskStore::get()) return false as term does not exist on disk
-            if (m_buf->unused() == 0 && m_end_key && strcmp(m_start_key, m_end_key) == 0) {
-                return false;
             }
 
             assert(m_diskfile->m_vfile->fs_tell() >= off1);
@@ -118,6 +105,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
         // else, seek to the first key on disk
         else {
             m_diskfile->m_vfile->fs_rewind();
+            m_buf->fill(m_diskfile->m_vfile);
         }
     }
 
@@ -138,10 +126,12 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     }
 
     //--------------------------------------------------------------------------
-    // check if key read is within defined key range
+    // check if key read is within defined key range (i.e. smaller than endkey)
     //--------------------------------------------------------------------------
-    if (m_end_key && ((cmp = strcmp(tmpkey, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
-        return false;
+    if (m_end_key) {
+        if ((cmp = strcmp(tmpkey, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false)) {
+            return false;
+        }
     }
 
     *key = tmpkey;
