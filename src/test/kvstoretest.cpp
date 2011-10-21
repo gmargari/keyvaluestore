@@ -11,7 +11,7 @@
 #define BYTES_TO_INSERT     10000000LL
 #define MAX_KEY_SIZE               100
 #define MAX_VALUE_SIZE            1000
-#define SEARCH_SKIP_KEYS           100  // search 1 every 'SEARCH_SKIP_KEYS' keys
+#define SEARCH_SKIP_KEYS             1  // search 1 every 'SEARCH_SKIP_KEYS' keys
 #define UNIQUE_KEYS                  1  // create unique keys, so no values are overwritten
 
 #define BUFSIZE 1000
@@ -97,22 +97,20 @@ int main()
         randstr(value, MAX_VALUE_SIZE);
 
         // search one every 'SEARCH_SKIP_KEYS' keys
-        if (i && i % SEARCH_SKIP_KEYS == 0)
+        if (SEARCH_SKIP_KEYS > 1 && i && i % SEARCH_SKIP_KEYS == 0)
             continue;
 
         if (UNIQUE_KEYS) {
             sprintf(key + strlen(key), "%Ld", i);
         }
         if (kvstore->get(key, &value2, &timestamp) == false) {
-            printf("Key [%s] was not found!\n", key);
+            printf("%d) Key [%s] was not found!\n", i, key);
             exit(EXIT_FAILURE);
         }
         if (UNIQUE_KEYS) {
             assert(strcmp(value, value2) == 0);
         }
         free(const_cast<char*>(value2)); // since value returned from get is always a copy...
-        if (i && i % 100 == 0)
-            printf("i = %Ld\n", i);
     }
 
     printf("Memstore keys:  %Ld\n", kvstore->get_num_mem_keys());
