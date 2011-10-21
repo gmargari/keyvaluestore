@@ -69,17 +69,38 @@ public:
      */
     void keep_unused();
 
+    /**
+     * return number of bytes needed to serialize <k,v,t>
+     * ('keylen' = strlen(k), 'valuelen' = strlen(v), 'timestamp' = t)
+     */
     static uint32_t serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp);
+
+    /**
+     * serialize <k,v,t> and copy it to buffer
+     */
     bool serialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp, uint32_t *len);
-    // NOTE: in case 'copy_keyvalue = false', strings pointed by 'key' and 'value' are valid only until next call of deserialize.
+
+    /**
+     * deserialize a <k,v,t> from buffer (in case 'copy_keyvalue = false',
+     * strings pointed by 'key' and 'value' are valid only until next call of
+     * function)
+     */
     bool deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue);
 
-    uint32_t  m_bytes_used;
+    /**
+     * undo deserialization previously done (rational similar to ungetc().
+     * needed from DiskFileInputStream::read() in case we "accidentally"
+     * deserialized a <k,v,t>)
+     */
+    void undo_deserialize(const char *key, const char *value, uint64_t timestamp);
+
 protected:
 
-    char     *m_buf;
-    uint32_t  m_buf_size;
-    uint32_t  m_bytes_in_buf;
+    char     *m_buf;            // pointer to char buffer
+    uint32_t  m_buf_size;       // buffer capacity
+    uint32_t  m_bytes_in_buf;   // number of bytes in buffer
+    uint32_t  m_bytes_used;     // number of bytes used (e.g. deserialized)
+
     bool str_is_alnum(const char *str, int len);
 };
 

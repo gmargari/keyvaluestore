@@ -241,6 +241,14 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
 }
 
 /*============================================================================
+ *                             undo_deserialize
+ *============================================================================*/
+void Buffer::undo_deserialize(const char *key, const char *value, uint64_t timestamp)
+{
+    m_bytes_used -= serialize_len(strlen(key), strlen(value), timestamp);
+}
+
+/*============================================================================
  *                               str_is_alnum
  *============================================================================*/
 bool Buffer::str_is_alnum(const char *str, int len)

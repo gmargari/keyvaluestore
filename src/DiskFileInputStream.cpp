@@ -96,7 +96,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
             if (cmp > 0 || (cmp == 0 && m_start_incl == true)) {
                 // must seek back at beginning of key tuple
-                m_buf->m_bytes_used -= len;
+                m_buf->undo_deserialize(tmpkey, tmpvalue, tmpts);
             }
 
             assert(m_diskfile->m_vfile->fs_tell() >= off1);
