@@ -172,12 +172,12 @@ void VFile::fs_close()
 /*============================================================================
  *                                 fs_read
  *============================================================================*/
-ssize_t VFile::fs_read(Buffer *buf, size_t count)
+ssize_t VFile::fs_read(char *buf, size_t count)
 {
     size_t bytes_read, num;
 
     for (bytes_read = 0; bytes_read < count; ) {
-        if ((num = cur_fs_read(buf->m_buf + buf->m_bytes_in_buf + bytes_read, count - bytes_read)) == 0) {
+        if ((num = cur_fs_read(buf + bytes_read, count - bytes_read)) == 0) {
             break; // no bytes left in file
         }
         bytes_read += num;
@@ -189,20 +189,12 @@ ssize_t VFile::fs_read(Buffer *buf, size_t count)
 /*============================================================================
  *                                fs_write
  *============================================================================*/
-ssize_t VFile::fs_write(Buffer *buf)
-{
-    return fs_write(buf, buf->m_bytes_in_buf);
-}
-
-/*============================================================================
- *                                fs_write
- *============================================================================*/
-ssize_t VFile::fs_write(Buffer *buf, size_t count)
+ssize_t VFile::fs_write(const char *buf, size_t count)
 {
     size_t bytes_written, num;
 
     for (bytes_written = 0; bytes_written < count; ) {
-        num = cur_fs_write(buf->m_buf + bytes_written, count - bytes_written);
+        num = cur_fs_write(buf + bytes_written, count - bytes_written);
         bytes_written += num;
     }
 

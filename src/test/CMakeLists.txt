@@ -11,4 +11,4 @@ add_executable (vfileindextest vfileindextest.cpp)
 target_link_libraries (vfileindextest KeyValueStore VFileIndex)
 
 add_executable (vfiletest vfiletest.cpp)
-target_link_libraries (vfiletest KeyValueStore VFile Buffer)
+target_link_libraries (vfiletest KeyValueStore VFile)

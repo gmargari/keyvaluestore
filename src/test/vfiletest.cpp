@@ -1,22 +1,21 @@
 #include "../Global.h"
 #include "../VFile.h"
 #include "../Statistics.h"
-#include "../Buffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
     VFile f;
-    Buffer *buf = new Buffer(mb2b(20));
+    char *buf = (char *)malloc(mb2b(20));
     uint64_t bytes_left;
 
     global_stats_init(); // avoid assertion error...
 
-    memset(buf->m_buf, 0, mb2b(20));
+    memset(buf, 0, mb2b(20));
 
     // open()            -->   size: 0MB, offset: 0MB
 dbg();
@@ -215,10 +214,10 @@ dbg();
     assert(f.fs_tell() == (off_t)mb2b(60));
 dbg();
     // write 135MB
-    delete buf;
-    buf = new Buffer(mb2b(60));
+    free(buf);
+    buf = (char *)malloc(mb2b(60));
     assert(buf);
-    memset(buf->m_buf, 0, mb2b(60));
+    memset(buf, 0, mb2b(60));
     f.fs_truncate(0);
     for (bytes_left = mb2b(60); bytes_left;) {
         bytes_left -= f.fs_write(buf, bytes_left);
@@ -253,7 +252,7 @@ dbg();
     assert(f.fs_size() == mb2b(18));
     assert(f.fs_tell() == (off_t)mb2b(18));
 
-    delete buf;
+    free(buf);
 
     printf("Everything ok!\n");
 

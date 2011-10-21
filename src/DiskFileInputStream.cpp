@@ -79,16 +79,17 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
                 return false;
             }
 
-            // read in buffer all bytes between 'off1' and 'off2'. check all tuples
-            // in buffer until we find 'm_start_key' or the next greater term.
+            // read in buffer all bytes between 'off1' and 'off2'. check all
+            // buffer tuples until we find 'm_start_key' or a greater term
+            m_buf->clear();
             m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
-            m_buf->m_bytes_in_buf = m_diskfile->m_vfile->fs_read(m_buf, off2 - off1);
+            m_buf->fill(m_diskfile->m_vfile, off2 - off1);
             while (m_buf->deserialize(&disk_key, &disk_value, timestamp, &len, false)) {
 
                 // found 'm_start_key'
                 if ((cmp = strcmp(disk_key, m_start_key)) == 0) {
                     if (m_start_incl == true) {
-                        // must seek file back at the beginning of 'm_start_key' tuple
+                        // must seek back, at beginning of 'm_start_key' tuple
                         m_buf->m_bytes_used -= len;
                     }
                     break;
@@ -116,12 +117,9 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
     // TODO: code repetition, how could I shorten code?
     if (m_buf->deserialize(key, value, timestamp, &len, false)) {
-
-        // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
-
         return true;
     }
 
@@ -129,19 +127,12 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
      * maybe we need to read more bytes in buffer to deserialize tuple
      */
 
-    // keep only unused bytes in buffer
     m_buf->keep_unused();
-
-    // read more bytes to buffer
-    m_buf->m_bytes_in_buf += m_diskfile->m_vfile->fs_read(m_buf, m_buf->free_space());
-
+    m_buf->fill(m_diskfile->m_vfile);
     if (m_buf->deserialize(key, value, timestamp, &len, false)) {
-
-        // check if we reached 'end_key'
         if (m_end_key && ((cmp = strcmp(*key, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false))) {
             return false;
         }
-
         return true;
     }
 

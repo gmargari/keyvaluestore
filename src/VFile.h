@@ -8,8 +8,6 @@
 
 using std::vector;
 
-class Buffer;
-
 class VFile
 {
 public:
@@ -32,9 +30,8 @@ public:
     // fs_read() and fs_write() are guaranteed to read or write 'count'
     // bytes. that is, they will repeatedly call internal functions until
     // they read or write all 'count' bytes.
-    ssize_t         fs_read(Buffer *buf, size_t count);
-    ssize_t         fs_write(Buffer *buf);
-    ssize_t         fs_write(Buffer *buf, size_t count);
+    ssize_t         fs_read(char *buf, size_t count);
+    ssize_t         fs_write(const char *buf, size_t count);
     off_t           fs_seek(off_t offset, int whence);
     off_t           fs_tell();
     void            fs_rewind();

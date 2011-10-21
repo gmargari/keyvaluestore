@@ -22,7 +22,7 @@ add_library (VFile                      VFile.cpp)
 add_library (VFileIndex                 VFileIndex.cpp)
 add_library (Statistics                 Statistics.cpp)
 add_library (RangeScanner               RangeScanner.cpp)
-add_library (Buffer	                    Buffer.cpp)
+add_library (Buffer                     Buffer.cpp)
 
 target_link_libraries (VFile                    VFileIndex Statistics)
 target_link_libraries (DiskFile                 VFile)

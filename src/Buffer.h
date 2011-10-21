@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+class VFile;
+
 class Buffer {
 
 public:
@@ -48,6 +50,21 @@ public:
     void clear();
 
     /**
+     * fill free space in buffer by reading at most 'bytes' bytes from 'vfile'
+     */
+    void fill(VFile *vfile, uint32_t bytes);
+
+    /**
+     * fill free space in buffer by reading bytes from 'vfile'
+     */
+    void fill(VFile *vfile);
+
+    /**
+     * write buffer bytes to 'vfile', clear buffer
+     */
+    void flush(VFile *vfile);
+
+    /**
      * shift all unused bytes to the beginning of buffer
      */
     void keep_unused();
@@ -57,13 +74,12 @@ public:
     // NOTE: in case 'copy_keyvalue = false', strings pointed by 'key' and 'value' are valid only until next call of deserialize.
     bool deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue);
 
+    uint32_t  m_bytes_used;
+protected:
+
     char     *m_buf;
     uint32_t  m_buf_size;
     uint32_t  m_bytes_in_buf;
-    uint32_t  m_bytes_used;
-
-protected:
-
     bool str_is_alnum(const char *str, int len);
 };
 
