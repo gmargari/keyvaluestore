@@ -18,9 +18,20 @@
  *                                 SimpleBuffer
  *============================================================================*/
 Buffer::Buffer(uint32_t bufsize)
-    : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0)
+    : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
+      m_buf_allocated(true)
 {
     m_buf = (char *)malloc(m_buf_size);
+}
+
+/*============================================================================
+ *                                 SimpleBuffer
+ *============================================================================*/
+Buffer::Buffer(char *buf, uint32_t bufsize)
+    : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
+      m_buf_allocated(false)
+{
+    m_buf = buf;
 }
 
 /*============================================================================
@@ -28,7 +39,9 @@ Buffer::Buffer(uint32_t bufsize)
  *============================================================================*/
 Buffer::~Buffer()
 {
-    free(m_buf);
+    if (m_buf_allocated) {
+        free(m_buf);
+    }
 }
 
 /*============================================================================

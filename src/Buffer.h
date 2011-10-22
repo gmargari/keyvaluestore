@@ -15,6 +15,11 @@ public:
     Buffer(uint32_t bufsize);
 
     /**
+     * constructor
+     */
+    Buffer(char *buf, uint32_t bufsize);
+
+    /**
      * destructor
      */
     ~Buffer();
@@ -100,6 +105,7 @@ protected:
     uint32_t  m_buf_size;       // buffer capacity
     uint32_t  m_bytes_in_buf;   // number of bytes in buffer
     uint32_t  m_bytes_used;     // number of bytes used (e.g. deserialized)
+    bool      m_buf_allocated;
 
     bool str_is_alnum(const char *str, int len);
 };

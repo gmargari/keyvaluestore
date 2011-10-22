@@ -21,6 +21,17 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
 }
 
 /*============================================================================
+ *                             DiskFileInputStream
+ *============================================================================*/
+DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize)
+    : m_diskfile(file), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
+      m_end_incl(true)
+{
+    m_buf = new Buffer(buf, bufsize);
+    assert(file->m_vfile_index);
+}
+
+/*============================================================================
  *                            ~DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::~DiskFileInputStream()

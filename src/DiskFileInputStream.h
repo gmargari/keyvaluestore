@@ -16,6 +16,11 @@ public:
     DiskFileInputStream(DiskFile *file, uint32_t bufsize);
 
     /**
+     * constructor
+     */
+    DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize);
+
+    /**
      * destructor
      */
     ~DiskFileInputStream();
