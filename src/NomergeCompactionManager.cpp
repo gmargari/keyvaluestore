@@ -31,9 +31,6 @@ NomergeCompactionManager::~NomergeCompactionManager()
 void NomergeCompactionManager::flush_bytes()
 {
     DiskFile *memstore_file;
-    DiskFileInputStream *memstore_file_istream;
-
-    assert(sanity_check());
 
     memstore_file = memstore_flush_to_diskfile();
     memstore_clear();
@@ -41,18 +38,4 @@ void NomergeCompactionManager::flush_bytes()
     // insert first, in diskstore files vector & input streams vector, as it
     // contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), memstore_file);
-    memstore_file_istream = new DiskFileInputStream(m_diskstore->m_disk_files.back(), MERGE_BUFSIZE);
-    m_diskstore->m_disk_istreams.insert(m_diskstore->m_disk_istreams.begin(), memstore_file_istream);
-
-    assert(sanity_check());
-}
-
-/*============================================================================
- *                                sanity_check
- *============================================================================*/
-int NomergeCompactionManager::sanity_check()
-{
-    assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
-
-    return 1;
 }

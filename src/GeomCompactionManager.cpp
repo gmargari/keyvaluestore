@@ -176,10 +176,9 @@ int GeomCompactionManager::compute_current_R()
 void GeomCompactionManager::flush_bytes()
 {
     DiskFile *disk_file, *memstore_file;
-    DiskFileInputStream *memstore_file_istream;
+    DiskFileInputStream *memstore_file_istream, *istream;
     vector<InputStream *> istreams_to_merge;
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
-    vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
     int size, count, part_num;
 
     assert(sanity_check());
@@ -214,8 +213,9 @@ void GeomCompactionManager::flush_bytes()
     assert(count <= (int)r_disk_files.size());
 
     for (int i = 0; i < count; i++) {
-        r_disk_istreams[i]->set_key_range(NULL, NULL);
-        istreams_to_merge.push_back(r_disk_istreams[i]);
+        istream = new DiskFileInputStream(r_disk_files[i], MERGE_BUFSIZE);
+        istream->set_key_range(NULL, NULL);
+        istreams_to_merge.push_back(istream);
     }
 
     //--------------------------------------------------------------------------
@@ -242,6 +242,11 @@ void GeomCompactionManager::flush_bytes()
     //--------------------------------------------------------------------------
     disk_file = merge_streams(istreams_to_merge);
 
+    // delete all istreams but memstore istream
+    for (int i = 0; i < (int)istreams_to_merge.size() - 1; i++) {
+        delete istreams_to_merge[i];
+    }
+
     //--------------------------------------------------------------------------
     // 4) delete merged files and corresponding streams from DiskStore
     //--------------------------------------------------------------------------
@@ -261,10 +266,8 @@ void GeomCompactionManager::flush_bytes()
     for (int i = 0; i < count; i++) {
         r_disk_files[i]->delete_from_disk();
         delete r_disk_files[i];
-        delete r_disk_istreams[i];
     }
     r_disk_files.erase(r_disk_files.begin(), r_disk_files.begin() + count);
-    r_disk_istreams.erase(r_disk_istreams.begin(), r_disk_istreams.begin() + count);
 
     //--------------------------------------------------------------------------
     // 5) add new file and corresponding stream to DiskStore
@@ -272,7 +275,6 @@ void GeomCompactionManager::flush_bytes()
 
     // add new file at the front, since it contains most recent <k,v> pairs
     r_disk_files.insert(r_disk_files.begin(), disk_file);
-    r_disk_istreams.insert(r_disk_istreams.begin(), new DiskFileInputStream(disk_file, MERGE_BUFSIZE));
 
     //--------------------------------------------------------------------------
     // 6) update vector of partitions
@@ -314,7 +316,6 @@ int GeomCompactionManager::sanity_check()
 {
     uint64_t cursize = 0;
 
-    assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
     assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());
     for (uint i = 0; i < m_partition_size.size(); i++) {
         // if P != 0, there's a case when R increases before a flush that the assertion below does not hold

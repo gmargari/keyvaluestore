@@ -84,7 +84,6 @@ void RangemergeCompactionManager::flush_bytes()
     DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
-    vector<DiskFileInputStream *> &r_disk_istreams = m_diskstore->m_disk_istreams;
     vector<InputStream *> istreams_to_merge;
     vector<Range> ranges;
     Range rng;
@@ -124,7 +123,7 @@ void RangemergeCompactionManager::flush_bytes()
 
         // get istream for file that stores all tuples that belong to range
         if (rng.m_idx != NO_DISK_FILE) {
-            disk_stream = r_disk_istreams[rng.m_idx];
+            disk_stream = new DiskFileInputStream(r_disk_files[rng.m_idx], MERGE_BUFSIZE);
             disk_stream->set_key_range(rng.m_first, rng.m_last, true, false);
             istreams_to_merge.push_back(disk_stream);
         }
@@ -142,6 +141,11 @@ void RangemergeCompactionManager::flush_bytes()
             // overflow)
             newfiles = merge_streams(istreams_to_merge, new_disk_files, m_blocksize);
             assert(newfiles == 1);
+        }
+
+        // delete all istreams but memstore istream
+        for (int i = 1; i < (int)istreams_to_merge.size(); i++) {
+            delete istreams_to_merge[i];
         }
 
         assert((dbg_memsize = m_memstore->get_size()) || 1);
@@ -171,9 +175,7 @@ void RangemergeCompactionManager::flush_bytes()
         if (idx != NO_DISK_FILE) {
             r_disk_files[idx]->delete_from_disk();
             delete r_disk_files[idx];
-            delete r_disk_istreams[idx];
             r_disk_files.erase(r_disk_files.begin() + idx);
-            r_disk_istreams.erase(r_disk_istreams.begin() + idx);
         }
     }
 
@@ -185,8 +187,6 @@ void RangemergeCompactionManager::flush_bytes()
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         r_disk_files.push_back(new_disk_files[i]);
-        disk_stream = new DiskFileInputStream(r_disk_files.back(), MERGE_BUFSIZE);
-        r_disk_istreams.push_back(disk_stream);
     }
 
     assert(sanity_check());
@@ -258,7 +258,6 @@ int RangemergeCompactionManager::sanity_check()
 {
     vector<Range> ranges;
 
-    assert(m_diskstore->m_disk_files.size() == m_diskstore->m_disk_istreams.size());
     for (unsigned int i = 0; i < m_diskstore->m_disk_files.size(); i++) {
         assert(m_diskstore->m_disk_files[i]->get_size() <= m_blocksize);
     }

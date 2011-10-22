@@ -22,10 +22,6 @@ public:
 
     // inherited from CompactionManager (see CompactionManager.h for description)
     void flush_bytes();
-
-protected:
-
-    int sanity_check();
 };
 
 #endif

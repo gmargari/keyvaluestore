@@ -31,11 +31,9 @@ DiskStore::DiskStore()
             fscanf(fp, "%s\n", fname);
             m_disk_files.push_back(new DiskFile());
             m_disk_files.back()->open_existing(fname);
-            m_disk_istreams.push_back(new DiskFileInputStream(m_disk_files.back(), MERGE_BUFSIZE));
         }
         fclose(fp);
 
-        assert(m_disk_files.size() == m_disk_istreams.size());
         assert(m_disk_files.size() == (unsigned)num_dfiles);
 
         DiskFile::set_max_dfile_num(max_dfiles_num);
@@ -73,11 +71,6 @@ DiskStore::~DiskStore()
         delete m_disk_files[i];
     }
     m_disk_files.clear();
-
-    for (int i = 0; i < (int)m_disk_istreams.size(); i++) {
-        delete m_disk_istreams[i];
-    }
-    m_disk_istreams.clear();
 }
 
 /*============================================================================
@@ -90,8 +83,7 @@ bool DiskStore::get(const char *key, char **value, uint64_t *timestamp)
 
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
-    assert(m_disk_files.size() == m_disk_istreams.size());
-    for (int i = 0; i < (int)m_disk_files.size(); i++) {
+    for (int i = 0; i < (int)m_disk_istreams.size(); i++) {
         disk_istream = m_disk_istreams[i];
         disk_istream->set_key_range(key, key, true, true);
         if (disk_istream->read(&k, &constvalue, timestamp)) {
