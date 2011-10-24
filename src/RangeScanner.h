@@ -4,14 +4,13 @@
 #include <stdint.h>
 
 class KeyValueStore;
-class PriorityInputStream;
 
 class RangeScanner {
 
 public:
 
     /**
-     * constructor. user should call set_key_range() _before_ calling read().
+     * constructor
      */
     RangeScanner(KeyValueStore *kvstore);
 
@@ -21,29 +20,30 @@ public:
     ~RangeScanner();
 
     /**
-     * return only pairs with keys between 'start_key' (inclusive) and 'end_key'
-     * (exclusive), i.e. all keys K where: start_key <= K < end_key.
-     * 'start_key' and 'end_key' are not copied.
+     * get tuple with key 'key'
+     *
+     * @return 1 if key exists, else 0
      */
-    void set_key_range(const char *start_key, const char *end_key);
+    int point_get(const char *key);
+
+    /**
+     * get all tuples with keys between 'start_key' (inclusive) and
+     * 'end_key' (exclusive), i.e. all keys K where: start_key <= K < end_key.
+     * ('start_key' and 'end_key' are not copied).
+     *
+     * @return number of keys read
+     */
+    int range_get(const char *start_key, const char *end_key);
 
     /**
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
-
-    /**
-     * get next <key, value, timestamp> from store
-     *
-     * @return false in there is no remaining <k,v,t> with key in the range
-     *         defined in range_set_keys(), else true.
-     */
-    bool get_next(char **key, char **value, uint64_t *timestamp);
+    int range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
 protected:
 
-    PriorityInputStream *m_pistream;
+    KeyValueStore *m_kvstore;
 };
 
 #endif

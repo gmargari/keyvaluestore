@@ -74,46 +74,6 @@ DiskStore::~DiskStore()
 }
 
 /*============================================================================
- *                                   get
- *============================================================================*/
-bool DiskStore::get(const char *key, char **value, uint64_t *timestamp)
-{
-    DiskFileInputStream *disk_istream;
-    const char *k, *constvalue;
-
-    // search disk files in order, from most recently created to oldest.
-    // return the first value found, since this is the most recent value
-    for (int i = 0; i < (int)m_disk_istreams.size(); i++) {
-        disk_istream = m_disk_istreams[i];
-        disk_istream->set_key_range(key, key, true, true);
-        if (disk_istream->read(&k, &constvalue, timestamp)) {
-            assert(strcmp(k, key) == 0);
-            *value = strdup(constvalue); // copy value
-            return true;
-        }
-    }
-
-    *value = NULL;
-    *timestamp = 0;
-    return false;
-}
-
-/*============================================================================
- *                                   get
- *============================================================================*/
-bool DiskStore::get(const char *key, uint64_t timestamp, char **value)
-{
-    uint64_t ts;
-
-    if (get(key, value, &ts) && ts == timestamp) {
-        return true;
-    } else {
-        *value = NULL;
-        return false;
-    }
-}
-
-/*============================================================================
  *                               get_num_keys
  *============================================================================*/
 uint64_t DiskStore::get_num_keys()

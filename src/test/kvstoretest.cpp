@@ -1,5 +1,6 @@
 #include "../Global.h"
 #include "../KeyValueStore.h"
+#include "../RangeScanner.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -39,12 +40,14 @@ void randstr(char *s, const int len) {
 int main()
 {
     KeyValueStore *kvstore;
-    char *key, *value, *value2;
+    char *key, *value;
     struct timeval tv;
-    uint64_t timestamp, num_keys, i;
+    uint64_t num_keys, i;
+    RangeScanner *scanner;
 
     kvstore = new KeyValueStore(KeyValueStore::GEOM_CM);
     kvstore->set_memstore_maxsize(MEMSTORE_SIZE);
+    scanner = new RangeScanner(kvstore);
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 118817;
@@ -103,14 +106,10 @@ int main()
         if (UNIQUE_KEYS) {
             sprintf(key + strlen(key), "%Ld", i);
         }
-        if (kvstore->get(key, &value2, &timestamp) == false) {
+        if (!scanner->point_get(key)) {
             printf("%d) Key [%s] was not found!\n", i, key);
             exit(EXIT_FAILURE);
         }
-        if (UNIQUE_KEYS) {
-            assert(strcmp(value, value2) == 0);
-        }
-        free(const_cast<char*>(value2)); // since value returned from get is always a copy...
     }
 
     printf("Memstore keys:  %Ld\n", kvstore->get_num_mem_keys());
@@ -129,6 +128,7 @@ int main()
     free(key);
     free(value);
     delete kvstore;
+    delete scanner;
 
     printf("Everything ok!\n");
 

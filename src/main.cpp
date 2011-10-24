@@ -120,7 +120,6 @@ int main(int argc, char **argv)
              insertbytes,
              periodic_stats_step,
              num_keys_to_insert,
-             timestamp,
              bytes_inserted,
              next_stats_print,
              total_search_time = 0;
@@ -128,9 +127,7 @@ int main(int argc, char **argv)
              valuesize;
     char    *compmanager = NULL,
             *key = NULL,
-            *key_copy = NULL,
             *value = NULL,
-            *value_copy = NULL,
             *end_key = NULL,
             *ptr;
     bool     unique_keys,
@@ -615,8 +612,7 @@ int main(int argc, char **argv)
                 // execute get()
                 //--------------------------------------------------------------
                 if (gflag) {
-                    kvstore->get(key, &value_copy, &timestamp);
-                    free(value_copy); // since 'value_copy'' is a copy
+                    scanner->point_get(key);
                 }
                 //--------------------------------------------------------------
                 // execute range get()
@@ -624,13 +620,7 @@ int main(int argc, char **argv)
                 else if (Gflag) {
                     strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
                     end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
-
-                    scanner->set_key_range(key, end_key);
-                    while (scanner->get_next(&key_copy, &value_copy, &timestamp)) {
-                        assert(strcmp(key_copy, key) >= 0 && strcmp(key_copy, end_key) < 0);
-                        free(key_copy);
-                        free(value_copy);
-                    }
+                    scanner->range_get(key, end_key);
                 }
 
                 gettimeofday(&search_end, NULL);

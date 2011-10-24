@@ -62,26 +62,6 @@ public:
     bool put(const char *key, const char *value);
 
     /**
-     * get the (copy of) value for a specific key
-     *
-     * @param key (in) key to be searched
-     * @param value (out) value corresponding to the searched key
-     * @param timestamp (out) timestamp of insertion
-     * @return true if key was found, false if not
-     */
-    bool get(const char *key, char **value, uint64_t *timestamp);
-
-    /**
-     * get the (copy of) value for a specific <key, timestamp> pair.
-     *
-     * @param key (in) key to be searched
-     * @param timestamp (in) timestamp of insertion
-     * @param value (out) value corresponding to the searched <key, timestamp>
-     * @return true if <key, timestamp> was found, false if not
-     */
-    bool get(const char *key, uint64_t timestamp, char **value);
-
-    /**
      * return number of <key, value, timestamp> tuples in memory
      */
     uint64_t get_num_mem_keys();

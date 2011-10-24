@@ -104,33 +104,6 @@ bool KeyValueStore::put(const char *key, const char *value)
 }
 
 /*============================================================================
- *                                   get
- *============================================================================*/
-bool KeyValueStore::get(const char *key, char **value, uint64_t *timestamp)
-{
-    // if key found in memstore, return since this is the most recent value:
-    if (m_memstore->get(key, value, timestamp)) {
-        return true;
-    }
-    // else, search in diskstore:
-    else {
-        return m_diskstore->get(key, value, timestamp);
-    }
-}
-
-/*============================================================================
- *                                   get
- *============================================================================*/
-bool KeyValueStore::get(const char *key, uint64_t timestamp, char **value)
-{
-    if (m_memstore->get(key, timestamp, value)) {
-        return true;
-    } else {
-        return m_diskstore->get(key, timestamp, value);
-    }
-}
-
-/*============================================================================
  *                             get_num_mem_keys
  *============================================================================*/
 uint64_t KeyValueStore::get_num_mem_keys()
