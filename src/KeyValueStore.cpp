@@ -305,7 +305,7 @@ void KeyValueStore::check_parameters()
 {
     struct stat st;
 
-    if(stat(ROOT_DIR,&st) != 0) {
+    if (stat(ROOT_DIR, &st) != 0) {
         printf("Error: %s does not exist\n", ROOT_DIR);
         exit(EXIT_FAILURE);
     }

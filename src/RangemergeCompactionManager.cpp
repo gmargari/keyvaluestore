@@ -144,7 +144,7 @@ void RangemergeCompactionManager::flush_bytes()
         }
 
         // delete all istreams but memstore istream
-        for (int i = 1; i < (int)istreams_to_merge.size(); i++) {
+        for (i = 1; i < (int)istreams_to_merge.size(); i++) {
             delete istreams_to_merge[i];
         }
 
