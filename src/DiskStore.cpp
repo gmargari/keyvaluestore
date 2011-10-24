@@ -16,7 +16,7 @@ using namespace std;
  *                                 DiskStore
  *============================================================================*/
 DiskStore::DiskStore()
-    : m_disk_files(), m_disk_istreams()
+    : m_disk_files()
 {
     char fname[100];
     FILE *fp;

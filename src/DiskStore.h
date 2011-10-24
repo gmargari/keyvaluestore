@@ -52,8 +52,7 @@ public:
 
 protected:
 
-    vector<DiskFile *>               m_disk_files;
-    vector<DiskFileInputStream *>    m_disk_istreams;
+    vector<DiskFile *> m_disk_files;
 };
 
 #endif
