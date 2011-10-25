@@ -107,7 +107,7 @@ int main()
             sprintf(key + strlen(key), "%Ld", i);
         }
         if (!scanner->point_get(key)) {
-            printf("%d) Key [%s] was not found!\n", i, key);
+            printf("%Ld) Key [%s] was not found!\n", i, key);
             exit(EXIT_FAILURE);
         }
     }
