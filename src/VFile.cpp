@@ -220,10 +220,10 @@ off_t VFile::fs_seek(off_t offs, int whence)
     }
 
     /*
-    * if seek is out of current file limits, check if there are previous
-    * or next files in m_filedescs and if we can get to that file. if yes,
-    * advance to that file.
-    */
+     * if seek is out of current file limits, check if there are previous
+     * or next files in m_filedescs and if we can get to that file. if yes,
+     * advance to that file.
+     */
 
     // m_offset is the absolute offset inside the virtual file
     if (m_offset > (off_t)m_size) {
@@ -286,8 +286,8 @@ void VFile::fs_truncate(off_t length)
     new_files = (int) ceil((float)length / (float)MAX_FILE_SIZE);
 
     /*
-        * if we need to shrink the virtual file
-        */
+     * if we need to shrink the virtual file
+     */
     if (new_files < (int)m_names.size()) {
 
         // if length == 0 then new_files = 0. keep first file and truncate to 0
@@ -315,8 +315,8 @@ void VFile::fs_truncate(off_t length)
         m_filedescs.erase(m_filedescs.begin() + new_files, m_filedescs.end());
     }
     /*
-        * else, if we need to extend the virtual file
-        */
+     * else, if we need to extend the virtual file
+     */
     else if (new_files > (int)m_names.size()) {
 
         // create 'new_files - m_names.size()' new files.
