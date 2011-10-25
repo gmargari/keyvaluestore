@@ -144,7 +144,7 @@ uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t time
 bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
                        uint32_t valuelen, uint64_t timestamp, uint32_t *len)
 {
-    uint32_t used = 0;
+    uint32_t bytes_used = 0;
     char *ptr;
     uint32_t buflen;
 
@@ -163,13 +163,13 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
         return false;
     }
 
-    ENCODE_NUM(ptr, keylen, used);
-    ENCODE_NUM(ptr, valuelen, used);
-    ENCODE_NUM(ptr, timestamp, used);
-    ENCODE_STR(ptr, key, keylen + 1, used);
-    ENCODE_STR(ptr, value, valuelen + 1, used);
+    ENCODE_NUM(ptr, keylen, bytes_used);
+    ENCODE_NUM(ptr, valuelen, bytes_used);
+    ENCODE_NUM(ptr, timestamp, bytes_used);
+    ENCODE_STR(ptr, key, keylen + 1, bytes_used);
+    ENCODE_STR(ptr, value, valuelen + 1, bytes_used);
 
-    assert(used == *len);
+    assert(bytes_used == *len);
     assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen] == '\0');
     assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + 1 + valuelen] == '\0');
 
@@ -198,7 +198,7 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
  *============================================================================*/
 bool Buffer::deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue)
 {
-    uint32_t used = 0, keylen, valuelen;
+    uint32_t bytes_used = 0, keylen, valuelen;
     char *tmpkey, *tmpvalue;
     const char *ptr;
     uint32_t buflen;
@@ -210,9 +210,9 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
         return false;
     }
 
-    DECODE_NUM(ptr, keylen, used);
-    DECODE_NUM(ptr, valuelen, used);
-    DECODE_NUM(ptr, *timestamp, used);
+    DECODE_NUM(ptr, keylen, bytes_used);
+    DECODE_NUM(ptr, valuelen, bytes_used);
+    DECODE_NUM(ptr, *timestamp, bytes_used);
 
     if (buflen < serialize_len(keylen, valuelen, *timestamp)) {
         return false;
@@ -222,10 +222,10 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
         tmpkey = (char *)malloc(keylen + 1);
         tmpvalue = (char *)malloc(valuelen + 1);
         assert(tmpkey && tmpvalue);
-        DECODE_STR(ptr, tmpkey, keylen + 1, used);
-        DECODE_STR(ptr, tmpvalue, valuelen + 1, used);
+        DECODE_STR(ptr, tmpkey, keylen + 1, bytes_used);
+        DECODE_STR(ptr, tmpvalue, valuelen + 1, bytes_used);
     } else {
-        assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) == used);
+        assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) == bytes_used);
         tmpkey = (char *)ptr + sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp);
         tmpvalue = tmpkey + keylen + 1;
     }

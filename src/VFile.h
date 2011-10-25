@@ -12,8 +12,6 @@ class VFile
 {
 public:
 
-    typedef enum { SIMMODE_REAL_IO, SIMMODE_SIMULATE_IO } sim_mode;
-
     /**
      * constructor
      */
@@ -45,7 +43,6 @@ public:
 
 protected:
 
-    sim_mode        m_simmode;
     char           *m_basefilename;
     uint64_t        m_size;
     off_t           m_offset;
