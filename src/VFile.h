@@ -28,7 +28,7 @@ public:
     // fs_read() and fs_write() are guaranteed to read or write 'count'
     // bytes. that is, they will repeatedly call internal functions until
     // they read or write all 'count' bytes.
-    ssize_t         fs_read(char *buf, size_t count);
+    ssize_t         fs_pread(char *buf, size_t count, off_t offs);
     ssize_t         fs_write(const char *buf, size_t count);
     off_t           fs_seek(off_t offset, int whence);
     off_t           fs_tell();
@@ -56,11 +56,12 @@ protected:
     // functions set or get information about the current physical file used
     bool            add_new_physical_file(bool open_existing);
     uint64_t        cur_fs_size();
+    uint64_t        cur_fs_size(int fileno);
     off_t           cur_fs_seek(off_t offs, int whence);
     off_t           cur_fs_tell();
     off_t           cur_fs_rewind();
     ssize_t         cur_fs_write(const char *buf, size_t count);
-    ssize_t         cur_fs_read(char *buf, size_t count);
+    ssize_t         cur_fs_pread(char *buf, size_t count, off_t offs);
 };
 
 #endif

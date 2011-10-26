@@ -163,16 +163,17 @@ void VFile::fs_close()
 }
 
 /*============================================================================
- *                                 fs_read
+ *                                 fs_pread
  *============================================================================*/
-ssize_t VFile::fs_read(char *buf, size_t count)
+ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
 {
     size_t bytes_read, num;
 
     for (bytes_read = 0; bytes_read < count; ) {
-        if ((num = cur_fs_read(buf + bytes_read, count - bytes_read)) == 0) {
+        if ((num = cur_fs_pread(buf + bytes_read, count - bytes_read, offs)) == 0) {
             break; // no bytes left in file
         }
+        offs += num;
         bytes_read += num;
     }
 
@@ -393,54 +394,32 @@ void VFile::fs_sync()
 }
 
 /*============================================================================
- *                               cur_fs_read
+ *                               cur_fs_pread
  *============================================================================*/
-ssize_t VFile::cur_fs_read(char *buf, size_t count)
+ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
 {
     ssize_t actually_read;
+    off_t offs_in_file, cur_file_size;
+    int fileno;
 
-    // TODO: remove/reduce calls to cur_fs_size/cur_fs_tell, they are syscalls
-
-    assert(m_cur != -1);
-
-    // if we reached end of vfile, then no bytes left to read
-    if (fs_tell() == (off_t)fs_size()) {
+    if (offs >= fs_size()) { // if no bytes left to read
         return 0;
     }
-    assert(fs_tell() <= (off_t)fs_size());
 
-    // if we reached end of current physical file, check if there's a next
-    // file in m_filedescs vector. if yes, advance to it. if no, error
-    if (cur_fs_tell() == (off_t)cur_fs_size()) {
-        if (cur_fs_size() == MAX_FILE_SIZE && m_cur < (int)m_filedescs.size() - 1) {
-            m_cur++;
-            cur_fs_rewind();
-        } else {
-            assert("shouldn't get here" && 0);
-        }
-    }
-
-    // check if we're going to cross max file size limit: if yes, we're going
-    // to read as many bytes as we can from current file and return the
-    // number of bytes read. caller must call again fs_read() to
-    // read the remaining bytes.
-    if (cur_fs_tell() + count > MAX_FILE_SIZE) {
-        count = MAX_FILE_SIZE - cur_fs_tell();
-    }
+    // calculate the file and the offset within the file
+    fileno = offs / MAX_FILE_SIZE;
+    offs_in_file = offs % MAX_FILE_SIZE;
 
     time_start(&(g_stats.read_time));
-    if ((actually_read = read(m_filedescs[m_cur], buf, count)) == -1) {
+    if ((actually_read = pread(m_filedescs[fileno], buf, count, offs_in_file)) == -1) {
         my_perror_exit();
     }
     time_end(&(g_stats.read_time));
-
-    m_offset += actually_read;
 
     // update global statistics
     bytes_inc(&g_stats.bytes_read, actually_read);
     num_inc(&(g_stats.num_reads), 1);
 
-    assert(actually_read);
     return actually_read;
 }
 
@@ -485,6 +464,17 @@ ssize_t VFile::cur_fs_write(const char *buf, size_t count)
     num_inc(&(g_stats.num_writes), 1);
 
     return actually_written;
+}
+
+/*============================================================================
+ *                                 cur_fs_size
+ *============================================================================*/
+uint64_t VFile::cur_fs_size(int fileno)
+{
+    struct stat filestatus;
+
+    stat(m_names[fileno], &filestatus);
+    return filestatus.st_size;
 }
 
 /*============================================================================

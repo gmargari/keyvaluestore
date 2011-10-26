@@ -12,6 +12,7 @@ int main(void)
     VFile f;
     char *buf = (char *)malloc(mb2b(20));
     uint64_t bytes_left;
+    off_t offs;
 
     global_stats_init(); // avoid assertion error...
 
@@ -229,28 +230,31 @@ dbg();
     //==============[ code using truncate, write & read ]==================/
     f.fs_truncate(mb2b(15));
     f.fs_rewind();
+    offs = 0;
 dbg();
-    f.fs_read(buf, mb2b(5));
+    offs += f.fs_pread(buf, mb2b(5), offs);
     assert(f.fs_size() == mb2b(15));
-    assert(f.fs_tell() == (off_t)mb2b(5));
+    assert(offs == (off_t)mb2b(5));
 dbg();
-    f.fs_read(buf, mb2b(5));
+    offs += f.fs_pread(buf, mb2b(5), offs);
     assert(f.fs_size() == mb2b(15));
-    assert(f.fs_tell() == (off_t)mb2b(10));
+    assert(offs == (off_t)mb2b(10));
 dbg();
-    f.fs_read(buf, mb2b(2));
+    offs += f.fs_pread(buf, mb2b(2), offs);
     assert(f.fs_size() == mb2b(15));
-    assert(f.fs_tell() == (off_t)mb2b(12));
+    assert(offs == (off_t)mb2b(12));
 dbg();
-    f.fs_read(buf, mb2b(3));
+    offs += f.fs_pread(buf, mb2b(3), offs);
     assert(f.fs_size() == mb2b(15));
-    assert(f.fs_tell() == (off_t)mb2b(15));
+    assert(offs == (off_t)mb2b(15));
 dbg();
+    f.fs_seek(offs, SEEK_SET);
     f.fs_write(buf, mb2b(3));
-    f.fs_seek(mb2b(-3), SEEK_CUR);
-    f.fs_read(buf, mb2b(3));
     assert(f.fs_size() == mb2b(18));
-    assert(f.fs_tell() == (off_t)mb2b(18));
+    f.fs_seek(mb2b(-3), SEEK_CUR);
+    offs += f.fs_pread(buf, mb2b(3), offs);
+    assert(f.fs_size() == mb2b(18));
+    assert(offs == (off_t)mb2b(18));
 
     free(buf);
 

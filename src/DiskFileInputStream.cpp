@@ -13,7 +13,7 @@
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
-    : m_diskfile(file), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
+    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
       m_end_incl(true)
 {
     m_buf = new Buffer(bufsize);
@@ -24,7 +24,7 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize)
-    : m_diskfile(file), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
+    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_end_key(NULL), m_start_incl(true),
       m_end_incl(true)
 {
     m_buf = new Buffer(buf, bufsize);
@@ -95,8 +95,9 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
             // read in buffer all bytes between 'off1' and 'off2'
             m_buf->clear();
-            m_diskfile->m_vfile->fs_seek(off1, SEEK_SET);
-            m_buf->fill(m_diskfile->m_vfile, off2 - off1);
+            m_buf->fill(m_diskfile->m_vfile, off2 - off1, off1);
+            m_offs = off2;
+            assert(m_buf->size() == off2 - off1);
 
             // check all buffer tuples until we find a key >= startkey
             while (m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, &len, false)) {
@@ -109,14 +110,11 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
                 // must seek back at beginning of key tuple
                 m_buf->undo_deserialize(tmpkey, tmpvalue, tmpts);
             }
-
-            assert(m_diskfile->m_vfile->fs_tell() >= off1);
-            assert(m_diskfile->m_vfile->fs_tell() <= off1 + MAX_INDEX_DIST);
         }
         // else, seek to the first key on disk
         else {
-            m_diskfile->m_vfile->fs_rewind();
-            m_buf->fill(m_diskfile->m_vfile);
+            m_offs = 0;
+            m_offs += m_buf->fill(m_diskfile->m_vfile, m_offs);
         }
     }
 
@@ -127,7 +125,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
         // maybe we need to read more bytes in buffer to deserialize tuple
         m_buf->keep_unused();
-        m_buf->fill(m_diskfile->m_vfile);
+        m_offs += m_buf->fill(m_diskfile->m_vfile, m_offs);
 
         // this should now work, unless there are no bytes left in file
         if ( ! m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, &len, false)) {

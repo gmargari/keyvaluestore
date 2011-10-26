@@ -2,6 +2,7 @@
 #define BUFFER_H
 
 #include <stdint.h>
+#include <sys/types.h>
 
 class VFile;
 
@@ -55,14 +56,20 @@ public:
     void clear();
 
     /**
-     * fill free space in buffer by reading at most 'bytes' bytes from 'vfile'
+     * fill free space in buffer by reading at most 'bytes' bytes from offset
+     * 'offs' of file 'vfile'
+     *
+     * @return number of bytes read
      */
-    void fill(VFile *vfile, uint32_t bytes);
+    uint32_t fill(VFile *vfile, uint32_t bytes, off_t offs);
 
     /**
-     * fill free space in buffer by reading bytes from 'vfile'
+     * fill free space in buffer by reading bytes from offset 'offs' of file
+     * 'vfile'
+     *
+     * @return number of bytes read
      */
-    void fill(VFile *vfile);
+    uint32_t fill(VFile *vfile, off_t offs);
 
     /**
      * write buffer bytes to 'vfile', clear buffer

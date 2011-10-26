@@ -96,17 +96,22 @@ void Buffer::clear()
 /*============================================================================
  *                                  fill
  *============================================================================*/
-void Buffer::fill(VFile *vfile, uint32_t bytes)
+uint32_t Buffer::fill(VFile *vfile, uint32_t bytes, off_t offs)
 {
-    m_bytes_in_buf += vfile->fs_read(m_buf + size(), bytes);
+    uint32_t bytes_read;
+
+    bytes_read = vfile->fs_pread(m_buf + size(), bytes, offs);
+    m_bytes_in_buf += bytes_read;
+
+    return bytes_read;
 }
 
 /*============================================================================
  *                                  fill
  *============================================================================*/
-void Buffer::fill(VFile *vfile)
+uint32_t Buffer::fill(VFile *vfile, off_t offs)
 {
-    fill(vfile, free_space());
+    return fill(vfile, free_space(), offs);
 }
 
 /*============================================================================

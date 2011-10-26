@@ -3,6 +3,8 @@
 
 #include "InputStream.h"
 
+#include <sys/types.h>
+
 class DiskFile;
 class Buffer;
 
@@ -35,6 +37,7 @@ public:
 protected:
 
     DiskFile    *m_diskfile;
+    off_t        m_offs;        // offset within diskfile we currently are
     Buffer      *m_buf;         // buffer used for I/O
     const char  *m_start_key;
     const char  *m_end_key;
