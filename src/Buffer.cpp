@@ -117,10 +117,15 @@ uint32_t Buffer::fill(VFile *vfile, off_t offs)
 /*============================================================================
  *                                  flush
  *============================================================================*/
-void Buffer::flush(VFile *vfile)
+uint32_t Buffer::flush(VFile *vfile, off_t offs)
 {
-    vfile->fs_write(m_buf, size());
+    uint32_t bytes_written;
+
+    bytes_written = vfile->fs_pwrite(m_buf, size(), offs);
+    assert(bytes_written == size());
     clear();
+
+    return bytes_written;
 }
 
 /*============================================================================

@@ -181,14 +181,15 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
 }
 
 /*============================================================================
- *                                fs_write
+ *                                fs_pwrite
  *============================================================================*/
-ssize_t VFile::fs_write(const char *buf, size_t count)
+ssize_t VFile::fs_pwrite(const char *buf, size_t count, off_t offs)
 {
     size_t bytes_written, num;
 
     for (bytes_written = 0; bytes_written < count; ) {
-        num = cur_fs_write(buf + bytes_written, count - bytes_written);
+        num = cur_fs_pwrite(buf + bytes_written, count - bytes_written, offs);
+        offs += num;
         bytes_written += num;
     }
 
@@ -424,39 +425,46 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
 }
 
 /*============================================================================
- *                                cur_fs_write
+ *                                cur_fs_pwrite
  *============================================================================*/
-ssize_t VFile::cur_fs_write(const char *buf, size_t count)
+ssize_t VFile::cur_fs_pwrite(const char *buf, size_t count, off_t offs)
 {
     ssize_t actually_written;
+    off_t offs_in_file;
+    int fileno, num_files;
 
-    assert(m_cur != -1);
+    // calculate the file and the offset within the file
+    fileno = offs / MAX_FILE_SIZE;
+    offs_in_file = offs % MAX_FILE_SIZE;
 
-    // if we reached end of current file, check if there's a next file in
-    // m_filedescs vector. if yes, advance to it. if no, create a new file.
-    if (cur_fs_tell() == MAX_FILE_SIZE) {
-        if (m_cur == (int)m_filedescs.size() - 1) {
+    // if file does not exist, create it (create also all other files needed.
+    // note that all files except last one must have size 'MAX_FILE_SIZE')
+    num_files = m_filedescs.size();
+    if (fileno >= num_files) {
+        num_files = fileno - num_files + 1; // how many files to create
+        for (int i = 0; i < num_files; i++) {
             add_new_physical_file(false);
-        } else {
-            m_cur++;
-            cur_fs_rewind();
+            if (i < num_files - 1) {
+                if (ftruncate64(m_filedescs[i], MAX_FILE_SIZE) == (off_t)-1) {
+                    my_perror_exit();
+                }
+            }
         }
     }
 
-    // (similar to cur_fs_read)
-    if (cur_fs_tell() + count > MAX_FILE_SIZE) {
-        count = MAX_FILE_SIZE - cur_fs_tell();
+    // write as many bytes as we can in current file
+    if (offs_in_file + count > MAX_FILE_SIZE) {
+        count = MAX_FILE_SIZE - offs_in_file;
     }
 
     time_start(&(g_stats.write_time));
-    if ((actually_written = write(m_filedescs[m_cur], buf, count)) == -1) {
+    if ((actually_written = pwrite(m_filedescs[fileno], buf, count, offs_in_file)) == -1) {
         my_perror_exit();
     }
     time_end(&(g_stats.write_time));
 
-    m_offset += actually_written;
-    if (m_offset > (off_t)m_size) {
-        m_size = m_offset;
+    if (offs_in_file + actually_written > (off_t)m_size) { // TODO delete
+        m_size = offs_in_file + actually_written;
     }
 
     // update global statistics

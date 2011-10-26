@@ -29,7 +29,7 @@ public:
     // bytes. that is, they will repeatedly call internal functions until
     // they read or write all 'count' bytes.
     ssize_t         fs_pread(char *buf, size_t count, off_t offs);
-    ssize_t         fs_write(const char *buf, size_t count);
+    ssize_t         fs_pwrite(const char *buf, size_t count, off_t offs);
     off_t           fs_seek(off_t offset, int whence);
     off_t           fs_tell();
     void            fs_rewind();
@@ -60,7 +60,7 @@ protected:
     off_t           cur_fs_seek(off_t offs, int whence);
     off_t           cur_fs_tell();
     off_t           cur_fs_rewind();
-    ssize_t         cur_fs_write(const char *buf, size_t count);
+    ssize_t         cur_fs_pwrite(const char *buf, size_t count, off_t offs);
     ssize_t         cur_fs_pread(char *buf, size_t count, off_t offs);
 };
 

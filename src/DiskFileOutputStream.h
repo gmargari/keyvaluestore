@@ -3,7 +3,7 @@
 
 #include "OutputStream.h"
 
-#include <cstdlib>
+#include <sys/types.h>
 
 class DiskFile;
 class Buffer;
@@ -45,6 +45,7 @@ public:
 protected:
 
     DiskFile    *m_diskfile;
+    off_t        m_offs;          // offset within diskfile we currently are
     uint64_t     m_vfile_size;    // size of vfile
     Buffer      *m_buf;           // buffer used for I/O
     char        *m_last_key;      // last key written to disk

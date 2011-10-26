@@ -74,7 +74,7 @@ public:
     /**
      * write buffer bytes to 'vfile', clear buffer
      */
-    void flush(VFile *vfile);
+    uint32_t flush(VFile *vfile, off_t offs);
 
     /**
      * shift all unused bytes to the beginning of buffer
