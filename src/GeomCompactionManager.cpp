@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cmath>
+#include <pthread.h>
 
 uint64_t dbg_lastsize = 0; // used for sanity_check()
 
@@ -263,6 +264,7 @@ void GeomCompactionManager::flush_bytes()
     }
 
     // delete all files merged as well as their input streams
+    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     for (int i = 0; i < count; i++) {
         r_disk_files[i]->delete_from_disk();
         delete r_disk_files[i];
@@ -275,6 +277,7 @@ void GeomCompactionManager::flush_bytes()
 
     // add new file at the front, since it contains most recent <k,v> pairs
     r_disk_files.insert(r_disk_files.begin(), disk_file);
+    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 
     //--------------------------------------------------------------------------
     // 6) update vector of partitions

@@ -16,7 +16,7 @@ using namespace std;
  *                                 DiskStore
  *============================================================================*/
 DiskStore::DiskStore()
-    : m_disk_files()
+    : m_disk_files(), m_rwlock(PTHREAD_RWLOCK_INITIALIZER)
 {
     char fname[100];
     FILE *fp;
@@ -80,9 +80,11 @@ uint64_t DiskStore::get_num_keys()
 {
     uint64_t total_keys = 0;
 
+    pthread_rwlock_rdlock(&m_rwlock);
     for (int i = 0; i < (int)m_disk_files.size(); i++) {
         total_keys += m_disk_files[i]->get_num_keys();
     }
+    pthread_rwlock_unlock(&m_rwlock);
 
     return total_keys;
 }
@@ -94,9 +96,11 @@ uint64_t DiskStore::get_size()
 {
     uint64_t total_size = 0;
 
+    pthread_rwlock_rdlock(&m_rwlock);
     for (int i = 0; i < (int)m_disk_files.size(); i++) {
         total_size += m_disk_files[i]->get_size();
     }
+    pthread_rwlock_unlock(&m_rwlock);
 
     return total_size;
 }

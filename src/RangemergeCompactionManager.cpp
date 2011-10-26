@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <climits>
-
+#include <pthread.h>
 #include <algorithm>
 
 using std::vector;
@@ -170,6 +170,7 @@ void RangemergeCompactionManager::flush_bytes()
     // avoid problems with deletion below, sort ranges by 'm_idx' field and
     // delete files from last to first
     sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_file_index);
+    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     for (i = cur_rng - 1; i >= 0; i--) {
         idx = ranges[i].m_idx;
         if (idx != NO_DISK_FILE) {
@@ -188,6 +189,7 @@ void RangemergeCompactionManager::flush_bytes()
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         r_disk_files.push_back(new_disk_files[i]);
     }
+    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 
     assert(sanity_check());
 }

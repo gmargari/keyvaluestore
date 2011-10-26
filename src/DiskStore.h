@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <pthread.h>
 
 using std::vector;
 
@@ -53,6 +54,7 @@ public:
 protected:
 
     vector<DiskFile *> m_disk_files;
+    pthread_rwlock_t   m_rwlock;
 };
 
 #endif
