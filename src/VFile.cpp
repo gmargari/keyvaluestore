@@ -170,10 +170,9 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
     size_t bytes_read, num;
 
     for (bytes_read = 0; bytes_read < count; ) {
-        if ((num = cur_fs_pread(buf + bytes_read, count - bytes_read, offs)) == 0) {
+        if ((num = cur_fs_pread(buf + bytes_read, count - bytes_read, offs + bytes_read)) == 0) {
             break; // no bytes left in file
         }
-        offs += num;
         bytes_read += num;
     }
 
@@ -185,12 +184,10 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
  *============================================================================*/
 ssize_t VFile::fs_pwrite(const char *buf, size_t count, off_t offs)
 {
-    size_t bytes_written, num;
+    size_t bytes_written;
 
     for (bytes_written = 0; bytes_written < count; ) {
-        num = cur_fs_pwrite(buf + bytes_written, count - bytes_written, offs);
-        offs += num;
-        bytes_written += num;
+        bytes_written += cur_fs_pwrite(buf + bytes_written, count - bytes_written, offs + bytes_written);
     }
 
     assert(bytes_written == count);
@@ -403,7 +400,7 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
     off_t offs_in_file;
     int fileno;
 
-    if (offs >= fs_size()) { // if no bytes left to read
+    if (offs >= (off_t)fs_size()) { // if no bytes left to read
         return 0;
     }
 
