@@ -23,8 +23,7 @@
  *                                 VFile
  *============================================================================*/
 VFile::VFile()
-    : m_basefilename(NULL), m_size(0), m_offset(0), m_names(), m_filedescs(),
-      m_cur(-1)
+    : m_basefilename(NULL), m_names(), m_filedescs()
 {
     assert(sizeof(off_t) == 8); // ensure 64bit offsets (TODO: move it elsewhere)
 }
@@ -71,7 +70,6 @@ bool VFile::add_new_physical_file(bool open_existing)
 
     m_names.push_back(fname);
     m_filedescs.push_back(fd);
-    m_cur = m_filedescs.size() - 1;
 
     return true;
 }
@@ -110,16 +108,9 @@ bool VFile::fs_open_existing(char *filename)
             my_exit();
         }
 
-        // the only thing we actually need from info file is the number of
-        // vfile files. if there are 3 files, then these should be named as
-        // m_basefilename.VFILE_PART_PREFIX.[00|01|02].
-        // the first time add_new_physical_file() is called, it will try to
-        // open m_basefilename.VFILE_PART_PREFIX.00. the next time, XXX.01,
-        // next time XXX.02 etc.
         add_new_physical_file(true);
-        m_size += filesize;
 
-        // check file opened from add_new_physical_file() is the one expected.
+        // check file opened from add_new_physical_file() is the one expected
         if (strcmp(m_names.back(), vfilename) != 0) {
             my_exit();
         }
@@ -158,8 +149,6 @@ void VFile::fs_close()
 
         fclose(fp);
     }
-
-    m_offset = 0;
 }
 
 /*============================================================================
@@ -196,75 +185,6 @@ ssize_t VFile::fs_pwrite(const char *buf, size_t count, off_t offs)
 }
 
 /*============================================================================
- *                                 fs_seek
- *============================================================================*/
-off_t VFile::fs_seek(off_t offs, int whence)
-{
-    off_t offs_in_file;
-    int fileno;
-
-    if (whence == SEEK_SET) {
-        m_offset = offs;
-    } else if (whence == SEEK_CUR) {
-        m_offset += offs;
-    } else if (whence == SEEK_END) {
-        m_offset = m_size + offs;
-    }
-
-    /*
-     * if seek is out of current file limits, check if there are previous
-     * or next files in m_filedescs and if we can get to that file. if yes,
-     * advance to that file.
-     */
-
-    // m_offset is the absolute offset inside the virtual file
-    if (m_offset > (off_t)m_size) {
-        my_exit();
-    }
-
-    // calculate the file and the offset within the file
-    fileno = m_offset / MAX_FILE_SIZE;
-    offs_in_file = m_offset % MAX_FILE_SIZE;
-
-    // example: if maxfilesize = 10bytes, and we:
-    //    1) create a file
-    //    2) write 10 bytes in file
-    // then offset = 10, size = 10. In this case, fileno will be '1'
-    // and offset will be '0', meaning that we have to seek to 0 byte of
-    // file 1. Instead we'll seek at fileno 0 at position 10.
-    if (fileno > (int)m_names.size() - 1) {
-        fileno--;
-        offs_in_file = MAX_FILE_SIZE;
-    }
-
-    // advance to that file
-    m_cur = fileno;
-
-    // seek within that file
-    if (lseek(m_filedescs[m_cur], offs_in_file, SEEK_SET) == (off_t)-1) {
-        my_perror_exit();
-    }
-
-    return m_offset;
-}
-
-/*============================================================================
- *                                  fs_tell
- *============================================================================*/
-off_t VFile::fs_tell()
-{
-    return m_offset;
-}
-
-/*============================================================================
- *                                 fs_rewind
- *============================================================================*/
-void VFile::fs_rewind()
-{
-    fs_seek(0, SEEK_SET);
-}
-
-/*============================================================================
  *                                fs_truncate
  *============================================================================*/
 void VFile::fs_truncate(off_t length)
@@ -274,9 +194,7 @@ void VFile::fs_truncate(off_t length)
 
     new_files = (int) ceil((float)length / (float)MAX_FILE_SIZE);
 
-    /*
-     * if we need to shrink the virtual file
-     */
+    // if we need to shrink the virtual file
     if (new_files < (int)m_names.size()) {
 
         // if length == 0 then new_files = 0. keep first file and truncate to 0
@@ -301,9 +219,7 @@ void VFile::fs_truncate(off_t length)
         m_names.erase(m_names.begin() + new_files, m_names.end());
         m_filedescs.erase(m_filedescs.begin() + new_files, m_filedescs.end());
     }
-    /*
-     * else, if we need to extend the virtual file
-     */
+    // else, if we need to extend the virtual file
     else if (new_files > (int)m_names.size()) {
 
         // create 'new_files - m_names.size()' new files.
@@ -321,8 +237,6 @@ void VFile::fs_truncate(off_t length)
         }
     }
 
-    m_cur = new_files - 1;
-
     if (length && length % MAX_FILE_SIZE != 0) {
         len = length % MAX_FILE_SIZE;
     } else if (length ) {
@@ -331,15 +245,9 @@ void VFile::fs_truncate(off_t length)
         len = length;
     }
 
-    if (ftruncate64(m_filedescs[m_cur], len) == (off_t)-1) {
+    if (ftruncate64(m_filedescs[new_files - 1], len) == (off_t)-1) {
         my_perror_exit();
     }
-
-    m_size = length;
-
-    // NOTE: truncate system call does not change file offset. our
-    // implementation sets offset to file size after truncating
-    fs_seek(m_size, SEEK_SET);
 }
 
 /*============================================================================
@@ -376,7 +284,13 @@ char *VFile::fs_name()
  *============================================================================*/
 uint64_t VFile::fs_size()
 {
-    return m_size;
+    uint64_t size = 0;
+
+    for (int i = 0; i < (int)m_filedescs.size(); i++) {
+        size += cur_fs_size(i);
+    }
+
+    return size;
 }
 
 /*============================================================================
@@ -460,10 +374,6 @@ ssize_t VFile::cur_fs_pwrite(const char *buf, size_t count, off_t offs)
     }
     time_end(&(g_stats.write_time));
 
-    if (offs_in_file + actually_written > (off_t)m_size) { // TODO delete
-        m_size = offs_in_file + actually_written;
-    }
-
     // update global statistics
     bytes_inc(&g_stats.bytes_written, actually_written);
     num_inc(&(g_stats.num_writes), 1);
@@ -480,49 +390,4 @@ uint64_t VFile::cur_fs_size(int fileno)
 
     stat(m_names[fileno], &filestatus);
     return filestatus.st_size;
-}
-
-/*============================================================================
- *                                 cur_fs_size
- *============================================================================*/
-uint64_t VFile::cur_fs_size()
-{
-    struct stat filestatus;
-
-    assert(m_cur != -1);
-
-    stat(m_names[m_cur], &filestatus);
-    return filestatus.st_size;
-}
-
-/*============================================================================
- *                                cur_fs_seek
- *============================================================================*/
-off_t VFile::cur_fs_seek(off_t offs, int whence)
-{
-    off_t newoffs;
-
-    assert(m_cur != -1);
-
-    if ((newoffs = lseek(m_filedescs[m_cur], offs, whence)) == (off_t)-1) {
-        my_perror_exit();
-    }
-
-    return newoffs;
-}
-
-/*============================================================================
- *                                cur_fs_tell
- *============================================================================*/
-off_t VFile::cur_fs_tell()
-{
-    return cur_fs_seek(0, SEEK_CUR);
-}
-
-/*============================================================================
- *                                cur_fs_tell
- *============================================================================*/
-off_t VFile::cur_fs_rewind()
-{
-    return cur_fs_seek(0, SEEK_SET);
 }

@@ -249,7 +249,6 @@ dbg();
     //==============[ code using truncate, write & read ]==================/
     f.fs_truncate(mb2b(15));
     offs = mb2b(15);
-    f.fs_rewind();
     offs = 0;
 dbg();
     offs += f.fs_pread(buf, mb2b(5), offs);
