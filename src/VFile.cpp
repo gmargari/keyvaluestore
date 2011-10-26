@@ -399,7 +399,7 @@ void VFile::fs_sync()
 ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
 {
     ssize_t actually_read;
-    off_t offs_in_file, cur_file_size;
+    off_t offs_in_file;
     int fileno;
 
     if (offs >= fs_size()) { // if no bytes left to read

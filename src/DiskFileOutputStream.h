@@ -6,8 +6,6 @@
 #include <cstdlib>
 
 class DiskFile;
-class VFile;
-class VFileIndex;
 class Buffer;
 
 class DiskFileOutputStream: public OutputStream {
