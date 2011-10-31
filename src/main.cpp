@@ -54,12 +54,12 @@ long int zipf_n = 1000000;     // parameter for zipf() function
 // the more time zipf() needs to generate a zipf number.
 
 struct put_args { // arguments for put thread
-    int uflag;
     int sflag;
+    int uflag;
     int zipf_keys;
+    uint32_t keysize;
     int print_kv_and_continue;
     uint64_t num_keys_to_insert;
-    uint32_t keysize;
     uint32_t valuesize;
     KeyValueStore *kvstore;
 };
@@ -80,26 +80,28 @@ bool put_thread_finished = false;
 void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
-     printf("        -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\"\n");
-     printf("        -r value:               r parameter, for geometric comp. manager only (default: %d)\n", DEFAULT_GEOM_R);
-     printf("        -p value:               p parameter, for geometric comp. manager only (default: disabled)\n");
-     printf("        -b blocksize:           block size in MB, for rangemerge comp. manager only (default: %.0f)\n", b2mb(DEFAULT_RNGMERGE_BLOCKSIZE));
-     printf("        -f flushmem:            flush memory size in MB, for rangemerge comp. manager only (default: 0,\n");
-     printf("                                when memory is full flush only the biggest range)\n");
-     printf("        -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
-     printf("        -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
-     printf("        -k keysize:             size of keys, in bytes (default: %u)\n", DEFAULT_KEY_SIZE);
-     printf("        -v valuesize:           size of values, in bytes (default: %u)\n", DEFAULT_VALUE_SIZE);
-     printf("        -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
-     printf("        -z:                     create zipfian keys (default: uniform keys)\n");
-     printf("        -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
-     printf("        -g numgetthreads:       number of get threads (default: %d)\n", DEFAULT_NUM_GET_THREADS);
-     printf("        -o statsperiod:         every time that many MB are inserted, print stats by far.\n");
-     printf("                                also, executed a number of gets() and print related stats\n");
-     printf("                                (default: memorysize/2)\n");
-     printf("        -s:                     read key-values from stdin\n");
-     printf("        -e:                     print key-values that would be inserted and exit\n");
-     printf("        -h:                     print this help message and exit\n");
+     printf("\n COMPACTION MANAGER\n");
+     printf("    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\"\n");
+     printf("    -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
+     printf("    -r value:               [geometric c.m.] r parameter (default: %d)\n", DEFAULT_GEOM_R);
+     printf("    -p value:               [geometric c.m.] p parameter (default: disabled)\n");
+     printf("    -b blocksize:           [rangemerge c.m.] block size in MB (default: %.0f)\n", b2mb(DEFAULT_RNGMERGE_BLOCKSIZE));
+     printf("    -f flushmem:            [rangemerge c.m.] flush memory size in MB\n");
+     printf("                            (default: 0, when memory is full flush only the biggest range)\n");
+     printf("\n PUT\n");
+     printf("    -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
+     printf("    -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
+     printf("    -k keysize:             size of keys, in bytes (default: %u)\n", DEFAULT_KEY_SIZE);
+     printf("    -v valuesize:           size of values, in bytes (default: %u)\n", DEFAULT_VALUE_SIZE);
+     printf("    -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
+     printf("    -z:                     create zipfian keys (default: false, uniform keys)\n");
+     printf("    -s:                     read key-values from stdin\n");
+     printf("\n GET\n");
+     printf("    -g numgetthreads:       number of get threads (default: %d)\n", DEFAULT_NUM_GET_THREADS);
+     printf("\n VARIOUS\n");
+     printf("    -e:                     print key-values that would be inserted and exit\n");
+     printf("    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)\n");
+     printf("    -h:                     print this help message and exit\n");
 }
 
 /*============================================================================
