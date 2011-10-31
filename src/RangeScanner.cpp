@@ -8,8 +8,6 @@
 #include "DiskFileInputStream.h"
 #include "PriorityInputStream.h"
 
-#include <cstdlib>
-
 /*============================================================================
  *                               RangeScanner
  *============================================================================*/
@@ -37,6 +35,7 @@ int RangeScanner::point_get(const char *key)
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
 
+    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
 //     // first check memstore, since it has the most recent values
 //     if (m_kvstore->m_memstore->get(key, &value, &t)) {
 //         free(value); // it has been copied
@@ -87,6 +86,7 @@ int RangeScanner::range_get(const char *start_key, const char *end_key, bool sta
     for (int i = 0; i < diskfiles; i++) {
         istreams.push_back(new DiskFileInputStream(m_kvstore->m_diskstore->m_disk_files[i], MAX_INDEX_DIST));
     }
+    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
 //     istreams.push_back(m_kvstore->m_memstore->m_inputstream);
     pistream = new PriorityInputStream(istreams);
 
