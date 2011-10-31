@@ -30,7 +30,7 @@ using namespace std;
 
 void  *put_routine(void *args);
 void  *get_routine(void *args);
-void   randstr(char *s, const int len);
+void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr(char *s, const int len);
 int    zipf();
 double rand_val(int seed);
@@ -494,7 +494,7 @@ int main(int argc, char **argv)
 
     gargs = (struct get_args *)malloc(num_get_threads*sizeof(get_args));
     for (i = 0; i < num_get_threads; i++) {
-        gargs[i].tid = i;
+        gargs[i].tid = i + 1;
         gargs[i].uflag = uflag;
         gargs[i].zipf_keys = zipf_keys;
         gargs[i].keysize = keysize,
@@ -565,7 +565,9 @@ void *put_routine(void *args)
              print_kv_and_continue = pargs->print_kv_and_continue;
     uint64_t num_keys_to_insert = pargs->num_keys_to_insert;
     uint32_t keysize = pargs->keysize,
-             valuesize = pargs->valuesize;
+             valuesize = pargs->valuesize,
+             kseed = 0, // kseed = getpid() + time(NULL);
+             vseed = kseed + 1;
     KeyValueStore *kvstore = pargs->kvstore;
     char    *key = NULL,
             *value = NULL;
@@ -597,15 +599,15 @@ void *put_routine(void *args)
             //----------------------------------------------------------------------
             // create a random key and a random value
             //----------------------------------------------------------------------
-            if (zipf_keys) {    // TODO: randstr(), zipfstr should take as arg a random seed (See rand_r()).
+            if (zipf_keys) {
                 zipfstr(key, keysize);
             } else {
-                randstr(key, keysize);
+                randstr_r(key, keysize, &kseed);
             }
             if (uflag) {
                 sprintf(key, "%s.%Ld", key, i); // Make key unique by appending a unique number
             }
-            randstr(value, valuesize);
+            randstr_r(value, valuesize, &vseed);
         }
 
         //----------------------------------------------------------------------
@@ -638,28 +640,27 @@ void *get_routine(void *args)
     struct get_args *gargs = (struct get_args *)args;
     int      uflag = gargs->uflag,
              zipf_keys = gargs->zipf_keys;
-    uint32_t keysize = gargs->keysize;
-    unsigned int rseed;
+    uint32_t keysize = gargs->keysize,
+             kseed = gargs->tid, // kseed = getpid() + time(NULL);
+             tseed = kseed + 1;
     char     key[MAX_KVTSIZE];
     int i = 0;
     Scanner *scanner = new Scanner(gargs->kvstore);
 
     printf("[DEBUG]  thread %d started\n", gargs->tid);
-    rseed = getpid();
 
     while (!put_thread_finished) {
 
-        usleep(rand_r(&rseed) % 10000); // sleep for a random number of ms between 0 and 500000
+        usleep(rand_r(&tseed) % 10000); // sleep for a random number of ms between 0 and 500000
 
         //--------------------------------------------------------------
         // create a random key
         //--------------------------------------------------------------
-        if (zipf_keys) {        // TODO: randstr(), zipfstr should take as arg a random seed (See rand_r()).
+        if (zipf_keys) {
             zipfstr(key, keysize);
         } else {
-            randstr(key, keysize);
+            randstr_r(key, keysize, &kseed);
         }
-
         if (uflag) {
             sprintf(key, "%s#%d", key, i++); // make key unique AND NON EXISTING!
         }
@@ -679,9 +680,9 @@ void *get_routine(void *args)
 
 
 /*============================================================================
- *                               randstr
+ *                              randstr_r
  *============================================================================*/
-void randstr(char *s, const int len)
+void randstr_r(char *s, const int len, uint32_t *seed)
 {
     static const char alphanum[] =
 //         "0123456789"
@@ -690,7 +691,7 @@ void randstr(char *s, const int len)
     int size = sizeof(alphanum);
 
     for (int i = 0; i < len; i++) {
-        s[i] = alphanum[rand() % (size - 1)];
+        s[i] = alphanum[rand_r(seed) % (size - 1)];
     }
 
     s[len] = '\0';
@@ -705,11 +706,12 @@ void zipfstr(char *s, const int len)
     int zipf_num;
     char key_prefix[MAX_KVTSIZE];
     static bool first = true;
+    uint32_t kseed = 0; // kseed = getpid() + time(NULL);
 
     if (first) {
         first = false;
         // key prefix must be common for all keys, so they follow zipf distribution
-        randstr(key_prefix, len - num_digits);
+        randstr_r(key_prefix, len - num_digits, &kseed);
     }
 
     zipf_num = zipf();
