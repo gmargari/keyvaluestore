@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "RangeScanner.h"
+#include "Scanner.h"
 
 #include "MemStore.h"
 #include "DiskStore.h"
@@ -9,18 +9,18 @@
 #include "PriorityInputStream.h"
 
 /*============================================================================
- *                               RangeScanner
+ *                                 Scanner
  *============================================================================*/
-RangeScanner::RangeScanner(KeyValueStore *kvstore)
+Scanner::Scanner(KeyValueStore *kvstore)
     : m_kvstore(kvstore)
 {
 
 }
 
 /*============================================================================
- *                              ~RangeScanner
+ *                                ~Scanner
  *============================================================================*/
-RangeScanner::~RangeScanner()
+Scanner::~Scanner()
 {
 
 }
@@ -28,7 +28,7 @@ RangeScanner::~RangeScanner()
 /*============================================================================
  *                                point_get
  *============================================================================*/
-int RangeScanner::point_get(const char *key)
+int Scanner::point_get(const char *key)
 {
     const char *k, *v;
     char *value;
@@ -63,7 +63,7 @@ int RangeScanner::point_get(const char *key)
 /*============================================================================
  *                                range_get
  *============================================================================*/
-int RangeScanner::range_get(const char *start_key, const char *end_key)
+int Scanner::range_get(const char *start_key, const char *end_key)
 {
     return range_get(start_key, end_key, true, false);
 }
@@ -71,7 +71,7 @@ int RangeScanner::range_get(const char *start_key, const char *end_key)
 /*============================================================================
  *                                range_get
  *============================================================================*/
-int RangeScanner::range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+int Scanner::range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
     const char *k, *v;
     uint64_t t;

@@ -1,23 +1,23 @@
-#ifndef RANGESCANNER_H
-#define RANGESCANNER_H
+#ifndef SCANNER_H
+#define SCANNER_H
 
 #include <stdint.h>
 
 class KeyValueStore;
 
-class RangeScanner {
+class Scanner {
 
 public:
 
     /**
      * constructor
      */
-    RangeScanner(KeyValueStore *kvstore);
+    Scanner(KeyValueStore *kvstore);
 
     /**
      * destructor
      */
-    ~RangeScanner();
+    ~Scanner();
 
     /**
      * get tuple with key 'key'

@@ -21,7 +21,7 @@ add_library (Range                      Range.cpp)
 add_library (VFile                      VFile.cpp)
 add_library (VFileIndex                 VFileIndex.cpp)
 add_library (Statistics                 Statistics.cpp)
-add_library (RangeScanner               RangeScanner.cpp)
+add_library (Scanner                    Scanner.cpp)
 add_library (Buffer                     Buffer.cpp)
 
 target_link_libraries (VFile                    VFileIndex Statistics)
@@ -33,7 +33,7 @@ target_link_libraries (MapInputStream           InputStream)
 target_link_libraries (PriorityInputStream      DiskFileInputStream MapInputStream)
 target_link_libraries (MemStore                 Map)
 target_link_libraries (DiskStore                DiskFile VFile)
-target_link_libraries (RangeScanner             KeyValueStore PriorityInputStream)
+target_link_libraries (Scanner                  KeyValueStore PriorityInputStream)
 
 target_link_libraries (CompactionManager        MemStore DiskStore MapInputStream DiskFile DiskFileInputStream DiskFileOutputStream PriorityInputStream Buffer)
 target_link_libraries (NomergeCompactionManager CompactionManager MemStore DiskStore)
@@ -44,7 +44,7 @@ target_link_libraries (RangemergeCompactionManager     CompactionManager MemStor
 target_link_libraries (KeyValueStore            MemStore DiskStore NomergeCompactionManager ImmCompactionManager GeomCompactionManager LogCompactionManager RangemergeCompactionManager Statistics)
 
 add_executable (sim main.cpp)
-target_link_libraries (sim KeyValueStore RangeScanner)
+target_link_libraries (sim KeyValueStore Scanner)
 
 add_subdirectory (test)
 add_subdirectory (tools)

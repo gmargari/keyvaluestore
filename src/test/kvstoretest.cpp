@@ -1,6 +1,6 @@
 #include "../Global.h"
 #include "../KeyValueStore.h"
-#include "../RangeScanner.h"
+#include "../Scanner.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -43,11 +43,11 @@ int main()
     char *key, *value;
     struct timeval tv;
     uint64_t num_keys, i;
-    RangeScanner *scanner;
+    Scanner *scanner;
 
     kvstore = new KeyValueStore(KeyValueStore::GEOM_CM);
     kvstore->set_memstore_maxsize(MEMSTORE_SIZE);
-    scanner = new RangeScanner(kvstore);
+    scanner = new Scanner(kvstore);
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 118817;

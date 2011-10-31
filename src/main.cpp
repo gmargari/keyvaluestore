@@ -5,7 +5,7 @@
 #include "LogCompactionManager.h"
 #include "RangemergeCompactionManager.h"
 #include "Statistics.h"
-#include "RangeScanner.h"
+#include "Scanner.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -642,7 +642,7 @@ void *get_routine(void *args)
     unsigned int rseed;
     char     key[MAX_KVTSIZE];
     int i = 0;
-    RangeScanner *scanner = new RangeScanner(gargs->kvstore);
+    Scanner *scanner = new Scanner(gargs->kvstore);
 
     printf("[DEBUG]  thread %d started\n", gargs->tid);
     rseed = getpid();
