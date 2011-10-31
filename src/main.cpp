@@ -53,23 +53,16 @@ long int zipf_n = 1000000;     // parameter for zipf() function
 // is a loop in zipf() that goes from 1 to 'n'. So, the greater 'n' is,
 // the more time zipf() needs to generate a zipf number.
 
-struct put_args { // arguments for put thread
+struct thread_args {
+    int tid;
     int sflag;
     int uflag;
     int zipf_keys;
-    uint32_t keysize;
     int print_kv_and_continue;
     uint64_t num_keys_to_insert;
+    uint32_t keysize;
     uint32_t valuesize;
     KeyValueStore *kvstore;
-};
-
-struct get_args { // arguments for get threads
-    int uflag;
-    int zipf_keys;
-    uint32_t keysize;
-    KeyValueStore *kvstore;
-    int tid;
 };
 
 bool put_thread_finished = false;
@@ -149,8 +142,7 @@ int main(int argc, char **argv)
              zipf_keys,
              print_kv_and_continue = false;
     KeyValueStore *kvstore;
-    struct put_args pargs;
-    struct get_args *gargs;
+    struct thread_args *targs;
     pthread_t *thread;
 
     // we need at least compaction manager
@@ -483,35 +475,30 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     // fill-in arguments of put thread and get threads
     //--------------------------------------------------------------------------
-    pargs.uflag = uflag;
-    pargs.sflag = sflag;
-    pargs.zipf_keys = zipf_keys;
-    pargs.print_kv_and_continue = print_kv_and_continue;
-    pargs.num_keys_to_insert = num_keys_to_insert;
-    pargs.keysize = keysize,
-    pargs.valuesize = valuesize;
-    pargs.kvstore = kvstore;
-
-    gargs = (struct get_args *)malloc(num_get_threads*sizeof(get_args));
-    for (i = 0; i < num_get_threads; i++) {
-        gargs[i].tid = i + 1;
-        gargs[i].uflag = uflag;
-        gargs[i].zipf_keys = zipf_keys;
-        gargs[i].keysize = keysize,
-        gargs[i].kvstore = kvstore;
+    targs = (struct thread_args *)malloc((1 + num_get_threads) * sizeof(thread_args));
+    for (i = 0; i < 1 + num_get_threads; i++) {
+        targs[i].tid = i;
+        targs[i].uflag = uflag;
+        targs[i].sflag = sflag;
+        targs[i].zipf_keys = zipf_keys;
+        targs[i].print_kv_and_continue = print_kv_and_continue;
+        targs[i].num_keys_to_insert = num_keys_to_insert;
+        targs[i].keysize = keysize,
+        targs[i].valuesize = valuesize;
+        targs[i].kvstore = kvstore;
     }
 
     //--------------------------------------------------------------------------
     // create put thread and get threads
     //--------------------------------------------------------------------------
-    thread = (pthread_t *)malloc((1 + num_get_threads)*sizeof(pthread_t));
+    thread = (pthread_t *)malloc((1 + num_get_threads) * sizeof(pthread_t));
 
     // create get threads
     for(i = 0; i < 1 + num_get_threads; i++) {
         if (i == 0) {
-            retval = pthread_create(&thread[i], NULL, put_routine, (void *)&pargs);
+            retval = pthread_create(&thread[i], NULL, put_routine, (void *)&targs[i]);
         } else {
-            retval = pthread_create(&thread[i], NULL, get_routine, (void *)&gargs[i-1]);
+            retval = pthread_create(&thread[i], NULL, get_routine, (void *)&targs[i]);
         }
         if (retval) {
             perror("pthread_create");
@@ -558,22 +545,22 @@ int main(int argc, char **argv)
  *============================================================================*/
 void *put_routine(void *args)
 {
-    struct put_args *pargs = (struct put_args *)args;
-    int      uflag = pargs->uflag,
-             sflag = pargs->sflag,
-             zipf_keys = pargs->zipf_keys,
-             print_kv_and_continue = pargs->print_kv_and_continue;
-    uint64_t num_keys_to_insert = pargs->num_keys_to_insert;
-    uint32_t keysize = pargs->keysize,
-             valuesize = pargs->valuesize,
-             kseed = 0, // kseed = getpid() + time(NULL);
+    struct thread_args *targs = (struct thread_args *)args;
+    int      uflag = targs->uflag,
+             sflag = targs->sflag,
+             zipf_keys = targs->zipf_keys,
+             print_kv_and_continue = targs->print_kv_and_continue;
+    uint64_t num_keys_to_insert = targs->num_keys_to_insert;
+    uint32_t keysize = targs->keysize,
+             valuesize = targs->valuesize;
+    KeyValueStore *kvstore = targs->kvstore;
+    uint32_t kseed = targs->tid, // kseed = getpid() + time(NULL);
              vseed = kseed + 1;
-    KeyValueStore *kvstore = pargs->kvstore;
     char    *key = NULL,
             *value = NULL;
     uint64_t bytes_inserted = 0;
 
-    printf("[DEBUG]  put thread started\n");
+    printf("[DEBUG]  put thread started\n", targs->tid);
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
@@ -605,7 +592,7 @@ void *put_routine(void *args)
                 randstr_r(key, keysize, &kseed);
             }
             if (uflag) {
-                sprintf(key, "%s.%Ld", key, i); // Make key unique by appending a unique number
+                sprintf(key, "%s.%Ld", key, i); // make unique
             }
             randstr_r(value, valuesize, &vseed);
         }
@@ -637,17 +624,17 @@ void *put_routine(void *args)
  *============================================================================*/
 void *get_routine(void *args)
 {
-    struct get_args *gargs = (struct get_args *)args;
-    int      uflag = gargs->uflag,
-             zipf_keys = gargs->zipf_keys;
-    uint32_t keysize = gargs->keysize,
-             kseed = gargs->tid, // kseed = getpid() + time(NULL);
+    struct thread_args *targs = (struct thread_args *)args;
+    int      uflag = targs->uflag,
+             zipf_keys = targs->zipf_keys;
+    uint32_t keysize = targs->keysize;
+    uint32_t kseed = targs->tid, // kseed = getpid() + time(NULL);
              tseed = kseed + 1;
     char     key[MAX_KVTSIZE];
-    int i = 0;
-    Scanner *scanner = new Scanner(gargs->kvstore);
+    int      i = 0;
+    Scanner *scanner = new Scanner(targs->kvstore);
 
-    printf("[DEBUG]  thread %d started\n", gargs->tid);
+    printf("[DEBUG]  get thread %d started\n", targs->tid);
 
     while (!put_thread_finished) {
 
@@ -662,7 +649,7 @@ void *get_routine(void *args)
             randstr_r(key, keysize, &kseed);
         }
         if (uflag) {
-            sprintf(key, "%s#%d", key, i++); // make key unique AND NON EXISTING!
+            sprintf(key, "%s#%d", key, i++); // make unique
         }
 
         //--------------------------------------------------------------
