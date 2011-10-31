@@ -18,6 +18,7 @@
 #include <iostream>
 #include <vector>
 #include <sys/time.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -27,6 +28,8 @@ using namespace std;
 // forward declaration of functions
 //------------------------------------------------------------------------------
 
+void  *put_routine(void *args);
+void  *get_routine(void *args);
 void   randstr(char *s, const int len);
 void   zipfstr(char *s, const int len);
 int    zipf();
@@ -42,15 +45,34 @@ const uint32_t DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
-const int      DEFAULT_NUM_POINT_GETS =         0;
-const int      DEFAULT_NUM_RANGE_GETS =         0;
-const bool     DEFAULT_FLUSH_PAGE_CACHE =   false;
+const int      DEFAULT_NUM_GET_THREADS =        0;
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 long int zipf_n = 1000000;     // parameter for zipf() function
 // 'zipf_n' affects the generation time of a random zipf number: there
 // is a loop in zipf() that goes from 1 to 'n'. So, the greater 'n' is,
 // the more time zipf() needs to generate a zipf number.
+
+struct put_args { // arguments for put thread
+    int uflag;
+    int sflag;
+    int zipf_keys;
+    int print_kv_and_continue;
+    uint64_t num_keys_to_insert;
+    uint32_t keysize;
+    uint32_t valuesize;
+    KeyValueStore *kvstore;
+};
+
+struct get_args { // arguments for get threads
+    int uflag;
+    int zipf_keys;
+    uint32_t keysize;
+    KeyValueStore *kvstore;
+    int tid;
+};
+
+bool put_thread_finished = false;
 
 /*============================================================================
  *                             print_syntax
@@ -71,16 +93,12 @@ void print_syntax(char *progname)
      printf("        -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
      printf("        -z:                     create zipfian keys (default: uniform keys)\n");
      printf("        -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
+     printf("        -g numgetthreads:       number of get threads (default: %d)\n", DEFAULT_NUM_GET_THREADS);
      printf("        -o statsperiod:         every time that many MB are inserted, print stats by far.\n");
      printf("                                also, executed a number of gets() and print related stats\n");
      printf("                                (default: memorysize/2)\n");
-     printf("        -g numofpointgets:      how many point get()s we will perform every 'statsperiod'\n");
-     printf("                                bytes of data inserted. '-g' and '-G' are mutually exclusive\n");
-     printf("        -G numofrangegets:      how many range get()s we will perform every 'statsperiod'\n");
-     printf("                                bytes of data inserted. '-g' and '-G' are mutually exclusive\n");
      printf("        -s:                     read key-values from stdin\n");
      printf("        -e:                     print key-values that would be inserted and exit\n");
-     printf("        -x:                     flush page cache before performing get()s (default: %s)\n", (DEFAULT_FLUSH_PAGE_CACHE) ? "true " : "false");
      printf("        -h:                     print this help message and exit\n");
 }
 
@@ -89,7 +107,7 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    char    *allargs = "hc:r:p:b:f:m:i:n:k:v:uzo:g:G:sex";
+    char    *allargs = "hc:r:p:b:f:m:i:n:k:v:uzg:o:se";
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
@@ -102,27 +120,22 @@ int main(int argc, char **argv)
              vflag = 0,
              uflag = 0,
              zflag = 0,
-             oflag = 0,
              gflag = 0,
-             Gflag = 0,
+             oflag = 0,
              sflag = 0,
              eflag = 0,
-             xflag = 0,
              myopt,
-             num_point_gets,
-             num_range_gets,
-             num_gets,
+             i,
              geom_r,
-             geom_p;
+             geom_p,
+             num_get_threads,
+             retval;
     uint64_t blocksize,
              flushmemorysize,
              memorysize,
              insertbytes,
              periodic_stats_step,
-             num_keys_to_insert,
-             bytes_inserted,
-             next_stats_print,
-             total_search_time = 0;
+             num_keys_to_insert;
     uint32_t keysize,
              valuesize;
     char    *compmanager = NULL,
@@ -132,13 +145,13 @@ int main(int argc, char **argv)
             *ptr;
     bool     unique_keys,
              zipf_keys,
-             flush_page_cache,
              print_kv_and_continue = false;
     KeyValueStore *kvstore;
-    struct timeval search_start, search_end;
-    RangeScanner *scanner;
+    struct put_args pargs;
+    struct get_args *gargs;
+    pthread_t *thread;
 
-    // We need at least compaction manager
+    // we need at least compaction manager
     if (argc == 1) {
          print_syntax(argv[0]);
          exit(EXIT_FAILURE);
@@ -226,22 +239,16 @@ int main(int argc, char **argv)
             zipf_keys = true;
             break;
 
+        case 'g':
+            CHECK_DUPLICATE_ARG(gflag, myopt);
+            gflag = 1;
+            num_get_threads = atoi(optarg);
+            break;
+
         case 'o':
             CHECK_DUPLICATE_ARG(oflag, myopt);
             oflag = 1;
             periodic_stats_step = mb2b(atof(optarg));
-            break;
-
-        case 'g':
-            CHECK_DUPLICATE_ARG(gflag, myopt);
-            gflag = 1;
-            num_point_gets = atoi(optarg);
-            break;
-
-        case 'G':
-            CHECK_DUPLICATE_ARG(Gflag, myopt);
-            Gflag = 1;
-            num_range_gets = atoi(optarg);
             break;
 
         case 'e':
@@ -253,12 +260,6 @@ int main(int argc, char **argv)
         case 's':
             CHECK_DUPLICATE_ARG(sflag, myopt);
             sflag = 1;
-            break;
-
-        case 'x':
-            CHECK_DUPLICATE_ARG(xflag, myopt);
-            xflag = 1;
-            flush_page_cache = true;
             break;
 
         case '?':
@@ -276,7 +277,7 @@ int main(int argc, char **argv)
         }
     }
 
-    for (int i = optind; i < argc; i++) {
+    for (i = optind; i < argc; i++) {
         printf ("Error: non-option argument: '%s'\n", argv[i]);
         exit(EXIT_FAILURE);
     }
@@ -321,17 +322,11 @@ int main(int argc, char **argv)
     if (nflag == 0) {
         num_keys_to_insert = insertbytes / (keysize + valuesize);
     }
+    if (gflag == 0) {
+        num_get_threads = DEFAULT_NUM_GET_THREADS;
+    }
     if (oflag == 0) {
         periodic_stats_step = memorysize/2;
-    }
-    if (gflag == 0) {
-        num_point_gets = DEFAULT_NUM_POINT_GETS;
-    }
-    if (Gflag == 0) {
-        num_range_gets = DEFAULT_NUM_RANGE_GETS;
-    }
-    if (xflag == 0) {
-        flush_page_cache = DEFAULT_FLUSH_PAGE_CACHE;
     }
 
     //--------------------------------------------------------------------------
@@ -365,10 +360,6 @@ int main(int argc, char **argv)
     }
     if (nflag && iflag) {
         printf("Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters\n");
-        exit(EXIT_FAILURE);
-    }
-    if (gflag && Gflag) {
-        printf("Error: you cannot execute both gets ('-g') and range gets ('-G')\n");
         exit(EXIT_FAILURE);
     }
     if (sflag) {
@@ -455,9 +446,7 @@ int main(int argc, char **argv)
         printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
         printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");
     }
-    printf("# num_gets:            %15d    %s\n", num_point_gets, (gflag == 0) ? "(default)" : "");
-    printf("# num_range_gets:      %15d    %s\n", num_range_gets, (Gflag == 0) ? "(default)" : "");
-    printf("# flush_page_cache:    %15s    %s\n", (flush_page_cache) ? "true" : "false", (xflag == 0) ? "(default)" : "");
+    printf("# num_get_threads:     %15d    %s\n", num_get_threads, (gflag == 0) ? "(default)" : "");
     printf("# print_stats_every:   %15.0f MB %s\n", b2mb(periodic_stats_step), (oflag == 0) ? "(default)" : "");
     if (strcmp(compmanager, "geometric") == 0) {
         if (pflag == 0) {
@@ -487,21 +476,103 @@ int main(int argc, char **argv)
     key = (char *)malloc(MAX_KVTSIZE);
     end_key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
-    bytes_inserted = 0;
-    next_stats_print = periodic_stats_step;
     rand_val(1.0); // must be called at least once with arg > 0, to seed Zipf randval()
 
     //--------------------------------------------------------------------------
-    // just print zipf keys to stdout and exit
+    // fill-in arguments of put thread and get threads
     //--------------------------------------------------------------------------
-//     for (uint64_t i = 0 ; i < (int)num_keys_to_insert; i++) {
-//         zipfstr(key, keysize);
-//         if (uflag)
-//             sprintf(key, "%s.%Ld", key, i); // make key unique
-//         printf("%s\n", key);
-//     }
-//     exit(0);
+    pargs.uflag = uflag;
+    pargs.sflag = sflag;
+    pargs.zipf_keys = zipf_keys;
+    pargs.print_kv_and_continue = print_kv_and_continue;
+    pargs.num_keys_to_insert = num_keys_to_insert;
+    pargs.keysize = keysize,
+    pargs.valuesize = valuesize;
+    pargs.kvstore = kvstore;
+
+    gargs = (struct get_args *)malloc(num_get_threads*sizeof(get_args));
+    for (i = 0; i < num_get_threads; i++) {
+        gargs[i].tid = i;
+        gargs[i].uflag = uflag;
+        gargs[i].zipf_keys = zipf_keys;
+        gargs[i].keysize = keysize,
+        gargs[i].kvstore = kvstore;
+    }
+
     //--------------------------------------------------------------------------
+    // create put thread and get threads
+    //--------------------------------------------------------------------------
+    thread = (pthread_t *)malloc((1 + num_get_threads)*sizeof(pthread_t));
+
+    // create get threads
+    for(i = 0; i < 1 + num_get_threads; i++) {
+        if (i == 0) {
+            retval = pthread_create(&thread[i], NULL, put_routine, (void *)&pargs);
+        } else {
+            retval = pthread_create(&thread[i], NULL, get_routine, (void *)&gargs[i-1]);
+        }
+        if (retval) {
+            perror("pthread_create");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // wait for threads to finish
+    //--------------------------------------------------------------------------
+    for(i = 0; i < 1 + num_get_threads; i++) {
+        pthread_join(thread[i], NULL);
+    }
+
+    if (!print_kv_and_continue) { // if we did insert some kvs to kvstore
+
+        // if we crete unique keys, assert num keys in store equals num keys inserted
+        if (uflag) {
+            assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
+        }
+
+        // flush remaining memory tuples
+        while (kvstore->get_mem_size()) {
+            kvstore->flush_bytes();
+        }
+
+        if (uflag) {
+            assert(kvstore->get_num_mem_keys() == 0);
+            assert(kvstore->get_num_disk_keys() == num_keys_to_insert);
+        }
+    }
+
+    free(key);
+    free(end_key);
+    free(value);
+    free(thread);
+    delete kvstore;
+
+    return EXIT_SUCCESS;
+}
+
+/*============================================================================
+ *                              put_routine
+ *============================================================================*/
+void *put_routine(void *args)
+{
+    struct put_args *pargs = (struct put_args *)args;
+    int      uflag = pargs->uflag,
+             sflag = pargs->sflag,
+             zipf_keys = pargs->zipf_keys,
+             print_kv_and_continue = pargs->print_kv_and_continue;
+    uint64_t num_keys_to_insert = pargs->num_keys_to_insert;
+    uint32_t keysize = pargs->keysize,
+             valuesize = pargs->valuesize;
+    KeyValueStore *kvstore = pargs->kvstore;
+    char    *key = NULL,
+            *value = NULL;
+    uint64_t bytes_inserted = 0;
+
+    printf("[DEBUG]  put thread started\n");
+
+    key = (char *)malloc(MAX_KVTSIZE);
+    value = (char *)malloc(MAX_KVTSIZE);
 
     // if we read keys and values from stdin, set num_keys_to_insert to 'infinity'
     if (sflag) {
@@ -522,15 +593,15 @@ int main(int argc, char **argv)
             }
         } else {
             //----------------------------------------------------------------------
-            // create a random key or zipfian key, and a random value
+            // create a random key and a random value
             //----------------------------------------------------------------------
-            if (zipf_keys) {
+            if (zipf_keys) {    // TODO: randstr(), zipfstr should take as arg a random seed (See rand_r()).
                 zipfstr(key, keysize);
             } else {
                 randstr(key, keysize);
             }
             if (uflag) {
-                sprintf(key + strlen(key), ".%Ld", i); // make key unique by appending a unique number
+                sprintf(key, "%s.%Ld", key, i); // Make key unique by appending a unique number
             }
             randstr(value, valuesize);
         }
@@ -547,135 +618,61 @@ int main(int argc, char **argv)
         // insert <key, value> into store
         //----------------------------------------------------------------------
         kvstore->put(key, value);
-
         bytes_inserted += strlen(key) + strlen(value);
-
-        //----------------------------------------------------------------------
-        // every 'periodic_stats_step' bytes inserted:
-        // - print stats by far
-        // - execute a number of point gets or range gets
-        //----------------------------------------------------------------------
-        if (bytes_inserted > next_stats_print) {
-            next_stats_print += periodic_stats_step;
-            kvstore->get_total_time_sec(); // make sure we call this first, so total_time is properly updated... (bad hack)
-            printf("%8.0f   %6u  %6u  %6u   %6u  %6u  %6u    %6u  %6u  %6u   %7u  %7u  %7u  %7u  %5d   ",
-              b2mb(bytes_inserted),
-              kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(), kvstore->get_put_time_sec(),
-              kvstore->get_merge_time_sec(), kvstore->get_free_time_sec(), kvstore->get_cmrest_time_sec(),
-              kvstore->get_mem_time_sec(), kvstore->get_read_time_sec(), kvstore->get_write_time_sec(),
-              kvstore->get_mb_read(), kvstore->get_mb_written(),
-              kvstore->get_num_reads(), kvstore->get_num_writes(),
-              kvstore->get_num_disk_files());
-            fflush(stdout);
-
-            stats_sanity_check();
-
-            // do not include io caused by searches (number of reads, amount of
-            // bytes read) in global stats
-            global_stats_disable_gathering();
-
-            //------------------------------------------------------------------
-            // if needed, flush page cache before executing get()s. this ensures
-            // data will be read from disk and not from page cache.
-            //------------------------------------------------------------------
-            if (flush_page_cache) {
-                system("echo 3 > /proc/sys/vm/drop_caches");
-            }
-
-            // if we will perform range gets
-            if (Gflag) {
-                scanner = new RangeScanner(kvstore);
-                num_gets = num_range_gets;
-            }
-            // else, we perform point gets
-            else {
-                num_gets = num_point_gets;
-            }
-
-            //--------------------------------------------------------------------------
-            // until we have executed all gets or range gets
-            //--------------------------------------------------------------------------
-            total_search_time = 0;
-            for (int j = 0; j < num_gets; j++) {
-
-                //--------------------------------------------------------------
-                // create a random key
-                //--------------------------------------------------------------
-                randstr(key, keysize);
-                if (uflag) {
-                    sprintf(key + strlen(key), ".%Ld.%d", i, j); // make key unique by appending a unique number
-                }
-
-                gettimeofday(&search_start, NULL);
-
-                //--------------------------------------------------------------
-                // execute get()
-                //--------------------------------------------------------------
-                if (gflag) {
-                    scanner->point_get(key);
-                }
-                //--------------------------------------------------------------
-                // execute range get()
-                //--------------------------------------------------------------
-                else if (Gflag) {
-                    strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
-                    end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
-                    scanner->range_get(key, end_key);
-                }
-
-                gettimeofday(&search_end, NULL);
-                total_search_time += (search_end.tv_sec - search_start.tv_sec) * 1000000 + (search_end.tv_usec - search_start.tv_usec);
-            }
-
-            if (Gflag) {
-                delete scanner;
-            }
-
-            global_stats_enable_gathering();
-
-            // print get() stats and number of disk files
-            printf("%7.2f  ", (num_gets ? usec2msec(total_search_time) / num_gets : 0)); fflush(stdout);
-            system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
-            printf("\n");
-        }
     }
 
-    if (!print_kv_and_continue) {
-        // print stats one last time
-        printf("%8.0f   %6u  %6u  %6u   %6u  %6u  %6u    %6u  %6u  %6u   %7u  %7u  %7u  %7u  %5d   ",
-            b2mb(bytes_inserted),
-            kvstore->get_total_time_sec(), kvstore->get_compaction_time_sec(), kvstore->get_put_time_sec(),
-            kvstore->get_merge_time_sec(), kvstore->get_free_time_sec(), kvstore->get_cmrest_time_sec(),
-            kvstore->get_mem_time_sec(), kvstore->get_read_time_sec(), kvstore->get_write_time_sec(),
-            kvstore->get_mb_read(), kvstore->get_mb_written(),
-            kvstore->get_num_reads(), kvstore->get_num_writes(),
-            kvstore->get_num_disk_files());
-        printf("%7.2f  ", (num_gets ? usec2msec(total_search_time) / num_gets : 0)); fflush(stdout);
-        system("ls -l /tmp/fsim.* 2> /dev/null | awk '{print $5}' | sort -rn | awk '{printf \"%d \", $1/1048576}'");
-        printf("\n");
-    }
-
-    // if we crete unique keys, assert num keys in store equals num keys inserted
-    if (uflag) {
-        assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
-    }
-
-    // flush remaining memory tuples
-    while (kvstore->get_mem_size()) {
-        kvstore->flush_bytes();
-    }
-
-    if (uflag) {
-        assert(kvstore->get_num_mem_keys() == 0);
-        assert(kvstore->get_num_disk_keys() == num_keys_to_insert);
-    }
+    put_thread_finished = true;
 
     free(key);
-    free(end_key);
     free(value);
-    delete kvstore;
+    pthread_exit(NULL);
+}
 
-    return EXIT_SUCCESS;
+/*============================================================================
+ *                              get_routine
+ *============================================================================*/
+void *get_routine(void *args)
+{
+    struct get_args *gargs = (struct get_args *)args;
+    int      uflag = gargs->uflag,
+             zipf_keys = gargs->zipf_keys;
+    uint32_t keysize = gargs->keysize;
+    unsigned int rseed;
+    char     key[MAX_KVTSIZE];
+    int i = 0;
+    RangeScanner *scanner = new RangeScanner(gargs->kvstore);
+
+    printf("[DEBUG]  thread %d started\n", gargs->tid);
+    rseed = getpid();
+
+    while (!put_thread_finished) {
+
+        usleep(rand_r(&rseed) % 10000); // sleep for a random number of ms between 0 and 500000
+
+        //--------------------------------------------------------------
+        // create a random key
+        //--------------------------------------------------------------
+        if (zipf_keys) {        // TODO: randstr(), zipfstr should take as arg a random seed (See rand_r()).
+            zipfstr(key, keysize);
+        } else {
+            randstr(key, keysize);
+        }
+
+        if (uflag) {
+            sprintf(key, "%s#%d", key, i++); // make key unique AND NON EXISTING!
+        }
+
+        //--------------------------------------------------------------
+        // execute range get()
+        //--------------------------------------------------------------
+        scanner->point_get(key);
+//         strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
+//         end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
+//         scanner->range_get(key, end_key);
+    }
+
+    delete scanner;
+    pthread_exit(NULL);
 }
 
 
