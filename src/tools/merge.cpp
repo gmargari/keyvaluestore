@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     prev_key[0] = '\0';
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
-            printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
+            printf("[%s] [%s] [%Lu]\n", key, value, timestamp);
         }
         strcpy(prev_key, key);
     }
