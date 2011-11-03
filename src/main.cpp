@@ -101,7 +101,7 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    char    *allargs = "hc:r:p:b:f:m:i:n:k:v:uzg:o:se";
+    char     allargs[] = "hc:r:p:b:f:m:i:n:k:v:uzg:o:se";
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
@@ -706,6 +706,8 @@ void zipfstr_r(char *s, const int len, uint32_t *seed)
 /*
  * code below from (has been modified for fastest number generation):
  *    http://www.csee.usf.edu/~christen/tools/toolpage.html
+ * code was modified to precomput sum of probabilities and use integers
+ * instead of doubles
  */
 
 /*============================================================================
@@ -713,34 +715,41 @@ void zipfstr_r(char *s, const int len, uint32_t *seed)
  *============================================================================*/
 int zipf_r(uint32_t *seed)
 {
-    static bool first = true;     // Static first time flag
-    static double c = 0;          // Normalization constant
-    static double *sum_prob;      // Sum of probabilities
-    double z;                     // Uniform random number (0 < z < 1)
-    double zipf_value;            // Computed exponential value to be returned
-    int    i;                     // Loop counter
+    static int *sum_prob = NULL; // sum of probabilities
+    int z,                       // uniform random number (0 <= z <= RAND_MAX)
+        zipf_value,              // computed exponential value to be returned
+        i;
 
-    // Compute normalization constant on first call only
-    if (first == true) {
-        first = false;
+    // compute sum of probabilities on first call only
+    if (sum_prob == NULL) {
+        double *sum_prob_f;
+        double c = 0;            // normalization constant
 
         for (i = 1; i <= zipf_n; i++) {
             c = c + (1.0 / pow((double) i, zipf_alpha));
         }
         c = 1.0 / c;
 
-        // gmargari mod: precompute sum of probabilities
-        sum_prob = (double *)malloc((zipf_n + 1) * sizeof(double));
-        sum_prob[1] = c / pow((double) 1, zipf_alpha);
-        for (i = 2; i <= zipf_n; i++) {
-            sum_prob[i] = sum_prob[i-1] + c / pow((double) i, zipf_alpha);
+        // precompute sum of probabilities
+        sum_prob_f = (double *)malloc((zipf_n + 1) * sizeof(double));
+        sum_prob_f[0] = 0;
+        for (i = 1; i <= zipf_n; i++) {
+            sum_prob_f[i] = sum_prob_f[i-1] + c / pow((double) i, zipf_alpha);
+        }
+
+        // from array of doubles sum_prob_f[] that contains values in range
+        // [0,1], compute array of integers sum_prob_i[] that contains values
+        // in range [0,RAND_MAX]
+        sum_prob = (int *)malloc((zipf_n + 1) * sizeof(int));
+        for (i = 0; i <= zipf_n; i++) {
+            sum_prob[i] = (int)(sum_prob_f[i] * RAND_MAX);
         }
     }
 
-    // Pull a uniform random number (0 < z < 1)
-    z = (double)rand_r(seed) / (double)RAND_MAX;
+    // pull a uniform random number (0 <= z <= RAND_MAX)
+    z = rand_r(seed);
 
-    // Map z to the value
+    // map z to the value
     for (i = 1; i <= zipf_n; i++) {
         if (sum_prob[i] >= z) {
             zipf_value = i;
@@ -748,7 +757,7 @@ int zipf_r(uint32_t *seed)
         }
     }
 
-    // Assert that zipf_value is between 1 and N
+    // assert that zipf_value is between 1 and N
     assert((zipf_value >= 1) && (zipf_value <= zipf_n));
 
     return(zipf_value);
