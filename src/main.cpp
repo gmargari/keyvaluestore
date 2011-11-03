@@ -558,7 +558,7 @@ void *put_routine(void *args)
             *value = NULL;
     uint64_t bytes_inserted = 0;
 
-    printf("# [DEBUG]  put thread started\n", targs->tid);
+    printf("# [DEBUG]  put thread started\n");
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
