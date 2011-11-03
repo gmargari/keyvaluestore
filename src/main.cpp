@@ -33,7 +33,6 @@ void  *get_routine(void *args);
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr(char *s, const int len);
 int    zipf();
-double rand_val(int seed);
 
 //------------------------------------------------------------------------------
 // default values
@@ -470,7 +469,6 @@ int main(int argc, char **argv)
     key = (char *)malloc(MAX_KVTSIZE);
     end_key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
-    rand_val(1.0); // must be called at least once with arg > 0, to seed Zipf randval()
 
     //--------------------------------------------------------------------------
     // fill-in arguments of put thread and get threads
@@ -740,9 +738,7 @@ int zipf()
     }
 
     // Pull a uniform random number (0 < z < 1)
-    do {
-        z = rand_val(0);
-    } while ((z == 0) || (z == 1));
+    z = (double)rand() / (double)RAND_MAX;
 
     // Map z to the value
     for (i = 1; i <= zipf_n; i++) {
@@ -756,38 +752,4 @@ int zipf()
     assert((zipf_value >= 1) && (zipf_value <= zipf_n));
 
     return(zipf_value);
-}
-
-/*============================================================================
- *                               rand_val
- *============================================================================*/
-double rand_val(int seed)        // Return a random value between 0.0 and 1.0
-{
-    const long  a =      16807;  // Multiplier
-    const long  m = 2147483647;  // Modulus
-    const long  q =     127773;  // m div a
-    const long  r =       2836;  // m mod a
-    static long x;               // Random int value
-    long        x_div_q;         // x divided by q
-    long        x_mod_q;         // x modulo q
-    long        x_new;           // New x value
-
-    // Set the seed if argument is non-zero and then return zero
-    if (seed > 0) {
-        x = seed;
-        return(0.0);
-    }
-
-    // RNG using integer arithmetic
-    x_div_q = x / q;
-    x_mod_q = x % q;
-    x_new = (a * x_mod_q) - (r * x_div_q);
-    if (x_new > 0) {
-        x = x_new;
-    } else {
-        x = x_new + m;
-    }
-
-    // Return a random value between 0.0 and 1.0
-    return((double) x / m);
 }
