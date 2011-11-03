@@ -560,7 +560,7 @@ void *put_routine(void *args)
             *value = NULL;
     uint64_t bytes_inserted = 0;
 
-    printf("[DEBUG]  put thread started\n", targs->tid);
+    printf("# [DEBUG]  put thread started\n", targs->tid);
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
@@ -634,7 +634,7 @@ void *get_routine(void *args)
     int      i = 0;
     Scanner *scanner = new Scanner(targs->kvstore);
 
-    printf("[DEBUG]  get thread %d started\n", targs->tid);
+    printf("# [DEBUG]  get thread %d started\n", targs->tid);
 
     while (!put_thread_finished) {
 

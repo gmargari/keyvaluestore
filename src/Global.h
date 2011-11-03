@@ -88,7 +88,7 @@ typedef enum { CM_MERGE_ONLINE, CM_MERGE_OFFLINE } merge_type;
 // macros to print an expression and its value
 //==============================================================================
 
-#define DEBUG_PROMPT "[DEBUG] "
+#define DEBUG_PROMPT "# [DEBUG] "
 
 /* integers */
 #define dbg_i(expr)        STMT( if (DBGLVL) { printf("%s " #expr " = %d\n", DEBUG_PROMPT, expr); fflush(stdout); } )

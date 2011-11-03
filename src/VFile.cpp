@@ -56,7 +56,7 @@ bool VFile::add_new_physical_file(bool open_existing)
     assert(fname);
 
     if (DBGLVL > 0) {
-        printf("[DEBUG]  %s [+]\n", fname);
+        printf("# [DEBUG]  %s [+]\n", fname);
     }
 
     fdflag = O_RDWR;
@@ -207,7 +207,7 @@ void VFile::fs_truncate(off_t length)
         for (int i = new_files; i < (int)m_names.size(); i++) {
 
             if (DBGLVL > 0) {
-                printf("[DEBUG]  %s [-]\n", m_names[i]);
+                printf("# [DEBUG]  %s [-]\n", m_names[i]);
             }
 
             if (remove(m_names[i]) == -1) {
@@ -258,7 +258,7 @@ void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and crea
     assert(m_names.size() == m_filedescs.size());
     for (int i = 0; i < (int)m_names.size(); i++) {
         if (DBGLVL > 0) {
-            printf("[DEBUG]  %s [-]\n", m_names[i]);
+            printf("# [DEBUG]  %s [-]\n", m_names[i]);
         }
 
         if (remove(m_names[i]) == -1) {
