@@ -31,8 +31,8 @@ using namespace std;
 void  *put_routine(void *args);
 void  *get_routine(void *args);
 void   randstr_r(char *s, const int len, uint32_t *seed);
-void   zipfstr(char *s, const int len);
-int    zipf();
+void   zipfstr_r(char *s, const int len, uint32_t *seed);
+int    zipf_r(uint32_t *seed);
 
 //------------------------------------------------------------------------------
 // default values
@@ -585,7 +585,7 @@ void *put_routine(void *args)
             // create a random key and a random value
             //----------------------------------------------------------------------
             if (zipf_keys) {
-                zipfstr(key, keysize);
+                zipfstr_r(key, keysize, &kseed);
             } else {
                 randstr_r(key, keysize, &kseed);
             }
@@ -642,7 +642,7 @@ void *get_routine(void *args)
         // create a random key
         //--------------------------------------------------------------
         if (zipf_keys) {
-            zipfstr(key, keysize);
+            zipfstr_r(key, keysize, &kseed);
         } else {
             randstr_r(key, keysize, &kseed);
         }
@@ -683,9 +683,9 @@ void randstr_r(char *s, const int len, uint32_t *seed)
 }
 
 /*============================================================================
- *                               zipfstr
+ *                              zipfstr_r
  *============================================================================*/
-void zipfstr(char *s, const int len)
+void zipfstr_r(char *s, const int len, uint32_t *seed)
 {
     int num_digits = log10(zipf_n) + 1;
     int zipf_num;
@@ -699,7 +699,7 @@ void zipfstr(char *s, const int len)
         randstr_r(key_prefix, len - num_digits, &kseed);
     }
 
-    zipf_num = zipf();
+    zipf_num = zipf_r(seed);
     sprintf(s, "%s%0*d", key_prefix, num_digits, zipf_num);
 }
 
@@ -709,9 +709,9 @@ void zipfstr(char *s, const int len)
  */
 
 /*============================================================================
- *                                 zipf
+ *                               zipf_r
  *============================================================================*/
-int zipf()
+int zipf_r(uint32_t *seed)
 {
     static bool first = true;     // Static first time flag
     static double c = 0;          // Normalization constant
@@ -738,7 +738,7 @@ int zipf()
     }
 
     // Pull a uniform random number (0 < z < 1)
-    z = (double)rand() / (double)RAND_MAX;
+    z = (double)rand_r(seed) / (double)RAND_MAX;
 
     // Map z to the value
     for (i = 1; i <= zipf_n; i++) {
