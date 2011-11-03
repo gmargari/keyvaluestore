@@ -718,7 +718,8 @@ int zipf_r(uint32_t *seed)
     static int *sum_prob = NULL; // sum of probabilities
     int z,                       // uniform random number (0 <= z <= RAND_MAX)
         zipf_value,              // computed exponential value to be returned
-        i;
+        i,
+        first, last, mid;        // for binary search
 
     // compute sum of probabilities on first call only
     if (sum_prob == NULL) {
@@ -749,12 +750,24 @@ int zipf_r(uint32_t *seed)
     // pull a uniform random number (0 <= z <= RAND_MAX)
     z = rand_r(seed);
 
-    // map z to the value
-    for (i = 1; i <= zipf_n; i++) {
-        if (sum_prob[i] >= z) {
-            zipf_value = i;
+    // map z to the value (find the first 'i' for which sum_prob[i] >= z)
+    first = 1;
+    last = zipf_n;
+    while (first <= last) {
+        mid = (last - first)/2 + first; // avoid overflow
+        if (z > sum_prob[mid]) {
+            first = mid + 1;
+        } else if (z < sum_prob[mid]) {
+            last = mid - 1;
+        } else {
             break;
         }
+    }
+
+    if (sum_prob[mid] >= z) {
+        zipf_value = mid;
+    } else {
+        zipf_value = mid + 1;
     }
 
     // assert that zipf_value is between 1 and N
