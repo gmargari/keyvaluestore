@@ -285,9 +285,11 @@ char *VFile::fs_name()
 uint64_t VFile::fs_size()
 {
     uint64_t size = 0;
+    struct stat filestatus;
 
     for (int i = 0; i < (int)m_filedescs.size(); i++) {
-        size += cur_fs_size(i);
+        stat(m_names[i], &filestatus);
+        size += filestatus.st_size;
     }
 
     return size;
@@ -379,15 +381,4 @@ ssize_t VFile::cur_fs_pwrite(const char *buf, size_t count, off_t offs)
     num_inc(&(g_stats.num_writes), 1);
 
     return actually_written;
-}
-
-/*============================================================================
- *                                 cur_fs_size
- *============================================================================*/
-uint64_t VFile::cur_fs_size(int fileno)
-{
-    struct stat filestatus;
-
-    stat(m_names[fileno], &filestatus);
-    return filestatus.st_size;
 }

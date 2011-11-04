@@ -45,7 +45,6 @@ protected:
     vector<int>     m_filedescs; // _using many physical files.
 
     bool            add_new_physical_file(bool open_existing);
-    uint64_t        cur_fs_size(int fileno);
     ssize_t         cur_fs_pwrite(const char *buf, size_t count, off_t offs);
     ssize_t         cur_fs_pread(char *buf, size_t count, off_t offs);
 };
