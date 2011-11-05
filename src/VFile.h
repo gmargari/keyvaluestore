@@ -31,7 +31,7 @@ public:
     bool            fs_open_existing(char *filename);
     void            fs_close();
     ssize_t         fs_pread(char *buf, size_t count, off_t offs);
-    ssize_t         fs_pwrite(const char *buf, size_t count, off_t offs);
+    ssize_t         fs_append(const char *buf, size_t count);
     void            fs_truncate(off_t length);
     void            fs_delete();
     char           *fs_name();
@@ -45,7 +45,7 @@ protected:
     vector<int>     m_filedescs; // _using many physical files.
 
     bool            add_new_physical_file(bool open_existing);
-    ssize_t         cur_fs_pwrite(const char *buf, size_t count, off_t offs);
+    ssize_t         cur_fs_append(const char *buf, size_t count);
     ssize_t         cur_fs_pread(char *buf, size_t count, off_t offs);
 };
 

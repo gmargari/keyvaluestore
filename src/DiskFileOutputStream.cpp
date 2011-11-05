@@ -13,7 +13,7 @@
  *                            DiskFileOutputStream
  *============================================================================*/
 DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
-    : m_file(file), m_offs(0), m_file_size(0), m_buf(NULL), m_index(NULL),
+    : m_file(file), m_file_size(0), m_buf(NULL), m_index(NULL),
       m_last_key(NULL), m_last_offs(-1), m_last_idx_offs(-1), m_stored_keys(0)
 {
     m_buf = new Buffer(bufsize);
@@ -36,7 +36,6 @@ DiskFileOutputStream::~DiskFileOutputStream()
  *============================================================================*/
 void DiskFileOutputStream::reset()
 {
-    m_offs = 0;
     m_buf->clear();
 
     m_index->clear(); // index will be rebuild
@@ -49,14 +48,14 @@ void DiskFileOutputStream::reset()
 /*============================================================================
  *                                  write
  *============================================================================*/
-bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool DiskFileOutputStream::append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
 {
     uint32_t len;
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
     if (Buffer::serialize_len(keylen, valuelen, timestamp) > m_buf->free_space()) {
-        m_offs += m_file->flush(m_buf, m_offs);
+        m_file->append(m_buf);
     }
 
     // serialize and add new pair to buffer
@@ -86,7 +85,7 @@ bool DiskFileOutputStream::write(const char *key, size_t keylen, const char *val
  *============================================================================*/
 void DiskFileOutputStream::close()
 {
-    m_offs += m_file->flush(m_buf, m_offs);
+    m_file->append(m_buf);
     m_file->sync();
 
     if (m_last_idx_offs != m_last_offs) {

@@ -39,7 +39,7 @@ void CompactionManager::copy_stream(InputStream *istream, OutputStream *ostream)
     time_start(&(g_stats.merge_time));
 
     while (istream->read(&key, &value, &timestamp)) {
-        ostream->write(key, strlen(key), value, strlen(value), timestamp);
+        ostream->append(key, strlen(key), value, strlen(value), timestamp);
     }
     ostream->close();
 
@@ -60,7 +60,7 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
     prev_key[0] = '\0';
     while (istream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
-            ostream->write(key, strlen(key), value, strlen(value), timestamp);
+            ostream->append(key, strlen(key), value, strlen(value), timestamp);
             strcpy(prev_key, key);
         }
     }
@@ -165,7 +165,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
             }
 
             filesize += len;
-            ostream->write(key, keylen, value, valuelen, timestamp);
+            ostream->append(key, keylen, value, valuelen, timestamp);
             strcpy(prev_key, key);
         }
     }

@@ -86,9 +86,9 @@ public:
     uint32_t fill(Buffer *buf, off_t offs);
 
     /**
-     * write all buffer bytes to this diskfile, clear buffer
+     * append all buffer bytes to this diskfile, clear buffer
      */
-    uint32_t flush(Buffer *buf, off_t offs);
+    uint32_t append(Buffer *buf);
 
     /**
      * sync pending diskfile writes to disk

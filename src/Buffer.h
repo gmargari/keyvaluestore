@@ -72,9 +72,9 @@ public:
     uint32_t fill(VFile *vfile, off_t offs);
 
     /**
-     * write buffer bytes to 'vfile', clear buffer
+     * append buffer bytes to 'vfile', clear buffer
      */
-    uint32_t flush(VFile *vfile, off_t offs);
+    uint32_t append(VFile *vfile);
 
     /**
      * shift all unused bytes to the beginning of buffer

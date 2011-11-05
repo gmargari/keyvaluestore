@@ -59,7 +59,7 @@ bool VFile::add_new_physical_file(bool open_existing)
         printf("# [DEBUG]  %s [+]\n", fname);
     }
 
-    fdflag = O_RDWR;
+    fdflag = O_RDWR | O_APPEND;
     if (open_existing == false) {
         fdflag |= O_CREAT | O_TRUNC;
     }
@@ -169,14 +169,14 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
 }
 
 /*============================================================================
- *                                fs_pwrite
+ *                                fs_append
  *============================================================================*/
-ssize_t VFile::fs_pwrite(const char *buf, size_t count, off_t offs)
+ssize_t VFile::fs_append(const char *buf, size_t count)
 {
     size_t bytes_written;
 
     for (bytes_written = 0; bytes_written < count; ) {
-        bytes_written += cur_fs_pwrite(buf + bytes_written, count - bytes_written, offs + bytes_written);
+        bytes_written += cur_fs_append(buf + bytes_written, count - bytes_written);
     }
 
     assert(bytes_written == count);
@@ -338,40 +338,32 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
 }
 
 /*============================================================================
- *                                cur_fs_pwrite
+ *                                cur_fs_append
  *============================================================================*/
-ssize_t VFile::cur_fs_pwrite(const char *buf, size_t count, off_t offs)
+ssize_t VFile::cur_fs_append(const char *buf, size_t count)
 {
     ssize_t actually_written;
-    off_t offs_in_file;
-    int fileno, num_files;
+    size_t bytes_left;
+    int fileno;
+    struct stat filestatus;
 
-    // calculate the file and the offset within the file
-    fileno = offs / MAX_FILE_SIZE;
-    offs_in_file = offs % MAX_FILE_SIZE;
-
-    // if file does not exist, create it (create also all other files needed.
-    // note that all files except last one must have size 'MAX_FILE_SIZE')
-    num_files = m_filedescs.size();
-    if (fileno >= num_files) {
-        num_files = fileno - num_files + 1; // how many files to create
-        for (int i = 0; i < num_files; i++) {
-            add_new_physical_file(false);
-            if (i < num_files - 1) {
-                if (ftruncate64(m_filedescs[i], MAX_FILE_SIZE) == (off_t)-1) {
-                    my_perror_exit();
-                }
-            }
-        }
+    // how many bytes can we write in last file
+    fileno = m_filedescs.size() - 1;
+    stat(m_names[fileno], &filestatus);
+    bytes_left = MAX_FILE_SIZE - filestatus.st_size;
+    if (bytes_left == 0) {
+        add_new_physical_file(false);
+        fileno++;
+        bytes_left = MAX_FILE_SIZE;
     }
 
     // write as many bytes as we can in current file
-    if (offs_in_file + count > MAX_FILE_SIZE) {
-        count = MAX_FILE_SIZE - offs_in_file;
+    if (count > bytes_left) {
+        count = bytes_left;
     }
 
     time_start(&(g_stats.write_time));
-    if ((actually_written = pwrite(m_filedescs[fileno], buf, count, offs_in_file)) == -1) {
+    if ((actually_written = pwrite(m_filedescs[fileno], buf, count, 0)) == -1) {
         my_perror_exit();
     }
     time_end(&(g_stats.write_time));

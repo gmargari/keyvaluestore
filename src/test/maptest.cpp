@@ -91,7 +91,7 @@ int main()
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
-        ostream1->write(k1, strlen(k1), v1, strlen(v1), timestamp);
+        ostream1->append(k1, strlen(k1), v1, strlen(v1), timestamp);
         strcpy(prev_key, k1);
     }
 
@@ -145,7 +145,7 @@ int main()
     prev_key[0] = '\0';
     while (pistream->read(&k1, &v1, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
-        ostream2->write(k1, strlen(k1), v1, strlen(v1), timestamp);
+        ostream2->append(k1, strlen(k1), v1, strlen(v1), timestamp);
         strcpy(prev_key, k1);
     }
     ostream2->close();

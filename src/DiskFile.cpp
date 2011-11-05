@@ -131,11 +131,11 @@ uint32_t DiskFile::fill(Buffer *buf, off_t offs)
 }
 
 /*============================================================================
- *                                  flush
+ *                                  append
  *============================================================================*/
-uint32_t DiskFile::flush(Buffer *buf, off_t offs)
+uint32_t DiskFile::append(Buffer *buf)
 {
-    return buf->flush(m_file, offs);
+    return buf->append(m_file);
 }
 
 /*============================================================================

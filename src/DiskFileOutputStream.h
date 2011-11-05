@@ -25,13 +25,12 @@ public:
 
     // inherited from OutputStream
     void reset();
-    bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
+    bool append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
     void close();
 
 protected:
 
     DiskFile    *m_file;          // file in which we store <key,value> pairs
-    off_t        m_offs;          // offset within diskfile we currently are
     uint64_t     m_file_size;     // current size of diskfile
     Buffer      *m_buf;           // buffer used for I/O
 

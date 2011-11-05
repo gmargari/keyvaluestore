@@ -16,11 +16,11 @@ public:
     virtual void reset() = 0;
 
     /**
-     * write <key, value, timestamp> tuple to stream
+     * append <key, value, timestamp> tuple to stream
      *
-     * @return false if could not write tuple to stream. else, true.
+     * @return false if could not append tuple to stream. else, true.
      */
-    virtual bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp) = 0;
+    virtual bool append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp) = 0;
 
     /**
      * close stream (e.g. flush to disk pending writes etc)
