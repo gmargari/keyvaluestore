@@ -17,7 +17,6 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
       m_end_incl(true)
 {
     m_buf = new Buffer(bufsize);
-    assert(file->m_vfile_index);
 }
 
 /*============================================================================
@@ -28,7 +27,6 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t buf
       m_end_incl(true)
 {
     m_buf = new Buffer(buf, bufsize);
-    assert(file->m_vfile_index);
 }
 
 /*============================================================================
@@ -88,14 +86,14 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
         if (m_start_key) {
 
             // if m_start_key was stored on disk it would be between off1 & off2
-            ret = m_diskfile->m_vfile_index->search(m_start_key, &off1, &off2);
+            ret = m_diskfile->search(m_start_key, &off1, &off2);
             if (ret == false) {
                 return false;
             }
 
             // read in buffer all bytes between 'off1' and 'off2'
             m_buf->clear();
-            m_buf->fill(m_diskfile->m_vfile, off2 - off1, off1);
+            m_diskfile->fill(m_buf, off2 - off1, off1);
             m_offs = off2;
             assert(m_buf->size() == off2 - off1);
 
@@ -114,7 +112,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
         // else, seek to the first key on disk
         else {
             m_offs = 0;
-            m_offs += m_buf->fill(m_diskfile->m_vfile, m_offs);
+            m_offs += m_diskfile->fill(m_buf, m_offs);
         }
     }
 
@@ -125,7 +123,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
         // maybe we need to read more bytes in buffer to deserialize tuple
         m_buf->keep_unused();
-        m_offs += m_buf->fill(m_diskfile->m_vfile, m_offs);
+        m_offs += m_diskfile->fill(m_buf, m_offs);
 
         // this should now work, unless there are no bytes left in file
         if ( ! m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, &len, false)) {

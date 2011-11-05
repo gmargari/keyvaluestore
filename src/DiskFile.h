@@ -3,12 +3,14 @@
 
 #include <stdint.h>
 
+#include <sys/types.h>
+
 class VFile;
 class VFileIndex;
+class Buffer;
 
 class DiskFile {
 
-friend class DiskFileInputStream;
 friend class DiskFileOutputStream;
 
 public:
@@ -68,6 +70,34 @@ public:
      */
     static void set_max_dfile_num(int num);
     static int  get_max_dfile_num();
+
+    /**
+     * fill free space in buffer 'buf' by reading at most 'bytes' bytes from
+     * offset 'offs' of this diskfile
+     *
+     * @return number of bytes read
+     */
+    uint32_t fill(Buffer *buf, uint32_t bytes, off_t offs);
+
+    /**
+     * fill free space in buffer 'buf' by reading bytes from offset 'offs' of
+     * this diskfile
+     *
+     * @return number of bytes read
+     */
+    uint32_t fill(Buffer *buf, off_t offs);
+
+    /**
+     * find the location on disk where the value corresponding to key 'term'
+     * might have been stored. normally, after this call we would read all
+     * bytes stored on diskfile between 'start_off' and 'end_off' and linearly
+     * search for a <'term', value> pair.
+     *
+     * @param term (in) term to search for
+     * @param start_off (out) start offset on disk file
+     * @param end_off (out) end offset on disk file
+     */
+    bool search(const char *term, off_t *start_off, off_t *end_off);
 
 //     // rewind file
 //     void rewind();

@@ -29,9 +29,7 @@ public:
 
     // inherited from InputStream
     void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
-
     void set_key_range(const char *start_key, const char *end_key);
-
     bool read(const char **key, const char **value, uint64_t *timestamp);
 
 protected:

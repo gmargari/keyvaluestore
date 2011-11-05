@@ -2,6 +2,7 @@
 #include "DiskFile.h"
 #include "VFile.h"
 #include "VFileIndex.h"
+#include "Buffer.h"
 
 int DiskFile::m_max_dfile_num = 0;
 
@@ -110,4 +111,28 @@ void DiskFile::set_max_dfile_num(int num)
 int DiskFile::get_max_dfile_num()
 {
     return m_max_dfile_num;
+}
+
+/*============================================================================
+ *                                   fill
+ *============================================================================*/
+uint32_t DiskFile::fill(Buffer *buf, uint32_t bytes, off_t offs)
+{
+    return buf->fill(m_vfile, bytes, offs);
+}
+
+/*============================================================================
+ *                                   fill
+ *============================================================================*/
+uint32_t DiskFile::fill(Buffer *buf, off_t offs)
+{
+    return buf->fill(m_vfile, offs);
+}
+
+/*============================================================================
+ *                                  search
+ *============================================================================*/
+bool DiskFile::search(const char *term, off_t *start_off, off_t *end_off)
+{
+    return m_vfile_index->search(term, start_off, end_off);
 }
