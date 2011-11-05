@@ -119,9 +119,9 @@ public:
 
 protected:
 
-    VFile       *m_vfile;
-    VFileIndex  *m_vfile_index;
-    uint64_t     m_vfile_numkeys;
+    VFile       *m_file;          // file in which we store <key,value> pairs
+    VFileIndex  *m_index;         // index of <key,offs> for diskfile
+    uint64_t     m_stored_keys;   // number of keys stored in diskfile
     static int   m_max_dfile_num; // create unique filenames
 };
 

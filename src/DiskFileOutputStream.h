@@ -30,15 +30,16 @@ public:
 
 protected:
 
-    DiskFile    *m_diskfile;
+    DiskFile    *m_file;          // file in which we store <key,value> pairs
     off_t        m_offs;          // offset within diskfile we currently are
-    uint64_t     m_vfile_size;    // size of vfile
+    uint64_t     m_file_size;     // current size of diskfile
     Buffer      *m_buf;           // buffer used for I/O
-    VFileIndex  *m_vfile_index;   // index of <key,offs> for diskfile keys
+
+    VFileIndex  *m_index;         // index of <key,offs> for diskfile keys
     char        *m_last_key;      // last key written to disk
     off_t        m_last_offs;     // offset of last key written to disk
     off_t        m_last_idx_offs; // last offset inserted in index
-    uint64_t     m_vfile_numkeys;       // number of keys stored in diskfile
+    uint64_t     m_stored_keys;   // number of keys stored in diskfile
 };
 
 #endif
