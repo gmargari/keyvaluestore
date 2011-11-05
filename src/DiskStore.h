@@ -53,6 +53,9 @@ public:
 
 protected:
 
+    bool load_from_disk();
+    bool save_to_disk();
+
     vector<DiskFile *> m_disk_files;
     pthread_rwlock_t   m_rwlock;
 };
