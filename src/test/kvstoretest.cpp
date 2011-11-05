@@ -86,6 +86,11 @@ int main()
             printf("i = %Ld, memstore size: %Ld\n", i, kvstore->get_mem_size());
     }
 
+    // flush remaining memory tuples
+    while (kvstore->get_mem_size()) {
+        kvstore->flush_bytes();
+    }
+
     //================================================================
     // search values (most of them should be on disk, latest should
     // be on memory)
