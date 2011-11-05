@@ -88,6 +88,11 @@ public:
     uint32_t fill(Buffer *buf, off_t offs);
 
     /**
+     * sync pending diskfile writes to disk
+     */
+    void sync();
+
+    /**
      * find the location on disk where the value corresponding to key 'term'
      * might have been stored. normally, after this call we would read all
      * bytes stored on diskfile between 'start_off' and 'end_off' and linearly
