@@ -59,8 +59,15 @@ public:
      */
     void clear();
 
-    // TODO: delete
-    void print();
+    /**
+     * save index to file
+     */
+    void save_to_disk(int fd);
+
+    /**
+     * load index from file
+     */
+    void load_from_disk(int fd);
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {

@@ -3,6 +3,8 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <unistd.h>
+#include <cstring>
 
 /*============================================================================
  *                                VFileIndex
@@ -121,14 +123,55 @@ void VFileIndex::clear()
 }
 
 /*============================================================================
- *                                   print
+ *                                save_to_disk
  *============================================================================*/
-void VFileIndex::print()
+void VFileIndex::save_to_disk(int fd)
 {
+    size_t len;
+    int num;
+
+    // write number of entries
+    num = m_map.size();
+    write(fd, &num, sizeof(num));
+
+    // write the entries
     for (TermOffsetMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
-        printf("[%s] -> %Ld\n", iter->first, iter->second);
+        len = strlen(iter->first);
+        write(fd, &len, sizeof(len));
+        write(fd, iter->first, len);
+        write(fd, &(iter->second), sizeof(iter->second));
     }
-    printf("m_vfilesize: %Ld\n", m_vfilesize);
+
+    // write filesize
+    write(fd, &m_vfilesize, sizeof(m_vfilesize));
+}
+
+/*============================================================================
+ *                               load_from_disk
+ *============================================================================*/
+void VFileIndex::load_from_disk(int fd)
+{
+    size_t len;
+    int num;
+    char key[MAX_INDEX_DIST];
+    off_t offset;
+
+    clear();
+
+    // read number of entries
+    num = m_map.size();
+    read(fd, &num, sizeof(num));
+
+    // read 'num' entries
+    for (int i = 0; i < num; i++) {
+        read(fd, &len, sizeof(len));
+        read(fd, key, len);
+        key[len] = '\0';
+        read(fd, &offset, sizeof(offset));
+    }
+
+    // read filesize
+    read(fd, &m_vfilesize, sizeof(m_vfilesize));
 }
 
 /*============================================================================
@@ -151,3 +194,4 @@ int VFileIndex::sanity_check()
 
     return 1;
 }
+
