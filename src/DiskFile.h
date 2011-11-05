@@ -99,13 +99,6 @@ public:
      */
     bool search(const char *term, off_t *start_off, off_t *end_off);
 
-//     // rewind file
-//     void rewind();
-//     // flush all pending writes to disk
-//     void sync();
-//     // close file
-//     void close();
-
 protected:
 
     VFile       *m_vfile;

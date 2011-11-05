@@ -66,7 +66,7 @@ bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
 
     assert(sanity_check());
     assert(key && start_off && end_off);
-    assert(m_vfilesize);
+    assert(m_vfilesize && "index probably does not exist");
 
     iter = m_map.upper_bound(key);
 

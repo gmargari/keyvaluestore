@@ -23,23 +23,8 @@ public:
     ~DiskFileOutputStream();
 
     // inherited from OutputStream
-    /**
-     * reset scanner
-     */
     void reset();
-
-    /**
-     * write <key, value, timestamp> tuple to stream
-     *
-     * @return false if could not write tuple to stream. else, true.
-     */
     bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
-
-    /**
-     * flush output stream buffer. user must call this function after
-     * writing all data in order to ensure data durability and to properly
-     * create index of underlying vfile.
-     */
     void flush();
 
 protected:
