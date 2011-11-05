@@ -1,5 +1,6 @@
 #include "Global.h"
 #include "DiskFile.h"
+
 #include "VFile.h"
 #include "VFileIndex.h"
 #include "Buffer.h"
@@ -130,6 +131,14 @@ uint32_t DiskFile::fill(Buffer *buf, off_t offs)
 }
 
 /*============================================================================
+ *                                  flush
+ *============================================================================*/
+uint32_t DiskFile::flush(Buffer *buf, off_t offs)
+{
+    return buf->flush(m_vfile, offs);
+}
+
+/*============================================================================
  *                                  sync
  *============================================================================*/
 void DiskFile::sync()
@@ -143,4 +152,21 @@ void DiskFile::sync()
 bool DiskFile::search(const char *term, off_t *start_off, off_t *end_off)
 {
     return m_vfile_index->search(term, start_off, end_off);
+}
+
+/*============================================================================
+ *                              set_file_index
+ *============================================================================*/
+void DiskFile::set_file_index(VFileIndex  *index)
+{
+    delete m_vfile_index;
+    m_vfile_index = index;
+}
+
+/*============================================================================
+ *                               set_num_keys
+ *============================================================================*/
+void DiskFile::set_num_keys(uint64_t num_keys)
+{
+    m_vfile_numkeys = num_keys;
 }

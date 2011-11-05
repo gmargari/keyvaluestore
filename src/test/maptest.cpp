@@ -95,7 +95,7 @@ int main()
         strcpy(prev_key, k1);
     }
 
-    ostream1->flush();
+    ostream1->close();
     map->clear();
 
     //========================================================
@@ -148,7 +148,7 @@ int main()
         ostream2->write(k1, strlen(k1), v1, strlen(v1), timestamp);
         strcpy(prev_key, k1);
     }
-    ostream2->flush();
+    ostream2->close();
 
     map->clear(NULL, key1, true, false);
     map->clear(key1, key2, true, false);

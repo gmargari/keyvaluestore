@@ -41,7 +41,7 @@ void CompactionManager::copy_stream(InputStream *istream, OutputStream *ostream)
     while (istream->read(&key, &value, &timestamp)) {
         ostream->write(key, strlen(key), value, strlen(value), timestamp);
     }
-    ostream->flush();
+    ostream->close();
 
     time_end(&(g_stats.merge_time));
 }
@@ -64,7 +64,7 @@ void CompactionManager::copy_stream_unique_keys(InputStream *istream, OutputStre
             strcpy(prev_key, key);
         }
     }
-    ostream->flush();
+    ostream->close();
 
     time_end(&(g_stats.merge_time));
 }
@@ -153,7 +153,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
             // greater than 'max_file_size', crete a new file for remaining tuples
             len = Buffer::serialize_len(keylen, valuelen, timestamp);
             if (filesize + len > max_file_size) {
-                ostream->flush();
+                ostream->close();
                 diskfiles.push_back(diskfile);
                 num_newfiles++;
 
@@ -169,7 +169,7 @@ int CompactionManager::merge_streams(vector<InputStream *> istreams, vector<Disk
             strcpy(prev_key, key);
         }
     }
-    ostream->flush();
+    ostream->close();
 
     time_end(&(g_stats.merge_time));
 

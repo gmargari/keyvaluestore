@@ -11,8 +11,6 @@ class Buffer;
 
 class DiskFile {
 
-friend class DiskFileOutputStream;
-
 public:
 
     /**
@@ -88,6 +86,11 @@ public:
     uint32_t fill(Buffer *buf, off_t offs);
 
     /**
+     * write all buffer bytes to this diskfile, clear buffer
+     */
+    uint32_t flush(Buffer *buf, off_t offs);
+
+    /**
      * sync pending diskfile writes to disk
      */
     void sync();
@@ -103,6 +106,16 @@ public:
      * @param end_off (out) end offset on disk file
      */
     bool search(const char *term, off_t *start_off, off_t *end_off);
+
+    /**
+     * set the index for this diskfile
+     */
+    void set_file_index(VFileIndex  *index);
+
+    /**
+     * set the number of keys stored on this diskfile
+     */
+    void set_num_keys(uint64_t num_keys);
 
 protected:
 

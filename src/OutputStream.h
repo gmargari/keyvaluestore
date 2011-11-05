@@ -23,9 +23,9 @@ public:
     virtual bool write(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp) = 0;
 
     /**
-     * flush output stream buffer
+     * close stream (e.g. flush to disk pending writes etc)
      */
-    virtual void flush() = 0;
+    virtual void close() = 0;
 
 protected:
 
