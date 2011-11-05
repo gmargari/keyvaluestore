@@ -123,6 +123,7 @@ protected:
     VFileIndex  *m_index;         // index of <key,offs> for diskfile
     uint64_t     m_stored_keys;   // number of keys stored in diskfile
     static int   m_max_dfile_num; // create unique filenames
+    bool         m_deleted;       // whether this disk file was delete from disk
 };
 
 #endif

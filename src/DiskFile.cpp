@@ -5,13 +5,18 @@
 #include "VFileIndex.h"
 #include "Buffer.h"
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int DiskFile::m_max_dfile_num = 0;
 
 /*============================================================================
  *                                 DiskFile
  *============================================================================*/
 DiskFile::DiskFile()
-    : m_file(), m_index(), m_stored_keys(0)
+    : m_file(), m_index(), m_stored_keys(0), m_deleted(false)
 {
     m_file = new VFile();
     m_index = new VFileIndex();
@@ -22,6 +27,19 @@ DiskFile::DiskFile()
  *============================================================================*/
 DiskFile::~DiskFile()
 {
+    if (m_deleted == false) {
+        char fname[1000];
+        int fd;
+
+        sprintf(fname, "%s%s", m_file->fs_name(), VFILE_INDEX_SUFFIX);
+        if ((fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) == -1) {
+            perror(fname);
+            exit(EXIT_FAILURE);
+        }
+        m_index->save_to_disk(fd);
+        close(fd);
+    }
+
     delete m_file;
     delete m_index;
 }
@@ -32,8 +50,18 @@ DiskFile::~DiskFile()
 bool DiskFile::open_existing(char *filename)
 {
     if (m_file->fs_open_existing(filename)) {
-        // TODO: read vfile index, vfile num keys
-        // m_index =
+        char fname[1000];
+        int fd;
+
+        sprintf(fname, "%s%s", filename, VFILE_INDEX_SUFFIX);
+        if ((fd = open(fname, O_RDONLY)) == -1) {
+            perror(fname);
+            exit(EXIT_FAILURE);
+        }
+        m_index->load_from_disk(fd);
+        close(fd);
+
+        // TODO
         // m_stored_keys =
         return true;
     } else {
@@ -62,8 +90,14 @@ bool DiskFile::open_new_unique()
  *============================================================================*/
 void DiskFile::delete_from_disk()
 {
+    char filename[1000];
+
+    sprintf(filename, "%s%s", m_file->fs_name(), VFILE_INDEX_SUFFIX);
+    remove(filename);
+
     m_file->fs_close();
     m_file->fs_delete();
+    m_deleted = true;
 }
 
 /*============================================================================
