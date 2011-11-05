@@ -38,7 +38,7 @@ GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *disk
         fscanf(fp, "P: %d\n", &m_P);
         fscanf(fp, "partitions: %d\n", &num_partitions);
         for (int i = 0; i < num_partitions; i++) {
-            fscanf(fp, "%d\n", &part_size);
+            fscanf(fp, "partition_size: %d\n", &part_size);
             m_partition_size.push_back(part_size);
             dbg_lastsize += part_size;
         }
@@ -71,7 +71,7 @@ GeomCompactionManager::~GeomCompactionManager()
         fprintf(fp, "P: %d\n", m_P);
         fprintf(fp, "partitions: %d\n", (int)m_partition_size.size());
         for (uint i = 0; i < m_partition_size.size(); i++) {
-            fprintf(fp, "%d\n", m_partition_size[i]);
+            fprintf(fp, "partition_size: %d\n", m_partition_size[i]);
         }
 
         fclose(fp);
