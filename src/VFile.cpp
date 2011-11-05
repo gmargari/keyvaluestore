@@ -255,6 +255,11 @@ void VFile::fs_truncate(off_t length)
  *============================================================================*/
 void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
 {
+    char fname[100];
+
+    sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
+    remove(fname);
+
     assert(m_names.size() == m_filedescs.size());
     for (int i = 0; i < (int)m_names.size(); i++) {
         if (DBGLVL > 0) {
