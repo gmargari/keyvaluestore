@@ -49,6 +49,7 @@ DiskFile::~DiskFile()
  *============================================================================*/
 bool DiskFile::open_existing(char *filename)
 {
+    // if vfile loaded, load also its index
     if (m_file->fs_open_existing(filename)) {
         char fname[1000];
         int fd;
@@ -61,8 +62,6 @@ bool DiskFile::open_existing(char *filename)
         m_index->load_from_disk(fd);
         close(fd);
 
-        // TODO
-        // m_stored_keys =
         return true;
     } else {
         return false;
