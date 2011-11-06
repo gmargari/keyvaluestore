@@ -185,6 +185,7 @@ void VFileIndex::load_from_disk(int fd)
         read(fd, key, len);
         key[len] = '\0';
         read(fd, &offset, sizeof(offset));
+        add(key, offset);
     }
 
     // read filesize & number of stored keys
