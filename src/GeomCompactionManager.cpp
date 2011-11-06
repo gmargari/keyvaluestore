@@ -277,7 +277,7 @@ bool GeomCompactionManager::save_state_to_disk()
         fprintf(fp, "R: %d\n", m_R);
         fprintf(fp, "P: %d\n", m_P);
         fprintf(fp, "partitions: %d\n", (int)m_partition_size.size());
-        for (uint i = 0; i < m_partition_size.size(); i++) {
+        for (int i = 0; i < (int)m_partition_size.size(); i++) {
             fprintf(fp, "partition_size: %d\n", m_partition_size[i]);
         }
 

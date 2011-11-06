@@ -533,6 +533,7 @@ int main(int argc, char **argv)
     free(end_key);
     free(value);
     free(thread);
+    free(targs);
     delete kvstore;
 
     return EXIT_SUCCESS;
