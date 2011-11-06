@@ -73,6 +73,12 @@ protected:
      */
     int compute_current_R();
 
+    /**
+     * save/load compaction manager state to/from disk
+     */
+    bool save_state_to_disk();
+    bool load_state_from_disk();
+
     void print_partitions();
 
     int sanity_check();
