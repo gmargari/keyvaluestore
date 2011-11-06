@@ -27,7 +27,7 @@ RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, Dis
     : CompactionManager(memstore, diskstore),
       m_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE), m_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE)
 {
-
+    load_state_from_disk();
 }
 
 /*============================================================================
@@ -35,7 +35,7 @@ RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, Dis
  *============================================================================*/
 RangemergeCompactionManager::~RangemergeCompactionManager()
 {
-
+    save_state_to_disk();
 }
 
 /*============================================================================
@@ -251,6 +251,54 @@ void RangemergeCompactionManager::create_ranges(vector<Range>& ranges)
         rng.m_idx = NO_DISK_FILE;
         ranges.push_back(rng);
     }
+}
+
+/*============================================================================
+ *                              save_state_to_disk
+ *============================================================================*/
+bool RangemergeCompactionManager::save_state_to_disk()
+{
+    char fname[100];
+    FILE *fp;
+
+    sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
+    if ((fp = fopen(fname, "w")) == NULL) {
+        printf("Error: fopen('%s')\n", fname);
+        perror("");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(fp, "cmmanager: %s\n", "rangemerge");
+    fprintf(fp, "blocksize: %Ld\n", m_blocksize);
+    fprintf(fp, "flushmem: %Ld\n", m_flushmem);
+
+    return true;
+}
+
+/*============================================================================
+ *                            load_state_from_disk
+ *============================================================================*/
+bool RangemergeCompactionManager::load_state_from_disk()
+{
+    char fname[100], cmmanager[100];
+    FILE *fp;
+
+    // open existing diskstore, if any
+    sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
+    if ((fp = fopen(fname, "r")) != NULL) {
+        fscanf(fp, "cmmanager: %s\n", cmmanager);
+        if (strcmp(cmmanager, "rangemerge") != 0) {
+            printf("Error: expected 'rangemerge' cmanager in file %s, found '%s'\n", fname, cmmanager);
+            exit(EXIT_FAILURE);
+        }
+        fscanf(fp, "blocksize: %Ld\n", &m_blocksize);
+        fscanf(fp, "flushmem: %Ld\n", &m_flushmem);
+        fclose(fp);
+
+        return true;
+    }
+
+    return false;
 }
 
 /*============================================================================

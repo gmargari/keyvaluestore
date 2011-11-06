@@ -41,10 +41,16 @@ public:
 protected:
 
     /**
-     * based on disk files, create the vector of ranges. ranges are sorted
-     * in lexicographical order
+     * based on disk files and memstore, create the vector of ranges. ranges
+     * are sorted in lexicographical order
      */
     void create_ranges(vector<Range>& ranges);
+
+    /**
+     * save/load compaction manager state to/from disk
+     */
+    bool save_state_to_disk();
+    bool load_state_from_disk();
 
     int sanity_check();
 
