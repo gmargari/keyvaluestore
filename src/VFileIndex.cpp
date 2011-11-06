@@ -161,7 +161,6 @@ void VFileIndex::save_to_disk(int fd)
     // write filesize & number of stored keys
     write(fd, &m_vfilesize, sizeof(m_vfilesize));
     write(fd, &m_stored_keys, sizeof(m_stored_keys));
-    printf(">>> %Ld\n", m_stored_keys);
 }
 
 /*============================================================================
@@ -191,7 +190,6 @@ void VFileIndex::load_from_disk(int fd)
     // read filesize & number of stored keys
     read(fd, &m_vfilesize, sizeof(m_vfilesize));
     read(fd, &m_stored_keys, sizeof(m_stored_keys));
-    printf(">>> %Ld\n", m_stored_keys);
 }
 
 /*============================================================================
