@@ -271,6 +271,7 @@ bool RangemergeCompactionManager::save_state_to_disk()
     fprintf(fp, "cmmanager: %s\n", "rangemerge");
     fprintf(fp, "blocksize: %Ld\n", m_blocksize);
     fprintf(fp, "flushmem: %Ld\n", m_flushmem);
+    fclose(fp);
 
     return true;
 }
