@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <stdint.h>
 #include <map>
 
 using std::map;
@@ -60,6 +61,12 @@ public:
     void clear();
 
     /**
+     * set/get the number of keys stored in disk file
+     */
+    void     set_num_stored_leys(uint64_t numkeys);
+    uint64_t get_num_stored_leys();
+
+    /**
      * save index to file
      */
     void save_to_disk(int fd);
@@ -83,6 +90,7 @@ protected:
 
     TermOffsetMap m_map;          // index containing <term, offset> pairs
     off_t         m_vfilesize;    // size of vfile on disk
+    uint64_t      m_stored_keys;  // number of keys stored in vfile
 };
 
 #endif

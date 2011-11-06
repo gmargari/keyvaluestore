@@ -16,7 +16,7 @@ int DiskFile::m_max_dfile_num = 0;
  *                                 DiskFile
  *============================================================================*/
 DiskFile::DiskFile()
-    : m_file(), m_index(), m_stored_keys(0), m_deleted(false)
+    : m_file(), m_index(), m_deleted(false)
 {
     m_file = new VFile();
     m_index = new VFileIndex();
@@ -76,7 +76,6 @@ bool DiskFile::open_new_unique()
 {
     char filename[100];
 
-    m_stored_keys = 0;
     sprintf(filename, "%s%s%04d", ROOT_DIR, DISKFILE_PREFIX, m_max_dfile_num++);
     if (m_file->fs_open_new(filename)) {
         return true;
@@ -105,7 +104,7 @@ void DiskFile::delete_from_disk()
  *============================================================================*/
 uint64_t DiskFile::get_num_keys()
 {
-    return m_stored_keys;
+    return m_index->get_num_stored_leys();
 }
 
 /*============================================================================
@@ -202,5 +201,5 @@ void DiskFile::set_file_index(VFileIndex  *index)
  *============================================================================*/
 void DiskFile::set_num_keys(uint64_t num_keys)
 {
-    m_stored_keys = num_keys;
+    m_index->set_num_stored_leys(num_keys);
 }

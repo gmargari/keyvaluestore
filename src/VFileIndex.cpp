@@ -10,7 +10,7 @@
  *                                VFileIndex
  *============================================================================*/
 VFileIndex::VFileIndex()
-    : m_map(), m_vfilesize()
+    : m_map(), m_vfilesize(), m_stored_keys(0)
 {
 
 }
@@ -123,6 +123,22 @@ void VFileIndex::clear()
 }
 
 /*============================================================================
+ *                            set_num_stored_leys
+ *============================================================================*/
+void VFileIndex::set_num_stored_leys(uint64_t numkeys)
+{
+    m_stored_keys = numkeys;
+}
+
+/*============================================================================
+ *                            get_num_stored_leys
+ *============================================================================*/
+uint64_t VFileIndex::get_num_stored_leys()
+{
+    return m_stored_keys;
+}
+
+/*============================================================================
  *                                save_to_disk
  *============================================================================*/
 void VFileIndex::save_to_disk(int fd)
@@ -142,8 +158,10 @@ void VFileIndex::save_to_disk(int fd)
         write(fd, &(iter->second), sizeof(iter->second));
     }
 
-    // write filesize
+    // write filesize & number of stored keys
     write(fd, &m_vfilesize, sizeof(m_vfilesize));
+    write(fd, &m_stored_keys, sizeof(m_stored_keys));
+    printf(">>> %Ld\n", m_stored_keys);
 }
 
 /*============================================================================
@@ -170,8 +188,10 @@ void VFileIndex::load_from_disk(int fd)
         read(fd, &offset, sizeof(offset));
     }
 
-    // read filesize
+    // read filesize & number of stored keys
     read(fd, &m_vfilesize, sizeof(m_vfilesize));
+    read(fd, &m_stored_keys, sizeof(m_stored_keys));
+    printf(">>> %Ld\n", m_stored_keys);
 }
 
 /*============================================================================
