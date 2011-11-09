@@ -96,6 +96,10 @@ public:
      */
     virtual void flush_bytes() = 0;
 
+    // Undefined methods (just remove Weffc++ warning)
+    CompactionManager(const CompactionManager&);
+    CompactionManager& operator=(const CompactionManager&);
+
 protected:
 
     MemStore    *m_memstore;

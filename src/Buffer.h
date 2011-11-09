@@ -106,6 +106,10 @@ public:
      */
     void undo_deserialize(const char *key, const char *value, uint64_t timestamp);
 
+    // Undefined methods (just remove Weffc++ warning)
+    Buffer(const Buffer&);
+    Buffer& operator=(const Buffer&);
+
 protected:
 
     char     *m_buf;            // pointer to char buffer

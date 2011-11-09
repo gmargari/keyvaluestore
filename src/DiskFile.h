@@ -116,6 +116,10 @@ public:
      */
     void set_num_keys(uint64_t num_keys);
 
+    // Undefined methods (just remove Weffc++ warning)
+    DiskFile(const DiskFile&);
+    DiskFile& operator=(const DiskFile&);
+
 protected:
 
     VFile       *m_file;          // file in which we store <key,value> pairs

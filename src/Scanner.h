@@ -41,6 +41,10 @@ public:
      */
     int range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
 
+    // Undefined methods (just remove Weffc++ warning)
+    Scanner(const Scanner&);
+    Scanner& operator=(const Scanner&);
+
 protected:
 
     KeyValueStore *m_kvstore;

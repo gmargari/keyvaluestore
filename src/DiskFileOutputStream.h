@@ -28,6 +28,10 @@ public:
     bool append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
     void close();
 
+    // Undefined methods (just remove Weffc++ warning)
+    DiskFileOutputStream(const DiskFileOutputStream&);
+    DiskFileOutputStream& operator=(const DiskFileOutputStream&);
+
 protected:
 
     DiskFile    *m_file;          // file in which we store <key,value> pairs

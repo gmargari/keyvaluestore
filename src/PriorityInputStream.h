@@ -35,6 +35,10 @@ public:
 
     bool read(const char **key, const char **value, uint64_t *timestamp);
 
+    // Undefined methods (just remove Weffc++ warning)
+    PriorityInputStream(const PriorityInputStream&);
+    PriorityInputStream& operator=(const PriorityInputStream&);
+
 protected:
 
     typedef struct {

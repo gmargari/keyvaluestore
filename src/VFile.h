@@ -38,6 +38,10 @@ public:
     uint64_t        fs_size();
     void            fs_sync();
 
+    // Undefined methods (just remove Weffc++ warning)
+    VFile(const VFile&);
+    VFile& operator=(const VFile&);
+
 protected:
 
     char           *m_basefilename;

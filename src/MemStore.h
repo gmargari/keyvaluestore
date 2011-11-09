@@ -139,6 +139,10 @@ public:
      */
     void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
+    // Undefined methods (just remove Weffc++ warning)
+    MemStore(const MemStore&);
+    MemStore& operator=(const MemStore&);
+
 protected:
 
     Map              *m_map;

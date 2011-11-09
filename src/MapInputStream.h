@@ -25,6 +25,10 @@ public:
 
     bool read(const char **key, const char **value, uint64_t *timestamp);
 
+    // Undefined methods (just remove Weffc++ warning)
+    MapInputStream(const MapInputStream&);
+    MapInputStream& operator=(const MapInputStream&);
+
 protected:
 
     Map                    *m_map;

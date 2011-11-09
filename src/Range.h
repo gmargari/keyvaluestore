@@ -39,6 +39,10 @@ public:
      */
     static bool cmp_by_file_index(const Range *r1, const Range *r2);
 
+    // Undefined methods (just remove Weffc++ warning)
+    Range(const Range&);
+    Range& operator=(const Range&);
+
     const char   *m_first;              // terms stored on disk block belong to
     const char   *m_last;               // range [m_first, m_last)
     uint64_t      m_memsize;            // total byte size of memory tuples

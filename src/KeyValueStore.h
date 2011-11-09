@@ -127,6 +127,10 @@ public:
     uint32_t get_read_time_sec();
     uint32_t get_write_time_sec();
 
+    // Undefined methods (just remove Weffc++ warning)
+    KeyValueStore(const KeyValueStore&);
+    KeyValueStore& operator=(const KeyValueStore&);
+
 protected:
     void check_parameters();
 
