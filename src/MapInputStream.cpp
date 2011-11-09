@@ -11,7 +11,7 @@ MapInputStream::MapInputStream(Map *map)
     : m_map(map), m_iter(), m_iter_end(), m_start_key(NULL), m_end_key(NULL),
       m_start_incl(true), m_end_incl(true)
 {
-
+    set_key_range(NULL, NULL);
 }
 
 /*============================================================================
