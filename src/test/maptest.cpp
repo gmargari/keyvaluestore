@@ -77,7 +77,7 @@ int main()
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        map->put(key, value);
+        map->put(key, value, i+1);
     }
 
     //========================================================
@@ -105,7 +105,7 @@ int main()
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
         randstr(value, (int)(rand() % maxvaluesize) + 1);
-        map->put(key, value);
+        map->put(key, value, i+1);
     }
 
     //========================================================

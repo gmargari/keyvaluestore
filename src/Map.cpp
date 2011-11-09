@@ -85,14 +85,6 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
 }
 
 /*============================================================================
- *                                    put
- *============================================================================*/
-bool Map::put(const char *key, const char *value)
-{
-    return put(key, value, get_timestamp());
-}
-
-/*============================================================================
  *                                    get
  *============================================================================*/
 bool Map::get(const char *key, const char **value, uint64_t *timestamp)
@@ -281,17 +273,6 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
     assert(get_size(start_key, end_key, start_key_incl, end_key_incl) == 0);
     assert(dbg_mem_before - get_size() == dbg_to_clean);
     assert(sanity_check());
-}
-
-/*============================================================================
- *                               get_timestamp
- *============================================================================*/
-uint64_t Map::get_timestamp()
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
 }
 
 /*============================================================================

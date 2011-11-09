@@ -36,17 +36,6 @@ public:
     bool put(const char *key, const char *value, uint64_t timestamp);
 
     /**
-     * insert a <key, value> pair into map. copies of the key and
-     * value are created and inserted into map. a timestamp is automatically
-     * assigned and the pair is store as a <key, value, timestamp> tuple in map.
-     *
-     * @param key key to be inserted
-     * @param value value to be inserted
-     * @return true for success, false for failure
-     */
-    bool put(const char *key, const char *value);
-
-    /**
      * get the value for a specific key
      *
      * @param key (in) key to be searched
@@ -124,11 +113,6 @@ public:
      * 'start_incl' and 'end_incl'.
      */
     void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
-
-    /**
-     * return current timestamp
-     */
-    uint64_t get_timestamp(); // TODO: move to KeyValueStore class
 
     struct cmp_str { // required, in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {

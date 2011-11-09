@@ -93,14 +93,7 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
  *============================================================================*/
 bool KeyValueStore::put(const char *key, const char *value)
 {
-    assert(m_memstore->get_size() <= m_memstore->get_maxsize());
-    if (m_memstore->will_reach_size_limit(key, value)) {
-        time_start(&(g_stats.compaction_time));
-        m_compactionmanager->flush_bytes();
-        time_end(&(g_stats.compaction_time));
-    }
-
-    return m_memstore->put(key, value);
+    return put(key, value, get_timestamp());
 }
 
 /*============================================================================
@@ -296,6 +289,16 @@ uint32_t KeyValueStore::get_write_time_sec()
     return time_get_secs(g_stats.write_time);
 }
 
+/*============================================================================
+ *                               get_timestamp
+ *============================================================================*/
+uint64_t KeyValueStore::get_timestamp()
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
+}
 
 // TODO: move elsewhere
 /*============================================================================

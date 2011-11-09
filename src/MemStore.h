@@ -49,16 +49,6 @@ public:
     bool put(const char *key, const char *value, uint64_t timestamp);
 
     /**
-     * insert a <key, value> pair into memstore. copies of the key and value are
-     * created and inserted into memstore.
-     *
-     * @param key key to be inserted
-     * @param value value to inserted
-     * @return true for success, false for failure
-     */
-    bool put(const char *key, const char *value);
-
-    /**
      * get the (copy of) value for a specific key.
      *
      * @param key (in) key to be searched

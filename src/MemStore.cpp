@@ -46,14 +46,6 @@ bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
 }
 
 /*============================================================================
- *                                   put
- *============================================================================*/
-bool MemStore::put(const char *key, const char *value)
-{
-    return m_map->put(key, value);
-}
-
-/*============================================================================
  *                                   get
  *============================================================================*/
 bool MemStore::get(const char *key, char **value, uint64_t *timestamp)

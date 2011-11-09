@@ -127,6 +127,11 @@ public:
     uint32_t get_read_time_sec();
     uint32_t get_write_time_sec();
 
+    /**
+     * return current timestamp
+     */
+    uint64_t get_timestamp();
+
     // Undefined methods (just remove Weffc++ warning)
     KeyValueStore(const KeyValueStore&);
     KeyValueStore& operator=(const KeyValueStore&);
