@@ -7,6 +7,7 @@
 #include "DiskFile.h"
 #include "DiskFileInputStream.h"
 #include "Range.h"
+#include "Streams.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -134,14 +135,14 @@ void RangemergeCompactionManager::flush_bytes()
         // split to a number of subranges, each of which will be stored on
         // a separate block.
         if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
-            newfiles = merge_streams(istreams_to_merge, new_disk_files, SPLIT_PERC * m_blocksize);
+            newfiles = Streams::merge_streams(istreams_to_merge, new_disk_files, SPLIT_PERC * m_blocksize);
             // assert(newfiles > 1); // this may not hold true (i.e. if all memory keys exist on disk and no split occurs)
         } else {
             // merge memory and disk istreams, creating a new file on disk.
             // set 'm_blocksize' as max file size, which will cause only
             // one file to be created (we have ensured aboce block will not
             // overflow)
-            newfiles = merge_streams(istreams_to_merge, new_disk_files, m_blocksize);
+            newfiles = Streams::merge_streams(istreams_to_merge, new_disk_files, m_blocksize);
             assert(newfiles == 1);
         }
 

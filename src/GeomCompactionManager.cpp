@@ -6,6 +6,7 @@
 #include "MapInputStream.h"
 #include "DiskFile.h"
 #include "DiskFileInputStream.h"
+#include "Streams.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -197,7 +198,7 @@ void GeomCompactionManager::flush_bytes()
     //--------------------------------------------------------------------------
     // 3) merge streams creating a new disk file
     //--------------------------------------------------------------------------
-    disk_file = merge_streams(istreams_to_merge);
+    disk_file = Streams::merge_streams(istreams_to_merge);
 
     // delete all istreams but memstore istream
     for (int i = 0; i < (int)istreams_to_merge.size() - 1; i++) {
