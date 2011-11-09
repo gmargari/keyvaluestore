@@ -97,7 +97,7 @@ void RangemergeCompactionManager::flush_bytes()
     assert(sanity_check());
 
     //--------------------------------------------------------------------------
-    // create vector of ranges //TODO: can we keep this rangetable permanently and not recreate it every time?! we only need to update first, last & memsize
+    // create vector of ranges
     //--------------------------------------------------------------------------
     create_ranges(ranges);
 
@@ -221,7 +221,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
         //      range[i].last = range[i+1].first;
         // when using ranges, 'first' should be inclusive and 'last' exclusive
         for (i = 0; i < (int)r_disk_files.size(); i++) {
-            rng = new Range();  // TODO free ranges from vector!!! or make vector global and not recompute it all the time!!!
+            rng = new Range();
             r_disk_files[i]->get_first_last_term(&rng->m_first, &rng->m_last);
             rng->m_disksize = r_disk_files[i]->get_size();
             rng->m_block_num = i;

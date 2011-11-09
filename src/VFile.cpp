@@ -25,7 +25,7 @@
 VFile::VFile()
     : m_basefilename(NULL), m_names(), m_filedescs()
 {
-    assert(sizeof(off_t) == 8); // ensure 64bit offsets (TODO: move it elsewhere)
+    assert(sizeof(off_t) == 8); // ensure 64bit offsets
 }
 
 /*============================================================================
