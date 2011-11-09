@@ -143,7 +143,6 @@ protected:
 
     Map              *m_map;
     uint64_t          m_maxsize;
-    MapInputStream   *m_inputstream;
 };
 
 #endif

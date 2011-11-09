@@ -131,6 +131,7 @@ int GeomCompactionManager::compute_current_R()
  *============================================================================*/
 void GeomCompactionManager::flush_bytes()
 {
+    MapInputStream *map_istream;
     DiskFile *disk_file, *memstore_file;
     DiskFileInputStream *memstore_file_istream, *istream;
     vector<InputStream *> istreams_to_merge;
@@ -180,8 +181,8 @@ void GeomCompactionManager::flush_bytes()
 
     // if we perform online merge, add memstore stream to vector of streams
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
-        m_memstore->m_inputstream->set_key_range(NULL, NULL);
-        istreams_to_merge.push_back(m_memstore->m_inputstream);
+        map_istream = new MapInputStream(m_memstore->m_map);
+        istreams_to_merge.push_back(map_istream);
     }
     // else, flush memstore to new file, add file stream to vector of streams
     else {
@@ -209,6 +210,7 @@ void GeomCompactionManager::flush_bytes()
 
     // if we performed online merge, clear memstore
     if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
+        delete map_istream;
         memstore_clear();
     }
     // else, memstore already cleared, delete the memstore file and disk stream

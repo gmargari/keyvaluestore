@@ -8,10 +8,9 @@
  *                                 MemStore
  *============================================================================*/
 MemStore::MemStore()
-    : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_inputstream()
+    : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE)
 {
     m_map = new Map();
-    m_inputstream = new MapInputStream(m_map);
 }
 
 /*============================================================================
@@ -19,7 +18,6 @@ MemStore::MemStore()
  *============================================================================*/
 MemStore::~MemStore()
 {
-    delete m_inputstream;
     delete m_map;
 }
 

@@ -189,14 +189,16 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
 {
     DiskFile *disk_file;
     DiskFileOutputStream *disk_ostream;
+    MapInputStream *map_istream;
 
     // write memstore to a new file on disk
     disk_file = new DiskFile();
     disk_file->open_new_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
-    m_memstore->m_inputstream->set_key_range(NULL, NULL);
+    map_istream = new MapInputStream(m_memstore->m_map);
     // no need to use copy_stream_unique_keys() since map keys are unique
-    copy_stream(m_memstore->m_inputstream, disk_ostream);
+    copy_stream(map_istream, disk_ostream);
+    delete map_istream;
     delete disk_ostream;
 
     assert(m_memstore->get_size_when_serialized() == disk_file->get_size());

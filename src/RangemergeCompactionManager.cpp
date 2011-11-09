@@ -81,6 +81,7 @@ uint64_t RangemergeCompactionManager::get_flushmem()
  *============================================================================*/
 void RangemergeCompactionManager::flush_bytes()
 {
+    MapInputStream *map_istream;
     DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
@@ -117,9 +118,10 @@ void RangemergeCompactionManager::flush_bytes()
         rng = ranges[cur_rng];
 
         // get istream with all memory tuples that belong to current range
-        m_memstore->m_inputstream->set_key_range(rng.m_first, rng.m_last, true, false);
+        map_istream = new MapInputStream(m_memstore->m_map);
+        map_istream->set_key_range(rng.m_first, rng.m_last, true, false);
         istreams_to_merge.clear();
-        istreams_to_merge.push_back(m_memstore->m_inputstream);
+        istreams_to_merge.push_back(map_istream);
 
         // get istream for file that stores all tuples that belong to range
         if (rng.m_idx != NO_DISK_FILE) {
@@ -147,6 +149,7 @@ void RangemergeCompactionManager::flush_bytes()
         for (i = 1; i < (int)istreams_to_merge.size(); i++) {
             delete istreams_to_merge[i];
         }
+        delete map_istream;
 
         assert((dbg_memsize = m_memstore->get_size()) || 1);
         assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
