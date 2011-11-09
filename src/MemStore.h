@@ -145,8 +145,8 @@ public:
 
 protected:
 
-    Map              *m_map;
-    uint64_t          m_maxsize;
+    Map      *m_map;
+    uint64_t  m_maxsize;
 };
 
 #endif

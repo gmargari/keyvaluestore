@@ -89,7 +89,7 @@ void RangemergeCompactionManager::flush_bytes()
     vector<Range *> ranges;
     Range *rng;
     uint64_t bytes_flushed, memstore_size, memstore_maxsize;
-    int i, cur_rng, newfiles, idx;
+    int i, cur_rng, newfiles;
 #if DBGLVL > 0
     uint64_t dbg_memsize, dbg_memsize_serial;
 #endif
@@ -124,8 +124,8 @@ void RangemergeCompactionManager::flush_bytes()
         istreams_to_merge.push_back(map_istream);
 
         // get istream for file that stores all tuples that belong to range
-        if (rng->m_idx != NO_DISK_FILE) {
-            disk_stream = new DiskFileInputStream(r_disk_files[rng->m_idx], MERGE_BUFSIZE);
+        if (rng->m_block_num != NO_DISK_BLOCK) {
+            disk_stream = new DiskFileInputStream(r_disk_files[rng->m_block_num], MERGE_BUFSIZE);
             disk_stream->set_key_range(rng->m_first, rng->m_last, true, false);
             istreams_to_merge.push_back(disk_stream);
         }
@@ -169,17 +169,18 @@ void RangemergeCompactionManager::flush_bytes()
     //--------------------------------------------------------------------------
     // delete old files from disk and remove them from diskstore
     //--------------------------------------------------------------------------
-    // we flushed from memory to disk the first 'cur_rng' ranges. in order to
-    // avoid problems with deletion below, sort ranges by 'm_idx' field and
-    // delete files from last to first
-    sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_file_index);
+    // we flushed to disk the first 'cur_rng' ranges. in order to avoid problems
+    // with file deletion, sort first 'cur_rng' ranges by 'block_num' and delete
+    // files from last to first (note: we store each block in a separate disk
+    // file. 'm_block_num' is the index of file in diskfiles vector)
+    sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_block_num);
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     for (i = cur_rng - 1; i >= 0; i--) {
-        idx = ranges[i]->m_idx;
-        if (idx != NO_DISK_FILE) {
-            r_disk_files[idx]->delete_from_disk();
-            delete r_disk_files[idx];
-            r_disk_files.erase(r_disk_files.begin() + idx);
+        int blocknum = ranges[i]->m_block_num;
+        if (blocknum != NO_DISK_BLOCK) {
+            r_disk_files[blocknum]->delete_from_disk();
+            delete r_disk_files[blocknum];
+            r_disk_files.erase(r_disk_files.begin() + blocknum);
         }
     }
     delete_ranges(ranges);
@@ -223,7 +224,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
             rng = new Range();  // TODO free ranges from vector!!! or make vector global and not recompute it all the time!!!
             r_disk_files[i]->get_first_last_term(&rng->m_first, &rng->m_last);
             rng->m_disksize = r_disk_files[i]->get_size();
-            rng->m_idx = i;
+            rng->m_block_num = i;
             ranges.push_back(rng);
         }
 
@@ -254,7 +255,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
         rng->m_memsize = sizes.first;
         rng->m_memsize_serialized = sizes.second;
         rng->m_disksize = 0;
-        rng->m_idx = NO_DISK_FILE;
+        rng->m_block_num = NO_DISK_BLOCK;
         ranges.push_back(rng);
     }
 }

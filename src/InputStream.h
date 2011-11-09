@@ -37,8 +37,6 @@ public:
      */
     virtual bool read(const char **key, const char **value, uint64_t *timestamp) = 0;
 
-protected:
-
 };
 
 #endif

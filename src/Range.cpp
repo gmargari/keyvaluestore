@@ -8,7 +8,7 @@
  *============================================================================*/
 Range::Range()
     : m_first(NULL), m_last(NULL), m_memsize(0), m_memsize_serialized(0),
-      m_disksize(0), m_idx(NO_DISK_FILE)
+      m_disksize(0), m_block_num(NO_DISK_BLOCK)
 {
 
 }
@@ -47,9 +47,9 @@ bool Range::cmp_by_term(const Range *r1, const Range *r2)
 
 
 /*============================================================================
- *                            cmp_by_file_index
+ *                            cmp_by_block_num
  *============================================================================*/
-bool Range::cmp_by_file_index(const Range *r1, const Range *r2)
+bool Range::cmp_by_block_num(const Range *r1, const Range *r2)
 {
-    return (r1->m_idx < r2->m_idx); // ascending order
+    return (r1->m_block_num < r2->m_block_num); // ascending order
 }

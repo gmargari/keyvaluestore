@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define NO_DISK_FILE   (-1)
+#define NO_DISK_BLOCK (-1)
 
 class Range {
 
@@ -35,20 +35,22 @@ public:
     static bool cmp_by_term(const Range *r1, const Range *r2);
 
     /**
-     * compare ranges lexicographically by field 'idx' (ascending order)
+     * compare ranges by field 'm_block_num' (ascending order)
      */
-    static bool cmp_by_file_index(const Range *r1, const Range *r2);
+    static bool cmp_by_block_num(const Range *r1, const Range *r2);
 
     // Undefined methods (just remove Weffc++ warning)
     Range(const Range&);
     Range& operator=(const Range&);
 
-    const char   *m_first;              // terms stored on disk block belong to
-    const char   *m_last;               // range [m_first, m_last)
-    uint64_t      m_memsize;            // total byte size of memory tuples
-    uint64_t      m_memsize_serialized; // total byte size of serialized memory tuples
-    uint64_t      m_disksize;           // size of tuples stored on disk block
-    int           m_idx;                // index in DiskStore's vector of disk block
+    const char *m_first;              // terms stored on disk block belong to
+    const char *m_last;               // range [m_first, m_last)
+    uint64_t    m_memsize;            // byte size of memory tuples
+    uint64_t    m_memsize_serialized; // byte size of serialized memory tuples
+    uint64_t    m_disksize;           // size of tuples stored on disk block
+    int         m_block_num;          // index in DiskStore's vector of disk
+                                      // files (we store each block in a
+                                      // separate disk file)
 };
 
 #endif
