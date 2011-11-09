@@ -33,6 +33,7 @@ void MapInputStream::set_key_range(const char *start_key, const char *end_key, b
     m_end_incl = end_incl;
 
     assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
+    assert(m_map);
     m_iter = m_map->start_iter(m_start_key, m_start_incl);
     m_iter_end = m_map->end_iter(m_end_key, m_end_incl);
 }
