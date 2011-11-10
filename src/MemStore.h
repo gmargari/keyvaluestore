@@ -12,10 +12,7 @@ class MapInputStream;
 class MemStore {
 
 friend class CompactionManager;
-friend class NomergeCompactionManager;
-friend class ImmCompactionManager;
 friend class GeomCompactionManager;
-friend class LogCompactionManager;
 friend class RangemergeCompactionManager;
 friend class Scanner;
 
@@ -104,7 +101,6 @@ public:
      * size limit
      */
     bool will_reach_size_limit(const char *key, const char *value, uint64_t timestamp);
-
     bool will_reach_size_limit(const char *key, const char *value);
 
     /**
