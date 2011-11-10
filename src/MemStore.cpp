@@ -60,24 +60,6 @@ bool MemStore::get(const char *key, char **value, uint64_t *timestamp)
     }
 }
 
-
-/*============================================================================
- *                                   get
- *============================================================================*/
-bool MemStore::get(const char *key, uint64_t timestamp, char **value)
-{
-    const char *constvalue;
-    uint64_t ts;
-
-    if (m_map->get(key, &constvalue, &ts) && ts == timestamp) {
-        *value = strdup(constvalue); // copy value
-        return true;
-    } else {
-        *value = NULL;
-        return false;
-    }
-}
-
 /*============================================================================
  *                              get_num_keys
  *============================================================================*/

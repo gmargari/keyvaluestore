@@ -106,21 +106,6 @@ bool Map::get(const char *key, const char **value, uint64_t *timestamp)
 }
 
 /*============================================================================
- *                                    get
- *============================================================================*/
-bool Map::get(const char *key, uint64_t timestamp, const char **value)
-{
-    uint64_t ts;
-
-    if (get(key, value, &ts) && ts == timestamp) {
-        return true;
-    } else {
-        *value = NULL;
-        return false;
-    }
-}
-
-/*============================================================================
  *                                get_num_keys
  *============================================================================*/
 uint64_t Map::get_num_keys()

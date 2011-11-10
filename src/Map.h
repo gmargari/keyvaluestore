@@ -46,16 +46,6 @@ public:
     bool get(const char *key, const char **value, uint64_t *timestamp);
 
     /**
-     * get the value for a specific <key, timestamp> pair
-     *
-     * @param key (in) key to be searched
-     * @param timestamp (in) timestamp of insertion
-     * @param value (out) value corresponding to the searched <key, timestamp>
-     * @return true if <key, timestamp> was found, false if not
-     */
-    bool get(const char *key, uint64_t timestamp, const char **value);
-
-    /**
      * return number of <key, value, timestamp> tuples in map
      */
     uint64_t get_num_keys();
