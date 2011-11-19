@@ -37,8 +37,7 @@ void NomergeCompactionManager::flush_bytes()
     memstore_clear();
 
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
-    // insert first, in diskstore files vector & input streams vector, as it
-    // contains the most recent <k,v> pairs
+    // insert first in diskstore as it contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), memstore_file);
     pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 }

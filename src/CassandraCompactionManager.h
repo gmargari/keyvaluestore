@@ -46,8 +46,8 @@ protected:
 
     int sanity_check();
 
-    int         m_L; // max number of files per level
-    vector<int> m_level_files;
+    int         m_L;            // max number of files per level
+    vector<int> m_level_files;  // number of existing files per level
 
 };
 

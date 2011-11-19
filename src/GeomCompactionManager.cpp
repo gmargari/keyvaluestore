@@ -206,7 +206,7 @@ void GeomCompactionManager::flush_bytes()
     }
 
     //--------------------------------------------------------------------------
-    // 4) delete merged files and corresponding streams from DiskStore
+    // 4) delete merged files from DiskStore
     //--------------------------------------------------------------------------
 
     // if we performed online merge, clear memstore
@@ -230,7 +230,7 @@ void GeomCompactionManager::flush_bytes()
     r_disk_files.erase(r_disk_files.begin(), r_disk_files.begin() + count);
 
     //--------------------------------------------------------------------------
-    // 5) add new file and corresponding stream to DiskStore
+    // 5) add new file to DiskStore
     //--------------------------------------------------------------------------
 
     // add new file at the front, since it contains most recent <k,v> pairs
