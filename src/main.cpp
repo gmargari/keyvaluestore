@@ -4,6 +4,7 @@
 #include "GeomCompactionManager.h"
 #include "LogCompactionManager.h"
 #include "RangemergeCompactionManager.h"
+#include "CassandraCompactionManager.h"
 #include "Statistics.h"
 #include "Scanner.h"
 
@@ -73,13 +74,14 @@ void print_syntax(char *progname)
 {
      printf("syntax: %s -c compactionmanager [options]\n", progname);
      printf("\n COMPACTION MANAGER\n");
-     printf("    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\"\n");
+     printf("    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"\n");
      printf("    -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
-     printf("    -r value:               [geometric c.m.] r parameter (default: %d)\n", DEFAULT_GEOM_R);
-     printf("    -p value:               [geometric c.m.] p parameter (default: disabled)\n");
+     printf("    -r value:               [geometric c.m.] R parameter (default: %d)\n", DEFAULT_GEOM_R);
+     printf("    -p value:               [geometric c.m.] P parameter (default: disabled)\n");
      printf("    -b blocksize:           [rangemerge c.m.] block size in MB (default: %.0f)\n", b2mb(DEFAULT_RNGMERGE_BLOCKSIZE));
      printf("    -f flushmem:            [rangemerge c.m.] flush memory size in MB\n");
      printf("                            (default: 0, when memory is full flush only the biggest range)\n");
+     printf("    -l value:               [cassandra c.m.] L parameter (default: %d)\n", DEFAULT_CASS_K);
      printf("\n PUT\n");
      printf("    -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
      printf("    -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
@@ -101,12 +103,13 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    char     allargs[] = "hc:r:p:b:f:m:i:n:k:v:uzg:o:se";
+    char     allargs[] = "hc:r:p:b:f:l:m:i:n:k:v:uzg:o:se";
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
              bflag = 0,
              fflag = 0,
+             lflag = 0,
              mflag = 0,
              iflag = 0,
              nflag = 0,
@@ -122,6 +125,7 @@ int main(int argc, char **argv)
              i,
              geom_r,
              geom_p,
+             cass_l,
              num_get_threads,
              retval;
     uint64_t blocksize,
@@ -188,6 +192,12 @@ int main(int argc, char **argv)
             CHECK_DUPLICATE_ARG(fflag, myopt);
             fflag = 1;
             flushmemorysize = mb2b(atoll(optarg));
+            break;
+
+        case 'l':
+            CHECK_DUPLICATE_ARG(lflag, myopt);
+            lflag = 1;
+            cass_l = atoi(optarg);
             break;
 
         case 'm':
@@ -290,6 +300,9 @@ int main(int argc, char **argv)
     if (fflag == 0) {
         flushmemorysize = DEFAULT_RNGMERGE_FLUSHMEMSIZE;
     }
+    if (lflag == 0) {
+        cass_l = DEFAULT_CASS_K;
+    }
     if (mflag == 0) {
         memorysize = DEFAULT_MEMSTORE_SIZE;
     }
@@ -331,8 +344,8 @@ int main(int argc, char **argv)
     }
     if (cflag && strcmp(compmanager, "nomerge") && strcmp(compmanager, "immediate") != 0
          && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
-         && strcmp(compmanager, "rangemerge") != 0) {
-        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\"\n");
+         && strcmp(compmanager, "rangemerge") != 0 && strcmp(compmanager, "cassandra") != 0) {
+        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\" or \"cassandra\"\n");
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
@@ -413,6 +426,13 @@ int main(int argc, char **argv)
             ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
         }
     }
+    // Cassandra compaction manager
+    else if (strcmp(compmanager, "cassandra") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::CASSANDRA_CM);
+        if (lflag) {
+            ((CassandraCompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
+        }
+    }
     // other compaction manager?!
     else {
         printf("Error: unknown compaction manager (but we should not get here!)\n");
@@ -454,6 +474,9 @@ int main(int argc, char **argv)
             printf("# rngmerge_block_size: %15.0f MB %s\n", b2mb(blocksize), (bflag == 0) ? "(default)" : "");
         }
         printf("# rngmerge_flushmem_size: %12.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
+    }
+    if (strcmp(compmanager, "cassandra") == 0) {
+        printf("# cassandra_l:         %15d    %s\n", cass_l, (lflag == 0) ? "(default)" : "");
     }
     printf("# memstore_merge_mode: %15s\n", (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline"));
     printf("# read_from_stdin:     %15s\n", (sflag) ? "true" : "false");
