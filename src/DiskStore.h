@@ -18,6 +18,7 @@ friend class ImmCompactionManager;
 friend class GeomCompactionManager;
 friend class LogCompactionManager;
 friend class RangemergeCompactionManager;
+friend class CassandraCompactionManager;
 friend class Scanner;
 
 public:

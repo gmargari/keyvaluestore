@@ -24,6 +24,7 @@
 #define DEFAULT_GEOM_P                                    0 // default disabled (no upper bound on number of partitions)
 #define DEFAULT_RNGMERGE_BLOCKSIZE              268435456LL // 256MB
 #define DEFAULT_RNGMERGE_FLUSHMEMSIZE                   0LL // 0 -> flush biggest range only
+#define DEFAULT_CASS_K                                    4
 
 //==============================================================================
 // vfile-related defines

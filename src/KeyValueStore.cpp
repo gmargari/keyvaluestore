@@ -8,6 +8,7 @@
 #include "LogCompactionManager.h"
 #include "GeomCompactionManager.h"
 #include "RangemergeCompactionManager.h"
+#include "CassandraCompactionManager.h"
 #include "Statistics.h"
 
 #include <cassert>
@@ -40,6 +41,9 @@ KeyValueStore::KeyValueStore(cm_type type)
             break;
         case KeyValueStore::RNGMERGE_CM:
             m_compactionmanager = new RangemergeCompactionManager(m_memstore, m_diskstore);
+            break;
+        case KeyValueStore::CASSANDRA_CM:
+            m_compactionmanager = new CassandraCompactionManager(m_memstore, m_diskstore);
             break;
     }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);
