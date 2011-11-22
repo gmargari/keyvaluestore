@@ -87,6 +87,15 @@ bool KeyValueStore::put(const char *key, const char *value, uint64_t timestamp)
         time_start(&(g_stats.compaction_time));
         flush_bytes();
         time_end(&(g_stats.compaction_time));
+
+        printf("%8d   %7u %7u %7u   %7u %7u %7u   %7u %7u %7u   %7u %7u %8d %8d   %4d\n",
+               get_mb_inserted(),
+               get_total_time_sec(), get_compaction_time_sec(), get_put_time_sec(),
+               get_merge_time_sec(), get_free_time_sec(), get_cmrest_time_sec(),
+               get_mem_time_sec(), get_read_time_sec(), get_write_time_sec(),
+               get_mb_read(), get_mb_written(), get_num_reads(), get_num_writes(),
+               get_num_disk_files());
+
     }
 
     return m_memstore->put(key, value, timestamp);
