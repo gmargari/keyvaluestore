@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-
+#include <pthread.h>
 #include <cstdio>
 
 using namespace std;
@@ -16,8 +16,9 @@ using namespace std;
  *                                 DiskStore
  *============================================================================*/
 DiskStore::DiskStore()
-    : m_disk_files(), m_rwlock(PTHREAD_RWLOCK_INITIALIZER)
+    : m_disk_files(), m_rwlock()
 {
+    pthread_rwlock_init(&m_rwlock, NULL);
     if ( ! load_from_disk()) {
         DiskFile::set_max_dfile_num(0);
     }
