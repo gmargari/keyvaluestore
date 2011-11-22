@@ -307,9 +307,11 @@ uint32_t KeyValueStore::get_write_time_sec()
 uint64_t KeyValueStore::get_timestamp()
 {
     struct timeval tv;
+    static uint64_t t = 0;
 
-    gettimeofday(&tv, NULL);
-    return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
+//     gettimeofday(&tv, NULL);
+//     return (uint64_t)(tv.tv_sec*1000000 + tv.tv_usec);
+    return ++t;
 }
 
 // TODO: move elsewhere
