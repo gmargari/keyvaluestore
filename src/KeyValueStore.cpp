@@ -173,6 +173,14 @@ merge_type KeyValueStore::get_memstore_merge_type()
 }
 
 /*============================================================================
+ *                             get_mb_inserted
+ *============================================================================*/
+uint32_t KeyValueStore::get_mb_inserted()
+{
+    return gb2mb(bytes_get_gb(g_stats.bytes_inserted)) + bytes_get_mb(g_stats.bytes_inserted);
+}
+
+/*============================================================================
  *                               get_mb_read
  *============================================================================*/
 uint32_t KeyValueStore::get_mb_read()

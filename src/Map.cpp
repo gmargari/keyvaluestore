@@ -78,6 +78,7 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
     m_size += keylen + 1 + sizeof(new_pair) + valuelen + 1;
     m_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
     m_map[cpkey] = new_pair;
+    bytes_inc(&g_stats.bytes_inserted, keylen + valuelen);
 
     assert(sanity_check());
 

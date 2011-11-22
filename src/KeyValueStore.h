@@ -112,6 +112,7 @@ public:
      * function used to get statistics about keyvaluestore
      */
 
+    uint32_t get_mb_inserted();
     uint32_t get_mb_read();
     uint32_t get_mb_written();
     uint32_t get_num_reads();

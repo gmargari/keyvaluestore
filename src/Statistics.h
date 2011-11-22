@@ -39,6 +39,7 @@ typedef struct {
  */
 
 typedef struct { // NOTE: add new field -> update global_stats_init() and stats_sanity_check()
+    byte_stats bytes_inserted;
     byte_stats bytes_written;
     byte_stats bytes_read;
     uint32_t   num_writes;

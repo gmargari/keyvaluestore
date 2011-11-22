@@ -195,6 +195,7 @@ void global_stats_init()
     assert(initialized == false);
     initialized = true;
 
+    bytes_init(&(g_stats.bytes_inserted));
     bytes_init(&(g_stats.bytes_written));
     bytes_init(&(g_stats.bytes_read));
     num_init(&(g_stats.num_writes));
