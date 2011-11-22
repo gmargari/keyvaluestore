@@ -132,7 +132,6 @@ int main(int argc, char **argv)
              flushmemorysize,
              memorysize,
              insertbytes,
-             periodic_stats_step,
              num_keys_to_insert;
     uint32_t keysize,
              valuesize;
@@ -248,12 +247,6 @@ int main(int argc, char **argv)
             num_get_threads = atoi(optarg);
             break;
 
-        case 'o':
-            CHECK_DUPLICATE_ARG(oflag, myopt);
-            oflag = 1;
-            periodic_stats_step = mb2b(atof(optarg));
-            break;
-
         case 'e':
             CHECK_DUPLICATE_ARG(eflag, myopt);
             eflag = 1;
@@ -330,9 +323,6 @@ int main(int argc, char **argv)
     }
     if (gflag == 0) {
         num_get_threads = DEFAULT_NUM_GET_THREADS;
-    }
-    if (oflag == 0) {
-        periodic_stats_step = memorysize/2;
     }
 
     //--------------------------------------------------------------------------
@@ -460,7 +450,6 @@ int main(int argc, char **argv)
         printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");
     }
     printf("# num_get_threads:     %15d    %s\n", num_get_threads, (gflag == 0) ? "(default)" : "");
-    printf("# print_stats_every:   %15.0f MB %s\n", b2mb(periodic_stats_step), (oflag == 0) ? "(default)" : "");
     if (strcmp(compmanager, "geometric") == 0) {
         if (pflag == 0) {
             printf("# geometric_r:         %15d    %s\n", geom_r, (rflag == 0) ? "(default)" : "");
@@ -482,8 +471,8 @@ int main(int argc, char **argv)
     printf("# read_from_stdin:     %15s\n", (sflag) ? "true" : "false");
     printf("# debug_level:         %15d\n", DBGLVL);
     fflush(stdout);
-    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
-    printf("# mb_ins | Ttotal Tcompac    Tput | Tmerge   Tfree Tcmrest |    Tmem   Tread  Twrite | mb_read  mb_writ    reads   writes | runs | avg_get  run_sizes\n");
+//    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
+    printf("# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs | avg_get  run_sizes\n");
 
     //--------------------------------------------------------------------------
     // initialize variables
@@ -515,7 +504,7 @@ int main(int argc, char **argv)
     thread = (pthread_t *)malloc((1 + num_get_threads) * sizeof(pthread_t));
 
     // create get threads
-    for(i = 0; i < 1 + num_get_threads; i++) {
+    for (i = 0; i < 1 + num_get_threads; i++) {
         if (i == 0) {
             retval = pthread_create(&thread[i], NULL, put_routine, (void *)&targs[i]);
         } else {
@@ -530,7 +519,7 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     // wait for threads to finish
     //--------------------------------------------------------------------------
-    for(i = 0; i < 1 + num_get_threads; i++) {
+    for (i = 0; i < 1 + num_get_threads; i++) {
         pthread_join(thread[i], NULL);
     }
 
@@ -582,7 +571,9 @@ void *put_routine(void *args)
             *value = NULL;
     uint64_t bytes_inserted = 0;
 
-    printf("# [DEBUG]  put thread started\n");
+    if (DBGLVL > 0) {
+        printf("# [DEBUG]  put thread started\n");
+    }
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
@@ -656,7 +647,9 @@ void *get_routine(void *args)
     int      i = 0;
     Scanner *scanner = new Scanner(targs->kvstore);
 
-    printf("# [DEBUG]  get thread %d started\n", targs->tid);
+    if (DBGLVL > 0) {
+        printf("# [DEBUG]  get thread %d started\n", targs->tid);
+    }
 
     while (!put_thread_finished) {
 
