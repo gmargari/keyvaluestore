@@ -330,16 +330,6 @@ bool GeomCompactionManager::load_state_from_disk()
 }
 
 /*============================================================================
- *                              print_partitions
- *============================================================================*/
-void GeomCompactionManager::print_partitions()
-{
-    printf("part.size: |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", m_partition_size[i]);   printf("\n");
-    printf("minsize:   |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", partition_minsize(i));  printf("\n");
-    printf("maxsize:   |"); for (uint i = 0; i < m_partition_size.size(); i++) printf("%3d |", partition_maxsize(i));  printf("\n");
-}
-
-/*============================================================================
  *                                sanity_check
  *============================================================================*/
 int GeomCompactionManager::sanity_check()

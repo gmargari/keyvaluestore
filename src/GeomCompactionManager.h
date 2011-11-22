@@ -54,11 +54,6 @@ protected:
     int partition_maxsize(int num);
 
     /**
-     * return size of 'num'-th partition on disk.
-     */
-//     int partition_size(int num);
-
-    /**
      * given the size of a partition, return which partition is this (e.g. the 4th)
      */
     int partition_num(int partition_size);
@@ -78,8 +73,6 @@ protected:
      */
     bool save_state_to_disk();
     bool load_state_from_disk();
-
-    void print_partitions();
 
     int sanity_check();
 

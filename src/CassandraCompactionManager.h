@@ -42,8 +42,6 @@ protected:
     bool save_state_to_disk();
     bool load_state_from_disk();
 
-    void print_partitions();
-
     int sanity_check();
 
     int         m_L;            // max number of files per level
