@@ -1,0 +1,406 @@
+\documentclass[11pt]{article}
+\topmargin -1.5cm        % read Lamport p.163
+\oddsidemargin -0.04cm   % read Lamport p.163
+\evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
+\textwidth 16.59cm
+\textheight 21.94cm
+%\pagestyle{empty}       % Uncomment if don't want page numbers
+\parskip 7.2pt           % sets spacing between paragraphs
+%\renewcommand{\baselinestretch}{1.5} % Uncomment for 1.5 spacing between lines
+\parindent 0pt		 % sets leading space for paragraphs
+\usepackage{graphicx}    % needed for including graphics e.g. EPS, PS
+
+\usepackage{epsfig}
+\usepackage{subfigure}
+% \usepackage{epstopdf}
+
+% \usepackage{comment}
+% \usepackage{boxedminipage}
+% \usepackage{alltt}
+% \usepackage{array}
+
+% \usepackage{epsfig}
+% \usepackage{algorithmic}
+% \usepackage{algorithm}
+% \usepackage{multirow}
+
+\begin{document}
+
+
+
+\section*{Key-value Store}
+
+\footnotesize
+\begin{verbatim}
+syntax: ./build/src/sim -c compactionmanager [options]
+ COMPACTION MANAGER
+    -c compactionmanager:   "nomerge", "immediate", "geometric", "logarithmic",
+                            "rangemerge", "cassandra"
+    -m memorysize:          memory size in MB (default: 100)
+    -r value:               [geometric c.m.] R parameter (default: 3)
+    -p value:               [geometric c.m.] P parameter (default: disabled)
+    -b blocksize:           [rangemerge c.m.] block size in MB (default: 256)
+    -f flushmem:            [rangemerge c.m.] flush memory size in MB
+                            (default: 0, when memory is full flush only the biggest range)
+    -l value:               [cassandra c.m.] L parameter (default: 4)
+
+ PUT
+    -i insertbytes:         number of bytes to insert in MB (default: 1000)
+    -n numkeystoinsert:     number of keys to insert (default: 953250)
+    -k keysize:             size of keys, in bytes (default: 100)
+    -v valuesize:           size of values, in bytes (default: 1000)
+    -u:                     create unique keys (default: false)
+    -z:                     create zipfian keys (default: false, uniform keys)
+    -s:                     read key-values from stdin
+
+ GET
+    -g numgetthreads:       number of get threads (default: 0)
+
+ VARIOUS
+    -e:                     print key-values that would be inserted and exit
+    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)
+    -h:                     print this help message and exit
+\end{verbatim}
+
+In all experiments below we insert in a store of \textbf{128MB} of available
+memory \textbf{10GB} of data, in order to simulate a datastore of 1GB memory
+to which we insert 100GB. Data is inserted as key-value pairs where key is
+100B and value is 1KB.
+
+
+%=============================================================================================================
+% Fragmentation
+%=============================================================================================================
+
+% \begin{figure}[ht]
+%   \begin{center}
+%     \includegraphics{eps/allmethods.fragm.eps}
+%     \caption{GB inserted in system vs. fragmentation (number of runs per list)}
+%   \end{center}
+% \end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Fragmentation\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.fragm.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.fragm.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.fragm.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.fragm.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.fragm.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.fragm.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.fragm.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.fragm.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.fragm.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.fragm.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.fragm.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.fragm.eps}}
+    \caption{GB inserted in system vs. fragmentation (number of runs per list)}
+  \end{center}
+\end{figure}
+
+
+%=============================================================================================================
+% Data inserted (GB)
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Data transferred (GB)\end{huge}
+
+    \subfigure[All methods]{\includegraphics{eps/allmethods.gbtransferred.eps}}
+    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.gbtransferred.eps}}
+    \caption{GB inserted in system vs. Data transferred (GB)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Data transferred (GB)\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.gbtransferred.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.gbtransferred.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.gbtransferred.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.gbtransferred.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.gbtransferred.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.gbtransferred.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.gbtransferred.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.gbtransferred.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.gbtransferred.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.gbtransferred.eps}}    
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.gbtransferred.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.gbtransferred.eps}}
+    \caption{GB inserted in system vs. Data transferred (GB)}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
+% I/O time
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}I/O time\end{huge}
+
+    \subfigure[All methods]{\includegraphics{eps/allmethods.iotime.eps}}
+    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.iotime.eps}}
+    \caption{GB inserted in system vs. I/O Time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}I/O time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.iotime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.iotime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.iotime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.iotime.eps}}    
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.iotime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.iotime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.iotime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.iotime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.iotime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.iotime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.iotime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.iotime.eps}}
+    \caption{GB inserted in system vs. I/O Time (s)}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
+% Compaction time
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Compaction time\end{huge}
+
+    \subfigure[All methods]{\includegraphics{eps/allmethods.compacttime.eps}}
+    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.compacttime.eps}}
+    \caption{GB inserted in system vs. Compaction Time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Compaction time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.compacttime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.compacttime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.compacttime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.compacttime.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.compacttime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.compacttime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.compacttime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.compacttime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.compacttime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.compacttime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.compacttime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.compacttime.eps}}
+    \caption{GB inserted in system vs. Compaction Time (s)}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
+% Insertion time
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Insertion time\end{huge}
+
+    \subfigure[All methods]{\includegraphics{eps/allmethods.totaltime.eps}}
+    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.totaltime.eps}}
+    \caption{GB inserted in system vs. Insertion time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Insertion time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.totaltime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.totaltime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.totaltime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.totaltime.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.totaltime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.totaltime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.totaltime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.totaltime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.totaltime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.totaltime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.totaltime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.totaltime.eps}}
+    \caption{GB inserted in system vs. Insertion time (s)}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
+% Memory size - per method
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Data transferred\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-memsize.totalstats.gbtransferred.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-memsize.totalstats.gbtransferred.eps}}
+    \caption{Memory size vs. Data transferred (GB)}
+  \end{center}
+\end{figure}
+
+%--------- Strange behaviour for NoMerge... increasing memory increases time!
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. I/O time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.iotime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.iotime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-memsize.totalstats.iotime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-memsize.totalstats.iotime.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-memsize.totalstats.iotime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-memsize.totalstats.iotime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-memsize.totalstats.iotime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-memsize.totalstats.iotime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-memsize.totalstats.iotime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-memsize.totalstats.iotime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-memsize.totalstats.iotime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-memsize.totalstats.iotime.eps}}
+    \caption{Memory size vs. I/O time (s)}
+  \end{center}
+\end{figure}
+
+%--------- Strange behaviour for NoMerge... increasing memory increases time!
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Compaction time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.compacttime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.compacttime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-memsize.totalstats.compacttime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-memsize.totalstats.compacttime.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-memsize.totalstats.compacttime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-memsize.totalstats.compacttime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-memsize.totalstats.compacttime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-memsize.totalstats.compacttime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-memsize.totalstats.compacttime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-memsize.totalstats.compacttime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-memsize.totalstats.compacttime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-memsize.totalstats.compacttime.eps}}
+    \caption{Memory size vs. Compaction time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Insertion time\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.totaltime.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.totaltime.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-memsize.totalstats.totaltime.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-memsize.totalstats.totaltime.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-memsize.totalstats.totaltime.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-memsize.totalstats.totaltime.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-memsize.totalstats.totaltime.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-memsize.totalstats.totaltime.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-memsize.totalstats.totaltime.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-memsize.totalstats.totaltime.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-memsize.totalstats.totaltime.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-memsize.totalstats.totaltime.eps}}
+    \caption{Memory size vs. Insertion time (s)}
+  \end{center}
+\end{figure}
+
+%=============================================================================================================
+% Memory size - all methods together
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Data transferred\end{huge}
+
+    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.gbtransferred.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.gbtransferred.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.gbtransferred.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.gbtransferred.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.gbtransferred.eps}}
+    \caption{Memory size vs. Data transferred (GB)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. I/O time\end{huge}
+
+    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.iotime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.iotime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.iotime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.iotime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.iotime.eps}}
+    \caption{Memory size vs. I/O time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Compaction time\end{huge}
+
+    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.compacttime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.compacttime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.compacttime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.compacttime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.compacttime.eps}}
+    \caption{Memory size vs. Compaction time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Insertion time\end{huge}
+
+    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.totaltime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.totaltime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.totaltime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.totaltime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.totaltime.eps}}
+    \caption{Memory size vs. Insertion time (s)}
+  \end{center}
+\end{figure}
+
+\end{document}
