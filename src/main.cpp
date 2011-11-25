@@ -17,13 +17,14 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <sys/time.h>
 #include <pthread.h>
 
 using namespace std;
 
-#define CHECK_DUPLICATE_ARG(flag,opt) do {if (flag) { printf("Error: you have already set '-%c' argument\n", opt); exit(EXIT_FAILURE); }} while(0)
+#define CHECK_DUPLICATE_ARG(flag,opt) do {if (flag) { cout << "Error: you have already set '-" << opt << "' argument" << endl; exit(EXIT_FAILURE); }} while(0)
 
 //------------------------------------------------------------------------------
 // forward declaration of functions
@@ -72,30 +73,34 @@ bool put_thread_finished = false;
  *============================================================================*/
 void print_syntax(char *progname)
 {
-     printf("syntax: %s -c compactionmanager [options]\n", progname);
-     printf("\n COMPACTION MANAGER\n");
-     printf("    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"\n");
-     printf("    -m memorysize:          memory size in MB (default: %.0f)\n", b2mb(DEFAULT_MEMSTORE_SIZE));
-     printf("    -r value:               [geometric c.m.] R parameter (default: %d)\n", DEFAULT_GEOM_R);
-     printf("    -p value:               [geometric c.m.] P parameter (default: disabled)\n");
-     printf("    -b blocksize:           [rangemerge c.m.] block size in MB (default: %.0f)\n", b2mb(DEFAULT_RNGMERGE_BLOCKSIZE));
-     printf("    -f flushmem:            [rangemerge c.m.] flush memory size in MB\n");
-     printf("                            (default: 0, when memory is full flush only the biggest range)\n");
-     printf("    -l value:               [cassandra c.m.] L parameter (default: %d)\n", DEFAULT_CASS_K);
-     printf("\n PUT\n");
-     printf("    -i insertbytes:         number of bytes to insert in MB (default: %.0f)\n", b2mb(DEFAULT_INSERTBYTES));
-     printf("    -n numkeystoinsert:     number of keys to insert (default: %Ld)\n", DEFAULT_INSERTKEYS);
-     printf("    -k keysize:             size of keys, in bytes (default: %u)\n", DEFAULT_KEY_SIZE);
-     printf("    -v valuesize:           size of values, in bytes (default: %u)\n", DEFAULT_VALUE_SIZE);
-     printf("    -u:                     create unique keys (default: %s)\n", (DEFAULT_UNIQUE_KEYS) ? "true " : "false");
-     printf("    -z:                     create zipfian keys (default: false, uniform keys)\n");
-     printf("    -s:                     read key-values from stdin\n");
-     printf("\n GET\n");
-     printf("    -g numgetthreads:       number of get threads (default: %d)\n", DEFAULT_NUM_GET_THREADS);
-     printf("\n VARIOUS\n");
-     printf("    -e:                     print key-values that would be inserted and exit\n");
-     printf("    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)\n");
-     printf("    -h:                     print this help message and exit\n");
+     cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
+     cout << endl;
+     cout << " COMPACTION MANAGER" << endl;
+     cout << "    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
+     cout << "    -m memorysize:          memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
+     cout << "    -r value:               [geometric c.m.] R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
+     cout << "    -p value:               [geometric c.m.] P parameter (default: disabled)" << endl;
+     cout << "    -b blocksize:           [rangemerge c.m.] block size in MB (default: " << b2mb(DEFAULT_RNGMERGE_BLOCKSIZE) << ")" << endl;
+     cout << "    -f flushmem:            [rangemerge c.m.] flush memory size in MB" << endl;
+     cout << "                            (default: 0, when memory is full flush only the biggest range)" << endl;
+     cout << "    -l value:               [cassandra c.m.] L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
+     cout << endl;
+     cout << " PUT" << endl;
+     cout << "    -i insertbytes:         number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
+     cout << "    -n numkeystoinsert:     number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
+     cout << "    -k keysize:             size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
+     cout << "    -v valuesize:           size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
+     cout << "    -u:                     create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
+     cout << "    -z:                     create zipfian keys (default: false, uniform keys)" << endl;
+     cout << "    -s:                     read key-values from stdin" << endl;
+     cout << endl;
+     cout << " GET" << endl;
+     cout << "    -g numgetthreads:       number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
+     cout << endl;
+     cout << " VARIOUS" << endl;
+     cout << "    -e:                     print key-values that would be inserted and exit" << endl;
+     cout << "    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)" << endl;
+     cout << "    -h:                     print this help message and exit" << endl;
 }
 
 /*============================================================================
@@ -118,7 +123,6 @@ int main(int argc, char **argv)
              uflag = 0,
              zflag = 0,
              gflag = 0,
-             oflag = 0,
              sflag = 0,
              eflag = 0,
              myopt,
@@ -274,7 +278,7 @@ int main(int argc, char **argv)
     }
 
     for (i = optind; i < argc; i++) {
-        printf ("Error: non-option argument: '%s'\n", argv[i]);
+        cout << "Error: non-option argument: '" << argv[i] << "'" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -329,53 +333,53 @@ int main(int argc, char **argv)
     // check values
     //--------------------------------------------------------------------------
     if (!cflag) {
-        printf("Error: you must set compaction manager\n");
+        cout << "Error: you must set compaction manager" << endl;
         exit(EXIT_FAILURE);
     }
     if (cflag && strcmp(compmanager, "nomerge") && strcmp(compmanager, "immediate") != 0
          && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
          && strcmp(compmanager, "rangemerge") != 0 && strcmp(compmanager, "cassandra") != 0) {
-        printf("Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\" or \"cassandra\"\n");
+        cout << "Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\" or \"cassandra\"" << endl;
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
-        printf("Error: you cannot set both 'r' and 'p' parameters\n");
+        cout << "Error: you cannot set both 'r' and 'p' parameters" << endl;
         exit(EXIT_FAILURE);
     }
     if (fflag && flushmemorysize > memorysize) {
-        printf("Error: flush memory size cannot be greater than memory size\n");
+        cout << "Error: flush memory size cannot be greater than memory size" << endl;
         exit(EXIT_FAILURE);
     }
     if (kflag && keysize > MAX_KVTSIZE) {
-        printf("Error: 'keysize' cannot be bigger than %lu\n", MAX_KVTSIZE);
+        cout << "Error: 'keysize' cannot be bigger than " << MAX_KVTSIZE << endl;
         exit(EXIT_FAILURE);
     }
     if (vflag && valuesize > MAX_KVTSIZE) {
-        printf("Error: 'valuesize' cannot be bigger than %lu\n", MAX_KVTSIZE);
+        cout << "Error: 'valuesize' cannot be bigger than " << MAX_KVTSIZE << endl;
         exit(EXIT_FAILURE);
     }
     if (nflag && iflag) {
-        printf("Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters\n");
+        cout << "Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters" << endl;
         exit(EXIT_FAILURE);
     }
     if (sflag) {
         if (kflag) {
-            printf("Ignoring '-k' flag (keysize): keys will be read from stdin\n");
+            cout << "Ignoring '-k' flag (keysize): keys will be read from stdin" << endl;
             kflag = 0;
             keysize = DEFAULT_KEY_SIZE;
         }
         if (vflag) {
-            printf("Ignoring '-v' flag (valuesize): values will be read from stdin\n");
+            cout << "Ignoring '-v' flag (valuesize): values will be read from stdin" << endl;
             vflag = 0;
             valuesize = DEFAULT_VALUE_SIZE;
         }
         if (uflag) {
-            printf("Ignoring '-u' flag (unique keys): keys will be read from stdin\n");
+            cout << "Ignoring '-u' flag (unique keys): keys will be read from stdin" << endl;
             uflag = 0;
             unique_keys = DEFAULT_UNIQUE_KEYS;
         }
         if (zflag) {
-            printf("Ignoring '-z' flag (zipf keys): keys will be read from stdin\n");
+            cout << "Ignoring '-z' flag (zipf keys): keys will be read from stdin" << endl;
             zflag = 0;
             zipf_keys = DEFAULT_ZIPF_KEYS;
         }
@@ -425,54 +429,54 @@ int main(int argc, char **argv)
     }
     // other compaction manager?!
     else {
-        printf("Error: unknown compaction manager (but we should not get here!)\n");
+        cout << "Error: unknown compaction manager (but we should not get here!)" << endl;
         exit(EXIT_FAILURE);
     }
 
     //--------------------------------------------------------------------------
     // print values of parameters
     //--------------------------------------------------------------------------
-    printf("# compaction_manager:  %15s\n", compmanager);
-    printf("# memory_size:         %15.0f MB %s\n", b2mb(memorysize), (mflag == 0) ? "(default)" : "");
+    cout << "# compaction_manager:  " << setw(15) << compmanager << endl;
+    cout << "# memory_size:         " << setw(15) << b2mb(memorysize) << " MB " << (mflag == 0 ? "(default)" : "")  << endl;
     if (sflag) {
-        printf("# insert_bytes:        %15s    (keys and values will be read from stdin)\n", "?");
-        printf("# key_size:            %15s    (keys and values will be read from stdin)\n", "?");
-        printf("# value_size:          %15s    (keys and values will be read from stdin)\n", "?");
-        printf("# keys_to_insert:      %15s    (keys and values will be read from stdin)\n", "?");
-        printf("# unique_keys:         %15s    (keys and values will be read from stdin)\n", "?");
-        printf("# zipf_keys:           %15s    (keys and values will be read from stdin)\n", "?");
+        cout << "# insert_bytes:        " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# key_size:            " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# value_size:          " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# keys_to_insert:      " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# unique_keys:         " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# zipf_keys:           " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
     } else {
-        printf("# insert_bytes:        %15.0f MB %s\n", b2mb(insertbytes), (iflag == 0) ? "(default)" : "");
-        printf("# key_size:            %15u    %s\n", keysize, (kflag == 0) ? "(default)" : "");
-        printf("# value_size:          %15u    %s\n", valuesize, (vflag == 0) ? "(default)" : "");
-        printf("# keys_to_insert:      %15Ld\n", num_keys_to_insert);
-        printf("# unique_keys:         %15s    %s\n", (unique_keys) ? "true" : "false", (uflag == 0) ? "(default)" : "");
-        printf("# zipf_keys:           %15s    %s\n", (zipf_keys) ? "true" : "false", (zflag == 0) ? "(default)" : "");
+        cout << "# insert_bytes:        " << setw(15) << b2mb(insertbytes) << " MB " << (iflag == 0 ? "(default)" : "") << endl;
+        cout << "# key_size:            " << setw(15) << keysize << "    " << (kflag == 0 ? "(default)" : "") << endl;
+        cout << "# value_size:          " << setw(15) << valuesize << "    " << (vflag == 0 ? "(default)" : "") << endl;
+        cout << "# keys_to_insert:      " << setw(15) << num_keys_to_insert << endl;
+        cout << "# unique_keys:         " << setw(15) << (unique_keys ? "true" : "false") << "    " << (uflag == 0 ? "(default)" : "") << endl;
+        cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "    " << (zflag == 0 ? "(default)" : "") << endl;
     }
-    printf("# num_get_threads:     %15d    %s\n", num_get_threads, (gflag == 0) ? "(default)" : "");
+    cout << "# num_get_threads:     " << setw(15) << num_get_threads << "    " << (gflag == 0 ? "(default)" : "") << endl;
     if (strcmp(compmanager, "geometric") == 0) {
         if (pflag == 0) {
-            printf("# geometric_r:         %15d    %s\n", geom_r, (rflag == 0) ? "(default)" : "");
+            cout << "# geometric_r:         " << setw(15) << geom_r << "    " << (rflag == 0 ? "(default)" : "") << endl;
         } else {
-            printf("# geometric_p:         %15d    %s\n", geom_p, (pflag == 0) ? "(default, disabled)" : "");
+            cout << "# geometric_p:         " << setw(15) << geom_p << "    " << (pflag == 0 ? "(default, disabled)" : "") << endl;
         }
     } else if (strcmp(compmanager, "rangemerge") == 0) {
         if (blocksize == 0) {
-            printf("# rngmerge_block_size: %15s MB\n", "inf");
+            cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB\n" << endl;
         } else {
-            printf("# rngmerge_block_size: %15.0f MB %s\n", b2mb(blocksize), (bflag == 0) ? "(default)" : "");
+            cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB " << (bflag == 0 ? "(default)" : "") << endl;
         }
-        printf("# rngmerge_flushmem_size: %12.0f MB %s\n", b2mb(flushmemorysize), (fflag == 0) ? "(default)" : "");
+        cout << "# rngmerge_flushmem_size: " << setw(12) << b2mb(flushmemorysize) << " MB " << (fflag == 0 ? "(default)" : "") << endl;
     }
     if (strcmp(compmanager, "cassandra") == 0) {
-        printf("# cassandra_l:         %15d    %s\n", cass_l, (lflag == 0) ? "(default)" : "");
+        cout << "# cassandra_l:         " << setw(15) << cass_l << "    " << (lflag == 0 ? "(default)" : "") << endl;
     }
-    printf("# memstore_merge_mode: %15s\n", (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline"));
-    printf("# read_from_stdin:     %15s\n", (sflag) ? "true" : "false");
-    printf("# debug_level:         %15d\n", DBGLVL);
+    cout << "# memstore_merge_mode: " << setw(15) << (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline") << endl;
+    cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
+    cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
-    printf("# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs | avg_get  run_sizes\n");
+    cout << "# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs | avg_get  run_sizes" << endl;
 
     //--------------------------------------------------------------------------
     // initialize variables
@@ -572,7 +576,7 @@ void *put_routine(void *args)
     uint64_t bytes_inserted = 0;
 
     if (DBGLVL > 0) {
-        printf("# [DEBUG]  put thread started\n");
+        cout << "# [DEBUG]  put thread started" << endl;
     }
 
     key = (char *)malloc(MAX_KVTSIZE);
@@ -614,7 +618,7 @@ void *put_routine(void *args)
         // just print <key, value> to stdout, do not insert into kvstore
         //----------------------------------------------------------------------
         if (print_kv_and_continue) {
-            printf("%s %s\n", key, value);
+            cout << key << " " << value << endl;
             continue;
         }
 
@@ -648,7 +652,7 @@ void *get_routine(void *args)
     Scanner *scanner = new Scanner(targs->kvstore);
 
     if (DBGLVL > 0) {
-        printf("# [DEBUG]  get thread %d started\n", targs->tid);
+        cout << "# [DEBUG]  get thread " << targs->tid << "started" << endl;
     }
 
     while (!put_thread_finished) {
