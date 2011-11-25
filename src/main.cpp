@@ -92,13 +92,13 @@ void print_syntax(char *progname)
      cout << "    -v valuesize:           size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
      cout << "    -u:                     create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
      cout << "    -z:                     create zipfian keys (default: false, uniform keys)" << endl;
-     cout << "    -s:                     read key-values from stdin" << endl;
      cout << endl;
      cout << " GET" << endl;
      cout << "    -g numgetthreads:       number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
      cout << endl;
      cout << " VARIOUS" << endl;
      cout << "    -e:                     print key-values that would be inserted and exit" << endl;
+     cout << "    -s:                     read key-values from stdin" << endl;
      cout << "    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)" << endl;
      cout << "    -h:                     print this help message and exit" << endl;
 }

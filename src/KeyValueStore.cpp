@@ -180,7 +180,7 @@ merge_type KeyValueStore::get_memstore_merge_type()
  *============================================================================*/
 uint64_t KeyValueStore::get_timestamp()
 {
-    struct timeval tv;
+//    struct timeval tv;
     static uint64_t t = 0;
 
 //     gettimeofday(&tv, NULL);
