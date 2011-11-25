@@ -5,6 +5,10 @@
 #include <sys/time.h>
 #include <cstdlib>
 #include <cassert>
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
 
 void randstr(char *s, const int len) {
     static const char alphanum[] =
@@ -37,12 +41,12 @@ int main()
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 438701;
-    printf("seed: %ld\n", tv.tv_usec);
+    cout << "seed: " << tv.tv_usec << endl;
 
     srand(tv.tv_usec);
     num_keys = rand() % 50000;
     maxkeysize = 3;
-    printf("num keys to be searched: %d\n", num_keys);
+    cout << "num keys to be searched: " << num_keys << endl;
 
     //========================================================
     // insert values
@@ -87,34 +91,34 @@ int main()
     srand(tv.tv_usec);
 
     for (int i = 0; i < N; i++) {
-        printf("%-*s ", maxkeysize+1, terms[i]); fflush(stdout);
+        cout << setw(maxkeysize+1) << right << terms[i]; fflush(stdout);
         if (index.search(terms[i], &off1, &off2)) {
-            printf("(%Ld, %Ld)\n", off1, off2);
+            cout << "(" << off1 << ", " << off2 << ")" << endl;
         } else {
-            printf("not found\n");
+            cout << "not found" << endl;
         }
 
         sprintf(key, "%s%s", terms[i], "00");
-        printf("%-*s ", maxkeysize+1, key); fflush(stdout);
+        cout << setw(maxkeysize+1) << left << key; fflush(stdout);
         if (index.search(key, &off1, &off2)) {
-            printf("(%Ld, %Ld)\n", off1, off2);
+            cout << "(" << off1 << ", " << off2 << ")" << endl;
         } else {
-            printf("not found\n");
+            cout << "not found" << endl;
         }
     }
 
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
-        printf("%-*s ", maxkeysize+1, key); fflush(stdout);
+        cout << setw(maxkeysize+1) << left << key; fflush(stdout);
         if (index.search(key, &off1, &off2)) {
-            printf("(%Ld, %Ld)\n", off1, off2);
+            cout << "(" << off1 << ", " << off2 << ")" << endl;
         } else {
-            printf("not found\n");
+            cout << "not found" << endl;
         }
     }
 #endif
 
-    printf("Everything ok!\n");
+    cout << "Everything ok!" << endl;
 
     return EXIT_SUCCESS;
 }

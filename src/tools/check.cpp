@@ -3,9 +3,11 @@
 #include "../DiskFileInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
+
+using namespace std;
 
 int main(int argc, char **argv)
 {
@@ -17,7 +19,7 @@ int main(int argc, char **argv)
     int cmp;
 
     if (argc != 2) {
-        printf("Syntax: %s <diskfile>\n", argv[0]);
+        cout << "Syntax: " << argv[0] << " <diskfile>" << endl;
         return EXIT_FAILURE;
     }
 
@@ -31,11 +33,11 @@ int main(int argc, char **argv)
     istream->set_key_range(NULL, NULL);
     while (istream->read(&key, &value, &timestamp)) {
         if ((cmp = strcmp(prev_key, key)) > 0) {
-            printf("Error: prev_key: %s > cur_key: %s\n", prev_key, key);
+            cout << "Error: prev_key: " << prev_key << " > cur_key: " << key << endl;
             return EXIT_FAILURE;
         }
         else if (cmp == 0) {
-            printf("Error: prev_key: %s == cur_key: %s\n", prev_key, key);
+            cout << "Error: prev_key: " << prev_key << " == cur_key: "  << key << endl;
             return EXIT_FAILURE;
         }
         strcpy(prev_key, key);
@@ -44,6 +46,6 @@ int main(int argc, char **argv)
     delete istream;
     delete diskfile;
 
-    printf("OK!\n");
+    cout << "OK!" << endl;
     return EXIT_SUCCESS;
 }

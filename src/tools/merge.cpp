@@ -4,9 +4,10 @@
 #include "../PriorityInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdio>
+#include <iostream>
 #include <cstdlib>
 
+using namespace std;
 using std::vector;
 
 int main(int argc, char **argv)
@@ -19,7 +20,7 @@ int main(int argc, char **argv)
     uint64_t timestamp;
 
     if (argc < 2) {
-        printf("Syntax: %s <fsim-file1> ... <fsim-fileN>\n", argv[0]);
+        cout << "Syntax: " << argv[0] << " <diskfile1> ... <diskfileN>" << endl;
         return EXIT_FAILURE;
     }
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
     prev_key[0] = '\0';
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
-            printf("[%s] [%s] [%Lu]\n", key, value, timestamp);
+            cout << "[" << key << "] ["  << value << "] [" << timestamp << "]" << endl;
         }
         strcpy(prev_key, key);
     }

@@ -6,11 +6,13 @@
 #include "../PriorityInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdio>
+#include <iostream>
 #include <cstdlib>
 #include <cassert>
 #include <cstdlib>
 #include <sys/time.h>
+
+using namespace std;
 
 #define BUFSIZE 1000
 
@@ -50,7 +52,7 @@ int main()
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 693157;
-    printf("seed: %ld\n", tv.tv_usec);
+    cout << "seed: " << tv.tv_usec << endl;
 
     map = new Map();
     srand(tv.tv_usec);
@@ -60,7 +62,7 @@ int main()
     maxvaluesize = 10;
 // maxkeysize = 3;
 // maxvaluesize = 3;
-    printf("num keys to be inserted: %d\n", num_keys);
+    cout << "num keys to be inserted: " << num_keys << endl;
 
     global_stats_init(); // avoid assertion error...
 
@@ -118,7 +120,6 @@ int main()
     strcpy(key1, "fff");
     strcpy(key2, "mmm");
     strcpy(key3, "ttt");
-//     printf("ranges: [NULL, %s) [%s, %s) [%s, %s) [%s, NULL]\n", key1, key1, key2, key2, key3, key3);
 
     istream1 = new MapInputStream(map);
     istream2 = new MapInputStream(map);
@@ -169,11 +170,11 @@ int main()
     while (dfistream1->read(&k1, &v1, &ts1)) {
         dfistream2->read(&k2, &v2, &ts2);
         if (strcmp(k1, k2) != 0) {
-            printf("%d) k1: %s != k2: %s\n", num, k1, k2);
+            cout << num << ") k1: " << k1 << " != k2: " << k2 << endl;
             exit(EXIT_FAILURE);
         }
         if (strcmp(v1, v2) != 0) {
-            printf("%d) v1: %s != v2: %s\n", num, v1, v2);
+            cout << num << ") v1: " << v1 << " != v2: " << v2 << endl;
             exit(EXIT_FAILURE);
         }
         num++;
@@ -206,7 +207,7 @@ int main()
     delete pistream;
     delete map;
 
-    printf("Everything ok!\n");
+    cout << "Everything ok!" << endl;
 
     return EXIT_SUCCESS;
 }

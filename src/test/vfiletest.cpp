@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <iostream>
+
+using namespace std;
 
 int main(void)
 {
@@ -167,7 +170,6 @@ int main(void)
         num = f.fs_append(buf, mb2b(3));
         bytes_left -= num;
         offs += num;
-        printf("bytes left: %Ld\n", bytes_left);
     }
     assert(f.fs_size() == mb2b(60));
     assert(offs == (off_t)mb2b(60));
@@ -181,7 +183,6 @@ int main(void)
     offs = 0;
     for (bytes_left = mb2b(60); bytes_left;) {
         bytes_left -= offs += f.fs_append(buf, bytes_left);
-        printf("bytes left: %Ld\n", bytes_left);
     }
     assert(f.fs_size() == mb2b(60));
     assert(offs == (off_t)mb2b(60));
@@ -211,7 +212,7 @@ int main(void)
 
     free(buf);
 
-    printf("Everything ok!\n");
+    cout << "Everything ok!" << endl;
 
     return EXIT_SUCCESS;
 }

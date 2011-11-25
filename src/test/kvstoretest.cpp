@@ -3,6 +3,8 @@
 #include "../Scanner.h"
 
 #include <cstdio>
+#include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
@@ -16,6 +18,8 @@
 #define UNIQUE_KEYS                  1  // create unique keys, so no values are overwritten
 
 #define BUFSIZE 1000
+
+using namespace std;
 
 /*============================================================================
  *                               randstr
@@ -51,17 +55,17 @@ int main()
 
     gettimeofday(&tv, NULL);
 // tv.tv_usec = 118817;
-    printf("seed: %ld\n", tv.tv_usec);
+    cout << "seed: " << tv.tv_usec << endl;
 
     srand(tv.tv_usec);
 //     num_keys = rand() % 100000;
     num_keys = BYTES_TO_INSERT / (MAX_KEY_SIZE + MAX_VALUE_SIZE);
 
-    printf("memstore size:   %12Ld\n", MEMSTORE_SIZE);
-    printf("bytes to insert: %12Ld\n", BYTES_TO_INSERT);
-    printf("keys to insert:  %12Ld\n", num_keys);
-    printf("max key size:    %12d\n", MAX_KEY_SIZE);
-    printf("max value size:  %12d\n", MAX_VALUE_SIZE);
+    cout << "memstore size:   " << setw(12) << right << MEMSTORE_SIZE << endl;
+    cout << "bytes to insert: " << setw(12) << right << BYTES_TO_INSERT << endl;
+    cout << "keys to insert:  " << setw(12) << right << num_keys << endl;
+    cout << "max key size:    " << setw(12) << right << MAX_KEY_SIZE << endl;
+    cout << "max value size:  " << setw(12) << right << MAX_VALUE_SIZE << endl;
 
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
@@ -70,7 +74,7 @@ int main()
     // insert values
     //================================================================
 
-    printf("===== Insert key-values =====\n");
+    cout << "===== Insert key-values =====" << endl;
     srand(tv.tv_usec);
 
     for (i = 0; i < num_keys; i++) {
@@ -83,7 +87,7 @@ int main()
         }
         kvstore->put(key, value);
         if (i && i % 100 == 0)
-            printf("i = %Ld, memstore size: %Ld\n", i, kvstore->get_mem_size());
+            cout << "i = " << i << ", memstore size = " << kvstore->get_mem_size() << endl;
     }
 
     // flush remaining memory tuples
@@ -95,7 +99,7 @@ int main()
     // search values (most of them should be on disk, latest should
     // be on memory)
     //================================================================
-    printf("\n===== Search every %dth key =====\n", SEARCH_SKIP_KEYS);
+    cout << endl << "===== Search every " << SEARCH_SKIP_KEYS << "th key =====" << endl;
     srand(tv.tv_usec);
 
     for (i = 0; i < num_keys; i++) {
@@ -112,20 +116,20 @@ int main()
             sprintf(key + strlen(key), "%Ld", i);
         }
         if (!scanner->point_get(key)) {
-            printf("%Ld) Key [%s] was not found!\n", i, key);
+            cout << i << ") Key [" << key << "] was not found!" << endl;
             exit(EXIT_FAILURE);
         }
     }
 
-    printf("Memstore keys:  %Ld\n", kvstore->get_num_mem_keys());
-    printf("Diskstore keys: %Ld\n", kvstore->get_num_disk_keys());
-    printf("Memstore size:  %Ld\n", kvstore->get_mem_size());
-    printf("Diskstore size: %Ld\n", kvstore->get_disk_size());
+    cout << "Memstore keys:  " << kvstore->get_num_mem_keys() << endl;
+    cout << "Diskstore keys: " << kvstore->get_num_disk_keys() << endl;
+    cout << "Memstore size:  " << kvstore->get_mem_size() << endl;
+    cout << "Diskstore size: " << kvstore->get_disk_size() << endl;
 
     if (UNIQUE_KEYS) {
         if (kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() != num_keys) {
-            printf("mem keys (%Ld) + disk keys (%Ld) != keys inserted (%Ld)\n",
-              kvstore->get_num_mem_keys(), kvstore->get_num_disk_keys(), num_keys);
+            cout << "(mem keys: " << kvstore->get_num_mem_keys() << ") + (disk keys: "
+                 << kvstore->get_num_disk_keys() << ") != (keys inserted: " << num_keys << ")" << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -135,7 +139,7 @@ int main()
     delete kvstore;
     delete scanner;
 
-    printf("Everything ok!\n");
+    cout << "Everything ok!" << endl;
 
     return EXIT_SUCCESS;
 }

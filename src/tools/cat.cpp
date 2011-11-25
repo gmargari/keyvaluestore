@@ -3,8 +3,10 @@
 #include "../DiskFileInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdio>
 #include <cstdlib>
+#include <iostream>
+
+using namespace std;
 
 int main(int argc, char **argv)
 {
@@ -14,7 +16,7 @@ int main(int argc, char **argv)
     uint64_t timestamp;
 
     if (argc != 2) {
-        printf("Syntax: %s <diskfile>\n", argv[0]);
+        cout << "Syntax: " << argv[0] << " <diskfile>" << endl;
         return EXIT_FAILURE;
     }
 
@@ -25,7 +27,7 @@ int main(int argc, char **argv)
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
     while (istream->read(&key, &value, &timestamp)) {
-        printf("[%s] [%s] [%Ld]\n", key, value, timestamp);
+        cout << "[" << key << "] [" << value << "] [" << timestamp << "]" << endl;
     }
     delete istream;
     delete diskfile;
