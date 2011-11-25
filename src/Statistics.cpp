@@ -1,6 +1,10 @@
 #include "Statistics.h"
 
 #include <cassert>
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
 
 /* decleration of global variable holding stats */
 keyvaluestore_stats g_stats;
@@ -206,6 +210,7 @@ void global_stats_init()
     time_init(&(g_stats.write_time));
     time_init(&(g_stats.merge_time));
     time_init(&(g_stats.free_time));
+    g_stats.disk_files = 0;
 
     time_start(&(g_stats.total_time));
 }
@@ -234,4 +239,56 @@ void stats_sanity_check()
 //     assert(time_get_secs(g_stats.total_time) >= time_get_secs(g_stats.compaction_time));
 //     assert(time_get_secs(g_stats.compaction_time) >= time_get_secs(g_stats.merge_time) + time_get_secs(g_stats.free_time));
 //     assert(time_get_secs(g_stats.merge_time) >= time_get_secs(g_stats.read_time) + time_get_secs(g_stats.write_time));
+}
+
+/*============================================================================
+ *                             print_stats_header
+ *============================================================================*/
+void print_stats_header()
+{
+    cout << "# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |"
+         << "    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs"
+         << endl;
+}
+
+/*============================================================================
+ *                                 print_stats
+ *============================================================================*/
+void print_stats()
+{
+    int32_t ttime;
+    time_end(&(g_stats.total_time));
+    time_start(&(g_stats.total_time));
+
+         // mb inserted
+    cout << setw(8)  << right << gb2mb(bytes_get_gb(g_stats.bytes_inserted)) + bytes_get_mb(g_stats.bytes_inserted)
+         // total time
+         << setw(10) << right << time_get_secs(g_stats.total_time)
+         // compaction time
+         << setw(8)  << right << time_get_secs(g_stats.compaction_time)
+         // put time (total - compaction)
+         << setw(8)  << right << (((ttime = time_get_secs(g_stats.total_time) - time_get_secs(g_stats.compaction_time)) < 0) ? 0 : ttime)
+         // merge time
+         << setw(10) << right << time_get_secs(g_stats.merge_time)
+         // free time
+         << setw(8)  << right << time_get_secs(g_stats.free_time)
+         // compaction rest time (compaction - merge - free)
+         << setw(8)  << right << (((ttime = time_get_secs(g_stats.compaction_time) - time_get_secs(g_stats.merge_time) - time_get_secs(g_stats.free_time)) < 0) ? 0 : ttime)
+         // memory time (merge - read - write)
+         << setw(10) << right << (((ttime = time_get_secs(g_stats.merge_time) - time_get_secs(g_stats.read_time) - time_get_secs(g_stats.write_time)) < 0) ? 0 : ttime)
+         // read time
+         << setw(8)  << right << time_get_secs(g_stats.read_time)
+         // write time
+         << setw(8)  << right << time_get_secs(g_stats.write_time)
+         // bytes read
+         << setw(10) << right << gb2mb(bytes_get_gb(g_stats.bytes_read)) + bytes_get_mb(g_stats.bytes_read)
+         // bytes written
+         << setw(8)  << right << gb2mb(bytes_get_gb(g_stats.bytes_written)) + bytes_get_mb(g_stats.bytes_written)
+         // read operations
+         << setw(9)  << right << g_stats.num_reads
+         // write operations
+         << setw(9)  << right << g_stats.num_writes
+         // number of disk files
+         << setw(7)  << right << g_stats.disk_files
+         << endl;
 }

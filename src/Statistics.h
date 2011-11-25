@@ -50,6 +50,7 @@ typedef struct { // NOTE: add new field -> update global_stats_init() and stats_
     time_stats write_time;      // Tread
     time_stats merge_time;      // Tmerge
     time_stats free_time;       // Tfree
+    int        disk_files;
 } keyvaluestore_stats;
 
 //==============================================================================
@@ -88,6 +89,13 @@ void        global_stats_init();
 void        global_stats_enable_gathering();
 void        global_stats_disable_gathering();
 void        stats_sanity_check();
+
+//==============================================================================
+// functions to print statistics
+//==============================================================================
+
+void        print_stats_header();
+void        print_stats();
 
 //==============================================================================
 // global variable holding stats

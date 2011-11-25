@@ -476,7 +476,7 @@ int main(int argc, char **argv)
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
-    cout << "# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs | avg_get  run_sizes" << endl;
+    print_stats_header();
 
     //--------------------------------------------------------------------------
     // initialize variables
