@@ -109,27 +109,6 @@ public:
     merge_type get_memstore_merge_type();
 
     /**
-     * function used to get statistics about keyvaluestore
-     */
-
-    uint32_t get_mb_inserted();
-    uint32_t get_mb_read();
-    uint32_t get_mb_written();
-    uint32_t get_num_reads();
-    uint32_t get_num_writes();
-    // see Statistics.h for explanation of these times
-    uint32_t get_total_time_sec();
-    uint32_t get_put_time_sec();
-    uint32_t get_compaction_time_sec();
-    uint32_t get_merge_time_sec();
-    uint32_t get_free_time_sec();
-    uint32_t get_cmrest_time_sec();
-    uint32_t get_mem_time_sec();
-    uint32_t get_io_time_sec();
-    uint32_t get_read_time_sec();
-    uint32_t get_write_time_sec();
-
-    /**
      * return current timestamp
      */
     uint64_t get_timestamp();
