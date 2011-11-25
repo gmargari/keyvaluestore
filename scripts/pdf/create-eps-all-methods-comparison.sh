@@ -290,7 +290,7 @@ for i in `seq 0 $(( ${#memsizes[*]} - 1 ))`; do
     outputfile="${outfolder}/allmethods-memsize-${memsizes[$i]}"
 
     # check if file exists
-    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; exit 1; fi
+    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
 
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", NR, $0}' ${inputfile} > ${inputfile_with_linenumbers}

@@ -1,6 +1,12 @@
 #!/bin/bash
 
-statsfolder="/tmp/kvstore-stats"
+if [ $# -ne 1 ]; then
+    echo "Syntax: $0 <stats folder>"
+    exit 1
+fi
+
+statsfolder=$1
+        
 #./run-experiments.sh $statsfolder 
 ./collect-stats.sh $statsfolder 
 ./create-eps-all-methods-comparison.sh $statsfolder 

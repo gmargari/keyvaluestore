@@ -14,22 +14,22 @@ my_print() {
 create_log_files() {
 
     my_print "create_log_files()"
+ 
+    # just remove all lines starting with "#", and keep only the stats refering
+    # to the first "keepbytes" bytes inserted
+    keepbytes=200000 # keep all
 
     for f in `ls -1 ${statsfolder}/*.stats 2> /dev/null`; do
         OUTFILE=`echo $f | awk '{sub(/\.stats/,".log", $1); print $1}'`
         cat $f  |
-#          awk '{ if ($1 != "#") { for (i=1; i<=15; i++) printf "%s ", $(i); print ""}}' > $OUTFILE;
-          # NOTE!!! keep only stats up to 10GB  
-          awk '{ if ($1 != "#" && $1 < 10240) { for (i=1; i<=15; i++) printf "%s ", $(i); print ""}}' > $OUTFILE;
+          awk -v kb=$keepbytes '$1 != "#" && $1 < kb { for (i=1; i<=NF; i++) printf "%s ", $(i); print ""}' > $OUTFILE;
     done
 
     # fix rangemerge stats, so it always contain 1 run
     for f in `ls -1 ${statsfolder}/rangemerge*.stats 2> /dev/null`; do
         OUTFILE=`echo $f | awk '{sub(/\.stats/,".log", $1); print $1}'`
         cat $f | 
-#          awk '{ if ($1 != "#") { if ($11 > 1) $11 = 1; for (i=1; i<=15; i++) printf "%s ", $(i); print ""}}' > $OUTFILE;
-          # NOTE!!! keep only stats up to 10GB  
-          awk '{ if ($1 != "#" && $1 < 10240) { if ($15 > 1) $15 = 1; for (i=1; i<=15; i++) printf "%s ", $(i); print ""}}' > $OUTFILE;
+          awk -v kb=$keepbytes '$1 != "#" && $1 < kb { $15 = 1; for (i=1; i<=NF; i++) printf "%s ", $(i); print ""}' > $OUTFILE;
     done
 }
 
