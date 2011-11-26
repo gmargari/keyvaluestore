@@ -99,7 +99,6 @@ void print_syntax(char *progname)
      cout << " VARIOUS" << endl;
      cout << "    -e:                     print key-values that would be inserted and exit" << endl;
      cout << "    -s:                     read key-values from stdin" << endl;
-     cout << "    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)" << endl;
      cout << "    -h:                     print this help message and exit" << endl;
 }
 
@@ -108,7 +107,7 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    char     allargs[] = "hc:r:p:b:f:l:m:i:n:k:v:uzg:o:se";
+    char     allargs[] = "hc:r:p:b:f:l:m:i:n:k:v:uzg:se";
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
