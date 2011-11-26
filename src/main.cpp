@@ -576,7 +576,7 @@ void *put_routine(void *args)
     uint64_t bytes_inserted = 0;
 
     if (DBGLVL > 0) {
-        cout << "# [DEBUG]  put thread started" << endl;
+        cout << "# [DEBUG]   put thread started" << endl;
     }
 
     key = (char *)malloc(MAX_KVTSIZE);
@@ -629,6 +629,10 @@ void *put_routine(void *args)
         bytes_inserted += strlen(key) + strlen(value);
     }
 
+    if (DBGLVL > 0) {
+        cout << "# [DEBUG]   put thread finished" << endl;
+    }
+
     put_thread_finished = true;
 
     free(key);
@@ -652,7 +656,7 @@ void *get_routine(void *args)
     Scanner *scanner = new Scanner(targs->kvstore);
 
     if (DBGLVL > 0) {
-        cout << "# [DEBUG]  get thread " << targs->tid << "started" << endl;
+        cout << "# [DEBUG]   get thread " << targs->tid << "started" << endl;
     }
 
     while (!put_thread_finished) {
@@ -678,6 +682,10 @@ void *get_routine(void *args)
 //         strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
 //         end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
 //         scanner->range_get(key, end_key);
+    }
+
+    if (DBGLVL > 0) {
+        cout << "# [DEBUG]   get thread " << targs->tid << "finished" << endl;
     }
 
     delete scanner;

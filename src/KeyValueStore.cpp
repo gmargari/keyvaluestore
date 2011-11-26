@@ -12,11 +12,13 @@
 #include "Statistics.h"
 
 #include <cassert>
-#include <cstdio>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstdlib>
+#include <iostream>
+
+using namespace std;
 
 /*============================================================================
  *                               KeyValueStore
@@ -197,7 +199,7 @@ void KeyValueStore::check_parameters()
     struct stat st;
 
     if (stat(ROOT_DIR, &st) != 0) {
-        printf("Error: %s does not exist\n", ROOT_DIR);
+        cout << "Error: " << ROOT_DIR << " does not exist" << endl;
         exit(EXIT_FAILURE);
     }
 
