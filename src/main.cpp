@@ -21,6 +21,7 @@
 #include <vector>
 #include <sys/time.h>
 #include <pthread.h>
+#include <getopt.h>
 
 using namespace std;
 
@@ -75,31 +76,30 @@ void print_syntax(char *progname)
 {
      cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
      cout << endl;
-     cout << " COMPACTION MANAGER" << endl;
-     cout << "    -c compactionmanager:   \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
-     cout << "    -m memorysize:          memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
-     cout << "    -r value:               [geometric c.m.] R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
-     cout << "    -p value:               [geometric c.m.] P parameter (default: disabled)" << endl;
-     cout << "    -b blocksize:           [rangemerge c.m.] block size in MB (default: " << b2mb(DEFAULT_RNGMERGE_BLOCKSIZE) << ")" << endl;
-     cout << "    -f flushmem:            [rangemerge c.m.] flush memory size in MB" << endl;
-     cout << "                            (default: 0, when memory is full flush only the biggest range)" << endl;
-     cout << "    -l value:               [cassandra c.m.] L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
+     cout << "COMPACTION MANAGER" << endl;
+     cout << " -c, --compaction-manager [VALUE]    \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
+     cout << " -r, --geometric-r [VALUE]           R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
+     cout << " -p, --geometric-p [VALUE]           P parameter (default: disabled)" << endl;
+     cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNGMERGE_BLOCKSIZE) << ")" << endl;
+     cout << " -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)" << endl;
+     cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
      cout << endl;
-     cout << " PUT" << endl;
-     cout << "    -i insertbytes:         number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
-     cout << "    -n numkeystoinsert:     number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
-     cout << "    -k keysize:             size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
-     cout << "    -v valuesize:           size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
-     cout << "    -u:                     create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
-     cout << "    -z:                     create zipfian keys (default: false, uniform keys)" << endl;
+     cout << "PUT" << endl;
+     cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
+     cout << " -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
+     cout << " -n, --num-keys [VALUE]              number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
+     cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
+     cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
+     cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
+     cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
      cout << endl;
-     cout << " GET" << endl;
-     cout << "    -g numgetthreads:       number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
+     cout << "GET" << endl;
+     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
      cout << endl;
-     cout << " VARIOUS" << endl;
-     cout << "    -e:                     print key-values that would be inserted and exit" << endl;
-     cout << "    -s:                     read key-values from stdin" << endl;
-     cout << "    -h:                     print this help message and exit" << endl;
+     cout << "VARIOUS" << endl;
+     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
+     cout << " -s, --read-kvs-from-stdin           read key-values from stdin" << endl;
+     cout << " -h, --help                          print this help message and exit" << endl;
 }
 
 /*============================================================================
@@ -107,7 +107,27 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    char     allargs[] = "hc:r:p:b:f:l:m:i:n:k:v:uzg:se";
+    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzg:esh";
+    const struct option long_opts[] = {
+            {"compaction-manager",   required_argument,  0, 'c'},
+            {"geometric-r",          required_argument,  0, 'r'},
+            {"geometric-p",          required_argument,  0, 'p'},
+            {"rangemerge-blocksize", required_argument,  0, 'b'},
+            {"rangemerge-flushmem",  required_argument,  0, 'f'},
+            {"cassandra-l",          required_argument,  0, 'l'},
+            {"memory-size",          required_argument,  0, 'm'},
+            {"insert-bytes",         required_argument,  0, 'i'},
+            {"num-keys",             required_argument,  0, 'n'},
+            {"key-size",             required_argument,  0, 'k'},
+            {"value-size",           required_argument,  0, 'v'},
+            {"unique-keys",          no_argument,        0, 'u'},
+            {"zipf-keys",            no_argument,        0, 'z'},
+            {"get-threads",          required_argument,  0, 'g'},
+            {"print-kvs-to-stdout",  no_argument,        0, 'e'},
+            {"read-kvs-from-stdin",  no_argument,        0, 's'},
+            {"help",                 no_argument,        0, 'h'},
+            {0, 0, 0, 0}
+    };
     int      cflag = 0,
              rflag = 0,
              pflag = 0,
@@ -130,7 +150,8 @@ int main(int argc, char **argv)
              geom_p,
              cass_l,
              num_get_threads,
-             retval;
+             retval,
+             indexptr;
     uint64_t blocksize,
              flushmemorysize,
              memorysize,
@@ -141,8 +162,7 @@ int main(int argc, char **argv)
     char    *compmanager = NULL,
             *key = NULL,
             *value = NULL,
-            *end_key = NULL,
-            *ptr;
+            *end_key = NULL;
     bool     unique_keys,
              zipf_keys,
              print_kv_and_continue = false;
@@ -159,7 +179,7 @@ int main(int argc, char **argv)
     //--------------------------------------------------------------------------
     // get arguments
     //--------------------------------------------------------------------------
-    while ((myopt = getopt (argc, argv, allargs)) != -1) {
+    while ((myopt = getopt_long(argc, argv, short_args, long_opts, &indexptr)) != -1) {
         switch (myopt)  {
 
         case 'h':
@@ -262,13 +282,6 @@ int main(int argc, char **argv)
             break;
 
         case '?':
-            if ((ptr = strchr(allargs, optopt)) && *(ptr+1) == ':') {
-                fprintf (stderr, "Error: option '-%c' requires an argument.\n", optopt);
-            } else if (isprint(optopt)) {
-                fprintf (stderr, "Error: unknown option '-%c'.\n", optopt);
-            } else {
-                fprintf (stderr, "Error: unknown option character '\\x%x'.\n", optopt);
-            }
             exit(EXIT_FAILURE);
 
         default:
