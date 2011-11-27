@@ -83,9 +83,9 @@ void print_syntax(char *progname)
      cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNGMERGE_BLOCKSIZE) << ")" << endl;
      cout << " -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)" << endl;
      cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
+     cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
      cout << endl;
      cout << "PUT" << endl;
-     cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
      cout << " -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
      cout << " -n, --num-keys [VALUE]              number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
      cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
@@ -109,24 +109,24 @@ int main(int argc, char **argv)
 {
     const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzg:esh";
     const struct option long_opts[] = {
-            {"compaction-manager",   required_argument,  0, 'c'},
-            {"geometric-r",          required_argument,  0, 'r'},
-            {"geometric-p",          required_argument,  0, 'p'},
-            {"rangemerge-blocksize", required_argument,  0, 'b'},
-            {"rangemerge-flushmem",  required_argument,  0, 'f'},
-            {"cassandra-l",          required_argument,  0, 'l'},
-            {"memory-size",          required_argument,  0, 'm'},
-            {"insert-bytes",         required_argument,  0, 'i'},
-            {"num-keys",             required_argument,  0, 'n'},
-            {"key-size",             required_argument,  0, 'k'},
-            {"value-size",           required_argument,  0, 'v'},
-            {"unique-keys",          no_argument,        0, 'u'},
-            {"zipf-keys",            no_argument,        0, 'z'},
-            {"get-threads",          required_argument,  0, 'g'},
-            {"print-kvs-to-stdout",  no_argument,        0, 'e'},
-            {"read-kvs-from-stdin",  no_argument,        0, 's'},
-            {"help",                 no_argument,        0, 'h'},
-            {0, 0, 0, 0}
+             {"compaction-manager",   required_argument,  0, 'c'},
+             {"geometric-r",          required_argument,  0, 'r'},
+             {"geometric-p",          required_argument,  0, 'p'},
+             {"rangemerge-blocksize", required_argument,  0, 'b'},
+             {"rangemerge-flushmem",  required_argument,  0, 'f'},
+             {"cassandra-l",          required_argument,  0, 'l'},
+             {"memory-size",          required_argument,  0, 'm'},
+             {"insert-bytes",         required_argument,  0, 'i'},
+             {"num-keys",             required_argument,  0, 'n'},
+             {"key-size",             required_argument,  0, 'k'},
+             {"value-size",           required_argument,  0, 'v'},
+             {"unique-keys",          no_argument,        0, 'u'},
+             {"zipf-keys",            no_argument,        0, 'z'},
+             {"get-threads",          required_argument,  0, 'g'},
+             {"print-kvs-to-stdout",  no_argument,        0, 'e'},
+             {"read-kvs-from-stdin",  no_argument,        0, 's'},
+             {"help",                 no_argument,        0, 'h'},
+             {0, 0, 0, 0}
     };
     int      cflag = 0,
              rflag = 0,
