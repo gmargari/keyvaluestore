@@ -25,6 +25,7 @@ add_library (VFileIndex                 VFileIndex.cpp)
 add_library (Statistics                 Statistics.cpp)
 add_library (Scanner                    Scanner.cpp)
 add_library (Buffer                     Buffer.cpp)
+add_library (RequestThrottle            RequestThrottle.cpp)
 
 target_link_libraries (VFile                    Statistics Buffer)
 target_link_libraries (DiskFile                 VFile VFileIndex Buffer)
@@ -48,7 +49,7 @@ target_link_libraries (RangemergeCompactionManager     CompactionManager MemStor
 target_link_libraries (KeyValueStore            MemStore DiskStore NomergeCompactionManager ImmCompactionManager GeomCompactionManager LogCompactionManager RangemergeCompactionManager CassandraCompactionManager Statistics)
 
 add_executable (sim main.cpp)
-target_link_libraries (sim KeyValueStore Scanner)
+target_link_libraries (sim KeyValueStore Scanner RequestThrottle)
 
 add_subdirectory (test)
 add_subdirectory (tools)

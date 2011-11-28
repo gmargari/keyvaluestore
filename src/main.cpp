@@ -7,6 +7,7 @@
 #include "CassandraCompactionManager.h"
 #include "Statistics.h"
 #include "Scanner.h"
+#include "RequestThrottle.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -48,6 +49,8 @@ const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + D
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
 const int      DEFAULT_NUM_GET_THREADS =        0;
+const int      DEFAULT_PUT_THRPUT =             0; // req per second, 0: disable throttling
+const int      DEFAULT_GET_THRPUT =            10; // req per second, 0: disable throttling
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 long int zipf_n = 1000000;     // parameter for zipf() function
@@ -64,6 +67,8 @@ struct thread_args {
     uint64_t num_keys_to_insert;
     uint32_t keysize;
     uint32_t valuesize;
+    int put_thrput;
+    int get_thrput;
     KeyValueStore *kvstore;
 };
 
@@ -92,9 +97,11 @@ void print_syntax(char *progname)
      cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
      cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
      cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
+     cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0 unlimited, default: " << DEFAULT_PUT_THRPUT << ")" << endl;
      cout << endl;
      cout << "GET" << endl;
      cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
+     cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0 unlimited, default: " << DEFAULT_GET_THRPUT << ")" << endl;
      cout << endl;
      cout << "VARIOUS" << endl;
      cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
@@ -107,7 +114,7 @@ void print_syntax(char *progname)
  *============================================================================*/
 int main(int argc, char **argv)
 {
-    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzg:esh";
+    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:esh";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -122,7 +129,9 @@ int main(int argc, char **argv)
              {"value-size",           required_argument,  0, 'v'},
              {"unique-keys",          no_argument,        0, 'u'},
              {"zipf-keys",            no_argument,        0, 'z'},
+             {"put-throughput",       required_argument,  0, 'P'},
              {"get-threads",          required_argument,  0, 'g'},
+             {"get-throughput",       required_argument,  0, 'G'},
              {"print-kvs-to-stdout",  no_argument,        0, 'e'},
              {"read-kvs-from-stdin",  no_argument,        0, 's'},
              {"help",                 no_argument,        0, 'h'},
@@ -140,8 +149,10 @@ int main(int argc, char **argv)
              kflag = 0,
              vflag = 0,
              uflag = 0,
+             Pflag = 0,
              zflag = 0,
              gflag = 0,
+             Gflag = 0,
              sflag = 0,
              eflag = 0,
              myopt,
@@ -151,7 +162,9 @@ int main(int argc, char **argv)
              cass_l,
              num_get_threads,
              retval,
-             indexptr;
+             indexptr,
+             put_thrput,
+             get_thrput;
     uint64_t blocksize,
              flushmemorysize,
              memorysize,
@@ -264,10 +277,22 @@ int main(int argc, char **argv)
             zipf_keys = true;
             break;
 
+        case 'P':
+            CHECK_DUPLICATE_ARG(Pflag, myopt);
+            Pflag = 1;
+            put_thrput = atoi(optarg);
+            break;
+
         case 'g':
             CHECK_DUPLICATE_ARG(gflag, myopt);
             gflag = 1;
             num_get_threads = atoi(optarg);
+            break;
+
+        case 'G':
+            CHECK_DUPLICATE_ARG(Gflag, myopt);
+            Gflag = 1;
+            get_thrput = atoi(optarg);
             break;
 
         case 'e':
@@ -327,6 +352,9 @@ int main(int argc, char **argv)
     if (zflag == 0) {
         zipf_keys = DEFAULT_ZIPF_KEYS;
     }
+    if (Pflag == 0) {
+        put_thrput = DEFAULT_PUT_THRPUT;
+    }
     if (iflag == 0) {
         if (nflag == 0) {
             insertbytes = DEFAULT_INSERTBYTES;
@@ -339,6 +367,9 @@ int main(int argc, char **argv)
     }
     if (gflag == 0) {
         num_get_threads = DEFAULT_NUM_GET_THREADS;
+    }
+    if (Gflag == 0) {
+        get_thrput = DEFAULT_GET_THRPUT;
     }
 
     //--------------------------------------------------------------------------
@@ -465,7 +496,9 @@ int main(int argc, char **argv)
         cout << "# unique_keys:         " << setw(15) << (unique_keys ? "true" : "false") << "    " << (uflag == 0 ? "(default)" : "") << endl;
         cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "    " << (zflag == 0 ? "(default)" : "") << endl;
     }
+    cout << "# put_throughput:      " << setw(15) << put_thrput << "    " << (Pflag == 0 ? "(default)" : "") << endl;
     cout << "# num_get_threads:     " << setw(15) << num_get_threads << "    " << (gflag == 0 ? "(default)" : "") << endl;
+    cout << "# get_throughput:      " << setw(15) << get_thrput << "    " << (Gflag == 0 ? "(default)" : "") << endl;
     if (strcmp(compmanager, "geometric") == 0) {
         if (pflag == 0) {
             cout << "# geometric_r:         " << setw(15) << geom_r << "    " << (rflag == 0 ? "(default)" : "") << endl;
@@ -512,6 +545,8 @@ int main(int argc, char **argv)
         targs[i].keysize = keysize,
         targs[i].valuesize = valuesize;
         targs[i].kvstore = kvstore;
+        targs[i].put_thrput = put_thrput;
+        targs[i].get_thrput = get_thrput;
     }
 
     //--------------------------------------------------------------------------
@@ -586,6 +621,7 @@ void *put_routine(void *args)
     char    *key = NULL,
             *value = NULL;
     uint64_t bytes_inserted = 0;
+    RequestThrottle throttler(targs->put_thrput);
 
     if (DBGLVL > 0) {
         cout << "# [DEBUG]   put thread started" << endl;
@@ -603,6 +639,11 @@ void *put_routine(void *args)
     // until we have inserted all keys
     //--------------------------------------------------------------------------
     for (uint64_t i = 0; i < num_keys_to_insert; i++) {
+
+        //--------------------------------------------------------------
+        // throttle request rate
+        //--------------------------------------------------------------
+        throttler.throttle();
 
         if (sflag) {
             //----------------------------------------------------------------------
@@ -661,11 +702,11 @@ void *get_routine(void *args)
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys;
     uint32_t keysize = targs->keysize;
-    uint32_t kseed = targs->tid, // kseed = getpid() + time(NULL);
-             tseed = kseed + 1;
+    uint32_t kseed = targs->tid; // kseed = getpid() + time(NULL);
     char     key[MAX_KVTSIZE];
     int      i = 0;
     Scanner *scanner = new Scanner(targs->kvstore);
+    RequestThrottle throttler(targs->get_thrput);
 
     if (DBGLVL > 0) {
         cout << "# [DEBUG]   get thread " << targs->tid << "started" << endl;
@@ -673,7 +714,10 @@ void *get_routine(void *args)
 
     while (!put_thread_finished) {
 
-        usleep(rand_r(&tseed) % 10000); // sleep for a random number of ms between 0 and 500000
+        //--------------------------------------------------------------
+        // throttle request rate
+        //--------------------------------------------------------------
+        throttler.throttle();
 
         //--------------------------------------------------------------
         // create a random key
