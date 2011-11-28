@@ -12,3 +12,6 @@ target_link_libraries (vfileindextest KeyValueStore VFileIndex)
 
 add_executable (vfiletest vfiletest.cpp)
 target_link_libraries (vfiletest KeyValueStore VFile)
+
+add_executable (requestthrottletest requestthrottletest.cpp)
+target_link_libraries (requestthrottletest RequestThrottle)
