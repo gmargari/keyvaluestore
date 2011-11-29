@@ -66,7 +66,7 @@ uint64_t RangemergeCompactionManager::get_blocksize()
  *============================================================================*/
 void RangemergeCompactionManager::set_flushmem(uint64_t flushmem)
 {
-    m_flushmem = min(flushmem, m_memstore->get_maxsize());
+    m_flushmem = flushmem;
 }
 
 /*============================================================================
