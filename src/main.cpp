@@ -709,7 +709,7 @@ void *get_routine(void *args)
     RequestThrottle throttler(targs->get_thrput);
 
     if (DBGLVL > 0) {
-        cout << "# [DEBUG]   get thread " << targs->tid << "started" << endl;
+        cout << "# [DEBUG]   get thread " << targs->tid << " started" << endl;
     }
 
     while (!put_thread_finished) {
@@ -741,7 +741,7 @@ void *get_routine(void *args)
     }
 
     if (DBGLVL > 0) {
-        cout << "# [DEBUG]   get thread " << targs->tid << "finished" << endl;
+        cout << "# [DEBUG]   get thread " << targs->tid << " finished" << endl;
     }
 
     delete scanner;

@@ -7,7 +7,6 @@
 using std::pair;
 
 class Map;
-class MapInputStream;
 
 class MemStore {
 
