@@ -11,7 +11,6 @@ class Map;
 class MemStore {
 
 friend class CompactionManager;
-friend class GeomCompactionManager;
 friend class RangemergeCompactionManager;
 friend class Scanner;
 

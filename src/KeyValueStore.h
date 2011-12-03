@@ -99,16 +99,6 @@ public:
     CompactionManager *get_compaction_manager();
 
     /**
-     * set/get the type of memstore merging. if merge type is 'offline', then
-     * in order to merge memstore with disk files we first flush memstore to
-     * disk to a new file and then merge this new file with other disk files.
-     * if merge is 'online' we don't flush memstore to disk, but merge it
-     * online with disk files.
-     */
-    void       set_memstore_merge_type(merge_type type);
-    merge_type get_memstore_merge_type();
-
-    /**
      * return current timestamp
      */
     uint64_t get_timestamp();

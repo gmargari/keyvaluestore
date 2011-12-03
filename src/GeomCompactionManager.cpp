@@ -132,7 +132,6 @@ int GeomCompactionManager::compute_current_R()
  *============================================================================*/
 void GeomCompactionManager::flush_bytes()
 {
-    MapInputStream *map_istream;
     DiskFile *disk_file, *memstore_file;
     DiskFileInputStream *memstore_file_istream, *istream;
     vector<InputStream *> istreams_to_merge;
@@ -179,21 +178,11 @@ void GeomCompactionManager::flush_bytes()
     //--------------------------------------------------------------------------
     // 2) add memstore stream to vector of streams to merge
     //--------------------------------------------------------------------------
-
-    // if we perform online merge, add memstore stream to vector of streams
-    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
-        map_istream = new MapInputStream(m_memstore->m_map);
-        istreams_to_merge.push_back(map_istream);
-    }
-    // else, flush memstore to new file, add file stream to vector of streams
-    else {
-        memstore_file = memstore_flush_to_diskfile();
-        memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
-        memstore_file_istream->set_key_range(NULL, NULL);
-        istreams_to_merge.push_back(memstore_file_istream);
-
-        memstore_clear();
-    }
+    memstore_file = memstore_flush_to_diskfile();
+    memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
+    memstore_file_istream->set_key_range(NULL, NULL);
+    istreams_to_merge.push_back(memstore_file_istream);
+    memstore_clear();
 
     //--------------------------------------------------------------------------
     // 3) merge streams creating a new disk file
@@ -209,17 +198,10 @@ void GeomCompactionManager::flush_bytes()
     // 4) delete merged files from DiskStore
     //--------------------------------------------------------------------------
 
-    // if we performed online merge, clear memstore
-    if (get_memstore_merge_type() == CM_MERGE_ONLINE) {
-        delete map_istream;
-        memstore_clear();
-    }
-    // else, memstore already cleared, delete the memstore file and disk stream
-    else {
-        memstore_file->delete_from_disk();
-        delete memstore_file;
-        delete memstore_file_istream;
-    }
+    // delete the memstore file and disk stream
+    memstore_file->delete_from_disk();
+    delete memstore_file;
+    delete memstore_file_istream;
 
     // delete all files merged as well as their input streams
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);

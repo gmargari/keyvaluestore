@@ -16,7 +16,7 @@
  *                              CompactionManager
  *============================================================================*/
 CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
-    : m_memstore(memstore), m_diskstore(diskstore), m_merge_type(CM_MERGE_ONLINE)
+    : m_memstore(memstore), m_diskstore(diskstore)
 {
 
 }
@@ -59,20 +59,4 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
 void CompactionManager::memstore_clear()
 {
     m_memstore->clear();
-}
-
-/*============================================================================
- *                         set_memstore_merge_type
- *============================================================================*/
-void CompactionManager::set_memstore_merge_type(merge_type type)
-{
-    m_merge_type = type;
-}
-
-/*============================================================================
- *                         get_memstore_merge_type
- *============================================================================*/
-merge_type CompactionManager::get_memstore_merge_type()
-{
-    return m_merge_type;
 }

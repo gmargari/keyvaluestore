@@ -516,7 +516,6 @@ int main(int argc, char **argv)
     if (strcmp(compmanager, "cassandra") == 0) {
         cout << "# cassandra_l:         " << setw(15) << cass_l << "    " << (lflag == 0 ? "(default)" : "") << endl;
     }
-    cout << "# memstore_merge_mode: " << setw(15) << (kvstore->get_memstore_merge_type() == CM_MERGE_ONLINE ? "online" : "offline") << endl;
     cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     fflush(stdout);
