@@ -119,7 +119,7 @@ void RangemergeCompactionManager::flush_bytes()
         rng = ranges[cur_rng];
 
         // get istream with all memory tuples that belong to current range
-        map_istream = new MapInputStream(m_memstore->m_map);
+        map_istream = m_memstore->new_map_inputstream();
         map_istream->set_key_range(rng->m_first, rng->m_last, true, false);
         istreams_to_merge.clear();
         istreams_to_merge.push_back(map_istream);

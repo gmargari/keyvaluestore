@@ -87,7 +87,7 @@ int Scanner::range_get(const char *start_key, const char *end_key, bool start_in
         istreams.push_back(new DiskFileInputStream(m_kvstore->m_diskstore->m_disk_files[i], MAX_INDEX_DIST));
     }
     // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
-//     istreams.push_back(m_kvstore->m_memstore->m_inputstream);
+//    istreams.push_back(m_kvstore->m_memstore->new_map_inputstream());
     pistream = new PriorityInputStream(istreams);
 
     // get all keys between 'start_key' and 'end_key'
@@ -97,7 +97,7 @@ int Scanner::range_get(const char *start_key, const char *end_key, bool start_in
     }
     pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);
 
-    for (int i = 0; i < diskfiles; i++) {
+    for (int i = 0; i < istreams.size(); i++) {
         delete istreams[i];
     }
 

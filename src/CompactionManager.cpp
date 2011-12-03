@@ -42,7 +42,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
     disk_file = new DiskFile();
     disk_file->open_new_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
-    map_istream = new MapInputStream(m_memstore->m_map);
+    map_istream = m_memstore->new_map_inputstream();
     // no need to use copy_stream_unique_keys() since map keys are unique
     Streams::copy_stream(map_istream, disk_ostream);
     delete map_istream;

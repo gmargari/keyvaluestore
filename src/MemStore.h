@@ -7,12 +7,9 @@
 using std::pair;
 
 class Map;
+class MapInputStream;
 
 class MemStore {
-
-friend class CompactionManager;
-friend class RangemergeCompactionManager;
-friend class Scanner;
 
 public:
 
@@ -112,6 +109,12 @@ public:
      * 'start_incl' and 'end_incl'.
      */
     void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
+
+    /**
+     * create and return an input stream for memstore's map. NOTE: caller must delete
+     * inputstream when done with it.
+     */
+    MapInputStream *new_map_inputstream();
 
     // Undefined methods (just remove Weffc++ warning)
     MemStore(const MemStore&);
