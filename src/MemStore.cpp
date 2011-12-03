@@ -97,7 +97,7 @@ uint64_t MemStore::get_size_when_serialized()
  *============================================================================*/
 uint64_t MemStore::get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
-    return m_map->get_size_when_serialized(start_key, end_key, true, false);
+    return m_map->get_size_when_serialized(start_key, end_key, start_key_incl, end_key_incl);
 }
 
 /*============================================================================
