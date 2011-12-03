@@ -113,7 +113,7 @@ pair<uint64_t, uint64_t> MemStore::get_sizes()
  *============================================================================*/
 pair<uint64_t, uint64_t> MemStore::get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
 {
-    return m_map->get_sizes(start_key, end_key, true, false);
+    return m_map->get_sizes(start_key, end_key, start_key_incl, end_key_incl);
 }
 
 /*============================================================================
