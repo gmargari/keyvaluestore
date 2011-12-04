@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 #include <map>
+#include <algorithm>
+#include <string.h>
 
 using std::pair;
+using std::vector;
 
 class Map;
 class MapInputStream;
@@ -116,13 +119,41 @@ public:
      */
     MapInputStream *new_map_inputstream();
 
-    // Undefined methods (just remove Weffc++ warning)
-    MemStore(const MemStore&);
-    MemStore& operator=(const MemStore&);
+    /**
+     * when using rangemerge c.m. memstore consists of multiple maps, one for
+     * each range. these functions add a new map for a newly created range,
+     * find the map responsible for storing/retrieving a specific key, and
+     * clear the map that contains a key
+     */
+    void add_map(const char *key);
+    Map *get_map(const char *key);
+    void clear_map(const char *key);
 
 protected:
 
-    Map      *m_map;
+    /**
+     * used from add_map()/get_map()/clear_map() functions above
+     * @return the index in vector 'm_map' of the map responsible for 'key'
+     */
+    int idx_of_map(const char *key);
+
+    int sanity_check();
+
+    typedef pair<char *, Map *> StrMapPair;
+
+    static struct _pair_compare {
+        inline bool operator() (const StrMapPair & left, const StrMapPair right) {
+            return strcmp(left.first, right.first);
+        }
+        inline bool operator() (const StrMapPair & left, char * const & right) {
+            return strcmp(left.first, right);
+        }
+        inline bool operator() (char * const & left, const StrMapPair & right) {
+            return strcmp(left, right.first);
+        }
+    } pair_compare;
+
+    vector < StrMapPair > m_map;
     uint64_t  m_maxsize;
 };
 
