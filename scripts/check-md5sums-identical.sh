@@ -28,16 +28,12 @@ mkdir -p /tmp/kvstore
 
 execute "nomerge"
 execute "logarithmic" 
-execute "geometric  -r 2"
-execute "geometric  -r 3"
-execute "geometric  -r 4"
-execute "geometric  -p 4"
+execute "geometric"
 execute "geometric  -p 3"
-execute "geometric  -p 2"
+execute "rangemerge"
 execute "rangemerge -b 2"
 execute "immediate"
-execute "cassandra  -l 2"
-execute "cassandra  -l 4"
+execute "cassandra"
 execute "cassandra  -l 10"
 
 rm $md5file

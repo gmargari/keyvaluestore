@@ -97,7 +97,7 @@ int Scanner::range_get(const char *start_key, const char *end_key, bool start_in
     }
     pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);
 
-    for (int i = 0; i < istreams.size(); i++) {
+    for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];
     }
 
