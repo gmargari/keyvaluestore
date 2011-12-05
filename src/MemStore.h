@@ -103,6 +103,7 @@ public:
     Map *get_map(const char *key);
     Map *get_map(int i);
     void clear_map(const char *key);
+    void clear_map(int idx);
 
 protected:
 
@@ -111,6 +112,11 @@ protected:
      * @return the index in vector 'm_map' of the map responsible for 'key'
      */
     int idx_of_map(const char *key);
+
+    /**
+     * used from clear_map() functions above
+     */
+    void clear_map(Map *map);
 
     int sanity_check();
 
@@ -133,6 +139,9 @@ protected:
 
     vector < StrMapPair > m_map;
     uint64_t  m_maxsize;
+    uint64_t  m_num_keys;
+    uint64_t  m_size;
+    uint64_t  m_size_when_serialized;
 };
 
 #endif

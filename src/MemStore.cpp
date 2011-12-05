@@ -12,7 +12,8 @@ using std::make_pair;
  *                                 MemStore
  *============================================================================*/
 MemStore::MemStore()
-    : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE)
+    : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
+      m_size_when_serialized(0)
 {
     add_map((char *)"");
 }
@@ -48,7 +49,18 @@ uint64_t MemStore::get_maxsize()
  *============================================================================*/
 bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
 {
-    return get_map(key)->put((char *)key, value, timestamp);
+    bool ret;
+    Map *map = get_map(key);
+
+    m_num_keys -= map->get_num_keys();
+    m_size -= map->get_size();
+    m_size_when_serialized -= map->get_size_when_serialized();
+    ret = map->put((char *)key, value, timestamp);
+    m_num_keys += map->get_num_keys();
+    m_size += map->get_size();
+    m_size_when_serialized += map->get_size_when_serialized();
+
+    return ret;
 }
 
 /*============================================================================
@@ -71,13 +83,7 @@ bool MemStore::get(const char *key, char **value, uint64_t *timestamp)
  *============================================================================*/
 uint64_t MemStore::get_num_keys()
 {
-    uint64_t sum = 0;
-
-    for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].map->get_num_keys();
-    }
-
-    return sum;
+    return m_num_keys;
 }
 
 /*============================================================================
@@ -85,13 +91,7 @@ uint64_t MemStore::get_num_keys()
  *============================================================================*/
 uint64_t MemStore::get_size()
 {
-    uint64_t sum = 0;
-
-    for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].map->get_size();
-    }
-
-    return sum;
+    return m_size;
 }
 
 /*============================================================================
@@ -99,13 +99,7 @@ uint64_t MemStore::get_size()
  *============================================================================*/
 uint64_t MemStore::get_size_when_serialized()
 {
-    uint64_t sum = 0;
-
-    for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].map->get_size_when_serialized();
-    }
-
-    return sum;
+    return m_size_when_serialized;
 }
 
 /*============================================================================
@@ -113,13 +107,7 @@ uint64_t MemStore::get_size_when_serialized()
  *============================================================================*/
 bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_t timestamp)
 {
-    uint64_t sum = 0;
-
-    for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].map->new_size(key, value, timestamp);
-    }
-
-    return (sum > m_maxsize);
+    return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 
 /*============================================================================
@@ -128,7 +116,7 @@ bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_
 void MemStore::clear()
 {
     for (int i = 0; i < (int)m_map.size(); i++) {
-        m_map[i].map->clear();
+        clear_map(i);
     }
 }
 
@@ -198,7 +186,26 @@ Map *MemStore::get_map(const char *key)
  *============================================================================*/
 void MemStore::clear_map(const char *key)
 {
-    get_map(key)->clear();
+    clear_map(get_map(key));
+}
+
+/*============================================================================
+ *                                 clear_map
+ *============================================================================*/
+void MemStore::clear_map(int idx)
+{
+    clear_map(get_map(idx));
+}
+
+/*============================================================================
+ *                                 clear_map
+ *============================================================================*/
+void MemStore::clear_map(Map *map)
+{
+    m_num_keys -= map->get_num_keys();
+    m_size -= map->get_size();
+    m_size_when_serialized -= map->get_size_when_serialized();
+    map->clear();
 }
 
 /*============================================================================

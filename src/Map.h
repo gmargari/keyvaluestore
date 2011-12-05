@@ -67,10 +67,9 @@ public:
     pair<uint64_t, uint64_t> get_sizes();
 
     /**
-     * if we add this <key, value, timestamp> tuple, which will be the total
-     * byte size of map?
+     * size of KV when serialized and added to map
      */
-    uint64_t new_size(const char *key, const char *value, uint64_t timestamp);
+    static size_t kv_size(const char *key, const char *value, uint64_t timestamp);
 
     /**
      * clear all elements of map
