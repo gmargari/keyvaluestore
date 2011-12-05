@@ -283,12 +283,12 @@ int MemStore::idx_of_map(const char *key)
 
     if (strcmp(key, m_map[mid].key) < 0) {
         mid--;
-        assert(mid >= 0); // m_map[0].key should be ""
     }
 
     // assert 'key' belongs to range [map[mid].key, map[mid+1].key)
     assert(strcmp(key, m_map[mid].key) >= 0 &&
            (mid == (int)m_map.size() - 1 || strcmp(key, m_map[mid+1].key) < 0));
+    assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;
 }

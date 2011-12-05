@@ -83,7 +83,11 @@
 // macros to print an expression and its value
 //==============================================================================
 
-#define DEBUG_PROMPT "# [DEBUG] "
+#if DBGLVL > 0
+    #include <stdio.h> // for functions below
+#endif
+
+#define DEBUG_PROMPT "# [DEBUG]  "
 
 /* integers */
 #define dbg_i(expr)        STMT( if (DBGLVL) { printf("%s " #expr " = %d\n", DEBUG_PROMPT, expr); fflush(stdout); } )

@@ -9,8 +9,6 @@
 #include "Range.h"
 #include "Streams.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include <cassert>
 #include <climits>
 #include <pthread.h>
