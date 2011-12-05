@@ -17,6 +17,8 @@
 using std::vector;
 using std::min;
 
+char *EMPTY_STRING = (char *)"";
+
 #define SPLIT_PERC 0.6 // move to Global.h?
 
 /*============================================================================
@@ -117,8 +119,7 @@ void RangemergeCompactionManager::flush_bytes()
         rng = ranges[cur_rng];
 
         // get istream with all memory tuples that belong to current range
-        map_istream = m_memstore->new_map_inputstream();
-        map_istream->set_key_range(rng->m_first, rng->m_last, true, false);
+        map_istream = m_memstore->new_map_inputstream(rng->m_first);
         istreams_to_merge.clear();
         istreams_to_merge.push_back(map_istream);
 
@@ -152,7 +153,14 @@ void RangemergeCompactionManager::flush_bytes()
         assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
 
         // remove from memstore tuples of current range
-        m_memstore->clear(rng->m_first, rng->m_last, true, false);
+        m_memstore->clear_map(rng->m_first);
+
+        // add new map(s) to memstore if range was splitted and new range(s) was created
+        for (int j = 0; j < newfiles - 1; j++) {
+            const char *ft, *lt;
+            new_disk_files.at(new_disk_files.size()-j-1)->get_first_last_term(&ft, &lt);
+            m_memstore->add_map(ft);
+        }
 
         assert(dbg_memsize - rng->m_memsize == m_memstore->get_size());
         assert(dbg_memsize_serial - rng->m_memsize_serialized == m_memstore->get_size_when_serialized());
@@ -227,7 +235,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
 
         sort(ranges.begin(), ranges.end(), Range::cmp_by_term);
 
-        ranges[0]->m_first = NULL;
+        ranges[0]->m_first = EMPTY_STRING;
         ranges[ranges.size() - 1]->m_last = NULL;
 
         for (i = 0; i < (int)ranges.size() - 1; i++) {
@@ -238,7 +246,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
             // since we want to know exactly the size of tuples when written to
             // disk, in order to know when a block will overflow, we use
             // get_size_when_serialized() and not get_size().
-            sizes = m_memstore->get_sizes(ranges[i]->m_first, ranges[i]->m_last, true, false);
+            sizes = m_memstore->get_map(ranges[i]->m_first)->get_sizes();
             ranges[i]->m_memsize = sizes.first;
             ranges[i]->m_memsize_serialized = sizes.second;
         }
@@ -246,9 +254,9 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
     // else, if this is the first time we flush bytes to disk (no disk file)
     else {
         rng = new Range();
-        rng->m_first = NULL; // to get all memory tuples
+        rng->m_first = EMPTY_STRING; // to get all memory tuples
         rng->m_last = NULL;
-        sizes = m_memstore->get_sizes();
+        sizes = m_memstore->get_map(rng->m_first)->get_sizes();
         rng->m_memsize = sizes.first;
         rng->m_memsize_serialized = sizes.second;
         rng->m_disksize = 0;
@@ -329,9 +337,14 @@ int RangemergeCompactionManager::sanity_check()
 
     create_ranges(ranges);
 
+    assert(m_memstore->get_num_maps() == ranges.size());
+    for (unsigned int i = 0; i < ranges.size(); i++) {
+        assert(m_memstore->get_map(i) == m_memstore->get_map(ranges[i]->m_first));
+    }
+
     // assert ranges are non interleaving, i.e. each key is stored in at most
     // one disk file, and that each memory tuple belongs to exaclty one range
-    assert(ranges[0]->m_first == NULL);
+    assert(strcmp(ranges[0]->m_first, EMPTY_STRING) == 0);
     assert(ranges[ranges.size() - 1]->m_last == NULL);
     for (unsigned int i = 0; i < ranges.size(); i++) {
         assert(i == 0 || strcmp(ranges[i-1]->m_last, ranges[i]->m_first) == 0);
