@@ -125,7 +125,6 @@ void RangemergeCompactionManager::flush_bytes()
         // get istream for file that stores all tuples that belong to range
         if (rng->m_block_num != NO_DISK_BLOCK) {
             disk_stream = new DiskFileInputStream(r_disk_files[rng->m_block_num], MERGE_BUFSIZE);
-            disk_stream->set_key_range(rng->m_first, rng->m_last, true, false);
             istreams_to_merge.push_back(disk_stream);
         }
 
