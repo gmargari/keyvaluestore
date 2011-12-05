@@ -151,10 +151,7 @@ int main()
     }
     ostream2->close();
 
-    map->clear(NULL, key1, true, false);
-    map->clear(key1, key2, true, false);
-    map->clear(key2, key3, true, false);
-    map->clear(key3, NULL, true, false);
+    map->clear();
     assert(map->get_size() == 0);
     assert(map->get_num_keys() == 0);
 
