@@ -220,6 +220,14 @@ MapInputStream *MemStore::new_map_inputstream()
 }
 
 /*============================================================================
+ *                             new_map_inputstream
+ *============================================================================*/
+MapInputStream *MemStore::new_map_inputstream(const char *key)
+{
+    return new MapInputStream(m_map[idx_of_map(key)].map);
+}
+
+/*============================================================================
  *                                 add_map
  *============================================================================*/
 void MemStore::add_map(const char *key)
