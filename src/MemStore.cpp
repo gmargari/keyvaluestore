@@ -23,7 +23,7 @@ MemStore::MemStore()
 MemStore::~MemStore()
 {
     for (int i = 0; i < (int)m_map.size(); i++) {
-        delete m_map[i].second;
+        delete m_map[i].map;
     }
 }
 
@@ -74,7 +74,7 @@ uint64_t MemStore::get_num_keys()
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->get_num_keys();
+        sum += m_map[i].map->get_num_keys();
     }
 
     return sum;
@@ -88,7 +88,7 @@ uint64_t MemStore::get_size()
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->get_size();
+        sum += m_map[i].map->get_size();
     }
 
     return sum;
@@ -102,7 +102,7 @@ uint64_t MemStore::get_size(const char *start_key, const char *end_key, bool sta
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->get_size(start_key, end_key, start_key_incl, end_key_incl);
+        sum += m_map[i].map->get_size(start_key, end_key, start_key_incl, end_key_incl);
     }
 
     return sum;
@@ -116,7 +116,7 @@ uint64_t MemStore::get_size_when_serialized()
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->get_size_when_serialized();
+        sum += m_map[i].map->get_size_when_serialized();
     }
 
     return sum;
@@ -130,7 +130,7 @@ uint64_t MemStore::get_size_when_serialized(const char *start_key, const char *e
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->get_size_when_serialized(start_key, end_key, start_key_incl, end_key_incl);
+        sum += m_map[i].map->get_size_when_serialized(start_key, end_key, start_key_incl, end_key_incl);
     }
 
     return sum;
@@ -144,9 +144,9 @@ pair<uint64_t, uint64_t> MemStore::get_sizes()
     pair<uint64_t, uint64_t> sum(0,0), ret;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        ret = m_map[i].second->get_sizes();
+        ret = m_map[i].map->get_sizes();
         sum.first += ret.first;
-        sum.second += ret.second ;
+        sum.second += ret.second;
     }
 
     return sum;
@@ -160,7 +160,7 @@ pair<uint64_t, uint64_t> MemStore::get_sizes(const char *start_key, const char *
     pair<uint64_t, uint64_t> sum(0,0), ret;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        ret = m_map[i].second->get_sizes(start_key, end_key, start_key_incl, end_key_incl);
+        ret = m_map[i].map->get_sizes(start_key, end_key, start_key_incl, end_key_incl);
         sum.first += ret.first;
         sum.second += ret.second;
     }
@@ -176,7 +176,7 @@ bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_
     uint64_t sum = 0;
 
     for (int i = 0; i < (int)m_map.size(); i++) {
-        sum += m_map[i].second->new_size(key, value, timestamp);
+        sum += m_map[i].map->new_size(key, value, timestamp);
     }
 
     return (sum > m_maxsize);
@@ -196,7 +196,7 @@ bool MemStore::will_reach_size_limit(const char *key, const char *value)
 void MemStore::clear()
 {
     for (int i = 0; i < (int)m_map.size(); i++) {
-        m_map[i].second->clear();
+        m_map[i].map->clear();
     }
 }
 
@@ -206,7 +206,7 @@ void MemStore::clear()
 void MemStore::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl) // TODO: delete
 {
     for (int i = 0; i < (int)m_map.size(); i++) {
-        m_map[i].second->clear(start_key, end_key, start_key_incl, end_key_incl);
+        m_map[i].map->clear(start_key, end_key, start_key_incl, end_key_incl);
     }
 }
 
@@ -216,7 +216,7 @@ void MemStore::clear(const char *start_key, const char *end_key, bool start_key_
 MapInputStream *MemStore::new_map_inputstream()
 {
     assert(m_map.size() == 1);
-    return new MapInputStream(m_map[0].second);
+    return new MapInputStream(m_map[0].map);
 }
 
 /*============================================================================
@@ -225,11 +225,16 @@ MapInputStream *MemStore::new_map_inputstream()
 void MemStore::add_map(const char *key)
 {
     int pos = idx_of_map(key);
+    StrMapPair newpair;
+
+    strcpy(newpair.key, key);
+    newpair.map = new Map();
 
     if (m_map.size()) {
         pos++;
     }
-    m_map.insert(m_map.begin() + pos, StrMapPair((char *)key, new Map()));
+    m_map.insert(m_map.begin() + pos, newpair);
+
     sanity_check();
 }
 
@@ -238,7 +243,7 @@ void MemStore::add_map(const char *key)
  *============================================================================*/
 Map *MemStore::get_map(const char *key)
 {
-    return m_map[idx_of_map(key)].second;
+    return m_map[idx_of_map(key)].map;
 }
 
 /*============================================================================
@@ -266,7 +271,7 @@ int MemStore::idx_of_map(const char *key)
     last = m_map.size() - 1;
     while (first <= last) {
         mid = (last - first)/2 + first; // avoid overflow
-        cmp = strcmp(key, m_map[mid].first);
+        cmp = strcmp(key, m_map[mid].key);
         if (cmp > 0) {
             first = mid + 1;
         } else if (cmp < 0) {
@@ -276,14 +281,14 @@ int MemStore::idx_of_map(const char *key)
         }
     }
 
-    if (strcmp(key, m_map[mid].first) < 0) {
+    if (strcmp(key, m_map[mid].key) < 0) {
         mid--;
-        assert(mid >= 0); // m_map[0].first should be ""
+        assert(mid >= 0); // m_map[0].key should be ""
     }
 
-    // assert key belongs to [map[mid].first, map[mid+1].first)
-    assert(strcmp(key, m_map[mid].first) >= 0 &&
-           (mid == (int)m_map.size() - 1 || strcmp(key, m_map[mid+1].first) < 0));
+    // assert 'key' belongs to range [map[mid].key, map[mid+1].key)
+    assert(strcmp(key, m_map[mid].key) >= 0 &&
+           (mid == (int)m_map.size() - 1 || strcmp(key, m_map[mid+1].key) < 0));
 
     return mid;
 }
@@ -295,7 +300,7 @@ int MemStore::sanity_check()
 {
 #if DBGLVL > 1
     for (int i = 0; i < (int)m_map.size() - 1; i++) {
-        assert(strcmp(m_map[i].first, m_map[i+1].first) < 0);
+        assert(strcmp(m_map[i].key, m_map[i+1].key) < 0);
     }
 #endif
 

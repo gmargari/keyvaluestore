@@ -139,17 +139,20 @@ protected:
 
     int sanity_check();
 
-    typedef pair<char *, Map *> StrMapPair;
+    typedef struct {
+        char key[MAX_KVTSIZE];
+        Map *map;
+    } StrMapPair;
 
     static struct _pair_compare {
         inline bool operator() (const StrMapPair & left, const StrMapPair right) {
-            return strcmp(left.first, right.first);
+            return strcmp(left.key, right.key);
         }
         inline bool operator() (const StrMapPair & left, char * const & right) {
-            return strcmp(left.first, right);
+            return strcmp(left.key, right);
         }
         inline bool operator() (char * const & left, const StrMapPair & right) {
-            return strcmp(left, right.first);
+            return strcmp(left, right.key);
         }
     } pair_compare;
 
