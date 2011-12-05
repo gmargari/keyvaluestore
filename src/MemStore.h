@@ -133,7 +133,9 @@ public:
      * clear the map that contains a key
      */
     void add_map(const char *key);
+    int  get_num_maps();
     Map *get_map(const char *key);
+    Map *get_map(int i);
     void clear_map(const char *key);
 
 protected:
