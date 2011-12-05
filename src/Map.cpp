@@ -139,11 +139,11 @@ pair<uint64_t, uint64_t> Map::get_sizes()
 }
 
 /*============================================================================
- *                                  new_size
+ *                                  kv_size
  *============================================================================*/
-uint64_t Map::new_size(const char *key, const char *value, uint64_t timestamp)
+size_t Map::kv_size(const char *key, const char *value, uint64_t timestamp)
 {
-    return get_size() + strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
+    return strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
 }
 
 /*============================================================================
