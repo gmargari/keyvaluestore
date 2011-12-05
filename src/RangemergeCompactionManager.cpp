@@ -146,11 +146,10 @@ void RangemergeCompactionManager::flush_bytes()
             assert(newfiles == 1);
         }
 
-        // delete all istreams but memstore istream
-        for (i = 1; i < (int)istreams_to_merge.size(); i++) {
+        // delete all istreams
+        for (i = 0; i < (int)istreams_to_merge.size(); i++) {
             delete istreams_to_merge[i];
         }
-        delete map_istream;
 
         assert((dbg_memsize = m_memstore->get_size()) || 1);
         assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
