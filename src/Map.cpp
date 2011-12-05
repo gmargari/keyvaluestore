@@ -119,15 +119,7 @@ uint64_t Map::get_num_keys()
  *============================================================================*/
 uint64_t Map::get_size()
 {
-    return get_sizes().first;
-}
-
-/*============================================================================
- *                                 get_size
- *============================================================================*/
-uint64_t Map::get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
-{
-    return get_sizes(start_key, end_key, start_key_incl, end_key_incl).first;
+    return m_size;
 }
 
 /*============================================================================
@@ -135,15 +127,7 @@ uint64_t Map::get_size(const char *start_key, const char *end_key, bool start_ke
  *============================================================================*/
 uint64_t Map::get_size_when_serialized()
 {
-    return get_sizes().second;
-}
-
-/*============================================================================
- *                          get_size_when_serialized
- *============================================================================*/
-uint64_t Map::get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
-{
-    return get_sizes(start_key, end_key, start_key_incl, end_key_incl).second;
+    return m_size_serialized;
 }
 
 /*============================================================================
@@ -152,42 +136,6 @@ uint64_t Map::get_size_when_serialized(const char *start_key, const char *end_ke
 pair<uint64_t, uint64_t> Map::get_sizes()
 {
     return make_pair(m_size, m_size_serialized);
-}
-
-/*============================================================================
- *                                get_sizes
- *============================================================================*/
-pair<uint64_t, uint64_t> Map::get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
-{
-    KVTMap::iterator iter, s_iter, e_iter;
-    char *key, *value;
-    uint64_t timestamp, memsize, memsize_serialized;
-    pair<uint64_t, uint64_t> ret;
-    size_t keylen, valuelen;
-
-    assert(sanity_check());
-
-    s_iter = start_iter(start_key, start_key_incl);
-    e_iter = end_iter(end_key, end_key_incl);
-    memsize = 0;
-    memsize_serialized = 0;
-    for(iter = s_iter; iter != e_iter; ++iter) {
-        key = const_cast<char *>(iter->first);
-        value = const_cast<char *>(iter->second.first);
-        timestamp = iter->second.second;
-        assert(key);
-        assert(value);
-        keylen = strlen(key);
-        valuelen = strlen(value);
-        memsize += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
-        memsize_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
-    }
-
-    assert(sanity_check());
-
-    ret.first = memsize;
-    ret.second = memsize_serialized;
-    return ret;
 }
 
 /*============================================================================
@@ -203,35 +151,19 @@ uint64_t Map::new_size(const char *key, const char *value, uint64_t timestamp)
  *============================================================================*/
 void Map::clear()
 {
-    clear(NULL, NULL, true, true);
-
-    assert(m_size == 0);
-    assert(m_size_serialized == 0);
-    assert(m_keys == 0);
-}
-
-/*============================================================================
- *                                   clear
- *============================================================================*/
-void Map::clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl)
-{
-    KVTMap::iterator iter, s_iter, e_iter;
     char *key, *value;
     uint64_t timestamp;
     size_t keylen, valuelen;
 #if DBGLVL > 0
-    uint64_t dbg_mem_before, dbg_to_clean, dbg_bytes_cleaned = 0;
+    uint64_t dbg_mem_before, dbg_bytes_cleaned = 0;
 #endif
 
     assert(sanity_check());
-    assert((dbg_to_clean = get_size(start_key, end_key, start_key_incl, end_key_incl)) || 1);
     assert((dbg_mem_before = get_size()) || 1);
 
     time_start(&(g_stats.free_time));
 
-    s_iter = start_iter(start_key, start_key_incl);
-    e_iter = end_iter(end_key, end_key_incl);
-    for(iter = s_iter; iter != e_iter; ++iter) {
+    for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = const_cast<char *>(iter->first);
         value = const_cast<char *>(iter->second.first);
         timestamp = iter->second.second;
@@ -247,17 +179,15 @@ void Map::clear(const char *start_key, const char *end_key, bool start_key_incl,
         free(value);
     }
 
-    if (start_key != NULL || end_key != NULL) {
-        m_map.erase(s_iter, e_iter);
-    } else {
-        m_map.clear();
-    }
+    m_map.clear();
 
     time_end(&(g_stats.free_time));
 
-    assert(dbg_to_clean == dbg_bytes_cleaned);
-    assert(get_size(start_key, end_key, start_key_incl, end_key_incl) == 0);
-    assert(dbg_mem_before - get_size() == dbg_to_clean);
+    assert(dbg_mem_before == dbg_bytes_cleaned);
+    assert(get_size() == 0);
+    assert(m_size == 0);
+    assert(m_size_serialized == 0);
+    assert(m_keys == 0);
     assert(sanity_check());
 }
 

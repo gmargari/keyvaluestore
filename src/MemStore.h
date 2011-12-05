@@ -64,54 +64,20 @@ public:
     uint64_t get_size();
 
     /**
-     * return total byte size of tuples with keys in the range [start_key, end_key].
-     * 'start_key' and 'end_key' may or may not be included, depending on
-     * 'start_incl' and 'end_incl'.
-     */
-    uint64_t get_size(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
-
-    /**
      * return total byte size of tuples when serialized to be stored on disk.
      */
     uint64_t get_size_when_serialized();
-
-    /**
-     * return total byte size of tuples with keys in the range [start_key, end_key]
-     * when serialized to be stored on disk.
-     * 'start_key' and 'end_key' may or may not be included, depending on
-     * 'start_incl' and 'end_incl'.
-     */
-    uint64_t get_size_when_serialized(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
-
-    /**
-     * return both the byte size of memory tuples and the byte size of
-     * memory tuples when serialized
-     */
-    pair<uint64_t, uint64_t> get_sizes();
-
-    /**
-     * similar to function above, but caller can specify range of keys
-     */
-    pair<uint64_t, uint64_t> get_sizes(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
     /**
      * check if adding <key, value, timestamp> to memstore will reach memstore's
      * size limit
      */
     bool will_reach_size_limit(const char *key, const char *value, uint64_t timestamp);
-    bool will_reach_size_limit(const char *key, const char *value);
 
     /**
      * clear memstore
      */
     void clear();
-
-    /**
-     * clear all elements of memstore with keys in the range [start_key, end_key].
-     * 'start_key' and 'end_key' may or may not be included, depending on
-     * 'start_incl' and 'end_incl'.
-     */
-    void clear(const char *start_key, const char *end_key, bool start_key_incl, bool end_key_incl);
 
     /**
      * create and return an input stream for memstore's map. NOTE: caller must delete
