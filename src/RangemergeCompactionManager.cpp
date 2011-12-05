@@ -153,7 +153,7 @@ void RangemergeCompactionManager::flush_bytes()
         assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
 
         // remove from memstore tuples of current range
-        m_memstore->get_map(rng->m_first)->clear();
+        m_memstore->clear_map(rng->m_first);
 
         // add new map(s) to memstore if range was splitted and new range(s) was created
         for (int j = 0; j < newfiles - 1; j++) {
