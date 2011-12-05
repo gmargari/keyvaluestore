@@ -56,6 +56,21 @@ int main()
         return EXIT_FAILURE;
     }
 
+    memstore->clear_map(k3);       // clear map 2
+    memstore->put("a3", "y", t++); // belongs to map 0
+    memstore->put("z3", "y", t++); // belongs to map 2
+    memstore->put("z4", "y", t++); // belongs to map 2
+    memstore->put("k3", "y", t++); // belongs to map 1
+
+    map1_num = memstore->get_map(k1)->get_num_keys();
+    map2_num = memstore->get_map(k2)->get_num_keys();
+    map3_num = memstore->get_map(k3)->get_num_keys();
+
+    if (map1_num != 7 || map2_num != 6 || map3_num != 2) {
+        cout << "num of keys per map should be <7, 6, 2>, but is <" << map1_num << ", " << map2_num << ", " << map3_num << ">" << endl;
+        return EXIT_FAILURE;
+    }
+
     delete memstore;
 
     cout << "Everything ok!" << endl;
