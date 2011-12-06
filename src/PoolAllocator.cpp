@@ -79,7 +79,7 @@ void PoolAllocator::freemem()
     tmp = m_cur_objstack;
     while (tmp) {
         prev = tmp->prev;
-        delete(&tmp);
+        delete_objstack(&tmp);
         tmp = prev;
     }
     m_cur_objstack = NULL;
