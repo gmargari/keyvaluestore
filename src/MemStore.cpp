@@ -145,6 +145,10 @@ void MemStore::add_map(const char *key)
     int pos = idx_of_map(key);
     StrMapPair newpair;
 
+    if (m_map.size() > 0 && strcmp(m_map[pos].key, key) == 0) {
+        return; // map with same key already exists
+    }
+
     strcpy(newpair.key, key);
     newpair.map = new Map();
 
