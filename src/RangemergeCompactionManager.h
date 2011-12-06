@@ -41,6 +41,12 @@ public:
 protected:
 
     /**
+     * when loading an existing index from disk, create in memstore one map
+     * for each range (add to memstore one map per range/disk file)
+     */
+    void add_maps_to_memstore();
+
+    /**
      * based on disk files and memstore, create the vector of ranges. ranges
      * are sorted in lexicographical order
      */

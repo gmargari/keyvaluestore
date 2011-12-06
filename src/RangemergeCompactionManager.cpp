@@ -29,6 +29,7 @@ RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, Dis
       m_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE), m_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE)
 {
     load_state_from_disk();
+    add_maps_to_memstore();
 }
 
 /*============================================================================
@@ -322,6 +323,20 @@ bool RangemergeCompactionManager::load_state_from_disk()
     }
 
     return false;
+}
+
+/*============================================================================
+ *                            add_maps_to_memstore
+ *============================================================================*/
+void RangemergeCompactionManager::add_maps_to_memstore()
+{
+    vector<Range *> ranges;
+
+    create_ranges(ranges);
+    for (int i = 1; i < (int)ranges.size(); i++) { // i = 1: MemStore constructor has inserted map for key ""
+        m_memstore->add_map(ranges[i]->m_first);
+    }
+    sanity_check();
 }
 
 /*============================================================================
