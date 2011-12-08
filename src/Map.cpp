@@ -92,7 +92,7 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
 /*============================================================================
  *                                    get
  *============================================================================*/
-bool Map::get(const char *key, const char **value, uint64_t *timestamp)
+bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     KVTMap::iterator iter;
 
@@ -101,10 +101,12 @@ bool Map::get(const char *key, const char **value, uint64_t *timestamp)
 
     if ((iter = m_map.find(key)) != m_map.end()) {
         *value = iter->second.first;
+        *valuelen = strlen(iter->second.first);
         *timestamp = iter->second.second;
         return true;
     } else {
         *value = NULL;
+        *valuelen = 0;
         *timestamp = 0;
         return false;
     }

@@ -41,11 +41,13 @@ public:
      * get the value for a specific key
      *
      * @param key (in) key to be searched
+     * @param keylen (in) size of key
      * @param value (out) value corresponding to the searched key
+     * @param valuelen (out) size of value
      * @param timestamp (out) timestamp of insertion
      * @return true if key was found, false if not
      */
-    bool get(const char *key, const char **value, uint64_t *timestamp);
+    bool get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
 
     /**
      * return number of <key, value, timestamp> tuples in map

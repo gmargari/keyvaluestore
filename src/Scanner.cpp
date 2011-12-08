@@ -31,14 +31,15 @@ Scanner::~Scanner()
 int Scanner::point_get(const char *key)
 {
     const char *k, *v;
-    uint32_t klen, vlen;
+    uint32_t klen, vlen, keylen, valuelen;
     char *value;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
 
-    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
+//    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
 //     // first check memstore, since it has the most recent values
-//     if (m_kvstore->m_memstore->get(key, &value, &t)) {
+//     keylen = strlen(key);
+//     if (m_kvstore->m_memstore->get(key, keylen, &value, &valuelen, &t)) {
 //         free(value); // it has been copied
 //         return 1;
 //     }
