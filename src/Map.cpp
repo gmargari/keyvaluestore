@@ -34,9 +34,9 @@ Map::~Map()
 bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     const char *cpkey;
-    char *cpvalue, *old_value;
+    char *cpvalue, *old_value, *p;
     uint64_t old_timestamp;
-    uint32_t old_valuelen;
+    uint32_t old_valuelen, len;
     KVTPair new_pair;
     KVTMap::iterator iter;
 
@@ -63,11 +63,17 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
         free(old_value);
         cpkey = key;
     } else {
-        cpkey = strdup(key);
+        len = strlen(key);
+        p = (char *)malloc(len + 1);
+        memcpy(p, key, len + 1);
+        cpkey = p;
         m_keys++;
     }
 
-    cpvalue = strdup(value);
+    len = strlen(value);
+    p = (char *)malloc(len + 1);
+    memcpy(p, value, len + 1);
+    cpvalue = p;
     assert(cpkey);
     assert(cpvalue);
 
