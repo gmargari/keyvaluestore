@@ -507,7 +507,7 @@ int main(int argc, char **argv)
         }
     } else if (strcmp(compmanager, "rangemerge") == 0) {
         if (blocksize == 0) {
-            cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB\n" << endl;
+            cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB" << endl;
         } else {
             cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB " << (bflag == 0 ? "(default)" : "") << endl;
         }
