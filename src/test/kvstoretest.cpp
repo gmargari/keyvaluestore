@@ -85,7 +85,7 @@ int main()
         if (UNIQUE_KEYS) {
             sprintf(key + strlen(key), "%Ld", i);
         }
-        kvstore->put(key, value);
+        kvstore->put(key, strlen(key), value, strlen(value));
         if (i && i % 100 == 0)
             cout << "i = " << i << ", memstore size = " << kvstore->get_mem_size() << endl;
     }

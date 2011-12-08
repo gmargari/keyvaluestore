@@ -31,12 +31,12 @@ Map::~Map()
 /*============================================================================
  *                                    put
  *============================================================================*/
-bool Map::put(const char *key, const char *value, uint64_t timestamp)
+bool Map::put(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
 {
     const char *cpkey;
     char *cpvalue, *old_value;
     uint64_t old_timestamp;
-    size_t keylen, valuelen, old_valuelen;
+    size_t old_valuelen;
     KVTPair new_pair;
     KVTMap::iterator iter;
 
@@ -44,8 +44,6 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
     assert(key);
     assert(value);
 
-    keylen = strlen(key);
-    valuelen = strlen(value);
     if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
         printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVTSIZE);
         assert(0);
@@ -141,9 +139,9 @@ pair<uint64_t, uint64_t> Map::get_sizes()
 /*============================================================================
  *                                  kv_size
  *============================================================================*/
-size_t Map::kv_size(const char *key, const char *value, uint64_t timestamp)
+size_t Map::kv_size(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
 {
-    return strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
+    return (keylen + 1 + sizeof(KVTPair) + valuelen + 1);
 }
 
 /*============================================================================

@@ -38,11 +38,13 @@ public:
      * and value are created and inserted into memstore.
      *
      * @param key key to be inserted
+     * @param keylen size of key
      * @param value value to be inserted
+     * @param valuelen size of value
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, const char *value, uint64_t timestamp);
+    bool put(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
 
     /**
      * get the (copy of) value for a specific key.
@@ -73,7 +75,7 @@ public:
      * check if adding <key, value, timestamp> to memstore will reach memstore's
      * size limit
      */
-    bool will_reach_size_limit(const char *key, const char *value, uint64_t timestamp);
+    bool will_reach_size_limit(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
 
     /**
      * clear memstore

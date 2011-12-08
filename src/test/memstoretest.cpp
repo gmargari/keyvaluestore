@@ -24,28 +24,28 @@ int main()
     memstore->add_map((char *)k2);
     memstore->add_map((char *)k3);
 
-    memstore->put("a1", "x", t++); // belongs to map 0
-    memstore->put("a2", "x", t++); // belongs to map 0
-    memstore->put("p3", "x", t++); // belongs to map 2
-    memstore->put("c1", "x", t++); // belongs to map 0
-    memstore->put("f3", "x", t++); // belongs to map 1
-    memstore->put("z1", "x", t++); // belongs to map 2
-    memstore->put("f4", "x", t++); // belongs to map 1
-    memstore->put("n1", "x", t++); // belongs to map 1
-    memstore->put("d1", "x", t++); // belongs to map 0
-    memstore->put("f",  "x", t++); // belongs to map 0
-    memstore->put("f2", "x", t++); // belongs to map 0
-    memstore->put("p",  "x", t++); // belongs to map 1
-    memstore->put("p2", "x", t++); // belongs to map 1
-    memstore->put("zz", "x", t++); // belongs to map 2
+    memstore->put("a1", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("a2", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("p3", 2, "x", 1, t++); // belongs to map 2
+    memstore->put("c1", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("f3", 2, "x", 1, t++); // belongs to map 1
+    memstore->put("z1", 2, "x", 1, t++); // belongs to map 2
+    memstore->put("f4", 2, "x", 1, t++); // belongs to map 1
+    memstore->put("n1", 2, "x", 1, t++); // belongs to map 1
+    memstore->put("d1", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("f1", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("f2", 2, "x", 1, t++); // belongs to map 0
+    memstore->put("p1", 2, "x", 1, t++); // belongs to map 1
+    memstore->put("p2", 2, "x", 1, t++); // belongs to map 1
+    memstore->put("zz", 2, "x", 1, t++); // belongs to map 2
 
-    memstore->put("zz", "y", t++); // belongs to map 2 (replace)
-    memstore->put("a1", "y", t++); // belongs to map 0 (replace)
-    memstore->put("n1", "y", t++); // belongs to map 1 (replace)
-    memstore->put("p2", "y", t++); // belongs to map 1 (replace)
-    memstore->put("p3", "y", t++); // belongs to map 2 (replace)
-    memstore->put("f2", "y", t++); // belongs to map 0 (replace)
-    memstore->put("f3", "y", t++); // belongs to map 1 (replace)
+    memstore->put("zz", 2, "y", 1, t++); // belongs to map 2 (replace)
+    memstore->put("a1", 2, "y", 1, t++); // belongs to map 0 (replace)
+    memstore->put("n1", 2, "y", 1, t++); // belongs to map 1 (replace)
+    memstore->put("p2", 2, "y", 1, t++); // belongs to map 1 (replace)
+    memstore->put("p3", 2, "y", 1, t++); // belongs to map 2 (replace)
+    memstore->put("f2", 2, "y", 1, t++); // belongs to map 0 (replace)
+    memstore->put("f3", 2, "y", 1, t++); // belongs to map 1 (replace)
 
     map1_num = memstore->get_map(k1)->get_num_keys();
     map2_num = memstore->get_map(k2)->get_num_keys();
@@ -57,10 +57,10 @@ int main()
     }
 
     memstore->clear_map(k3);       // clear map 2
-    memstore->put("a3", "y", t++); // belongs to map 0
-    memstore->put("z3", "y", t++); // belongs to map 2
-    memstore->put("z4", "y", t++); // belongs to map 2
-    memstore->put("k3", "y", t++); // belongs to map 1
+    memstore->put("a3", 2, "y", 1, t++); // belongs to map 0
+    memstore->put("z3", 2, "y", 1, t++); // belongs to map 2
+    memstore->put("z4", 2, "y", 1, t++); // belongs to map 2
+    memstore->put("k3", 2, "y", 1, t++); // belongs to map 1
 
     map1_num = memstore->get_map(k1)->get_num_keys();
     map2_num = memstore->get_map(k2)->get_num_keys();

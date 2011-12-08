@@ -619,6 +619,7 @@ void *put_routine(void *args)
              vseed = kseed + 1;
     char    *key = NULL,
             *value = NULL;
+    size_t   keylen, valuelen;
     uint64_t bytes_inserted = 0;
     RequestThrottle throttler(targs->put_thrput);
 
@@ -677,8 +678,10 @@ void *put_routine(void *args)
         //----------------------------------------------------------------------
         // insert <key, value> into store
         //----------------------------------------------------------------------
-        kvstore->put(key, value);
-        bytes_inserted += strlen(key) + strlen(value);
+        keylen = strlen(key); // make more efficient, e.g. keylen = keysize + sizeof(str(i) + 1) (+1 of '.' in sprintf above)
+        valuelen = strlen(value); // make more efficient
+        kvstore->put(key, keylen, value, valuelen);
+        bytes_inserted += keylen + valuelen;
     }
 
     if (DBGLVL > 0) {
