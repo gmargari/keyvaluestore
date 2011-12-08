@@ -12,6 +12,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     const char *key, *value;
+    uint32_t keylen, valuelen;
     char *prev_key;
     DiskFile *diskfile;
     DiskFileInputStream *istream;
@@ -31,7 +32,7 @@ int main(int argc, char **argv)
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
-    while (istream->read(&key, &value, &timestamp)) {
+    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
         if ((cmp = strcmp(prev_key, key)) > 0) {
             cout << "Error: prev_key: " << prev_key << " > cur_key: " << key << endl;
             return EXIT_FAILURE;

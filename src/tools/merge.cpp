@@ -13,6 +13,7 @@ using std::vector;
 int main(int argc, char **argv)
 {
     const char *key, *value;
+    uint32_t keylen, valuelen;
     char prev_key[MAX_KVTSIZE];
     vector<DiskFile *> diskfiles;
     vector<InputStream *> istreams;
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
     pistream = new PriorityInputStream(istreams);
     pistream->set_key_range(NULL, NULL);
     prev_key[0] = '\0';
-    while (pistream->read(&key, &value, &timestamp)) {
+    while (pistream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
             cout << "[" << key << "] ["  << value << "] [" << timestamp << "]" << endl;
         }

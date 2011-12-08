@@ -11,6 +11,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     const char *key, *value;
+    uint32_t keylen, valuelen;
     DiskFile *diskfile;
     DiskFileInputStream *istream;
     uint64_t timestamp;
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
-    while (istream->read(&key, &value, &timestamp)) {
+    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
         cout << "[" << key << "] [" << value << "] [" << timestamp << "]" << endl;
     }
     delete istream;

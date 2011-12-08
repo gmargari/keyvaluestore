@@ -62,11 +62,12 @@ void DiskFileInputStream::set_key_range(const char *start_key, const char *end_k
 /*============================================================================
  *                                  read
  *============================================================================*/
-bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *timestamp)
+bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     int cmp;
     off_t off1, off2;
     const char *tmpkey, *tmpvalue;
+    uint32_t tmpkeylen, tmpvaluelen;
     uint64_t tmpts;
     bool ret;
 
@@ -98,7 +99,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
             assert(m_buf->size() == off2 - off1);
 
             // check all buffer tuples until we find a key >= startkey
-            while (m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
+            while (m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
                 if ((cmp = strcmp(tmpkey, m_start_key)) >= 0) {
                     break;
                 }
@@ -106,7 +107,7 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
             if (cmp > 0 || (cmp == 0 && m_start_incl == true)) {
                 // must seek back at beginning of key tuple
-                m_buf->undo_deserialize(tmpkey, tmpvalue, tmpts);
+                m_buf->undo_deserialize(tmpkey, tmpkeylen, tmpvalue, tmpvaluelen, tmpts);
             }
         }
         // else, seek to the first key on disk
@@ -119,14 +120,14 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
     //--------------------------------------------------------------------------
     // read next <key,value,timestamp> from file
     //--------------------------------------------------------------------------
-    if ( ! m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
+    if ( ! m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
 
         // maybe we need to read more bytes in buffer to deserialize tuple
         m_buf->keep_unused();
         m_offs += m_diskfile->fill(m_buf, m_offs);
 
         // this should now work, unless there are no bytes left in file
-        if ( ! m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
+        if ( ! m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
             assert(m_buf->unused() == 0);
             return false;
         }
@@ -143,6 +144,8 @@ bool DiskFileInputStream::read(const char **key, const char **value, uint64_t *t
 
     *key = tmpkey;
     *value = tmpvalue;
+    *keylen = tmpkeylen;
+    *valuelen = tmpvaluelen;
     *timestamp = tmpts;
     return true;
 }

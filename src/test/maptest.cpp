@@ -46,6 +46,7 @@ int main()
     vector<InputStream *> istreams;
     char *key, *value, *key1, *key2, *key3, *value1, *prev_key;
     const char *k1, *v1, *k2, *v2;
+    uint32_t k1len, v1len, k2len, v2len;
     struct timeval tv;
     int num_keys, num, maxkeysize, maxvaluesize;
     uint64_t timestamp, ts1, ts2;
@@ -93,9 +94,9 @@ int main()
     ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
     istream->set_key_range(NULL, NULL);
     prev_key[0] = '\0';
-    while (istream->read(&k1, &v1, &timestamp)) {
+    while (istream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
-        ostream1->append(k1, strlen(k1), v1, strlen(v1), timestamp);
+        ostream1->append(k1, k1len, v1, v1len, timestamp);
         strcpy(prev_key, k1);
     }
 
@@ -148,9 +149,9 @@ int main()
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
     pistream = new PriorityInputStream(istreams);
     prev_key[0] = '\0';
-    while (pistream->read(&k1, &v1, &timestamp)) {
+    while (pistream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
-        ostream2->append(k1, strlen(k1), v1, strlen(v1), timestamp);
+        ostream2->append(k1, k1len, v1, v1len, timestamp);
         strcpy(prev_key, k1);
     }
     ostream2->close();
@@ -168,8 +169,8 @@ int main()
     dfistream1->set_key_range(NULL, NULL);
     dfistream2->set_key_range(NULL, NULL);
     num = 0;
-    while (dfistream1->read(&k1, &v1, &ts1)) {
-        dfistream2->read(&k2, &v2, &ts2);
+    while (dfistream1->read(&k1, &k1len, &v1, &v1len, &ts1)) {
+        dfistream2->read(&k2, &k2len, &v2, &v2len, &ts2);
         if (strcmp(k1, k2) != 0) {
             cout << num << ") k1: " << k1 << " != k2: " << k2 << endl;
             exit(EXIT_FAILURE);
@@ -180,7 +181,7 @@ int main()
         }
         num++;
     }
-    assert(dfistream2->read(&k2, &v2, &ts2) == false);
+    assert(dfistream2->read(&k2, &k2len, &v2, &v2len, &ts2) == false);
 
     //========================================================
     // free mem / delete objects

@@ -97,14 +97,14 @@ public:
      * strings pointed by 'key' and 'value' are valid only until next call of
      * function)
      */
-    bool deserialize(const char **key, const char **value, uint64_t *timestamp, bool copy_keyvalue);
+    bool deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue);
 
     /**
      * undo deserialization previously done (rational similar to ungetc().
      * needed from DiskFileInputStream::read() in case we "accidentally"
      * deserialized a <k,v,t>)
      */
-    void undo_deserialize(const char *key, const char *value, uint64_t timestamp);
+    void undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     Buffer(const Buffer&);
