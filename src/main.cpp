@@ -619,7 +619,7 @@ void *put_routine(void *args)
              vseed = kseed + 1;
     char    *key = NULL,
             *value = NULL;
-    size_t   keylen, valuelen;
+    uint32_t keylen, valuelen;
     uint64_t bytes_inserted = 0;
     RequestThrottle throttler(targs->put_thrput);
 

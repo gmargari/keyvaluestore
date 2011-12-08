@@ -48,7 +48,7 @@ void DiskFileOutputStream::reset()
 /*============================================================================
  *                                  write
  *============================================================================*/
-bool DiskFileOutputStream::append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     uint32_t len;
     off_t cur_offs;

@@ -82,7 +82,7 @@ uint64_t KeyValueStore::get_memstore_maxsize()
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, keylen, value, valuelen, timestamp)) {
@@ -100,7 +100,7 @@ bool KeyValueStore::put(const char *key, size_t keylen, const char *value, size_
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, size_t keylen, const char *value, size_t valuelen)
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen)
 {
     return put(key, keylen, value, valuelen, get_timestamp());
 }

@@ -47,7 +47,7 @@ uint64_t MemStore::get_maxsize()
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool MemStore::put(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool MemStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     bool ret;
     Map *map = get_map(key);
@@ -105,7 +105,7 @@ uint64_t MemStore::get_size_when_serialized()
 /*============================================================================
  *                           will_reach_size_limit
  *============================================================================*/
-bool MemStore::will_reach_size_limit(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool MemStore::will_reach_size_limit(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     return (m_size + Map::kv_size(key, keylen, value, valuelen, timestamp) > m_maxsize);
 }

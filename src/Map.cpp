@@ -31,12 +31,12 @@ Map::~Map()
 /*============================================================================
  *                                    put
  *============================================================================*/
-bool Map::put(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     const char *cpkey;
     char *cpvalue, *old_value;
     uint64_t old_timestamp;
-    size_t old_valuelen;
+    uint32_t old_valuelen;
     KVTPair new_pair;
     KVTMap::iterator iter;
 
@@ -139,7 +139,7 @@ pair<uint64_t, uint64_t> Map::get_sizes()
 /*============================================================================
  *                                  kv_size
  *============================================================================*/
-size_t Map::kv_size(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp)
+uint32_t Map::kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     return (keylen + 1 + sizeof(KVTPair) + valuelen + 1);
 }
@@ -151,7 +151,7 @@ void Map::clear()
 {
     char *key, *value;
     uint64_t timestamp;
-    size_t keylen, valuelen;
+    uint32_t keylen, valuelen;
 #if DBGLVL > 0
     uint64_t dbg_mem_before, dbg_bytes_cleaned = 0;
 #endif
@@ -249,7 +249,7 @@ int Map::sanity_check()
     uint64_t map_size = 0, map_size_serialized = 0;
     const char *key, *value;
     uint64_t timestamp;
-    size_t keylen, valuelen;
+    uint32_t keylen, valuelen;
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first;

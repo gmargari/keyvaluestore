@@ -77,8 +77,8 @@ int main()
     prev_key = (char *)malloc(MAX_KVTSIZE);
 
     for (int i = 0; i < num_keys; i++) {
-        size_t keylen = rand() % maxkeysize + 1,
-               valuelen = rand() % maxkeysize + 1;
+        uint32_t keylen = rand() % maxkeysize + 1,
+                 valuelen = rand() % maxkeysize + 1;
         randstr(key, keylen);
         randstr(value, valuelen);
         map->put(key, keylen, value, valuelen, i+1);
@@ -107,8 +107,8 @@ int main()
     //========================================================
     srand(tv.tv_usec);
     for (int i = 0; i < num_keys; i++) {
-        size_t keylen = rand() % maxkeysize + 1,
-               valuelen = rand() % maxkeysize + 1;
+        uint32_t keylen = rand() % maxkeysize + 1,
+                 valuelen = rand() % maxkeysize + 1;
         randstr(key, keylen);
         randstr(value, valuelen);
         map->put(key, keylen, value, valuelen, i+1);
