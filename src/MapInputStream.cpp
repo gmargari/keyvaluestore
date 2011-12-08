@@ -49,18 +49,22 @@ void MapInputStream::set_key_range(const char *start_key, const char *end_key)
 /*============================================================================
  *                                  read
  *============================================================================*/
-bool MapInputStream::read(const char **key, const char **value, uint64_t *timestamp)
+bool MapInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     assert(key && value && timestamp);
 
     if (m_iter == m_iter_end) {
         *key = NULL;
+        *keylen = 0;
         *value = NULL;
+        *valuelen = 0;
         *timestamp = 0;
         return false;
     } else {
         *key = m_iter->first;
+        *keylen = strlen(m_iter->first);
         *value = m_iter->second.first;
+        *valuelen = strlen(m_iter->second.first);
         *timestamp = m_iter->second.second;
         ++m_iter;
         return true;

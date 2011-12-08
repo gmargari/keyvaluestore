@@ -35,7 +35,7 @@ public:
      *
      * @return false if no tuple left. else, true.
      */
-    virtual bool read(const char **key, const char **value, uint64_t *timestamp) = 0;
+    virtual bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) = 0;
 
 };
 

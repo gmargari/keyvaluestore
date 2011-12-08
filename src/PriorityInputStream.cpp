@@ -71,7 +71,8 @@ void PriorityInputStream::reset()
 
     // insert one element from each stream to priority queue
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value), &(m_elements[i]->timestamp))) {
+        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->keylen),
+                                &(m_elements[i]->value), &(m_elements[i]->valuelen), &(m_elements[i]->timestamp))) {
             m_pqueue.push(m_elements[i]);
         }
     }
@@ -83,7 +84,7 @@ void PriorityInputStream::reset()
 /*============================================================================
  *                                   read
  *============================================================================*/
-bool PriorityInputStream::read(const char **key, const char **value, uint64_t *timestamp)
+bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     pq_elem *top;
 
@@ -100,7 +101,8 @@ bool PriorityInputStream::read(const char **key, const char **value, uint64_t *t
         // the element poped from head last time belonged to stream 'm_last_sid'.
         // insert into priority queue a new element from that stream.
         assert(m_last_sid < (int)m_istreams.size());
-        if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->timestamp))) {
+        if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->keylen),
+                                         &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->valuelen), &(m_elements[m_last_sid]->timestamp))) {
             m_pqueue.push(m_elements[m_last_sid]);
         }
     }
@@ -112,7 +114,9 @@ bool PriorityInputStream::read(const char **key, const char **value, uint64_t *t
     // get top element
     top = m_pqueue.top();
     *key = top->key;
+    *keylen = top->keylen;
     *value = top->value;
+    *valuelen = top->valuelen;
     *timestamp = top->timestamp;
     m_last_sid = top->sid;
     m_pqueue.pop();

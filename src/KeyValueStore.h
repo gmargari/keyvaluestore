@@ -2,6 +2,7 @@
 #define KEYVALUESTORE_H
 
 #include <stdint.h>
+#include <string.h>
 
 class MemStore;
 class DiskStore;
@@ -46,21 +47,25 @@ public:
      * value are created and inserted into the store.
      *
      * @param key key to be inserted
+     * @param keylen size of key
      * @param value value to be inserted
+     * @param valuelen size of value
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, const char *value, uint64_t timestamp);
+    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
 
     /**
      * insert a <key, value> tuple into store. copies of the key and value are
      * created and inserted into the store.
      *
      * @param key key to be inserted
-     * @param value value to inserted
+     * @param keylen size of key
+     * @param value value to be inserted
+     * @param valuelen size of value
      * @return true for success, false for failure
      */
-    bool put(const char *key, const char *value);
+    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen);
 
     /**
      * return number of <key, value, timestamp> tuples in memory

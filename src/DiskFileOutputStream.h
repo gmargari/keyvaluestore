@@ -25,7 +25,7 @@ public:
 
     // inherited from OutputStream
     void reset();
-    bool append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp);
+    bool append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
     void close();
 
     // Undefined methods (just remove Weffc++ warning)

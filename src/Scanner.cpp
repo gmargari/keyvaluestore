@@ -31,13 +31,15 @@ Scanner::~Scanner()
 int Scanner::point_get(const char *key)
 {
     const char *k, *v;
+    uint32_t klen, vlen, keylen, valuelen;
     char *value;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
 
-    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
+//    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
 //     // first check memstore, since it has the most recent values
-//     if (m_kvstore->m_memstore->get(key, &value, &t)) {
+//     keylen = strlen(key);
+//     if (m_kvstore->m_memstore->get(key, keylen, &value, &valuelen, &t)) {
 //         free(value); // it has been copied
 //         return 1;
 //     }
@@ -48,7 +50,7 @@ int Scanner::point_get(const char *key)
     for (int i = 0; i < (int)m_kvstore->m_diskstore->m_disk_files.size(); i++) {
         disk_istream = new DiskFileInputStream(m_kvstore->m_diskstore->m_disk_files[i], MAX_INDEX_DIST);
         disk_istream->set_key_range(key, key, true, true);
-        if (disk_istream->read(&k, &v, &t)) {
+        if (disk_istream->read(&k, &klen, &v, &vlen, &t)) {
             pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);
             delete disk_istream;
             return 1;
@@ -74,6 +76,7 @@ int Scanner::range_get(const char *start_key, const char *end_key)
 int Scanner::range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
 {
     const char *k, *v;
+    uint32_t klen, vlen;
     uint64_t t;
     int numkeys = 0, diskfiles;
     PriorityInputStream *pistream;
@@ -92,7 +95,7 @@ int Scanner::range_get(const char *start_key, const char *end_key, bool start_in
 
     // get all keys between 'start_key' and 'end_key'
     pistream->set_key_range(start_key, end_key, start_incl, end_incl);
-    while (pistream->read(&k, &v, &t)) {
+    while (pistream->read(&k, &klen, &v, &vlen, &t)) {
         numkeys++;
     }
     pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);

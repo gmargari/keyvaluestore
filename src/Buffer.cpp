@@ -188,15 +188,15 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
 #if DBGLVL > 1
     {
         const char *kkk, *vvv;
+        uint32_t kkklen, vvvlen;
         uint64_t ts;
-        uint32_t lll, tmpused = m_bytes_in_buf;
+        uint32_t tmpused = m_bytes_in_buf;
         m_bytes_used = m_bytes_in_buf - *len;
-        assert(deserialize(&kkk, &vvv, &ts, &lll, false));
+        assert(deserialize(&kkk, &kkklen, &vvv, &vvvlen, &ts, false));
         m_bytes_used = tmpused;
         assert(strcmp(kkk, key)==0);
         assert(strcmp(vvv, value)==0);
         assert(ts == timestamp);
-        assert(lll == *len);
     }
 #endif
 
@@ -206,12 +206,13 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
 /*============================================================================
  *                                deserialize
  *============================================================================*/
-bool Buffer::deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue)
+bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue)
 {
-    uint32_t bytes_used = 0, keylen, valuelen;
+    uint32_t bytes_used = 0;
     char *tmpkey, *tmpvalue;
     const char *ptr;
     uint32_t buflen;
+    uint32_t len;
 
     ptr = m_buf + m_bytes_used;
     buflen = m_bytes_in_buf - m_bytes_used;
@@ -220,44 +221,44 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
         return false;
     }
 
-    DECODE_NUM(ptr, keylen, bytes_used);
-    DECODE_NUM(ptr, valuelen, bytes_used);
+    DECODE_NUM(ptr, *keylen, bytes_used);
+    DECODE_NUM(ptr, *valuelen, bytes_used);
     DECODE_NUM(ptr, *timestamp, bytes_used);
 
-    if (buflen < serialize_len(keylen, valuelen, *timestamp)) {
+    if (buflen < serialize_len(*keylen, *valuelen, *timestamp)) {
         return false;
     }
 
     if (copy_keyvalue) {
-        tmpkey = (char *)malloc(keylen + 1);
-        tmpvalue = (char *)malloc(valuelen + 1);
+        tmpkey = (char *)malloc(*keylen + 1);
+        tmpvalue = (char *)malloc(*valuelen + 1);
         assert(tmpkey && tmpvalue);
-        DECODE_STR(ptr, tmpkey, keylen + 1, bytes_used);
-        DECODE_STR(ptr, tmpvalue, valuelen + 1, bytes_used);
+        DECODE_STR(ptr, tmpkey, *keylen + 1, bytes_used);
+        DECODE_STR(ptr, tmpvalue, *valuelen + 1, bytes_used);
     } else {
         assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) == bytes_used);
         tmpkey = (char *)ptr + sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp);
-        tmpvalue = tmpkey + keylen + 1;
+        tmpvalue = tmpkey + *keylen + 1;
     }
 
-    *len = serialize_len(keylen, valuelen, *timestamp);
+    len = serialize_len(*keylen, *valuelen, *timestamp);
     *key = tmpkey;
     *value = tmpvalue;
-    m_bytes_used += *len;
+    m_bytes_used += len;
 
     assert(*key);
     assert(*value);
-    assert(keylen <= MAX_KVTSIZE);
-    assert(valuelen <= MAX_KVTSIZE);
-    assert(*key + keylen < ptr + buflen);
-    assert((*key)[keylen] == '\0');
-    assert(*value + valuelen < ptr + buflen);
-    assert((*value)[valuelen] == '\0');
-    assert(strlen(*key) == keylen);
-    assert(strlen(*value) == valuelen);
+    assert(*keylen <= MAX_KVTSIZE);
+    assert(*valuelen <= MAX_KVTSIZE);
+    assert(*key + *keylen < ptr + buflen);
+    assert((*key)[*keylen] == '\0');
+    assert(*value + *valuelen < ptr + buflen);
+    assert((*value)[*valuelen] == '\0');
+    assert(strlen(*key) == *keylen);
+    assert(strlen(*value) == *valuelen);
     if (DBGLVL > 1) {
-        assert(str_is_alnum(*key, strlen(*key)));
-        assert(str_is_alnum(*value, strlen(*value)));
+        assert(str_is_alnum(*key, *keylen));
+        assert(str_is_alnum(*value, *valuelen));
     }
 
     return true;
@@ -266,9 +267,9 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
 /*============================================================================
  *                             undo_deserialize
  *============================================================================*/
-void Buffer::undo_deserialize(const char *key, const char *value, uint64_t timestamp)
+void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
-    m_bytes_used -= serialize_len(strlen(key), strlen(value), timestamp);
+    m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
 }
 
 /*============================================================================

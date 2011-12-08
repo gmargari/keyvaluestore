@@ -47,7 +47,7 @@ uint64_t MemStore::get_maxsize()
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
+bool MemStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     bool ret;
     Map *map = get_map(key);
@@ -55,7 +55,7 @@ bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
     m_num_keys -= map->get_num_keys();
     m_size -= map->get_size();
     m_size_when_serialized -= map->get_size_when_serialized();
-    ret = map->put((char *)key, value, timestamp);
+    ret = map->put((char *)key, keylen, value, valuelen, timestamp);
     m_num_keys += map->get_num_keys();
     m_size += map->get_size();
     m_size_when_serialized += map->get_size_when_serialized();
@@ -66,11 +66,11 @@ bool MemStore::put(const char *key, const char *value, uint64_t timestamp)
 /*============================================================================
  *                                   get
  *============================================================================*/
-bool MemStore::get(const char *key, char **value, uint64_t *timestamp)
+bool MemStore::get(const char *key, uint32_t keylen, char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     const char *constvalue;
 
-    if (get_map(key)->get(key, &constvalue, timestamp)) {
+    if (get_map(key)->get(key, keylen, &constvalue, valuelen, timestamp)) {
         *value = strdup(constvalue); // copy value
         return true;
     } else {
@@ -105,9 +105,9 @@ uint64_t MemStore::get_size_when_serialized()
 /*============================================================================
  *                           will_reach_size_limit
  *============================================================================*/
-bool MemStore::will_reach_size_limit(const char *key, const char *value, uint64_t timestamp)
+bool MemStore::will_reach_size_limit(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
-    return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
+    return (m_size + Map::kv_size(key, keylen, value, valuelen, timestamp) > m_maxsize);
 }
 
 /*============================================================================

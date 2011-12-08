@@ -20,7 +20,7 @@ public:
      *
      * @return false if could not append tuple to stream. else, true.
      */
-    virtual bool append(const char *key, size_t keylen, const char *value, size_t valuelen, uint64_t timestamp) = 0;
+    virtual bool append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) = 0;
 
     /**
      * close stream (e.g. flush to disk pending writes etc)

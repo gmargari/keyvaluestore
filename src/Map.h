@@ -29,21 +29,25 @@ public:
      * value are created and inserted into map.
      *
      * @param key key to be inserted
+     * @param keylen size of key
      * @param value value to be inserted
+     * @param valuelen size of value
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, const char *value, uint64_t timestamp);
+    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
 
     /**
      * get the value for a specific key
      *
      * @param key (in) key to be searched
+     * @param keylen (in) size of key
      * @param value (out) value corresponding to the searched key
+     * @param valuelen (out) size of value
      * @param timestamp (out) timestamp of insertion
      * @return true if key was found, false if not
      */
-    bool get(const char *key, const char **value, uint64_t *timestamp);
+    bool get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
 
     /**
      * return number of <key, value, timestamp> tuples in map
@@ -69,7 +73,7 @@ public:
     /**
      * size of KV when serialized and added to map
      */
-    static size_t kv_size(const char *key, const char *value, uint64_t timestamp);
+    static uint32_t kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
 
     /**
      * clear all elements of map

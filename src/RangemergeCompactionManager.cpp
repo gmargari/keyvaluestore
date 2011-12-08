@@ -336,6 +336,8 @@ void RangemergeCompactionManager::add_maps_to_memstore()
     for (int i = 1; i < (int)ranges.size(); i++) { // i = 1: MemStore constructor has inserted map for key ""
         m_memstore->add_map(ranges[i]->m_first);
     }
+    delete_ranges(ranges);
+
     sanity_check();
 }
 
@@ -352,7 +354,7 @@ int RangemergeCompactionManager::sanity_check()
 
     create_ranges(ranges);
 
-    assert(m_memstore->get_num_maps() == ranges.size());
+    assert(m_memstore->get_num_maps() == (int)ranges.size());
     for (unsigned int i = 0; i < ranges.size(); i++) {
         assert(m_memstore->get_map(i) == m_memstore->get_map(ranges[i]->m_first));
     }

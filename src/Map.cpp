@@ -31,12 +31,12 @@ Map::~Map()
 /*============================================================================
  *                                    put
  *============================================================================*/
-bool Map::put(const char *key, const char *value, uint64_t timestamp)
+bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
     const char *cpkey;
-    char *cpvalue, *old_value;
+    char *cpvalue, *old_value, *p;
     uint64_t old_timestamp;
-    size_t keylen, valuelen, old_valuelen;
+    uint32_t old_valuelen, len;
     KVTPair new_pair;
     KVTMap::iterator iter;
 
@@ -44,8 +44,6 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
     assert(key);
     assert(value);
 
-    keylen = strlen(key);
-    valuelen = strlen(value);
     if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
         printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVTSIZE);
         assert(0);
@@ -65,11 +63,17 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
         free(old_value);
         cpkey = key;
     } else {
-        cpkey = strdup(key);
+        len = strlen(key);
+        p = (char *)malloc(len + 1);
+        memcpy(p, key, len + 1);
+        cpkey = p;
         m_keys++;
     }
 
-    cpvalue = strdup(value);
+    len = strlen(value);
+    p = (char *)malloc(len + 1);
+    memcpy(p, value, len + 1);
+    cpvalue = p;
     assert(cpkey);
     assert(cpvalue);
 
@@ -88,7 +92,7 @@ bool Map::put(const char *key, const char *value, uint64_t timestamp)
 /*============================================================================
  *                                    get
  *============================================================================*/
-bool Map::get(const char *key, const char **value, uint64_t *timestamp)
+bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
 {
     KVTMap::iterator iter;
 
@@ -97,10 +101,12 @@ bool Map::get(const char *key, const char **value, uint64_t *timestamp)
 
     if ((iter = m_map.find(key)) != m_map.end()) {
         *value = iter->second.first;
+        *valuelen = strlen(iter->second.first);
         *timestamp = iter->second.second;
         return true;
     } else {
         *value = NULL;
+        *valuelen = 0;
         *timestamp = 0;
         return false;
     }
@@ -141,9 +147,9 @@ pair<uint64_t, uint64_t> Map::get_sizes()
 /*============================================================================
  *                                  kv_size
  *============================================================================*/
-size_t Map::kv_size(const char *key, const char *value, uint64_t timestamp)
+uint32_t Map::kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
 {
-    return strlen(key) + 1 + sizeof(KVTPair) + strlen(value) + 1;
+    return (keylen + 1 + sizeof(KVTPair) + valuelen + 1);
 }
 
 /*============================================================================
@@ -153,7 +159,7 @@ void Map::clear()
 {
     char *key, *value;
     uint64_t timestamp;
-    size_t keylen, valuelen;
+    uint32_t keylen, valuelen;
 #if DBGLVL > 0
     uint64_t dbg_mem_before, dbg_bytes_cleaned = 0;
 #endif
@@ -251,7 +257,7 @@ int Map::sanity_check()
     uint64_t map_size = 0, map_size_serialized = 0;
     const char *key, *value;
     uint64_t timestamp;
-    size_t keylen, valuelen;
+    uint32_t keylen, valuelen;
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first;

@@ -30,7 +30,7 @@ public:
     // inherited from InputStream
     void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
     void set_key_range(const char *start_key, const char *end_key);
-    bool read(const char **key, const char **value, uint64_t *timestamp);
+    bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     DiskFileInputStream(const DiskFileInputStream&);
