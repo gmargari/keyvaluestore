@@ -34,7 +34,6 @@ int main(int argc, char **argv)
     }
 
     pistream = new PriorityInputStream(istreams);
-    pistream->set_key_range(NULL, NULL);
     prev_key[0] = '\0';
     while (pistream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {

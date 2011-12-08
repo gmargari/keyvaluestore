@@ -81,7 +81,6 @@ void CassandraCompactionManager::flush_bytes()
         istreams_to_merge.clear();
         for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
             istream = new DiskFileInputStream(r_disk_files[i], MERGE_BUFSIZE);
-            istream->set_key_range(NULL, NULL);
             istreams_to_merge.push_back(istream);
         }
 

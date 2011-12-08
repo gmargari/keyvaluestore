@@ -18,6 +18,7 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
       m_end_incl(true)
 {
     m_buf = new Buffer(bufsize);
+    set_key_range(NULL, NULL);
 }
 
 /*============================================================================

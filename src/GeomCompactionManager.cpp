@@ -171,7 +171,6 @@ void GeomCompactionManager::flush_bytes()
 
     for (int i = 0; i < count; i++) {
         istream = new DiskFileInputStream(r_disk_files[i], MERGE_BUFSIZE);
-        istream->set_key_range(NULL, NULL);
         istreams_to_merge.push_back(istream);
     }
 
@@ -180,7 +179,6 @@ void GeomCompactionManager::flush_bytes()
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
     memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
-    memstore_file_istream->set_key_range(NULL, NULL);
     istreams_to_merge.push_back(memstore_file_istream);
     memstore_clear();
 
