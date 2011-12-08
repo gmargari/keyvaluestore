@@ -206,12 +206,13 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
 /*============================================================================
  *                                deserialize
  *============================================================================*/
-bool Buffer::deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue)
+bool Buffer::deserialize(const char **key, const char **value, uint64_t *timestamp, bool copy_keyvalue)
 {
     uint32_t bytes_used = 0, keylen, valuelen;
     char *tmpkey, *tmpvalue;
     const char *ptr;
     uint32_t buflen;
+    uint32_t len;
 
     ptr = m_buf + m_bytes_used;
     buflen = m_bytes_in_buf - m_bytes_used;
@@ -240,10 +241,10 @@ bool Buffer::deserialize(const char **key, const char **value, uint64_t *timesta
         tmpvalue = tmpkey + keylen + 1;
     }
 
-    *len = serialize_len(keylen, valuelen, *timestamp);
+    len = serialize_len(keylen, valuelen, *timestamp);
     *key = tmpkey;
     *value = tmpvalue;
-    m_bytes_used += *len;
+    m_bytes_used += len;
 
     assert(*key);
     assert(*value);

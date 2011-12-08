@@ -97,7 +97,7 @@ public:
      * strings pointed by 'key' and 'value' are valid only until next call of
      * function)
      */
-    bool deserialize(const char **key, const char **value, uint64_t *timestamp, uint32_t *len, bool copy_keyvalue);
+    bool deserialize(const char **key, const char **value, uint64_t *timestamp, bool copy_keyvalue);
 
     /**
      * undo deserialization previously done (rational similar to ungetc().
