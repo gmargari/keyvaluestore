@@ -23,19 +23,21 @@ my_print() {
 # For each input file (same method with different parameter values) create a bar chart
 #==========================================================================================
 
-# files=(  'rangemerge-blocksize.totalstats' 'rangemerge-flushmem.totalstats' 'rangemerge-memsize.totalstats' 'immediate-memsize.totalstats' \
 files=(  'rangemerge-memsize.totalstats' 'immediate-memsize.totalstats' 'nomerge-memsize.totalstats' \
          'geometric-p-4-memsize.totalstats' 'geometric-p-3-memsize.totalstats' 'geometric-p-2-memsize.totalstats' \
          'geometric-r-4-memsize.totalstats' 'geometric-r-3-memsize.totalstats' 'geometric-r-2-memsize.totalstats' \
          'cassandra-l-4-memsize.totalstats' 'cassandra-l-3-memsize.totalstats' 'cassandra-l-2-memsize.totalstats' \
-         'allmethods.totalstats' 'allmethods-no-imm-no-rngmrg.totalstats' )
+         'allmethods.totalstats' 'allmethods-no-imm-no-rngmrg.totalstats'
+         'rangemerge-blocksize.totalstats' 'rangemerge-flushmem.totalstats'  \
+         )
 
-#xlabels=( 'Block size (MB)' 'Flushmem size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
 xlabels=( 'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
-         'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
-         'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
-         'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
-         ' ' ' ' )
+          'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
+          'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
+          'Memory size (MB)' 'Memory size (MB)' 'Memory size (MB)' \
+          ' ' ' ' \
+          'Block size (MB)' 'Flushmem size (MB)' \
+         )
 
 # check arrays 'files' and 'xlabels' have the same number of elements
 if [ ${#files[*]} -ne ${#xlabels[*]} ]; then
@@ -99,7 +101,6 @@ gnuplot << EOF
     #set ylabel 'Insertion time (s)'
     plot '${inputfile_with_linenumbers}' using 1:4 notitle with boxes fill pattern 3 lc rgb 'black'
 
-
 EOF
 #==========================[ gnuplot embedded script ]============================
 
@@ -133,7 +134,7 @@ for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
     inputfile=${statsfolder}/$file
     newymax=`cat $inputfile | awk '{if($15>max) max=$15} END{print max}'`
     if [ "$newymax" -gt "$ymaxall" ]; then
-	ymaxall=$newymax
+    ymaxall=$newymax
     fi
 done
 

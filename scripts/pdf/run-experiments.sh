@@ -175,16 +175,6 @@ def_memsize_in_mb=1024
 # You can change these
 #---------------------------------
 
-
-
-memsizes=( "2048" )
-echo -e "\e[1;31m [ $0: nomerge memsize ] \e[m"
-nomerge_memsize
-exit
-
-
-
-
 echo -e "\e[1;31m [ $0: all methods ] \e[m"
 all_methods
 
@@ -206,9 +196,8 @@ immediate_memsize
 echo -e "\e[1;31m [ $0: cassandra memsize ] \e[m"
 cassandra_memsize
 
-#echo -e "\e[1;31m [ $0: rangemerge blocksize ] \e[m"
-#rangemerge_blocksize
+echo -e "\e[1;31m [ $0: rangemerge blocksize ] \e[m"
+rangemerge_blocksize
 
-#echo -e "\e[1;31m [ $0: rangemerge flushmem ] \e[m"
-#rangemerge_flushmem
-
+echo -e "\e[1;31m [ $0: rangemerge flushmem ] \e[m"
+rangemerge_flushmem

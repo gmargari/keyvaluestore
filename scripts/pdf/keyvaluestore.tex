@@ -67,6 +67,7 @@ memory \textbf{10GB} of data, in order to simulate a datastore of 1GB memory
 to which we insert 100GB. Data is inserted as key-value pairs where key is
 100B and value is 1KB.
 
+\clearpage
 
 %=============================================================================================================
 % Fragmentation
@@ -100,6 +101,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
+\clearpage
 
 %=============================================================================================================
 % Data inserted (GB)
@@ -137,7 +139,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-
+\clearpage
 
 %=============================================================================================================
 % I/O time
@@ -175,7 +177,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-
+\clearpage
 
 %=============================================================================================================
 % Compaction time
@@ -213,7 +215,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-
+\clearpage
 
 %=============================================================================================================
 % Insertion time
@@ -251,7 +253,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-
+\clearpage
 
 %=============================================================================================================
 % Memory size - per method
@@ -343,6 +345,8 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
+\clearpage
+
 %=============================================================================================================
 % Memory size - all methods together
 %=============================================================================================================
@@ -402,5 +406,34 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
     \caption{Memory size vs. Insertion time (s)}
   \end{center}
 \end{figure}
+
+\clearpage
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Rangemerge - Blocksize\end{huge}
+
+    \subfigure[GB transferred]  {\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]  		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.compacttime.eps}}
+    \subfigure[Total time] 		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Blocksize}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Rangemerge - Flushmem\end{huge}
+
+    \subfigure[GB transferred]  {\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]  		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.compacttime.eps}}
+    \subfigure[Total time] 		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Flushmem}
+  \end{center}
+\end{figure}
+
 
 \end{document}
