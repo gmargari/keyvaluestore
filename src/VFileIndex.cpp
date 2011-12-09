@@ -26,7 +26,7 @@ VFileIndex::~VFileIndex()
 /*============================================================================
  *                                   add
  *============================================================================*/
-void VFileIndex::add(const char *key, off_t offset)
+void VFileIndex::add(const char *key, uint32_t keylen, off_t offset)
 {
     char *cpkey;
     assert(sanity_check());
@@ -185,7 +185,7 @@ void VFileIndex::load_from_disk(int fd)
         read(fd, key, len);
         key[len] = '\0';
         read(fd, &offset, sizeof(offset));
-        add(key, offset);
+        add(key, len, offset);
     }
 
     // read filesize & number of stored keys

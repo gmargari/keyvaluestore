@@ -28,9 +28,9 @@ public:
     ~VFileIndex();
 
     /**
-     * add (append) a <term, offset> entry in index
+     * add (append) a <key, offset> entry in index
      */
-    void add(const char *term, off_t offset);
+    void add(const char *key, uint32_t keylen, off_t offset);
 
     /**
      * set the vfile disk size (used to determine where the last entry ends,
