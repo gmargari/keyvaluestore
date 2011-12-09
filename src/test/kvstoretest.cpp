@@ -115,7 +115,7 @@ int main()
         if (UNIQUE_KEYS) {
             sprintf(key + strlen(key), "%Ld", i);
         }
-        if (!scanner->point_get(key)) {
+        if (!scanner->point_get(key, strlen(key))) {
             cout << i << ") Key [" << key << "] was not found!" << endl;
             exit(EXIT_FAILURE);
         }

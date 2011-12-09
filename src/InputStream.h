@@ -22,13 +22,13 @@ public:
      * (exclusive), i.e. all keys K where: start_key <= K < end_key.
      * 'start_key' and 'end_key' are not copied.
      */
-    virtual void set_key_range(const char *start_key, const char *end_key) = 0;
+    virtual void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) = 0;
 
     /**
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    virtual void set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl) = 0;
+    virtual void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) = 0;
 
     /**
      * get next <key, value, timestamp> tuple from stream

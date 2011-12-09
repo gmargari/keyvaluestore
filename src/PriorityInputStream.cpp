@@ -14,7 +14,8 @@ static const int SID_NOT_INITIALIZED = INT_MAX;
  *============================================================================*/
 PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
     : m_pqueue(), m_istreams(istreams), m_elements(), m_last_sid(SID_NOT_INITIALIZED),
-      m_start_key(NULL), m_end_key(NULL), m_start_incl(true), m_end_incl(true)
+      m_start_key(NULL), m_start_keylen(0), m_end_key(NULL), m_end_keylen(0),
+      m_start_incl(true), m_end_incl(true)
 {
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
@@ -35,15 +36,17 @@ PriorityInputStream::~PriorityInputStream()
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, const char *end_key, bool start_incl, bool end_incl)
+void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl)
 {
     m_start_key = start_key;
+    m_start_keylen = start_keylen;
     m_end_key = end_key;
+    m_end_keylen = end_keylen;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
+        m_istreams[i]->set_key_range(m_start_key, m_start_keylen, m_end_key, m_end_keylen, m_start_incl, m_end_incl);
     }
 
     reset();
@@ -52,9 +55,9 @@ void PriorityInputStream::set_key_range(const char *start_key, const char *end_k
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, const char *end_key)
+void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen)
 {
-    set_key_range(start_key, end_key, true, false);
+    set_key_range(start_key, start_keylen, end_key, end_keylen, true, false);
 }
 
 /*============================================================================

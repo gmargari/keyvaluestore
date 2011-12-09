@@ -736,10 +736,10 @@ void *get_routine(void *args)
         //--------------------------------------------------------------
         // execute range get()
         //--------------------------------------------------------------
-        scanner->point_get(key);
+        scanner->point_get(key, strlen(key));
 //         strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
 //         end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
-//         scanner->range_get(key, end_key);
+//         scanner->range_get(key, strlen(key), end_key, strlen(end_key));
     }
 
     if (DBGLVL > 0) {

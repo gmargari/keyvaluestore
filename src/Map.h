@@ -103,7 +103,7 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    KVTMap::iterator start_iter(const char *key, bool key_incl);
+    KVTMap::iterator start_iter(const char *key, uint32_t keylen, bool key_incl);
 
     /**
      * return an iterator which points at the last element which equal or
@@ -114,7 +114,7 @@ protected:
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    KVTMap::iterator end_iter(const char *key, bool key_incl);
+    KVTMap::iterator end_iter(const char *key, uint32_t keylen, bool key_incl);
 
     KVTMap      m_map;
     uint64_t    m_size;            // size of map

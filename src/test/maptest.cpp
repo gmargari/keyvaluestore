@@ -130,10 +130,10 @@ int main()
     istream3 = new MapInputStream(map);
     istream4 = new MapInputStream(map);
 
-    istream1->set_key_range(NULL, key1);
-    istream2->set_key_range(key1, key2);
-    istream3->set_key_range(key2, key3);
-    istream4->set_key_range(key3, NULL);
+    istream1->set_key_range(NULL, 0,            key1, strlen(key1));
+    istream2->set_key_range(key1, strlen(key1), key2, strlen(key2));
+    istream3->set_key_range(key2, strlen(key2), key3, strlen(key3));
+    istream4->set_key_range(key3, strlen(key3), NULL, 0);
     istreams.push_back(istream1);
     istreams.push_back(istream2);
     istreams.push_back(istream3);

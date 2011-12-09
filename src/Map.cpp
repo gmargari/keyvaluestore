@@ -198,7 +198,7 @@ void Map::clear()
 /*============================================================================
  *                                 start_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::start_iter(const char *key, bool key_incl)
+Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key_incl)
 {
     KVTMap::iterator iter;
 
@@ -219,7 +219,7 @@ Map::KVTMap::iterator Map::start_iter(const char *key, bool key_incl)
 /*============================================================================
  *                                  end_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::end_iter(const char *key, bool key_incl)
+Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_incl)
 {
     KVTMap::iterator iter;
 

@@ -24,7 +24,7 @@ public:
      *
      * @return 1 if key exists, else 0
      */
-    int point_get(const char *key);
+    int point_get(const char *key, uint32_t keylen);
 
     /**
      * get all tuples with keys between 'start_key' (inclusive) and
@@ -33,13 +33,13 @@ public:
      *
      * @return number of keys read
      */
-    int range_get(const char *start_key, const char *end_key);
+    int range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen);
 
     /**
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    int range_get(const char *start_key, const char *end_key, bool start_incl, bool end_incl);
+    int range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl);
 
     // Undefined methods (just remove Weffc++ warning)
     Scanner(const Scanner&);
