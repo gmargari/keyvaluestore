@@ -26,7 +26,6 @@ add_library (Statistics                 Statistics.cpp)
 add_library (Scanner                    Scanner.cpp)
 add_library (Buffer                     Buffer.cpp)
 add_library (RequestThrottle            RequestThrottle.cpp)
-add_library (PoolAllocator              PoolAllocator.cpp)
 
 target_link_libraries (VFile                    Statistics)
 target_link_libraries (Buffer                   VFile)
