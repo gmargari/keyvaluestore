@@ -7,8 +7,8 @@
  *                                  Range
  *============================================================================*/
 Range::Range()
-    : m_first(NULL), m_last(NULL), m_memsize(0), m_memsize_serialized(0),
-      m_disksize(0), m_block_num(NO_DISK_BLOCK)
+    : m_first(NULL), m_firstlen(0), m_last(NULL), m_lastlen(0), m_memsize(0),
+      m_memsize_serialized(0), m_disksize(0), m_block_num(NO_DISK_BLOCK)
 {
 
 }

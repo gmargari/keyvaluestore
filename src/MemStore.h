@@ -95,7 +95,7 @@ public:
      * this function is used from rangemerge c.m., where we have multiple maps in
      * memstore, one per range. NOTE: caller must delete inputstream when done with it.
      */
-    MapInputStream *new_map_inputstream(const char *key);
+    MapInputStream *new_map_inputstream(const char *key, uint32_t keylen);
 
     /**
      * when using rangemerge c.m. memstore consists of multiple maps, one for
@@ -103,11 +103,11 @@ public:
      * find the map responsible for storing/retrieving a specific key, and
      * clear the map that contains a key
      */
-    void add_map(const char *key);
+    void add_map(const char *key, uint32_t keylen);
     int  get_num_maps();
-    Map *get_map(const char *key);
+    Map *get_map(const char *key, uint32_t keylen);
     Map *get_map(int i);
-    void clear_map(const char *key);
+    void clear_map(const char *key, uint32_t keylen);
     void clear_map(int idx);
 
 protected:
@@ -116,7 +116,7 @@ protected:
      * used from add_map()/get_map()/clear_map() functions above
      * @return the index in vector 'm_map' of the map responsible for 'key'
      */
-    int idx_of_map(const char *key);
+    int idx_of_map(const char *key, uint32_t keylen);
 
     /**
      * used from clear_map() functions above

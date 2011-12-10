@@ -54,7 +54,7 @@ public:
     /**
      * return first and last term stored in disk file
      */
-    void get_first_last_term(const char **first, const char **last);
+    void get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen);
 
     /**
      * name of this disk file
@@ -104,7 +104,7 @@ public:
      * @param start_off (out) start offset on disk file
      * @param end_off (out) end offset on disk file
      */
-    bool search(const char *term, off_t *start_off, off_t *end_off);
+    bool search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off);
 
     /**
      * set the index for this diskfile

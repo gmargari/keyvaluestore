@@ -21,8 +21,8 @@ int main()
     global_stats_init(); // avoid assertion error...
 
     //memstore->add_map((char *)k1); this map is added by default in memstore's constructor
-    memstore->add_map((char *)k2);
-    memstore->add_map((char *)k3);
+    memstore->add_map((char *)k2, strlen(k2));
+    memstore->add_map((char *)k3, strlen(k3));
 
     memstore->put("a1", 2, "x", 1, t++); // belongs to map 0
     memstore->put("a2", 2, "x", 1, t++); // belongs to map 0
@@ -47,24 +47,24 @@ int main()
     memstore->put("f2", 2, "y", 1, t++); // belongs to map 0 (replace)
     memstore->put("f3", 2, "y", 1, t++); // belongs to map 1 (replace)
 
-    map1_num = memstore->get_map(k1)->get_num_keys();
-    map2_num = memstore->get_map(k2)->get_num_keys();
-    map3_num = memstore->get_map(k3)->get_num_keys();
+    map1_num = memstore->get_map(k1, strlen(k1))->get_num_keys();
+    map2_num = memstore->get_map(k2, strlen(k2))->get_num_keys();
+    map3_num = memstore->get_map(k3, strlen(k3))->get_num_keys();
 
     if (map1_num != 6 || map2_num != 5 || map3_num != 3) {
         cout << "num of keys per map should be <6, 5, 3>, but is <" << map1_num << ", " << map2_num << ", " << map3_num << ">" << endl;
         return EXIT_FAILURE;
     }
 
-    memstore->clear_map(k3);       // clear map 2
+    memstore->clear_map(k3, strlen(k3)); // clear map 2
     memstore->put("a3", 2, "y", 1, t++); // belongs to map 0
     memstore->put("z3", 2, "y", 1, t++); // belongs to map 2
     memstore->put("z4", 2, "y", 1, t++); // belongs to map 2
     memstore->put("k3", 2, "y", 1, t++); // belongs to map 1
 
-    map1_num = memstore->get_map(k1)->get_num_keys();
-    map2_num = memstore->get_map(k2)->get_num_keys();
-    map3_num = memstore->get_map(k3)->get_num_keys();
+    map1_num = memstore->get_map(k1, strlen(k1))->get_num_keys();
+    map2_num = memstore->get_map(k2, strlen(k2))->get_num_keys();
+    map3_num = memstore->get_map(k3, strlen(k3))->get_num_keys();
 
     if (map1_num != 7 || map2_num != 6 || map3_num != 2) {
         cout << "num of keys per map should be <7, 6, 2>, but is <" << map1_num << ", " << map2_num << ", " << map3_num << ">" << endl;

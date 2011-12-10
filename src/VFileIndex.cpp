@@ -49,20 +49,22 @@ void VFileIndex::set_vfilesize(off_t size)
 /*============================================================================
  *                            get_first_last_term
  *============================================================================*/
-void VFileIndex::get_first_last_term(const char **first, const char **last)
+void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen)
 {
     TermOffsetMap::iterator iter;
 
-    (*first) = (m_map.begin())->first;
+    *first = (m_map.begin())->first;
+    *firstlen = strlen(*first);
     iter = m_map.end();
     --iter;
-    (*last) = iter->first;
+    *last = iter->first;
+    *lastlen = strlen(iter->first);
 }
 
 /*============================================================================
  *                                  search
  *============================================================================*/
-bool VFileIndex::search(const char *key, off_t *start_off, off_t *end_off)
+bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off_t *end_off)
 {
     TermOffsetMap::iterator iter;
 

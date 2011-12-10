@@ -44,7 +44,9 @@ public:
     Range& operator=(const Range&);
 
     const char *m_first;              // terms stored on disk block belong to
-    const char *m_last;               // range [m_first, m_last)
+    uint32_t    m_firstlen;           // range [m_first, m_last)
+    const char *m_last;
+    uint32_t    m_lastlen;
     uint64_t    m_memsize;            // byte size of memory tuples
     uint64_t    m_memsize_serialized; // byte size of serialized memory tuples
     uint64_t    m_disksize;           // size of tuples stored on disk block
