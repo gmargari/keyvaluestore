@@ -37,6 +37,7 @@ void  *get_routine(void *args);
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, uint32_t *seed);
 int    zipf_r(uint32_t *seed);
+int    numdigits(uint64_t num);
 
 //------------------------------------------------------------------------------
 // default values
@@ -652,19 +653,25 @@ void *put_routine(void *args)
             if (scanf("%s %s", key, value) != 2) {
                 break;
             }
+            keylen = strlen(key);
+            valuelen = strlen(value);
         } else {
             //----------------------------------------------------------------------
             // create a random key and a random value
             //----------------------------------------------------------------------
             if (zipf_keys) {
                 zipfstr_r(key, keysize, &kseed);
+                keylen = keysize;
             } else {
                 randstr_r(key, keysize, &kseed);
+                keylen = keysize;
             }
             if (uflag) {
-                sprintf(key, "%s.%Ld", key, i); // make unique
+                sprintf(key, "%s.%Ld", key, i); // make unique (TODO: undefined behaviour!)
+                keylen += 1 + numdigits(i);
             }
             randstr_r(value, valuesize, &vseed);
+            valuelen = valuesize;
         }
 
         //----------------------------------------------------------------------
@@ -678,8 +685,6 @@ void *put_routine(void *args)
         //----------------------------------------------------------------------
         // insert <key, value> into store
         //----------------------------------------------------------------------
-        keylen = strlen(key); // make more efficient, e.g. keylen = keysize + sizeof(str(i) + 1) (+1 of '.' in sprintf above)
-        valuelen = strlen(value); // make more efficient
         kvstore->put(key, keylen, value, valuelen);
         bytes_inserted += keylen + valuelen;
     }
@@ -703,10 +708,10 @@ void *get_routine(void *args)
     struct thread_args *targs = (struct thread_args *)args;
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys;
-    uint32_t keysize = targs->keysize;
+    uint32_t keysize = targs->keysize, keylen;
     uint32_t kseed = targs->tid; // kseed = getpid() + time(NULL);
     char     key[MAX_KVTSIZE];
-    int      i = 0;
+    int      i = -1;
     Scanner *scanner = new Scanner(targs->kvstore);
     RequestThrottle throttler(targs->get_thrput);
 
@@ -726,20 +731,23 @@ void *get_routine(void *args)
         //--------------------------------------------------------------
         if (zipf_keys) {
             zipfstr_r(key, keysize, &kseed);
+            keylen = keysize;
         } else {
             randstr_r(key, keysize, &kseed);
+            keylen = keysize;
         }
         if (uflag) {
-            sprintf(key, "%s#%d", key, i++); // make unique
+            sprintf(key, "%s#%d", key, ++i); // make unique (TODO: undefined behaviour!)
+            keylen += 1 + numdigits(i);
         }
 
         //--------------------------------------------------------------
         // execute range get()
         //--------------------------------------------------------------
-        scanner->point_get(key, strlen(key));
+        scanner->point_get(key, keylen);
 //         strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
 //         end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
-//         scanner->range_get(key, strlen(key), end_key, strlen(end_key));
+//         scanner->range_get(key, keylen, end_key, keylen);
     }
 
     if (DBGLVL > 0) {
@@ -861,4 +869,29 @@ int zipf_r(uint32_t *seed)
     assert((zipf_value >= 1) && (zipf_value <= zipf_n));
 
     return(zipf_value);
+}
+
+/*============================================================================
+ *                             numdigits
+ *============================================================================*/
+int numdigits(uint64_t num)
+{
+    int digits = 0;
+
+    if (num < 10) return 1;
+    if (num < 100) return 2;
+    if (num < 1000) return 3;
+    if (num < 10000) return 4;
+    if (num < 100000) return 5;
+    if (num < 1000000) return 6;
+    if (num < 10000000) return 7;
+    if (num < 100000000) return 8;
+    if (num < 1000000000) return 9;
+
+    do {
+        num /= 10;
+        ++digits;
+    } while (num > 0);
+
+    return digits;
 }

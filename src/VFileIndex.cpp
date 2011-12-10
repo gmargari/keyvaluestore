@@ -54,7 +54,7 @@ void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, con
 {
     TermOffsetMap::iterator iter;
 
-    *first = (m_map.begin())->first;
+    *first = m_map.begin()->first;
     *firstlen = strlen(*first);
     iter = m_map.end();
     --iter;

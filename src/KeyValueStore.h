@@ -2,7 +2,6 @@
 #define KEYVALUESTORE_H
 
 #include <stdint.h>
-#include <string.h>
 
 class MemStore;
 class DiskStore;
