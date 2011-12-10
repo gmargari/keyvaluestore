@@ -63,8 +63,8 @@ bool MapInputStream::read(const char **key, uint32_t *keylen, const char **value
         *timestamp = 0;
         return false;
     } else {
-        *key = m_iter->first;
-        *keylen = strlen(m_iter->first);
+        *key = m_iter->first.data();
+        *keylen = m_iter->first.size();
         *value = m_iter->second.first.data();
         *valuelen = m_iter->second.first.size();
         *timestamp = m_iter->second.second;

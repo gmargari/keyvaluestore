@@ -82,15 +82,15 @@ public:
      */
     void clear();
 
-    struct cmp_str { // required, in order for the map to have its keys sorted
-        bool operator()(char const *a, char const *b) {
-            return strcmp(a, b) < 0;
+    struct cmp_slice { // required, in order for the map to have its keys sorted
+        bool operator()(Slice const a, Slice const b) {
+            return strcmp(a.data(), b.data()) < 0;
         }
     };
 
     // map: key --> <value, timestamp>
     typedef pair<Slice, uint64_t > KVTPair;
-    typedef map<const char *, KVTPair, cmp_str> KVTMap;
+    typedef map<const Slice, KVTPair, cmp_slice> KVTMap;
 
 protected:
 

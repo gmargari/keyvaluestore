@@ -168,10 +168,10 @@ void Map::clear()
     time_start(&(g_stats.free_time));
 
     for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
-        key = const_cast<char *>(iter->first);
+        key = const_cast<char *>(iter->first.data());
         value = const_cast<char *>(iter->second.first.data());
         timestamp = iter->second.second;
-        keylen = strlen(key);
+        keylen = iter->first.size();
         valuelen = iter->second.first.size();
         assert(key);
         assert(value);
@@ -206,7 +206,7 @@ Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key
 
     if (key) {
         iter = m_map.lower_bound(key);
-        if (key_incl == false && strcmp(iter->first, key) == 0) {
+        if (key_incl == false && strcmp(iter->first.data(), key) == 0) {
             ++iter;
         }
     } else {
@@ -235,7 +235,7 @@ Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_i
         // leave it there, else forward it one position.
         if (key_incl == false && iter != m_map.begin()) {
             --iter;
-            if (strcmp(iter->first, key) != 0) {
+            if (strcmp(iter->first.data(), key) != 0) {
                 ++iter;
             }
         }
@@ -258,10 +258,10 @@ int Map::sanity_check()
     uint32_t keylen, valuelen;
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
-        key = iter->first;
+        key = iter->first.data();
         value = iter->second.first.data();
         timestamp = iter->second.second;
-        keylen = strlen(key);
+        keylen = iter->first.size();
         valuelen = iter->second.first.size();
         map_size += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
         map_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
