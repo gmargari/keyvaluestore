@@ -169,10 +169,10 @@ void Map::clear()
 
     for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = const_cast<char *>(iter->first.data());
-        value = const_cast<char *>(iter->second.first.data());
-        timestamp = iter->second.second;
         keylen = iter->first.size();
+        value = const_cast<char *>(iter->second.first.data());
         valuelen = iter->second.first.size();
+        timestamp = iter->second.second;
         assert(key);
         assert(value);
         assert((dbg_bytes_cleaned += keylen + 1 + sizeof(KVTPair) + valuelen + 1));
@@ -259,10 +259,10 @@ int Map::sanity_check()
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first.data();
-        value = iter->second.first.data();
-        timestamp = iter->second.second;
         keylen = iter->first.size();
+        value = iter->second.first.data();
         valuelen = iter->second.first.size();
+        timestamp = iter->second.second;
         map_size += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
         map_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
         assert(keylen + 1 <= MAX_KVTSIZE);

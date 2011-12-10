@@ -1,2 +1,7 @@
 build/*
 .kdev4/
+todo.txt
+CMakeLists.txt.user
+var
+*.tar
+*.gz
