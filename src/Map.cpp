@@ -53,11 +53,11 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
     // if 'key' exists in map, delete corresponding value (it'll be replaced,
     // along with its timestamp)
     if ((iter = m_map.find(key)) != m_map.end()) {
-        old_value = const_cast<char *>(iter->second.first);
+        old_value = const_cast<char *>(iter->second.first.data());
         old_timestamp = iter->second.second;
         assert(timestamp > old_timestamp);
 
-        old_valuelen = strlen(old_value);
+        old_valuelen = iter->second.first.size();
         m_size -= keylen + 1 + old_valuelen + 1 + sizeof(new_pair);
         m_size_serialized -= Buffer::serialize_len(keylen, old_valuelen, timestamp);
         free(old_value);
@@ -75,7 +75,7 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
     assert(cpkey);
     assert(cpvalue);
 
-    new_pair.first = cpvalue;
+    new_pair.first = Slice(cpvalue, valuelen);
     new_pair.second = timestamp;
     m_size += keylen + 1 + sizeof(new_pair) + valuelen + 1;
     m_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
@@ -98,8 +98,8 @@ bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *va
     assert(key && value && timestamp);
 
     if ((iter = m_map.find(key)) != m_map.end()) {
-        *value = iter->second.first;
-        *valuelen = strlen(iter->second.first);
+        *value = iter->second.first.data();
+        *valuelen = iter->second.first.size();
         *timestamp = iter->second.second;
         return true;
     } else {
@@ -169,10 +169,10 @@ void Map::clear()
 
     for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = const_cast<char *>(iter->first);
-        value = const_cast<char *>(iter->second.first);
+        value = const_cast<char *>(iter->second.first.data());
         timestamp = iter->second.second;
         keylen = strlen(key);
-        valuelen = strlen(value);
+        valuelen = iter->second.first.size();
         assert(key);
         assert(value);
         assert((dbg_bytes_cleaned += keylen + 1 + sizeof(KVTPair) + valuelen + 1));
@@ -259,10 +259,10 @@ int Map::sanity_check()
 
     for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first;
-        value = iter->second.first;
+        value = iter->second.first.data();
         timestamp = iter->second.second;
         keylen = strlen(key);
-        valuelen = strlen(value);
+        valuelen = iter->second.first.size();
         map_size += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
         map_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
         assert(keylen + 1 <= MAX_KVTSIZE);

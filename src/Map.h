@@ -1,6 +1,8 @@
 #ifndef KVTMAP_H
 #define KVTMAP_H
 
+#include "slice.h"
+
 #include <stdint.h>
 #include <cstring>
 #include <map>
@@ -87,7 +89,7 @@ public:
     };
 
     // map: key --> <value, timestamp>
-    typedef pair<char *, uint64_t > KVTPair;
+    typedef pair<Slice, uint64_t > KVTPair;
     typedef map<const char *, KVTPair, cmp_str> KVTMap;
 
 protected:
