@@ -39,7 +39,7 @@ int main(int argc, char **argv)
         if (strcmp(prev_key, key) != 0) {
             cout << "[" << key << "] ["  << value << "] [" << timestamp << "]" << endl;
         }
-        strcpy(prev_key, key);
+        memcpy(prev_key, key, keylen + 1);
     }
 
     for (unsigned int i = 0; i < istreams.size(); i++) {

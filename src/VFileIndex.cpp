@@ -31,7 +31,8 @@ void VFileIndex::add(const char *key, uint32_t keylen, off_t offset)
     char *cpkey;
     assert(sanity_check());
 
-    cpkey = strdup(key);
+    cpkey = (char *)malloc(keylen + 1);
+    memcpy(cpkey, key, keylen + 1);
     assert(m_map.find(cpkey) == m_map.end());
     m_map[cpkey] = offset;
 

@@ -96,7 +96,7 @@ int main()
     while (istream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
         ostream1->append(k1, k1len, v1, v1len, timestamp);
-        strcpy(prev_key, k1);
+        memcpy(prev_key, k1, k1len + 1);
     }
 
     ostream1->close();
@@ -121,9 +121,9 @@ int main()
     key1 = (char *)malloc(MAX_KVTSIZE);
     key2 = (char *)malloc(MAX_KVTSIZE);
     key3 = (char *)malloc(MAX_KVTSIZE);
-    strcpy(key1, "fff");
-    strcpy(key2, "mmm");
-    strcpy(key3, "ttt");
+    memcpy(key1, "fff", 4);
+    memcpy(key2, "mmm", 4);
+    memcpy(key3, "ttt", 4);
 
     istream1 = new MapInputStream(map);
     istream2 = new MapInputStream(map);
@@ -151,7 +151,7 @@ int main()
     while (pistream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
         assert(strcmp(k1, prev_key) != 0);
         ostream2->append(k1, k1len, v1, v1len, timestamp);
-        strcpy(prev_key, k1);
+        memcpy(prev_key, k1, k1len + 1);
     }
     ostream2->close();
 

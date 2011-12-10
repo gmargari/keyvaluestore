@@ -40,7 +40,7 @@ int main(int argc, char **argv)
             cout << "Error: prev_key: " << prev_key << " == cur_key: "  << key << endl;
             return EXIT_FAILURE;
         }
-        strcpy(prev_key, key);
+        memcpy(prev_key, key, keylen + 1);
     }
     free(prev_key);
     delete istream;
