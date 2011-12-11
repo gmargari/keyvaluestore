@@ -26,27 +26,27 @@ public:
     ~Buffer();
 
     /**
-     * return capacity of buffer (m_buf_size)
+     * return capacity of buffer
      */
     uint32_t capacity();
 
     /**
-     * return number of bytes in buffer (m_bytes_in_buf)
+     * return number of bytes in buffer
      */
     uint32_t size();
 
     /**
-     * return size of free space in buffer (m_buf_size - m_bytes_in_buf)
+     * return size of free space in buffer
      */
     uint32_t free_space();
 
     /**
-     * return number of bytes used from buffer (m_bytes_used)
+     * return number of bytes used from buffer
      */
     uint32_t used();
 
     /**
-     * return number of unused bytes in buffer (m_bytes_in_buf - m_bytes_used)
+     * return number of unused bytes in buffer
      */
     uint32_t unused();
 
@@ -112,13 +112,78 @@ public:
 
 protected:
 
+    bool str_is_alnum(const char *str, int len);
+
     char     *m_buf;            // pointer to char buffer
     uint32_t  m_buf_size;       // buffer capacity
     uint32_t  m_bytes_in_buf;   // number of bytes in buffer
     uint32_t  m_bytes_used;     // number of bytes used (e.g. deserialized)
     bool      m_buf_allocated;
-
-    bool str_is_alnum(const char *str, int len);
 };
+
+/*============================================================================
+ *                                capacity
+ *============================================================================*/
+inline uint32_t Buffer::capacity()
+{
+    return m_buf_size;
+}
+
+/*============================================================================
+ *                                  size
+ *============================================================================*/
+inline uint32_t Buffer::size()
+{
+    return m_bytes_in_buf;
+}
+
+/*============================================================================
+ *                               free_space
+ *============================================================================*/
+inline uint32_t Buffer::free_space()
+{
+    return m_buf_size - m_bytes_in_buf;
+}
+
+/*============================================================================
+ *                                  used
+ *============================================================================*/
+inline uint32_t Buffer::used()
+{
+    return m_bytes_used;
+}
+
+/*============================================================================
+ *                                 unused
+ *============================================================================*/
+inline uint32_t Buffer::unused()
+{
+    return m_bytes_in_buf - m_bytes_used;
+}
+
+/*============================================================================
+ *                                  clear
+ *============================================================================*/
+inline void Buffer::clear()
+{
+    m_bytes_in_buf = 0;
+    m_bytes_used = 0;
+}
+
+/*============================================================================
+ *                               serialize_len
+ *============================================================================*/
+inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp)
+{
+    return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + valuelen + 2);
+}
+
+/*============================================================================
+ *                             undo_deserialize
+ *============================================================================*/
+inline void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
+{
+    m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
+}
 
 #endif

@@ -3,10 +3,8 @@
 
 #include "VFile.h"
 
-#include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
 
 // TODO: make these portable!
 #define ENCODE_NUM(_buf_, _num_, _used_) do { memcpy((_buf_) + _used_,  &(_num_), sizeof(_num_)); _used_ += sizeof(_num_); } while (0)
@@ -15,7 +13,7 @@
 #define DECODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_str_), (_buf_) + _used_, (_len_)); _used_ += (_len_); } while (0)
 
 /*============================================================================
- *                                 SimpleBuffer
+ *                                 Buffer
  *============================================================================*/
 Buffer::Buffer(uint32_t bufsize)
     : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
@@ -25,7 +23,7 @@ Buffer::Buffer(uint32_t bufsize)
 }
 
 /*============================================================================
- *                                 SimpleBuffer
+ *                                 Buffer
  *============================================================================*/
 Buffer::Buffer(char *buf, uint32_t bufsize)
     : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
@@ -35,62 +33,13 @@ Buffer::Buffer(char *buf, uint32_t bufsize)
 }
 
 /*============================================================================
- *                                ~SimpleBuffer
+ *                                ~Buffer
  *============================================================================*/
 Buffer::~Buffer()
 {
     if (m_buf_allocated) {
         free(m_buf);
     }
-}
-
-/*============================================================================
- *                                capacity
- *============================================================================*/
-uint32_t Buffer::capacity()
-{
-    return m_buf_size;
-}
-
-/*============================================================================
- *                                  size
- *============================================================================*/
-uint32_t Buffer::size()
-{
-    return m_bytes_in_buf;
-}
-
-/*============================================================================
- *                               free_space
- *============================================================================*/
-uint32_t Buffer::free_space()
-{
-    return m_buf_size - m_bytes_in_buf;
-}
-
-/*============================================================================
- *                                  used
- *============================================================================*/
-uint32_t Buffer::used()
-{
-    return m_bytes_used;
-}
-
-/*============================================================================
- *                                 unused
- *============================================================================*/
-uint32_t Buffer::unused()
-{
-    return m_bytes_in_buf - m_bytes_used;
-}
-
-/*============================================================================
- *                                  clear
- *============================================================================*/
-void Buffer::clear()
-{
-    m_bytes_in_buf = 0;
-    m_bytes_used = 0;
 }
 
 /*============================================================================
@@ -138,14 +87,6 @@ void Buffer::keep_unused()
     memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
     m_bytes_in_buf = unused_bytes;
     m_bytes_used = 0;
-}
-
-/*============================================================================
- *                               serialize_len
- *============================================================================*/
-uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp)
-{
-    return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + valuelen + 2);
 }
 
 /*============================================================================
@@ -262,14 +203,6 @@ bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value,
     }
 
     return true;
-}
-
-/*============================================================================
- *                             undo_deserialize
- *============================================================================*/
-void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
-    m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
 }
 
 /*============================================================================
