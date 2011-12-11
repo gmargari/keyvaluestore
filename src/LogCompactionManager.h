@@ -3,9 +3,6 @@
 
 #include "GeomCompactionManager.h"
 
-class MemStore;
-class DiskStore;
-
 class LogCompactionManager: public GeomCompactionManager {
 
 public:
@@ -13,12 +10,15 @@ public:
     /**
      * constructor
      */
-    LogCompactionManager(MemStore *memstore, DiskStore *diskstore);
+    LogCompactionManager(MemStore *memstore, DiskStore *diskstore)
+        : GeomCompactionManager(memstore, diskstore) {
+        GeomCompactionManager::set_R(2);
+    }
 
     /**
      * destructor
      */
-    ~LogCompactionManager();
+    ~LogCompactionManager() { }
 };
 
 #endif

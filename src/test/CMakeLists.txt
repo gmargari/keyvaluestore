@@ -14,7 +14,6 @@ add_executable (vfiletest vfiletest.cpp)
 target_link_libraries (vfiletest KeyValueStore VFile)
 
 add_executable (requestthrottletest requestthrottletest.cpp)
-target_link_libraries (requestthrottletest RequestThrottle)
 
 add_executable (memstoretest memstoretest.cpp)
 target_link_libraries (memstoretest MemStore)

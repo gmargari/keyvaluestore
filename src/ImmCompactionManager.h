@@ -3,9 +3,6 @@
 
 #include "GeomCompactionManager.h"
 
-class MemStore;
-class DiskStore;
-
 class ImmCompactionManager: public GeomCompactionManager {
 
 public:
@@ -13,12 +10,15 @@ public:
     /**
      * constructor
      */
-    ImmCompactionManager(MemStore *memstore, DiskStore *diskstore);
+    ImmCompactionManager(MemStore *memstore, DiskStore *diskstore)
+        : GeomCompactionManager(memstore, diskstore) {
+        GeomCompactionManager::set_P(1);
+    }
 
     /**
      * destructor
      */
-    ~ImmCompactionManager();
+    ~ImmCompactionManager() { }
 };
 
 #endif

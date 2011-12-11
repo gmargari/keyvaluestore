@@ -1,7 +1,7 @@
 #ifndef KVTMAP_H
 #define KVTMAP_H
 
-#include "slice.h"
+#include "Slice.h"
 
 #include <stdint.h>
 #include <cstring>

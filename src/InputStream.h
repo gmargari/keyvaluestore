@@ -10,12 +10,12 @@ public:
     /**
      * constructor
      */
-    InputStream();
+    InputStream() { }
 
     /**
      * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual ~InputStream();
+    virtual ~InputStream() { }
 
     /**
      * return only pairs with keys between 'start_key' (inclusive) and 'end_key'
