@@ -15,24 +15,21 @@ using std::make_pair;
  *                                    Map
  *============================================================================*/
 Map::Map()
-    : m_map(), m_size(0), m_size_serialized(0), m_keys(0)
-{
+    : m_map(), m_size(0), m_size_serialized(0), m_keys(0) {
 
 }
 
 /*============================================================================
  *                                   ~Map
  *============================================================================*/
-Map::~Map()
-{
+Map::~Map() {
     clear();
 }
 
 /*============================================================================
  *                                    put
  *============================================================================*/
-bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
+bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     const char *cpkey;
     char *cpvalue, *old_value, *p;
     uint64_t old_timestamp;
@@ -90,8 +87,7 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
 /*============================================================================
  *                                    get
  *============================================================================*/
-bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
-{
+bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
@@ -113,48 +109,42 @@ bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *va
 /*============================================================================
  *                                get_num_keys
  *============================================================================*/
-uint64_t Map::get_num_keys()
-{
+uint64_t Map::get_num_keys() {
     return m_keys;
 }
 
 /*============================================================================
  *                                 get_size
  *============================================================================*/
-uint64_t Map::get_size()
-{
+uint64_t Map::get_size() {
     return m_size;
 }
 
 /*============================================================================
  *                          get_size_when_serialized
  *============================================================================*/
-uint64_t Map::get_size_when_serialized()
-{
+uint64_t Map::get_size_when_serialized() {
     return m_size_serialized;
 }
 
 /*============================================================================
  *                                get_sizes
  *============================================================================*/
-pair<uint64_t, uint64_t> Map::get_sizes()
-{
+pair<uint64_t, uint64_t> Map::get_sizes() {
     return make_pair(m_size, m_size_serialized);
 }
 
 /*============================================================================
  *                                  kv_size
  *============================================================================*/
-uint32_t Map::kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
+uint32_t Map::kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     return (keylen + 1 + sizeof(KVTPair) + valuelen + 1);
 }
 
 /*============================================================================
  *                                   clear
  *============================================================================*/
-void Map::clear()
-{
+void Map::clear() {
     char *key, *value;
     uint64_t timestamp;
     uint32_t keylen, valuelen;
@@ -198,8 +188,7 @@ void Map::clear()
 /*============================================================================
  *                                 start_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key_incl)
-{
+Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key_incl) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
@@ -219,8 +208,7 @@ Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key
 /*============================================================================
  *                                  end_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_incl)
-{
+Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_incl) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
@@ -249,8 +237,7 @@ Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_i
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int Map::sanity_check()
-{
+int Map::sanity_check() {
 #if DBGLVL > 1
     uint64_t map_size = 0, map_size_serialized = 0;
     const char *key, *value;

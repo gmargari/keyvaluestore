@@ -12,24 +12,21 @@
  *                                 Scanner
  *============================================================================*/
 Scanner::Scanner(KeyValueStore *kvstore)
-    : m_kvstore(kvstore)
-{
+    : m_kvstore(kvstore) {
 
 }
 
 /*============================================================================
  *                                ~Scanner
  *============================================================================*/
-Scanner::~Scanner()
-{
+Scanner::~Scanner() {
 
 }
 
 /*============================================================================
  *                                point_get
  *============================================================================*/
-int Scanner::point_get(const char *key, uint32_t keylen)
-{
+int Scanner::point_get(const char *key, uint32_t keylen) {
     const char *k, *v;
     uint32_t klen, vlen, valuelen;
     char *value;
@@ -64,16 +61,14 @@ int Scanner::point_get(const char *key, uint32_t keylen)
 /*============================================================================
  *                                range_get
  *============================================================================*/
-int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen)
-{
+int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) {
     return range_get(start_key, start_keylen, end_key, end_keylen, true, false);
 }
 
 /*============================================================================
  *                                range_get
  *============================================================================*/
-int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl)
-{
+int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
     const char *k, *v;
     uint32_t klen, vlen;
     uint64_t t;

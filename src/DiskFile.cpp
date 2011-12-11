@@ -16,8 +16,7 @@ int DiskFile::m_max_dfile_num = 0;
  *                                 DiskFile
  *============================================================================*/
 DiskFile::DiskFile()
-    : m_file(), m_index(), m_deleted(false)
-{
+    : m_file(), m_index(), m_deleted(false) {
     m_file = new VFile();
     m_index = new VFileIndex();
 }
@@ -25,8 +24,7 @@ DiskFile::DiskFile()
 /*============================================================================
  *                                ~DiskFile
  *============================================================================*/
-DiskFile::~DiskFile()
-{
+DiskFile::~DiskFile() {
     if (m_deleted == false) {
         char fname[1000];
         int fd;
@@ -47,8 +45,7 @@ DiskFile::~DiskFile()
 /*============================================================================
  *                               open_existing
  *============================================================================*/
-bool DiskFile::open_existing(char *filename)
-{
+bool DiskFile::open_existing(char *filename) {
     // if vfile loaded, load also its index
     if (m_file->fs_open_existing(filename)) {
         char fname[1000];
@@ -71,8 +68,7 @@ bool DiskFile::open_existing(char *filename)
 /*============================================================================
  *                              open_new_unique
  *============================================================================*/
-bool DiskFile::open_new_unique()
-{
+bool DiskFile::open_new_unique() {
     char filename[100];
 
     sprintf(filename, "%s%s%04d", ROOT_DIR, DISKFILE_PREFIX, m_max_dfile_num++);
@@ -86,8 +82,7 @@ bool DiskFile::open_new_unique()
 /*============================================================================
  *                              delete_from_disk
  *============================================================================*/
-void DiskFile::delete_from_disk()
-{
+void DiskFile::delete_from_disk() {
     char filename[1000];
 
     sprintf(filename, "%s%s", m_file->fs_name(), VFILE_INDEX_SUFFIX);
@@ -101,96 +96,84 @@ void DiskFile::delete_from_disk()
 /*============================================================================
  *                                get_num_keys
  *============================================================================*/
-uint64_t DiskFile::get_num_keys()
-{
+uint64_t DiskFile::get_num_keys() {
     return m_index->get_num_stored_leys();
 }
 
 /*============================================================================
  *                                  get_size
  *============================================================================*/
-uint64_t DiskFile::get_size()
-{
+uint64_t DiskFile::get_size() {
     return m_file->fs_size();
 }
 
 /*============================================================================
  *                            get_first_last_term
  *============================================================================*/
-void DiskFile::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen)
-{
+void DiskFile::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen) {
     m_index->get_first_last_term(first, firstlen, last, lastlen);
 }
 
 /*============================================================================
  *                                  get_name
  *============================================================================*/
-char *DiskFile::get_name()
-{
+char *DiskFile::get_name() {
     return m_file->fs_name();
 }
 
 /*============================================================================
  *                             set_max_dfile_num
  *============================================================================*/
-void DiskFile::set_max_dfile_num(int num)
-{
+void DiskFile::set_max_dfile_num(int num) {
     m_max_dfile_num = num;
 }
 
 /*============================================================================
  *                             set_max_dfile_num
  *============================================================================*/
-int DiskFile::get_max_dfile_num()
-{
+int DiskFile::get_max_dfile_num() {
     return m_max_dfile_num;
 }
 
 /*============================================================================
  *                                   fill
  *============================================================================*/
-uint32_t DiskFile::fill(Buffer *buf, uint32_t bytes, off_t offs)
-{
+uint32_t DiskFile::fill(Buffer *buf, uint32_t bytes, off_t offs) {
     return buf->fill(m_file, bytes, offs);
 }
 
 /*============================================================================
  *                                   fill
  *============================================================================*/
-uint32_t DiskFile::fill(Buffer *buf, off_t offs)
-{
+uint32_t DiskFile::fill(Buffer *buf, off_t offs) {
     return buf->fill(m_file, offs);
 }
 
 /*============================================================================
  *                                  append
  *============================================================================*/
-uint32_t DiskFile::append(Buffer *buf)
-{
+uint32_t DiskFile::append(Buffer *buf) {
     return buf->append(m_file);
 }
 
 /*============================================================================
  *                                  sync
  *============================================================================*/
-void DiskFile::sync()
-{
+void DiskFile::sync() {
     m_file->fs_sync();
 }
 
 /*============================================================================
  *                                  search
  *============================================================================*/
-bool DiskFile::search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off)
-{
+bool DiskFile::search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off) {
     return m_index->search(term, termlen, start_off, end_off);
 }
 
 /*============================================================================
  *                              set_file_index
  *============================================================================*/
-void DiskFile::set_file_index(VFileIndex  *index)
-{
+void DiskFile::set_file_index(VFileIndex  *index) {
     delete m_index;
     m_index = index;
 }
@@ -198,7 +181,6 @@ void DiskFile::set_file_index(VFileIndex  *index)
 /*============================================================================
  *                               set_num_keys
  *============================================================================*/
-void DiskFile::set_num_keys(uint64_t num_keys)
-{
+void DiskFile::set_num_keys(uint64_t num_keys) {
     m_index->set_num_stored_leys(num_keys);
 }

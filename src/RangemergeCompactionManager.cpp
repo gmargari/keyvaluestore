@@ -26,8 +26,7 @@ char *EMPTY_STRING = (char *)"";
  *============================================================================*/
 RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
-      m_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE), m_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE)
-{
+      m_blocksize(DEFAULT_RNGMERGE_BLOCKSIZE), m_flushmem(DEFAULT_RNGMERGE_FLUSHMEMSIZE) {
     load_state_from_disk();
     add_maps_to_memstore();
 }
@@ -35,16 +34,14 @@ RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore, Dis
 /*============================================================================
  *                       ~RangemergeCompactionManager
  *============================================================================*/
-RangemergeCompactionManager::~RangemergeCompactionManager()
-{
+RangemergeCompactionManager::~RangemergeCompactionManager() {
     save_state_to_disk();
 }
 
 /*============================================================================
  *                               set_blocksize
  *============================================================================*/
-void RangemergeCompactionManager::set_blocksize(uint64_t blocksize)
-{
+void RangemergeCompactionManager::set_blocksize(uint64_t blocksize) {
     if (blocksize) {
         m_blocksize = blocksize;
     } else {
@@ -57,32 +54,28 @@ void RangemergeCompactionManager::set_blocksize(uint64_t blocksize)
 /*============================================================================
  *                               get_blocksize
  *============================================================================*/
-uint64_t RangemergeCompactionManager::get_blocksize()
-{
+uint64_t RangemergeCompactionManager::get_blocksize() {
     return m_blocksize;
 }
 
 /*============================================================================
  *                               set_flushmem
  *============================================================================*/
-void RangemergeCompactionManager::set_flushmem(uint64_t flushmem)
-{
+void RangemergeCompactionManager::set_flushmem(uint64_t flushmem) {
     m_flushmem = flushmem;
 }
 
 /*============================================================================
  *                               get_flushmem
  *============================================================================*/
-uint64_t RangemergeCompactionManager::get_flushmem()
-{
+uint64_t RangemergeCompactionManager::get_flushmem() {
     return m_flushmem;
 }
 
 /*============================================================================
  *                               flush_bytes
  *============================================================================*/
-void RangemergeCompactionManager::flush_bytes()
-{
+void RangemergeCompactionManager::flush_bytes() {
     MapInputStream *map_istream;
     DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;
@@ -210,8 +203,7 @@ void RangemergeCompactionManager::flush_bytes()
 /*============================================================================
  *                               create_ranges
  *============================================================================*/
-void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
-{
+void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges) {
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     Range *rng;
     int i;
@@ -271,8 +263,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges)
 /*============================================================================
  *                               delete_ranges
  *============================================================================*/
-void RangemergeCompactionManager::delete_ranges(vector<Range *> ranges)
-{
+void RangemergeCompactionManager::delete_ranges(vector<Range *> ranges) {
     for (int i = 0; i < (int)ranges.size(); i++) {
         delete ranges[i];
     }
@@ -281,8 +272,7 @@ void RangemergeCompactionManager::delete_ranges(vector<Range *> ranges)
 /*============================================================================
  *                              save_state_to_disk
  *============================================================================*/
-bool RangemergeCompactionManager::save_state_to_disk()
-{
+bool RangemergeCompactionManager::save_state_to_disk() {
     char fname[100];
     FILE *fp;
 
@@ -304,8 +294,7 @@ bool RangemergeCompactionManager::save_state_to_disk()
 /*============================================================================
  *                            load_state_from_disk
  *============================================================================*/
-bool RangemergeCompactionManager::load_state_from_disk()
-{
+bool RangemergeCompactionManager::load_state_from_disk() {
     char fname[100], cmmanager[100];
     FILE *fp;
 
@@ -330,8 +319,7 @@ bool RangemergeCompactionManager::load_state_from_disk()
 /*============================================================================
  *                            add_maps_to_memstore
  *============================================================================*/
-void RangemergeCompactionManager::add_maps_to_memstore()
-{
+void RangemergeCompactionManager::add_maps_to_memstore() {
     vector<Range *> ranges;
 
     create_ranges(ranges);
@@ -346,8 +334,7 @@ void RangemergeCompactionManager::add_maps_to_memstore()
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int RangemergeCompactionManager::sanity_check()
-{
+int RangemergeCompactionManager::sanity_check() {
     vector<Range *> ranges;
 
     for (unsigned int i = 0; i < m_diskstore->m_disk_files.size(); i++) {

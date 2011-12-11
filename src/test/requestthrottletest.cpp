@@ -7,8 +7,7 @@
 
 using namespace std;
 
-int main(void)
-{
+int main(void) {
     struct timeval now, start, end;
     int num_req, req_per_sec;
     double total_time;

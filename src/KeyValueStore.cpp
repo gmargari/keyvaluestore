@@ -24,8 +24,7 @@ using namespace std;
  *                               KeyValueStore
  *============================================================================*/
 KeyValueStore::KeyValueStore(cm_type type)
-    : m_memstore(), m_diskstore(), m_compactionmanager()
-{
+    : m_memstore(), m_diskstore(), m_compactionmanager() {
     m_memstore = new MemStore();
     m_diskstore = new DiskStore();
     switch (type) {
@@ -56,8 +55,7 @@ KeyValueStore::KeyValueStore(cm_type type)
 /*============================================================================
  *                              ~KeyValueStore
  *============================================================================*/
-KeyValueStore::~KeyValueStore()
-{
+KeyValueStore::~KeyValueStore() {
     delete m_memstore;
     delete m_diskstore;
     delete m_compactionmanager;
@@ -66,24 +64,21 @@ KeyValueStore::~KeyValueStore()
 /*============================================================================
  *                           set_memstore_maxsize
  *============================================================================*/
-void KeyValueStore::set_memstore_maxsize(uint64_t maxsize)
-{
+void KeyValueStore::set_memstore_maxsize(uint64_t maxsize) {
     m_memstore->set_maxsize(maxsize);
 }
 
 /*============================================================================
  *                           set_memstore_maxsize
  *============================================================================*/
-uint64_t KeyValueStore::get_memstore_maxsize()
-{
+uint64_t KeyValueStore::get_memstore_maxsize() {
     return m_memstore->get_maxsize();
 }
 
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_reach_size_limit(key, keylen, value, valuelen, timestamp)) {
         time_start(&(g_stats.compaction_time));
@@ -100,72 +95,63 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uin
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen)
-{
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen) {
     return put(key, keylen, value, valuelen, get_timestamp());
 }
 
 /*============================================================================
  *                             get_num_mem_keys
  *============================================================================*/
-uint64_t KeyValueStore::get_num_mem_keys()
-{
+uint64_t KeyValueStore::get_num_mem_keys() {
     return m_memstore->get_num_keys();
 }
 
 /*============================================================================
  *                             get_num_disk_keys
  *============================================================================*/
-uint64_t KeyValueStore::get_num_disk_keys()
-{
+uint64_t KeyValueStore::get_num_disk_keys() {
     return m_diskstore->get_num_keys();
 }
 
 /*============================================================================
  *                               get_mem_size
  *============================================================================*/
-uint64_t KeyValueStore::get_mem_size()
-{
+uint64_t KeyValueStore::get_mem_size() {
     return m_memstore->get_size();
 }
 
 /*============================================================================
  *                               get_disk_size
  *============================================================================*/
-uint64_t KeyValueStore::get_disk_size()
-{
+uint64_t KeyValueStore::get_disk_size() {
     return m_diskstore->get_size();
 }
 
 /*============================================================================
  *                             get_num_disk_files
  *============================================================================*/
-int KeyValueStore::get_num_disk_files()
-{
+int KeyValueStore::get_num_disk_files() {
     return m_diskstore->get_num_disk_files();
 }
 
 /*============================================================================
  *                                flush_bytes
  *============================================================================*/
-void KeyValueStore::flush_bytes()
-{
+void KeyValueStore::flush_bytes() {
     m_compactionmanager->flush_bytes();
 }
 
 /*============================================================================
  *                          get_compaction_manager
  *============================================================================*/
-CompactionManager *KeyValueStore::get_compaction_manager()
-{
+CompactionManager *KeyValueStore::get_compaction_manager() {
     return m_compactionmanager;
 }
 
 /*============================================================================
  *                               get_timestamp
  *============================================================================*/
-uint64_t KeyValueStore::get_timestamp()
-{
+uint64_t KeyValueStore::get_timestamp() {
 //    struct timeval tv;
     static uint64_t t = 0;
 
@@ -178,8 +164,7 @@ uint64_t KeyValueStore::get_timestamp()
 /*============================================================================
  *                            check_parameters
  *============================================================================*/
-void KeyValueStore::check_parameters()
-{
+void KeyValueStore::check_parameters() {
     struct stat st;
 
     if (stat(ROOT_DIR, &st) != 0) {

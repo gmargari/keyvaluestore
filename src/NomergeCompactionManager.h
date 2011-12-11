@@ -26,8 +26,7 @@ public:
 /*============================================================================
  *                               flush_memstore
  *============================================================================*/
-void NomergeCompactionManager::flush_bytes()
-{
+void NomergeCompactionManager::flush_bytes() {
     DiskFile *memstore_file;
 
     memstore_file = memstore_flush_to_diskfile();

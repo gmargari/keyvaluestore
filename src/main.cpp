@@ -78,8 +78,7 @@ bool put_thread_finished = false;
 /*============================================================================
  *                             print_syntax
  *============================================================================*/
-void print_syntax(char *progname)
-{
+void print_syntax(char *progname) {
      cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
      cout << endl;
      cout << "COMPACTION MANAGER" << endl;
@@ -113,8 +112,7 @@ void print_syntax(char *progname)
 /*============================================================================
  *                                main
  *============================================================================*/
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:esh";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
@@ -605,8 +603,7 @@ int main(int argc, char **argv)
 /*============================================================================
  *                              put_routine
  *============================================================================*/
-void *put_routine(void *args)
-{
+void *put_routine(void *args) {
     struct thread_args *targs = (struct thread_args *)args;
     int      uflag = targs->uflag,
              sflag = targs->sflag,
@@ -703,8 +700,7 @@ void *put_routine(void *args)
 /*============================================================================
  *                              get_routine
  *============================================================================*/
-void *get_routine(void *args)
-{
+void *get_routine(void *args) {
     struct thread_args *targs = (struct thread_args *)args;
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys;
@@ -762,8 +758,7 @@ void *get_routine(void *args)
 /*============================================================================
  *                              randstr_r
  *============================================================================*/
-void randstr_r(char *s, const int len, uint32_t *seed)
-{
+void randstr_r(char *s, const int len, uint32_t *seed) {
     static const char alphanum[] =
 //         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -780,8 +775,7 @@ void randstr_r(char *s, const int len, uint32_t *seed)
 /*============================================================================
  *                              zipfstr_r
  *============================================================================*/
-void zipfstr_r(char *s, const int len, uint32_t *seed)
-{
+void zipfstr_r(char *s, const int len, uint32_t *seed) {
     int num_digits = log10(zipf_n) + 1;
     int zipf_num;
     char key_prefix[MAX_KVTSIZE];
@@ -808,8 +802,7 @@ void zipfstr_r(char *s, const int len, uint32_t *seed)
 /*============================================================================
  *                               zipf_r
  *============================================================================*/
-int zipf_r(uint32_t *seed)
-{
+int zipf_r(uint32_t *seed) {
     static int *sum_prob = NULL; // sum of probabilities
     int z,                       // uniform random number (0 <= z <= RAND_MAX)
         zipf_value,              // computed exponential value to be returned
@@ -874,8 +867,7 @@ int zipf_r(uint32_t *seed)
 /*============================================================================
  *                             numdigits
  *============================================================================*/
-int numdigits(uint64_t num)
-{
+int numdigits(uint64_t num) {
     int digits = 0;
 
     if (num < 10) return 1;

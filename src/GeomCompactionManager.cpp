@@ -21,24 +21,21 @@ uint64_t dbg_lastsize = 0; // used for sanity_check()
  *============================================================================*/
 GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
-      m_R(DEFAULT_GEOM_R), m_P(DEFAULT_GEOM_P), m_partition_size()
-{
+      m_R(DEFAULT_GEOM_R), m_P(DEFAULT_GEOM_P), m_partition_size() {
     load_state_from_disk();
 }
 
 /*============================================================================
  *                            ~GeomCompactionManager
  *============================================================================*/
-GeomCompactionManager::~GeomCompactionManager()
-{
+GeomCompactionManager::~GeomCompactionManager() {
     save_state_to_disk();
 }
 
 /*============================================================================
  *                                   set_R
  *============================================================================*/
-void GeomCompactionManager::set_R(int r)
-{
+void GeomCompactionManager::set_R(int r) {
     assert(r >= 2 || (m_P && r >= 1));
     m_R = r;
 }
@@ -46,16 +43,14 @@ void GeomCompactionManager::set_R(int r)
 /*============================================================================
  *                                   get_R
  *============================================================================*/
-int GeomCompactionManager::get_R()
-{
+int GeomCompactionManager::get_R() {
     return m_R;
 }
 
 /*============================================================================
  *                                   set_P
  *============================================================================*/
-void GeomCompactionManager::set_P(int p)
-{
+void GeomCompactionManager::set_P(int p) {
     assert(p >= 1);
     m_P = p;
 }
@@ -63,16 +58,14 @@ void GeomCompactionManager::set_P(int p)
 /*============================================================================
  *                                   get_P
  *============================================================================*/
-int GeomCompactionManager::get_P()
-{
+int GeomCompactionManager::get_P() {
     return m_P;
 }
 
 /*============================================================================
  *                             partition_minsize
  *============================================================================*/
-int GeomCompactionManager::partition_minsize(int part_num)
-{
+int GeomCompactionManager::partition_minsize(int part_num) {
     assert(m_R >= 2 || (m_P && m_R >= 1));
     if (m_P) {
         return (int)pow(m_R, part_num);
@@ -84,8 +77,7 @@ int GeomCompactionManager::partition_minsize(int part_num)
 /*============================================================================
  *                             partition_maxsize
  *============================================================================*/
-int GeomCompactionManager::partition_maxsize(int part_num)
-{
+int GeomCompactionManager::partition_maxsize(int part_num) {
     // the only difference between P being and not being constant
     // is that in the first case partition 0 has limit R maxsize in the
     // second case it has maxsize R-1.
@@ -100,8 +92,7 @@ int GeomCompactionManager::partition_maxsize(int part_num)
 /*============================================================================
  *                              partition_num
  *============================================================================*/
-int GeomCompactionManager::partition_num(int partition_size)
-{
+int GeomCompactionManager::partition_num(int partition_size) {
     for (int i = 0; ; i++) {
         if (partition_size <= partition_maxsize(i)) {
             assert(partition_size >= partition_minsize(i));
@@ -116,8 +107,7 @@ int GeomCompactionManager::partition_num(int partition_size)
 /*============================================================================
  *                             compute_current_R
  *============================================================================*/
-int GeomCompactionManager::compute_current_R()
-{
+int GeomCompactionManager::compute_current_R() {
     int size_of_bytes_inserted = 0;
 
     size_of_bytes_inserted = 1; // 1 for memstore that will be flushed to disk
@@ -130,8 +120,7 @@ int GeomCompactionManager::compute_current_R()
 /*============================================================================
  *                                flush_bytes
  *============================================================================*/
-void GeomCompactionManager::flush_bytes()
-{
+void GeomCompactionManager::flush_bytes() {
     DiskFile *disk_file, *memstore_file;
     DiskFileInputStream *memstore_file_istream, *istream;
     vector<InputStream *> istreams_to_merge;
@@ -243,8 +232,7 @@ void GeomCompactionManager::flush_bytes()
 /*============================================================================
  *                              save_state_to_disk
  *============================================================================*/
-bool GeomCompactionManager::save_state_to_disk()
-{
+bool GeomCompactionManager::save_state_to_disk() {
     char fname[100];
     FILE *fp;
 
@@ -275,8 +263,7 @@ bool GeomCompactionManager::save_state_to_disk()
 /*============================================================================
  *                            load_state_from_disk
  *============================================================================*/
-bool GeomCompactionManager::load_state_from_disk()
-{
+bool GeomCompactionManager::load_state_from_disk() {
     char fname[100], cmmanager[100];
     FILE *fp;
     int num_partitions, part_size;
@@ -312,8 +299,7 @@ bool GeomCompactionManager::load_state_from_disk()
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int GeomCompactionManager::sanity_check()
-{
+int GeomCompactionManager::sanity_check() {
     uint64_t cursize = 0;
 
     assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());

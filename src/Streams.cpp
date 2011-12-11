@@ -12,8 +12,7 @@
 /*============================================================================
  *                                 copy_stream
  *============================================================================*/
-void Streams::copy_stream(InputStream *istream, OutputStream *ostream)
-{
+void Streams::copy_stream(InputStream *istream, OutputStream *ostream) {
     const char *key, *value;
     uint32_t keylen, valuelen;
     uint64_t timestamp;
@@ -31,8 +30,7 @@ void Streams::copy_stream(InputStream *istream, OutputStream *ostream)
 /*============================================================================
  *                           copy_stream_unique_keys
  *============================================================================*/
-void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostream)
-{
+void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostream) {
     const char *key, *value;
     uint32_t keylen, valuelen;
     uint64_t timestamp;
@@ -55,8 +53,7 @@ void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostrea
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, OutputStream *ostream)
-{
+void Streams::merge_streams(vector<InputStream *> istreams, OutputStream *ostream) {
     PriorityInputStream *pistream;
 
     pistream = new PriorityInputStream(istreams);
@@ -67,8 +64,7 @@ void Streams::merge_streams(vector<InputStream *> istreams, OutputStream *ostrea
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, DiskFile *diskfile)
-{
+void Streams::merge_streams(vector<InputStream *> istreams, DiskFile *diskfile) {
     DiskFileOutputStream *ostream;
 
     ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
@@ -79,8 +75,7 @@ void Streams::merge_streams(vector<InputStream *> istreams, DiskFile *diskfile)
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-DiskFile *Streams::merge_streams(vector<InputStream *> istreams)
-{
+DiskFile *Streams::merge_streams(vector<InputStream *> istreams) {
     DiskFile *diskfile;
 
     diskfile = new DiskFile;
@@ -93,8 +88,7 @@ DiskFile *Streams::merge_streams(vector<InputStream *> istreams)
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles)
-{
+void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles) {
     DiskFile *diskfile;
 
     diskfile = merge_streams(istreams);
@@ -104,8 +98,7 @@ void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& 
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size)
-{
+int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size) {
     DiskFile *diskfile;
     PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;

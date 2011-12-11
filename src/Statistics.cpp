@@ -14,8 +14,7 @@ static bool stats_gathering_enabled = true;
 /*============================================================================
  *                                 bytes_init
  *============================================================================*/
-void bytes_init(byte_stats *bytestats)
-{
+void bytes_init(byte_stats *bytestats) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -30,8 +29,7 @@ void bytes_init(byte_stats *bytestats)
 /*============================================================================
  *                                 bytes_inc
  *============================================================================*/
-void bytes_inc(byte_stats *bytestats, size_t bytes)
-{
+void bytes_inc(byte_stats *bytestats, size_t bytes) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -64,8 +62,7 @@ void bytes_inc(byte_stats *bytestats, size_t bytes)
 /*============================================================================
  *                               bytes_get_gb
  *============================================================================*/
-uint32_t bytes_get_gb(byte_stats bytestats)
-{
+uint32_t bytes_get_gb(byte_stats bytestats) {
     assert(initialized);
     return bytestats.gb;
 }
@@ -73,8 +70,7 @@ uint32_t bytes_get_gb(byte_stats bytestats)
 /*============================================================================
  *                               bytes_get_mb
  *============================================================================*/
-uint32_t bytes_get_mb(byte_stats bytestats)
-{
+uint32_t bytes_get_mb(byte_stats bytestats) {
     assert(initialized);
     return bytestats.mb;
 }
@@ -82,8 +78,7 @@ uint32_t bytes_get_mb(byte_stats bytestats)
 /*============================================================================
  *                               bytes_get_kb
  *============================================================================*/
-uint32_t bytes_get_kb(byte_stats bytestats)
-{
+uint32_t bytes_get_kb(byte_stats bytestats) {
     assert(initialized);
     return bytestats.kb;
 }
@@ -91,8 +86,7 @@ uint32_t bytes_get_kb(byte_stats bytestats)
 /*============================================================================
  *                               bytes_get_b
  *============================================================================*/
-uint32_t bytes_get_b(byte_stats bytestats)
-{
+uint32_t bytes_get_b(byte_stats bytestats) {
     assert(initialized);
     return bytestats.b;
 }
@@ -100,8 +94,7 @@ uint32_t bytes_get_b(byte_stats bytestats)
 /*============================================================================
  *                                 time_init
  *============================================================================*/
-void time_init(time_stats *timestats)
-{
+void time_init(time_stats *timestats) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -114,8 +107,7 @@ void time_init(time_stats *timestats)
 /*============================================================================
  *                                 time_start
  *============================================================================*/
-void time_start(time_stats *timestats)
-{
+void time_start(time_stats *timestats) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -127,8 +119,7 @@ void time_start(time_stats *timestats)
 /*============================================================================
  *                                 time_end
  *============================================================================*/
-void time_end(time_stats *timestats)
-{
+void time_end(time_stats *timestats) {
     struct timeval newtime;
 
     assert(initialized);
@@ -150,8 +141,7 @@ void time_end(time_stats *timestats)
 /*============================================================================
  *                              time_get_secs
  *============================================================================*/
-uint32_t time_get_secs(time_stats timestats)
-{
+uint32_t time_get_secs(time_stats timestats) {
     assert(initialized);
     return timestats.total.tv_sec;
 }
@@ -159,8 +149,7 @@ uint32_t time_get_secs(time_stats timestats)
 /*============================================================================
  *                              time_get_usecs
  *============================================================================*/
-uint32_t time_get_usecs(time_stats timestats)
-{
+uint32_t time_get_usecs(time_stats timestats) {
     assert(initialized);
     return timestats.total.tv_usec;
 }
@@ -168,8 +157,7 @@ uint32_t time_get_usecs(time_stats timestats)
 /*============================================================================
  *                                 num_init
  *============================================================================*/
-void num_init(uint32_t *numstats)
-{
+void num_init(uint32_t *numstats) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -181,8 +169,7 @@ void num_init(uint32_t *numstats)
 /*============================================================================
  *                                  num_inc
  *============================================================================*/
-void num_inc(uint32_t *numstats, int inc)
-{
+void num_inc(uint32_t *numstats, int inc) {
     assert(initialized);
     if (stats_gathering_enabled == false) {
         return;
@@ -194,8 +181,7 @@ void num_inc(uint32_t *numstats, int inc)
 /*============================================================================
  *                             global_stats_init
  *============================================================================*/
-void global_stats_init()
-{
+void global_stats_init() {
     assert(initialized == false);
     initialized = true;
 
@@ -218,24 +204,21 @@ void global_stats_init()
 /*============================================================================
  *                       global_stats_enable_gathering
  *============================================================================*/
-void global_stats_enable_gathering()
-{
+void global_stats_enable_gathering() {
     stats_gathering_enabled = true;
 }
 
 /*============================================================================
  *                       global_stats_disable_gathering
  *============================================================================*/
-void global_stats_disable_gathering()
-{
+void global_stats_disable_gathering() {
     stats_gathering_enabled = false;
 }
 
 /*============================================================================
  *                             global_stats_init
  *============================================================================*/
-void stats_sanity_check()
-{
+void stats_sanity_check() {
 //     assert(time_get_secs(g_stats.total_time) >= time_get_secs(g_stats.compaction_time));
 //     assert(time_get_secs(g_stats.compaction_time) >= time_get_secs(g_stats.merge_time) + time_get_secs(g_stats.free_time));
 //     assert(time_get_secs(g_stats.merge_time) >= time_get_secs(g_stats.read_time) + time_get_secs(g_stats.write_time));
@@ -244,8 +227,7 @@ void stats_sanity_check()
 /*============================================================================
  *                             print_stats_header
  *============================================================================*/
-void print_stats_header()
-{
+void print_stats_header() {
     cout << "# mb_ins |  Ttotal Tcompac    Tput |  Tmerge   Tfree Tcmrest |"
          << "    Tmem   Tread  Twrite | mb_read mb_writ    reads   writes | runs"
          << endl;
@@ -254,8 +236,7 @@ void print_stats_header()
 /*============================================================================
  *                                 print_stats
  *============================================================================*/
-void print_stats()
-{
+void print_stats() {
     int32_t ttime;
     time_end(&(g_stats.total_time));
     time_start(&(g_stats.total_time));

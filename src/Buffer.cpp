@@ -17,8 +17,7 @@
  *============================================================================*/
 Buffer::Buffer(uint32_t bufsize)
     : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
-      m_buf_allocated(true)
-{
+      m_buf_allocated(true) {
     m_buf = (char *)malloc(m_buf_size);
 }
 
@@ -27,16 +26,14 @@ Buffer::Buffer(uint32_t bufsize)
  *============================================================================*/
 Buffer::Buffer(char *buf, uint32_t bufsize)
     : m_buf(NULL), m_buf_size(bufsize), m_bytes_in_buf(0), m_bytes_used(0),
-      m_buf_allocated(false)
-{
+      m_buf_allocated(false) {
     m_buf = buf;
 }
 
 /*============================================================================
  *                                ~Buffer
  *============================================================================*/
-Buffer::~Buffer()
-{
+Buffer::~Buffer() {
     if (m_buf_allocated) {
         free(m_buf);
     }
@@ -45,8 +42,7 @@ Buffer::~Buffer()
 /*============================================================================
  *                                  fill
  *============================================================================*/
-uint32_t Buffer::fill(VFile *vfile, uint32_t bytes, off_t offs)
-{
+uint32_t Buffer::fill(VFile *vfile, uint32_t bytes, off_t offs) {
     uint32_t bytes_read;
 
     bytes_read = vfile->fs_pread(m_buf + size(), bytes, offs);
@@ -58,16 +54,14 @@ uint32_t Buffer::fill(VFile *vfile, uint32_t bytes, off_t offs)
 /*============================================================================
  *                                  fill
  *============================================================================*/
-uint32_t Buffer::fill(VFile *vfile, off_t offs)
-{
+uint32_t Buffer::fill(VFile *vfile, off_t offs) {
     return fill(vfile, free_space(), offs);
 }
 
 /*============================================================================
  *                                 append
  *============================================================================*/
-uint32_t Buffer::append(VFile *vfile)
-{
+uint32_t Buffer::append(VFile *vfile) {
     uint32_t bytes_written;
 
     bytes_written = vfile->fs_append(m_buf, size());
@@ -80,8 +74,7 @@ uint32_t Buffer::append(VFile *vfile)
 /*============================================================================
  *                                keep_unused
  *============================================================================*/
-void Buffer::keep_unused()
-{
+void Buffer::keep_unused() {
     uint32_t unused_bytes = m_bytes_in_buf - m_bytes_used;
 
     memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
@@ -93,8 +86,7 @@ void Buffer::keep_unused()
  *                                serialize
  *============================================================================*/
 bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
-                       uint32_t valuelen, uint64_t timestamp, uint32_t *len)
-{
+                       uint32_t valuelen, uint64_t timestamp, uint32_t *len) {
     uint32_t bytes_used = 0;
     char *ptr;
     uint32_t buflen;
@@ -147,8 +139,7 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
 /*============================================================================
  *                                deserialize
  *============================================================================*/
-bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue)
-{
+bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue) {
     uint32_t bytes_used = 0;
     char *tmpkey, *tmpvalue;
     const char *ptr;
@@ -208,8 +199,7 @@ bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value,
 /*============================================================================
  *                               str_is_alnum
  *============================================================================*/
-bool Buffer::str_is_alnum(const char *str, int len)
-{
+bool Buffer::str_is_alnum(const char *str, int len) {
     for (int i = 0; i < len; i++)
         if (!isalnum(str[i]))
             return false;

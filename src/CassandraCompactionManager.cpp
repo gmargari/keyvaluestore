@@ -17,40 +17,35 @@
  *============================================================================*/
 CassandraCompactionManager::CassandraCompactionManager(MemStore *memstore, DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
-      m_L(DEFAULT_CASS_K), m_level_files()
-{
+      m_L(DEFAULT_CASS_K), m_level_files() {
     load_state_from_disk();
 }
 
 /*============================================================================
  *                         ~CassandraCompactionManager
  *============================================================================*/
-CassandraCompactionManager::~CassandraCompactionManager()
-{
+CassandraCompactionManager::~CassandraCompactionManager() {
     save_state_to_disk();
 }
 
 /*============================================================================
  *                                   set_L
  *============================================================================*/
-void CassandraCompactionManager::set_L(int l)
-{
+void CassandraCompactionManager::set_L(int l) {
     m_L = l;
 }
 
 /*============================================================================
  *                                   get_L
  *============================================================================*/
-int CassandraCompactionManager::get_L()
-{
+int CassandraCompactionManager::get_L() {
     return m_L;
 }
 
 /*============================================================================
  *                                flush_bytes
  *============================================================================*/
-void CassandraCompactionManager::flush_bytes()
-{
+void CassandraCompactionManager::flush_bytes() {
     DiskFile *disk_file, *memstore_file;
     DiskFileInputStream *istream;
     vector<InputStream *> istreams_to_merge;
@@ -140,8 +135,7 @@ void CassandraCompactionManager::flush_bytes()
 /*============================================================================
  *                              save_state_to_disk
  *============================================================================*/
-bool CassandraCompactionManager::save_state_to_disk()
-{
+bool CassandraCompactionManager::save_state_to_disk() {
     char fname[100];
     FILE *fp;
 
@@ -167,8 +161,7 @@ bool CassandraCompactionManager::save_state_to_disk()
 /*============================================================================
  *                            load_state_from_disk
  *============================================================================*/
-bool CassandraCompactionManager::load_state_from_disk()
-{
+bool CassandraCompactionManager::load_state_from_disk() {
     char fname[100], cmmanager[100];
     FILE *fp;
     int num_levels, level_files;
@@ -202,8 +195,7 @@ bool CassandraCompactionManager::load_state_from_disk()
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int CassandraCompactionManager::sanity_check()
-{
+int CassandraCompactionManager::sanity_check() {
     int size = 0;
     static int last_size = 0;
 

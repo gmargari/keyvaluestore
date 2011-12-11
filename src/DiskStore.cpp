@@ -16,8 +16,7 @@ using namespace std;
  *                                 DiskStore
  *============================================================================*/
 DiskStore::DiskStore()
-    : m_disk_files(), m_rwlock()
-{
+    : m_disk_files(), m_rwlock() {
     pthread_rwlock_init(&m_rwlock, NULL);
     if ( ! load_from_disk()) {
         DiskFile::set_max_dfile_num(0);
@@ -27,8 +26,7 @@ DiskStore::DiskStore()
 /*============================================================================
  *                                ~DiskStore
  *============================================================================*/
-DiskStore::~DiskStore()
-{
+DiskStore::~DiskStore() {
     save_to_disk();
 
     for (int i = 0; i < (int)m_disk_files.size(); i++) {
@@ -40,8 +38,7 @@ DiskStore::~DiskStore()
 /*============================================================================
  *                               get_num_keys
  *============================================================================*/
-uint64_t DiskStore::get_num_keys()
-{
+uint64_t DiskStore::get_num_keys() {
     uint64_t total_keys = 0;
 
     pthread_rwlock_rdlock(&m_rwlock);
@@ -56,8 +53,7 @@ uint64_t DiskStore::get_num_keys()
 /*============================================================================
  *                                get_size
  *============================================================================*/
-uint64_t DiskStore::get_size()
-{
+uint64_t DiskStore::get_size() {
     uint64_t total_size = 0;
 
     pthread_rwlock_rdlock(&m_rwlock);
@@ -72,16 +68,14 @@ uint64_t DiskStore::get_size()
 /*============================================================================
  *                            get_num_disk_files
  *============================================================================*/
-int DiskStore::get_num_disk_files()
-{
+int DiskStore::get_num_disk_files() {
     return m_disk_files.size();
 }
 
 /*============================================================================
  *                               save_to_disk
  *============================================================================*/
-bool DiskStore::save_to_disk()
-{
+bool DiskStore::save_to_disk() {
     char fname[100];
     FILE *fp;
 
@@ -108,8 +102,7 @@ bool DiskStore::save_to_disk()
 /*============================================================================
  *                              load_from_disk
  *============================================================================*/
-bool DiskStore::load_from_disk()
-{
+bool DiskStore::load_from_disk() {
     char fname[100];
     FILE *fp;
     int num_dfiles, max_dfiles_num;

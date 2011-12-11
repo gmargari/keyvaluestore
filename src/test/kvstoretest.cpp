@@ -41,8 +41,7 @@ void randstr(char *s, const int len) {
 /*============================================================================
  *                                main
  *============================================================================*/
-int main()
-{
+int main() {
     KeyValueStore *kvstore;
     char *key, *value;
     struct timeval tv;

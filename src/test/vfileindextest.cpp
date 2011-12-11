@@ -23,8 +23,7 @@ void randstr(char *s, const int len) {
     s[len] = '\0';
 }
 
-int main()
-{
+int main() {
     VFileIndex index;
     char key[MAX_KVTSIZE];
     off_t off1, off2;

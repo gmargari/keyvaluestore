@@ -16,24 +16,21 @@
  *                              CompactionManager
  *============================================================================*/
 CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
-    : m_memstore(memstore), m_diskstore(diskstore)
-{
+    : m_memstore(memstore), m_diskstore(diskstore) {
 
 }
 
 /*============================================================================
  *                              ~CompactionManager
  *============================================================================*/
-CompactionManager::~CompactionManager()
-{
+CompactionManager::~CompactionManager() {
 
 }
 
 /*============================================================================
  *                        memstore_flush_to_diskfile
  *============================================================================*/
-DiskFile *CompactionManager::memstore_flush_to_diskfile()
-{
+DiskFile *CompactionManager::memstore_flush_to_diskfile() {
     DiskFile *disk_file;
     DiskFileOutputStream *disk_ostream;
     MapInputStream *map_istream;
@@ -56,7 +53,6 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile()
 /*============================================================================
  *                              memstore_clear
  *============================================================================*/
-void CompactionManager::memstore_clear()
-{
+void CompactionManager::memstore_clear() {
     m_memstore->clear();
 }

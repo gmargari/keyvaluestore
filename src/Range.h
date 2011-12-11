@@ -62,40 +62,35 @@ public:
  *============================================================================*/
 Range::Range()
     : m_first(NULL), m_firstlen(0), m_last(NULL), m_lastlen(0), m_memsize(0),
-      m_memsize_serialized(0), m_disksize(0), m_block_num(NO_DISK_BLOCK)
-{
+      m_memsize_serialized(0), m_disksize(0), m_block_num(NO_DISK_BLOCK) {
 
 }
 
 /*============================================================================
  *                                  Range
  *============================================================================*/
-Range::~Range()
-{
+Range::~Range() {
 
 }
 
 /*============================================================================
  *                              cmp_by_memsize
  *============================================================================*/
-inline bool Range::cmp_by_memsize(const Range *r1, const Range *r2)
-{
+inline bool Range::cmp_by_memsize(const Range *r1, const Range *r2) {
     return (r1->m_memsize > r2->m_memsize); // descending order
 }
 
 /*============================================================================
  *                              cmp_by_disksize
  *============================================================================*/
-inline bool Range::cmp_by_disksize(const Range *r1, const Range *r2)
-{
+inline bool Range::cmp_by_disksize(const Range *r1, const Range *r2) {
     return (r1->m_disksize > r2->m_disksize); // descending order
 }
 
 /*============================================================================
  *                               cmp_by_term
  *============================================================================*/
-inline bool Range::cmp_by_term(const Range *r1, const Range *r2)
-{
+inline bool Range::cmp_by_term(const Range *r1, const Range *r2) {
     return (strcmp(r1->m_first, r2->m_first) < 0); // ascending order
 }
 
@@ -103,8 +98,7 @@ inline bool Range::cmp_by_term(const Range *r1, const Range *r2)
 /*============================================================================
  *                            cmp_by_block_num
  *============================================================================*/
-inline bool Range::cmp_by_block_num(const Range *r1, const Range *r2)
-{
+inline bool Range::cmp_by_block_num(const Range *r1, const Range *r2) {
     return (r1->m_block_num < r2->m_block_num); // ascending order
 }
 

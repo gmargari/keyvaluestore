@@ -8,8 +8,7 @@
 
 using namespace std;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     const char *key, *value;
     uint32_t keylen, valuelen;
     DiskFile *diskfile;

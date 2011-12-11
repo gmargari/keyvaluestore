@@ -124,48 +124,42 @@ protected:
 /*============================================================================
  *                                capacity
  *============================================================================*/
-inline uint32_t Buffer::capacity()
-{
+inline uint32_t Buffer::capacity() {
     return m_buf_size;
 }
 
 /*============================================================================
  *                                  size
  *============================================================================*/
-inline uint32_t Buffer::size()
-{
+inline uint32_t Buffer::size() {
     return m_bytes_in_buf;
 }
 
 /*============================================================================
  *                               free_space
  *============================================================================*/
-inline uint32_t Buffer::free_space()
-{
+inline uint32_t Buffer::free_space() {
     return m_buf_size - m_bytes_in_buf;
 }
 
 /*============================================================================
  *                                  used
  *============================================================================*/
-inline uint32_t Buffer::used()
-{
+inline uint32_t Buffer::used() {
     return m_bytes_used;
 }
 
 /*============================================================================
  *                                 unused
  *============================================================================*/
-inline uint32_t Buffer::unused()
-{
+inline uint32_t Buffer::unused() {
     return m_bytes_in_buf - m_bytes_used;
 }
 
 /*============================================================================
  *                                  clear
  *============================================================================*/
-inline void Buffer::clear()
-{
+inline void Buffer::clear() {
     m_bytes_in_buf = 0;
     m_bytes_used = 0;
 }
@@ -173,16 +167,14 @@ inline void Buffer::clear()
 /*============================================================================
  *                               serialize_len
  *============================================================================*/
-inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp)
-{
+inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp) {
     return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + valuelen + 2);
 }
 
 /*============================================================================
  *                             undo_deserialize
  *============================================================================*/
-inline void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
+inline void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
 }
 

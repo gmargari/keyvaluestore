@@ -13,8 +13,8 @@
 
 using std::vector;
 
-class VFile
-{
+class VFile {
+
 public:
 
     /**

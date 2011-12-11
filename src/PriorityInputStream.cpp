@@ -15,8 +15,7 @@ static const int SID_NOT_INITIALIZED = INT_MAX;
 PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
     : m_pqueue(), m_istreams(istreams), m_elements(), m_last_sid(SID_NOT_INITIALIZED),
       m_start_key(NULL), m_start_keylen(0), m_end_key(NULL), m_end_keylen(0),
-      m_start_incl(true), m_end_incl(true)
-{
+      m_start_incl(true), m_end_incl(true) {
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
         m_elements.back()->sid = i;
@@ -26,8 +25,7 @@ PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
 /*============================================================================
  *                           ~PriorityInputStream
  *============================================================================*/
-PriorityInputStream::~PriorityInputStream()
-{
+PriorityInputStream::~PriorityInputStream() {
     for (int i = 0; i < (int)m_elements.size(); i++) {
         free(m_elements[i]);
     }
@@ -36,8 +34,7 @@ PriorityInputStream::~PriorityInputStream()
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl)
-{
+void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
     m_start_key = start_key;
     m_start_keylen = start_keylen;
     m_end_key = end_key;
@@ -55,16 +52,14 @@ void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_ke
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen)
-{
+void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) {
     set_key_range(start_key, start_keylen, end_key, end_keylen, true, false);
 }
 
 /*============================================================================
  *                                  reset
  *============================================================================*/
-void PriorityInputStream::reset()
-{
+void PriorityInputStream::reset() {
     assert(sanity_check());
 
     // if priority queue non-empty, remove all elements
@@ -87,8 +82,7 @@ void PriorityInputStream::reset()
 /*============================================================================
  *                                   read
  *============================================================================*/
-bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
-{
+bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
     pq_elem *top;
 
     assert(sanity_check());
@@ -132,8 +126,7 @@ bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int PriorityInputStream::sanity_check()
-{
+int PriorityInputStream::sanity_check() {
     int *x;
     vector<pq_elem *> tmp_vector;
     pq_elem *top;

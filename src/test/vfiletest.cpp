@@ -10,8 +10,7 @@
 
 using namespace std;
 
-int main(void)
-{
+int main(void) {
     VFile f;
     char *buf = (char *)malloc(mb2b(20));
     uint64_t bytes_left, num;

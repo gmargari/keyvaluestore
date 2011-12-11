@@ -23,16 +23,14 @@
  *                                 VFile
  *============================================================================*/
 VFile::VFile()
-    : m_basefilename(NULL), m_names(), m_filedescs()
-{
+    : m_basefilename(NULL), m_names(), m_filedescs() {
     assert(sizeof(off_t) == 8); // ensure 64bit offsets
 }
 
 /*============================================================================
  *                                ~VFile
  *============================================================================*/
-VFile::~VFile()
-{
+VFile::~VFile() {
     fs_close();
 
     for (int i = 0; i < (int)m_names.size(); i++) {
@@ -46,8 +44,7 @@ VFile::~VFile()
 /*============================================================================
  *                         add_new_physical_file
  *============================================================================*/
-bool VFile::add_new_physical_file(bool open_existing)
-{
+bool VFile::add_new_physical_file(bool open_existing) {
     char newfname[100], *fname;
     int fd, fdflag;
 
@@ -77,8 +74,7 @@ bool VFile::add_new_physical_file(bool open_existing)
 /*============================================================================
  *                               fs_open_new
  *============================================================================*/
-bool VFile::fs_open_new(char *filename)
-{
+bool VFile::fs_open_new(char *filename) {
     m_basefilename = strdup(filename);
     return add_new_physical_file(false);
 }
@@ -86,8 +82,7 @@ bool VFile::fs_open_new(char *filename)
 /*============================================================================
  *                             fs_open_existing
  *============================================================================*/
-bool VFile::fs_open_existing(char *filename)
-{
+bool VFile::fs_open_existing(char *filename) {
     char fname[100], vfilename[100];
     FILE *fp;
     struct stat filestatus;
@@ -124,8 +119,7 @@ bool VFile::fs_open_existing(char *filename)
 /*============================================================================
  *                                  close
  *============================================================================*/
-void VFile::fs_close()
-{
+void VFile::fs_close() {
     char fname[100];
     FILE *fp;
     struct stat filestatus;
@@ -154,8 +148,7 @@ void VFile::fs_close()
 /*============================================================================
  *                                 fs_pread
  *============================================================================*/
-ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
-{
+ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs) {
     size_t bytes_read, num;
 
     for (bytes_read = 0; bytes_read < count; ) {
@@ -171,8 +164,7 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs)
 /*============================================================================
  *                                fs_append
  *============================================================================*/
-ssize_t VFile::fs_append(const char *buf, size_t count)
-{
+ssize_t VFile::fs_append(const char *buf, size_t count) {
     size_t bytes_written;
 
     for (bytes_written = 0; bytes_written < count; ) {
@@ -187,8 +179,7 @@ ssize_t VFile::fs_append(const char *buf, size_t count)
 /*============================================================================
  *                                fs_truncate
  *============================================================================*/
-void VFile::fs_truncate(off_t length)
-{
+void VFile::fs_truncate(off_t length) {
     off_t len;
     int new_files, num;
 
@@ -253,8 +244,7 @@ void VFile::fs_truncate(off_t length)
 /*============================================================================
  *                               fs_delete
  *============================================================================*/
-void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and create a protected fs_unlink() that will be called also from fs_truncate.
-{
+void VFile::fs_delete() {
     char fname[100];
 
     sprintf(fname, "%s%s", m_basefilename, VFILE_INFO_SUFFIX);
@@ -279,16 +269,14 @@ void VFile::fs_delete() // TODO: rename this function to fs_rm (public) and crea
 /*============================================================================
  *                                 fs_name
  *============================================================================*/
-char *VFile::fs_name()
-{
+char *VFile::fs_name() {
     return m_basefilename;
 }
 
 /*============================================================================
  *                                 fs_size
  *============================================================================*/
-uint64_t VFile::fs_size()
-{
+uint64_t VFile::fs_size() {
     uint64_t size = 0;
     struct stat filestatus;
 
@@ -303,8 +291,7 @@ uint64_t VFile::fs_size()
 /*============================================================================
  *                                 fs_sync
  *============================================================================*/
-void VFile::fs_sync()
-{
+void VFile::fs_sync() {
     for (int i = 0; i < (int)m_filedescs.size(); i++) {
         time_start(&(g_stats.write_time));
         fsync(m_filedescs[i]);
@@ -315,8 +302,7 @@ void VFile::fs_sync()
 /*============================================================================
  *                               cur_fs_pread
  *============================================================================*/
-ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
-{
+ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs) {
     ssize_t actually_read;
     off_t offs_in_file;
     int fileno;
@@ -345,8 +331,7 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs)
 /*============================================================================
  *                                cur_fs_append
  *============================================================================*/
-ssize_t VFile::cur_fs_append(const char *buf, size_t count)
-{
+ssize_t VFile::cur_fs_append(const char *buf, size_t count) {
     ssize_t actually_written;
     size_t bytes_left;
     int fileno;

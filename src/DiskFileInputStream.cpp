@@ -15,8 +15,7 @@
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
     : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_start_keylen(0),
-      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true)
-{
+      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true) {
     m_buf = new Buffer(bufsize);
     set_key_range(NULL, 0, NULL, 0);
 }
@@ -26,24 +25,21 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize)
     : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_start_keylen(0),
-      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true)
-{
+      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true) {
     m_buf = new Buffer(buf, bufsize);
 }
 
 /*============================================================================
  *                            ~DiskFileInputStream
  *============================================================================*/
-DiskFileInputStream::~DiskFileInputStream()
-{
+DiskFileInputStream::~DiskFileInputStream() {
     delete m_buf;
 }
 
 /*============================================================================
  *                                set_key_range
  *============================================================================*/
-void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl)
-{
+void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
     m_start_key = start_key;
     m_start_keylen = start_keylen;
     m_end_key = end_key;
@@ -57,16 +53,14 @@ void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_ke
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen)
-{
+void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) {
     set_key_range(start_key, start_keylen, end_key, end_keylen, true, false);
 }
 
 /*============================================================================
  *                                  read
  *============================================================================*/
-bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp)
-{
+bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
     int cmp;
     off_t off1, off2;
     const char *tmpkey, *tmpvalue;

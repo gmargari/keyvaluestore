@@ -43,8 +43,7 @@ private:
  *============================================================================*/
 RequestThrottle::RequestThrottle(int target_rate)
     : m_req_per_sec(target_rate), m_buffer(), m_capacity(target_rate),
-      m_size(0), m_head(0)
-{
+      m_size(0), m_head(0) {
     if (m_req_per_sec) {
         m_buffer = new timeval[m_capacity];
         assert(m_buffer);
@@ -54,16 +53,14 @@ RequestThrottle::RequestThrottle(int target_rate)
 /*============================================================================
  *                              ~RequestThrottle
  *============================================================================*/
-RequestThrottle::~RequestThrottle()
-{
+RequestThrottle::~RequestThrottle() {
     delete[] m_buffer;
 }
 
 /*============================================================================
  *                                   throttle
  *============================================================================*/
-void RequestThrottle::throttle()
-{
+void RequestThrottle::throttle() {
     struct timeval now;
     double diff_sec;
 

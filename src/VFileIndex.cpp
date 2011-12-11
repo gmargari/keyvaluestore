@@ -10,24 +10,21 @@
  *                                VFileIndex
  *============================================================================*/
 VFileIndex::VFileIndex()
-    : m_map(), m_vfilesize(), m_stored_keys(0)
-{
+    : m_map(), m_vfilesize(), m_stored_keys(0) {
 
 }
 
 /*============================================================================
  *                               ~VFileIndex
  *============================================================================*/
-VFileIndex::~VFileIndex()
-{
+VFileIndex::~VFileIndex() {
     clear();
 }
 
 /*============================================================================
  *                                   add
  *============================================================================*/
-void VFileIndex::add(const char *key, uint32_t keylen, off_t offset)
-{
+void VFileIndex::add(const char *key, uint32_t keylen, off_t offset) {
     char *cpkey;
     assert(sanity_check());
 
@@ -42,16 +39,14 @@ void VFileIndex::add(const char *key, uint32_t keylen, off_t offset)
 /*============================================================================
  *                               set_vfilesize
  *============================================================================*/
-void VFileIndex::set_vfilesize(off_t size)
-{
+void VFileIndex::set_vfilesize(off_t size) {
     m_vfilesize = size;
 }
 
 /*============================================================================
  *                            get_first_last_term
  *============================================================================*/
-void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen)
-{
+void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen) {
     TermOffsetMap::iterator iter;
 
     *first = m_map.begin()->first;
@@ -65,8 +60,7 @@ void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, con
 /*============================================================================
  *                                  search
  *============================================================================*/
-bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off_t *end_off)
-{
+bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off_t *end_off) {
     TermOffsetMap::iterator iter;
 
     assert(sanity_check());
@@ -109,8 +103,7 @@ bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off
 /*============================================================================
  *                                   clear
  *============================================================================*/
-void VFileIndex::clear()
-{
+void VFileIndex::clear() {
     TermOffsetMap::iterator iter;
 
     assert(sanity_check());
@@ -128,24 +121,21 @@ void VFileIndex::clear()
 /*============================================================================
  *                            set_num_stored_leys
  *============================================================================*/
-void VFileIndex::set_num_stored_leys(uint64_t numkeys)
-{
+void VFileIndex::set_num_stored_leys(uint64_t numkeys) {
     m_stored_keys = numkeys;
 }
 
 /*============================================================================
  *                            get_num_stored_leys
  *============================================================================*/
-uint64_t VFileIndex::get_num_stored_leys()
-{
+uint64_t VFileIndex::get_num_stored_leys() {
     return m_stored_keys;
 }
 
 /*============================================================================
  *                                save_to_disk
  *============================================================================*/
-void VFileIndex::save_to_disk(int fd)
-{
+void VFileIndex::save_to_disk(int fd) {
     size_t len;
     int num;
 
@@ -169,8 +159,7 @@ void VFileIndex::save_to_disk(int fd)
 /*============================================================================
  *                               load_from_disk
  *============================================================================*/
-void VFileIndex::load_from_disk(int fd)
-{
+void VFileIndex::load_from_disk(int fd) {
     size_t len;
     int num;
     char key[MAX_INDEX_DIST];
@@ -199,8 +188,7 @@ void VFileIndex::load_from_disk(int fd)
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int VFileIndex::sanity_check()
-{
+int VFileIndex::sanity_check() {
     TermOffsetMap::iterator iter;
     const char *prev_key = NULL;
     off_t prev_offs = -1;

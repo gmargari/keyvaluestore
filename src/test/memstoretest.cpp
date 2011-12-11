@@ -12,8 +12,7 @@ using namespace std;
 /*============================================================================
  *                                 main
  *============================================================================*/
-int main()
-{
+int main() {
     MemStore *memstore = new MemStore();
     int t = 1, map1_num, map2_num, map3_num;
     char *k1 = (char *)"", *k2 = (char *)"f3", *k3 = (char *)"p3";

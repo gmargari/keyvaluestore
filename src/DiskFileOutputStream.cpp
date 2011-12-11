@@ -14,8 +14,7 @@
  *============================================================================*/
 DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
     : m_file(file), m_file_size(0), m_buf(NULL), m_index(NULL),
-      m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1), m_stored_keys(0)
-{
+      m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1), m_stored_keys(0) {
     m_buf = new Buffer(bufsize);
     m_last_key = (char *)malloc(MAX_KVTSIZE);
     m_index = new VFileIndex();
@@ -25,8 +24,7 @@ DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
 /*============================================================================
  *                           ~DiskFileOutputStream
  *============================================================================*/
-DiskFileOutputStream::~DiskFileOutputStream()
-{
+DiskFileOutputStream::~DiskFileOutputStream() {
     delete m_buf;
     free(m_last_key);
 }
@@ -34,8 +32,7 @@ DiskFileOutputStream::~DiskFileOutputStream()
 /*============================================================================
  *                                 reset
  *============================================================================*/
-void DiskFileOutputStream::reset()
-{
+void DiskFileOutputStream::reset() {
     m_buf->clear();
 
     m_index->clear(); // index will be rebuild
@@ -49,8 +46,7 @@ void DiskFileOutputStream::reset()
 /*============================================================================
  *                                  write
  *============================================================================*/
-bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp)
-{
+bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     uint32_t len;
     off_t cur_offs;
 
@@ -85,8 +81,7 @@ bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *
 /*============================================================================
  *                                 close
  *============================================================================*/
-void DiskFileOutputStream::close()
-{
+void DiskFileOutputStream::close() {
     m_file->append(m_buf);
     m_file->sync();
 

@@ -10,8 +10,7 @@
 using namespace std;
 using std::vector;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     const char *key, *value;
     uint32_t keylen, valuelen;
     char prev_key[MAX_KVTSIZE];
