@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <queue>
-#include <cstring>
+#include <string.h>
 
 using std::vector;
 using std::priority_queue;

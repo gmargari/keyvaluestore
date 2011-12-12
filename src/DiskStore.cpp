@@ -3,9 +3,9 @@
 
 #include "DiskFile.h"
 
-#include <cstdlib>
-#include <cassert>
-#include <cstdio>
+#include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
 
 using namespace std;
 

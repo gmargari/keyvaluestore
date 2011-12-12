@@ -2,12 +2,12 @@
 #include "../KeyValueStore.h"
 #include "../Scanner.h"
 
-#include <cstdio>
+#include <stdio.h>
 #include <iostream>
 #include <iomanip>
-#include <cstdlib>
-#include <cassert>
-#include <cstring>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 #include <sys/time.h>
 
 #define MEMSTORE_SIZE        1000000LL

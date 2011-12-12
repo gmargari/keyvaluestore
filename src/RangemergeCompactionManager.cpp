@@ -9,8 +9,8 @@
 #include "Range.h"
 #include "Streams.h"
 
-#include <cassert>
-#include <climits>
+#include <assert.h>
+#include <limits.h>
 #include <pthread.h>
 
 using std::vector;

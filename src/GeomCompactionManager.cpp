@@ -7,8 +7,8 @@
 #include "DiskFileInputStream.h"
 #include "Streams.h"
 
-#include <cassert>
-#include <cmath>
+#include <assert.h>
+#include <math.h>
 
 uint64_t dbg_lastsize = 0; // used for sanity_check()
 

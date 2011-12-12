@@ -6,11 +6,11 @@
 #include "DiskFileInputStream.h"
 #include "Streams.h"
 
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
-#include <cmath>
-#include <cstring>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <math.h>
+#include <string.h>
 
 /*============================================================================
  *                          CassandraCompactionManager

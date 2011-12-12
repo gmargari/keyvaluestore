@@ -1,7 +1,7 @@
 #include "Global.h"
 #include "MapInputStream.h"
 
-#include <cassert>
+#include <assert.h>
 
 /*============================================================================
  *                              MapInputStream

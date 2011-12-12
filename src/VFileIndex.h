@@ -1,8 +1,8 @@
 #ifndef VFILEINDEX_H
 #define VFILEINDEX_H
 
-#include <cstdio>
-#include <cstring>
+#include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 #include <map>
 

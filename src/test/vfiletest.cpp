@@ -2,8 +2,8 @@
 #include "../VFile.h"
 #include "../Statistics.h"
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <iostream>

@@ -4,7 +4,7 @@
 #include "Slice.h"
 
 #include <stdint.h>
-#include <cstring>
+#include <string.h>
 #include <map>
 
 using std::map;

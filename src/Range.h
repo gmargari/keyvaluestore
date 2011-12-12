@@ -2,8 +2,8 @@
 #define RANGE_H
 
 #include <stdint.h>
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 #define NO_DISK_BLOCK (-1)
 

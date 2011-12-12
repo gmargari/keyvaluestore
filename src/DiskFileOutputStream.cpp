@@ -5,7 +5,7 @@
 #include "VFileIndex.h"
 #include "Buffer.h"
 
-#include <cstdlib>
+#include <stdlib.h>
 
 /*============================================================================
  *                            DiskFileOutputStream

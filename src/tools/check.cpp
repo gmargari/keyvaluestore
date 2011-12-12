@@ -3,8 +3,8 @@
 #include "../DiskFileInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 #include <iostream>
 
 using namespace std;

@@ -3,7 +3,7 @@
 #include "../DiskFileInputStream.h"
 #include "../Statistics.h"
 
-#include <cstdlib>
+#include <stdlib.h>
 #include <iostream>
 
 using namespace std;

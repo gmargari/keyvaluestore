@@ -4,7 +4,7 @@
 #include "Buffer.h"
 #include "Statistics.h"
 
-#include <cassert>
+#include <assert.h>
 
 using std::make_pair;
 

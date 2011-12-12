@@ -1,9 +1,9 @@
 #include "Global.h"
 #include "PriorityInputStream.h"
 
-#include <cassert>
-#include <cstdlib>
-#include <climits>
+#include <assert.h>
+#include <stdlib.h>
+#include <limits.h>
 
 static const int SID_NOT_INITIALIZED = INT_MAX;
 

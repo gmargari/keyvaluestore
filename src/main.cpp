@@ -9,9 +9,9 @@
 #include "Scanner.h"
 #include "RequestThrottle.h"
 
-#include <cmath>
-#include <cstring>
-#include <cassert>
+#include <math.h>
+#include <string.h>
+#include <assert.h>
 #include <iostream>
 #include <iomanip>
 #include <pthread.h>

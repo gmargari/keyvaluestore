@@ -7,9 +7,9 @@
 #include "../Statistics.h"
 
 #include <iostream>
-#include <cstdlib>
-#include <cassert>
-#include <cstdlib>
+#include <stdlib.h>
+#include <assert.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 using namespace std;

@@ -5,7 +5,7 @@
 #include "../Statistics.h"
 
 #include <iostream>
-#include <cstdlib>
+#include <stdlib.h>
 
 using namespace std;
 using std::vector;

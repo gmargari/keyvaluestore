@@ -4,8 +4,8 @@
 #include "../Statistics.h"
 
 #include <iostream>
-#include <cstdlib>
-#include <cassert>
+#include <stdlib.h>
+#include <assert.h>
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 #include "Global.h"
 #include "VFileIndex.h"
 
-#include <cassert>
-#include <cstdlib>
+#include <assert.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 /*============================================================================

@@ -11,7 +11,7 @@
 #include "CassandraCompactionManager.h"
 #include "Statistics.h"
 
-#include <cassert>
+#include <assert.h>
 #include <sys/stat.h>
 #include <iostream>
 

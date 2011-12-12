@@ -3,8 +3,8 @@
 #include "../Statistics.h"
 
 #include <sys/time.h>
-#include <cstdlib>
-#include <cassert>
+#include <stdlib.h>
+#include <assert.h>
 #include <iostream>
 #include <iomanip>
 
