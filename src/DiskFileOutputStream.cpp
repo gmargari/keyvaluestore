@@ -15,8 +15,8 @@ DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
       m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1), m_stored_keys(0) {
     m_buf = new Buffer(bufsize);
     m_last_key = (char *)malloc(MAX_KVTSIZE);
+    m_last_key[0] = '\0';
     m_index = new VFileIndex();
-    reset();
 }
 
 /*============================================================================
@@ -28,21 +28,7 @@ DiskFileOutputStream::~DiskFileOutputStream() {
 }
 
 /*============================================================================
- *                                 reset
- *============================================================================*/
-void DiskFileOutputStream::reset() {
-    m_buf->clear();
-
-    m_index->clear(); // index will be rebuild
-    m_last_key[0] = '\0';
-    m_last_keylen = 0;
-    m_last_offs = -1;
-    m_last_idx_offs = -1;
-    m_stored_keys = 0;
-}
-
-/*============================================================================
- *                                  write
+ *                                 append
  *============================================================================*/
 bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
     uint32_t len;

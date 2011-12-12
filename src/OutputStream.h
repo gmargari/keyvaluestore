@@ -7,12 +7,15 @@ class OutputStream {
 
 public:
 
-    virtual ~OutputStream() { };
+    /**
+     * constructor
+     */
+    OutputStream() { }
 
     /**
-     * reset stream
+     * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual void reset() = 0;
+    virtual ~OutputStream() { };
 
     /**
      * append <key, value, timestamp> tuple to stream

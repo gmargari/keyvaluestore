@@ -24,7 +24,6 @@ public:
     ~DiskFileOutputStream();
 
     // inherited from OutputStream
-    void reset();
     bool append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
     void close();
 
