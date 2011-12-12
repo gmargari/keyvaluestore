@@ -1,9 +1,7 @@
 #include "Global.h"
 #include "Streams.h"
 
-#include "MapInputStream.h"
 #include "DiskFile.h"
-#include "DiskFileInputStream.h"
 #include "DiskFileOutputStream.h"
 #include "PriorityInputStream.h"
 #include "Buffer.h"

@@ -2,7 +2,6 @@
 #define KVTOUTPUTSTREAM_H
 
 #include <stdint.h>
-#include <unistd.h>
 
 class OutputStream {
 

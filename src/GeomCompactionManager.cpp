@@ -1,18 +1,14 @@
 #include "Global.h"
 #include "GeomCompactionManager.h"
 
-#include "MemStore.h"
 #include "DiskStore.h"
 #include "MapInputStream.h"
 #include "DiskFile.h"
 #include "DiskFileInputStream.h"
 #include "Streams.h"
 
-#include <cstdlib>
-#include <cstdio>
 #include <cassert>
 #include <cmath>
-#include <pthread.h>
 
 uint64_t dbg_lastsize = 0; // used for sanity_check()
 

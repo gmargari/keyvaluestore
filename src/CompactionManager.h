@@ -1,11 +1,6 @@
 #ifndef COMPACTIONMANAGER_H
 #define COMPACTIONMANAGER_H
 
-#include <stdint.h>
-#include <vector>
-
-using std::vector;
-
 class MemStore;
 class DiskStore;
 class DiskFile;

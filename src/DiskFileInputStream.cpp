@@ -2,11 +2,8 @@
 #include "DiskFileInputStream.h"
 
 #include "DiskFile.h"
-#include "VFile.h"
-#include "VFileIndex.h"
 #include "Buffer.h"
 
-#include <cstdlib>
 #include <cstring>
 #include <cassert>
 

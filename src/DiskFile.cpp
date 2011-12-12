@@ -5,9 +5,6 @@
 #include "VFileIndex.h"
 #include "Buffer.h"
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 int DiskFile::m_max_dfile_num = 0;

@@ -2,12 +2,10 @@
 #include "DiskFileOutputStream.h"
 
 #include "DiskFile.h"
-#include "VFile.h"
 #include "VFileIndex.h"
 #include "Buffer.h"
 
 #include <cstdlib>
-#include <cassert>
 
 /*============================================================================
  *                            DiskFileOutputStream

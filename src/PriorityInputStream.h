@@ -6,7 +6,6 @@
 #include <vector>
 #include <queue>
 #include <cstring>
-#include <cassert>
 
 using std::vector;
 using std::priority_queue;

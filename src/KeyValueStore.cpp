@@ -13,9 +13,6 @@
 
 #include <cassert>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <cstdlib>
 #include <iostream>
 
 using namespace std;

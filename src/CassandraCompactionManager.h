@@ -3,13 +3,9 @@
 
 #include "CompactionManager.h"
 
-#include <stdint.h>
 #include <vector>
 
 using std::vector;
-
-class MemStore;
-class DiskStore;
 
 class CassandraCompactionManager: public CompactionManager {
 

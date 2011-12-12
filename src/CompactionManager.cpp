@@ -2,15 +2,12 @@
 #include "CompactionManager.h"
 
 #include "MemStore.h"
-#include "DiskStore.h"
 #include "MapInputStream.h"
 #include "DiskFile.h"
-#include "DiskFileInputStream.h"
 #include "DiskFileOutputStream.h"
-#include "PriorityInputStream.h"
-#include "Buffer.h"
-#include "Statistics.h"
 #include "Streams.h"
+
+#include <assert.h>
 
 /*============================================================================
  *                              CompactionManager

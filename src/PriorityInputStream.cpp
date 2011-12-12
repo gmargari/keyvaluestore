@@ -1,8 +1,6 @@
 #include "Global.h"
 #include "PriorityInputStream.h"
 
-#include <cstdlib>
-#include <cstring>
 #include <cassert>
 #include <cstdlib>
 #include <climits>

@@ -2,7 +2,6 @@
 #include "MapInputStream.h"
 
 #include <cassert>
-#include <cstdlib>
 
 /*============================================================================
  *                              MapInputStream

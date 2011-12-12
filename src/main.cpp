@@ -9,18 +9,11 @@
 #include "Scanner.h"
 #include "RequestThrottle.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include <cmath>
-#include <ctime>
 #include <cstring>
 #include <cassert>
-#include <ctype.h>
-#include <unistd.h>
 #include <iostream>
 #include <iomanip>
-#include <vector>
-#include <sys/time.h>
 #include <pthread.h>
 #include <getopt.h>
 

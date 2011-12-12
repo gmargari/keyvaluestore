@@ -1,7 +1,6 @@
 #include "Global.h"
 #include "MemStore.h"
 
-#include "Map.h"
 #include "MapInputStream.h"
 
 #include <assert.h>

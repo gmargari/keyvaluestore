@@ -4,9 +4,10 @@
 #include "CompactionManager.h"
 
 #include <stdint.h>
+#include <vector>
 
-class MemStore;
-class DiskStore;
+using std::vector;
+
 class Range;
 
 class RangemergeCompactionManager: public CompactionManager {

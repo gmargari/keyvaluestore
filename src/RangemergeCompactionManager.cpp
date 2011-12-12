@@ -12,7 +12,6 @@
 #include <cassert>
 #include <climits>
 #include <pthread.h>
-#include <algorithm>
 
 using std::vector;
 using std::min;

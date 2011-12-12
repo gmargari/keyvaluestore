@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <unistd.h>
-#include <cstring>
 
 /*============================================================================
  *                                VFileIndex

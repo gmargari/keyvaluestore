@@ -2,12 +2,9 @@
 #include "DiskStore.h"
 
 #include "DiskFile.h"
-#include "DiskFileInputStream.h"
 
 #include <cstdlib>
 #include <cassert>
-#include <cstring>
-#include <pthread.h>
 #include <cstdio>
 
 using namespace std;

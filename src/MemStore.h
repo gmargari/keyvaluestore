@@ -1,6 +1,7 @@
 #ifndef MEMSTORE_H
 #define MEMSTORE_H
 
+#include "Global.h" // for MAX_KVTSIZE
 #include <stdint.h>
 #include <map>
 #include <algorithm>

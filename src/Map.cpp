@@ -5,9 +5,6 @@
 #include "Statistics.h"
 
 #include <cassert>
-#include <cstdlib>
-#include <cstdio>
-#include <sys/time.h>
 
 using std::make_pair;
 

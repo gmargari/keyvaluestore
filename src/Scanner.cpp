@@ -1,10 +1,8 @@
 #include "Global.h"
 #include "Scanner.h"
 
-#include "MemStore.h"
 #include "DiskStore.h"
 #include "KeyValueStore.h"
-#include "MapInputStream.h"
 #include "DiskFileInputStream.h"
 #include "PriorityInputStream.h"
 

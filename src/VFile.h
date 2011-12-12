@@ -9,7 +9,6 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-#include <sys/time.h>
 
 using std::vector;
 
