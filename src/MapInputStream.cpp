@@ -32,8 +32,8 @@ void MapInputStream::set_key_range(const char *start_key, uint32_t start_keylen,
 
     assert(!m_start_key || !m_end_key || strcmp(m_start_key, m_end_key) <= 0);
     assert(m_map);
-    m_iter = m_map->start_iter(m_start_key, start_keylen, m_start_incl);
-    m_iter_end = m_map->end_iter(m_end_key, end_keylen, m_end_incl);
+    m_iter = m_map->start_iter(Slice(m_start_key, start_keylen), m_start_incl);
+    m_iter_end = m_map->end_iter(Slice(m_end_key, end_keylen), m_end_incl);
 }
 
 /*============================================================================

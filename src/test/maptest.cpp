@@ -81,7 +81,7 @@ int main() {
                  valuelen = rand() % maxkeysize + 1;
         randstr(key, keylen);
         randstr(value, valuelen);
-        map->put(key, keylen, value, valuelen, i+1);
+        map->put(Slice(key, keylen), Slice(value, valuelen), i+1);
     }
 
     //========================================================
@@ -110,7 +110,7 @@ int main() {
                  valuelen = rand() % maxkeysize + 1;
         randstr(key, keylen);
         randstr(value, valuelen);
-        map->put(key, keylen, value, valuelen, i+1);
+        map->put(Slice(key, keylen), Slice(value, valuelen), i+1);
     }
 
     //========================================================

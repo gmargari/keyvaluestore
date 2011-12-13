@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #include "./Global.h"
+#include "./Slice.h"
 
 class VFile;
 class VFileIndex;
@@ -56,7 +57,7 @@ class DiskFile {
     /**
      * return first and last term stored in disk file
      */
-    void get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen);
+    void get_first_last_term(Slice *first, Slice *last);
 
     /**
      * name of this disk file
@@ -102,11 +103,11 @@ class DiskFile {
      * bytes stored on diskfile between 'start_off' and 'end_off' and linearly
      * search for a <'term', value> pair.
      *
-     * @param term (in) term to search for
+     * @param key (in) key to search for
      * @param start_off (out) start offset on disk file
      * @param end_off (out) end offset on disk file
      */
-    bool search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off);
+    bool search(Slice key, off_t *start_off, off_t *end_off);
 
     /**
      * set the index for this diskfile

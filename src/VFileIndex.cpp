@@ -23,12 +23,12 @@ VFileIndex::~VFileIndex() {
 /*============================================================================
  *                                   add
  *============================================================================*/
-void VFileIndex::add(const char *key, uint32_t keylen, off_t offset) {
+void VFileIndex::add(Slice key, off_t offset) {
     char *cpkey;
     assert(sanity_check());
 
-    cpkey = (char *)malloc(keylen + 1);
-    memcpy(cpkey, key, keylen + 1);
+    cpkey = (char *)malloc(key.size() + 1);
+    memcpy(cpkey, key.data(), key.size() + 1);
     assert(m_map.find(cpkey) == m_map.end());
     m_map[cpkey] = offset;
 
@@ -45,32 +45,32 @@ void VFileIndex::set_vfilesize(off_t size) {
 /*============================================================================
  *                            get_first_last_term
  *============================================================================*/
-void VFileIndex::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen) {
+void VFileIndex::get_first_last_term(Slice *first, Slice *last) {
     TermOffsetMap::iterator iter;
 
-    *first = m_map.begin()->first;
-    *firstlen = strlen(*first);
+    assert(first && last);
+    iter = m_map.begin();
+    *first = Slice(iter->first, strlen(iter->first));
     iter = m_map.end();
     --iter;
-    *last = iter->first;
-    *lastlen = strlen(iter->first);
+    *last = Slice(iter->first, strlen(iter->first));
 }
 
 /*============================================================================
  *                                  search
  *============================================================================*/
-bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off_t *end_off) {
+bool VFileIndex::search(Slice key, off_t *start_off, off_t *end_off) {
     TermOffsetMap::iterator iter;
 
     assert(sanity_check());
-    assert(key && start_off && end_off);
+    assert(key.data() && start_off && end_off);
     assert(m_vfilesize && "index probably does not exist");
 
-    iter = m_map.upper_bound(key);
+    iter = m_map.upper_bound(key.data());
 
     if (iter == m_map.end()) {  // no key greater than 'key'
         // if the last term of index is 'key'
-        if (m_map.size() > 0 && (iter--, 1) && strcmp(iter->first, key) == 0) {
+        if (m_map.size() > 0 && (iter--, 1) && strcmp(iter->first, key.data()) == 0) {
             *start_off = iter->second;
             *end_off = m_vfilesize;
             assert(*start_off < *end_off);
@@ -84,7 +84,7 @@ bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off
         *end_off = iter->second;
         --iter;
         *start_off = iter->second;
-        assert(strcmp(key, iter->first) >= 0 && (iter++, 1) && strcmp(key, iter->first) <= 0);
+        assert(strcmp(key.data(), iter->first) >= 0 && (iter++, 1) && strcmp(key.data(), iter->first) <= 0);
         assert(*start_off < *end_off);
         return true;
     } else {  // 'key' is smaller than first term in index
@@ -171,7 +171,7 @@ void VFileIndex::load_from_disk(int fd) {
         read(fd, key, len);
         key[len] = '\0';
         read(fd, &offset, sizeof(offset));
-        add(key, len, offset);
+        add(Slice(key, len), offset);
     }
 
     // read filesize & number of stored keys

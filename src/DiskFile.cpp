@@ -108,8 +108,8 @@ uint64_t DiskFile::get_size() {
 /*============================================================================
  *                            get_first_last_term
  *============================================================================*/
-void DiskFile::get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen) {
-    m_index->get_first_last_term(first, firstlen, last, lastlen);
+void DiskFile::get_first_last_term(Slice *first, Slice *last) {
+    m_index->get_first_last_term(first, last);
 }
 
 /*============================================================================
@@ -164,8 +164,8 @@ void DiskFile::sync() {
 /*============================================================================
  *                                  search
  *============================================================================*/
-bool DiskFile::search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off) {
-    return m_index->search(term, termlen, start_off, end_off);
+bool DiskFile::search(Slice key, off_t *start_off, off_t *end_off) {
+    return m_index->search(key, start_off, end_off);
 }
 
 /*============================================================================

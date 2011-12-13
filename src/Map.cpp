@@ -27,13 +27,16 @@ Map::~Map() {
 /*============================================================================
  *                                    put
  *============================================================================*/
-bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
+bool Map::put(Slice Key, Slice Value, uint64_t timestamp) {
     const char *cpkey;
     char *cpvalue, *old_value, *p;
     uint64_t old_timestamp;
     uint32_t old_valuelen;
     KVTPair new_pair;
     KVTMap::iterator iter;
+    const char *key = Key.data(), *value = Value.data();
+    uint32_t keylen = Key.size(), valuelen = Value.size();
+
 
     assert(sanity_check());
     assert(key);
@@ -85,20 +88,18 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
 /*============================================================================
  *                                    get
  *============================================================================*/
-bool Map::get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
+bool Map::get(Slice key, Slice *value, uint64_t *timestamp) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
-    assert(key && value && timestamp);
+    assert(key.data() && value && timestamp);
 
-    if ((iter = m_map.find(key)) != m_map.end()) {
-        *value = iter->second.first.data();
-        *valuelen = iter->second.first.size();
+    if ((iter = m_map.find(key.data())) != m_map.end()) {
+        *value = iter->second.first;
         *timestamp = iter->second.second;
         return true;
     } else {
-        *value = NULL;
-        *valuelen = 0;
+        *value = Slice();
         *timestamp = 0;
         return false;
     }
@@ -135,17 +136,16 @@ pair<uint64_t, uint64_t> Map::get_sizes() {
 /*============================================================================
  *                                  kv_size
  *============================================================================*/
-uint32_t Map::kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
-    return (keylen + 1 + sizeof(KVTPair) + valuelen + 1);
+uint32_t Map::kv_size(Slice key, Slice value, uint64_t timestamp) {
+    return (key.size() + 1 + sizeof(KVTPair) + value.size() + 1);
 }
 
 /*============================================================================
  *                                   clear
  *============================================================================*/
 void Map::clear() {
-    char *key, *value;
+    Slice key, value;
     uint64_t timestamp;
-    uint32_t keylen, valuelen;
 #if DBGLVL > 0
     uint64_t dbg_mem_before, dbg_bytes_cleaned = 0;
 #endif
@@ -156,19 +156,17 @@ void Map::clear() {
     time_start(&(g_stats.free_time));
 
     for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
-        key = const_cast<char *>(iter->first.data());
-        keylen = iter->first.size();
-        value = const_cast<char *>(iter->second.first.data());
-        valuelen = iter->second.first.size();
+        key = iter->first;
+        value = iter->second.first;
         timestamp = iter->second.second;
-        assert(key);
-        assert(value);
-        assert((dbg_bytes_cleaned += keylen + 1 + sizeof(KVTPair) + valuelen + 1));
-        m_size -= keylen + 1 + sizeof(KVTPair) + valuelen + 1;
-        m_size_serialized -= Buffer::serialize_len(keylen, valuelen, timestamp);
+        assert(key.data());
+        assert(value.data());
+        assert((dbg_bytes_cleaned += key.size() + 1 + sizeof(KVTPair) + value.size() + 1));  // replace with kv_Size()
+        m_size -= key.size() + 1 + sizeof(KVTPair) + value.size() + 1;
+        m_size_serialized -= Buffer::serialize_len(key.size(), value.size(), timestamp);
         m_keys--;
-        free(key);
-        free(value);
+        free(const_cast<char *>(key.data()));
+        free(const_cast<char *>(value.data()));
     }
 
     m_map.clear();
@@ -186,14 +184,14 @@ void Map::clear() {
 /*============================================================================
  *                                 start_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key_incl) {
+Map::KVTMap::iterator Map::start_iter(Slice key, bool key_incl) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
 
-    if (key) {
-        iter = m_map.lower_bound(key);
-        if (key_incl == false && strcmp(iter->first.data(), key) == 0) {
+    if (key.data()) {
+        iter = m_map.lower_bound(key.data());
+        if (key_incl == false && strcmp(iter->first.data(), key.data()) == 0) {
             ++iter;
         }
     } else {
@@ -206,22 +204,22 @@ Map::KVTMap::iterator Map::start_iter(const char *key, uint32_t keylen, bool key
 /*============================================================================
  *                                  end_iter
  *============================================================================*/
-Map::KVTMap::iterator Map::end_iter(const char *key, uint32_t keylen, bool key_incl) {
+Map::KVTMap::iterator Map::end_iter(Slice key, bool key_incl) {
     KVTMap::iterator iter;
 
     assert(sanity_check());
 
-    if (key) {
+    if (key.data()) {
         // upper_bound(x) returns an iterator pointing to the first element
         // whose key compares strictly greater than x
-        iter = m_map.upper_bound(key);
+        iter = m_map.upper_bound(key.data());
 
         // if 'end_key' is not inclusive, set 'iter' one position back
         // and check if 'iter' has key equal to 'end_key'. if yes,
         // leave it there, else forward it one position.
         if (key_incl == false && iter != m_map.begin()) {
             --iter;
-            if (strcmp(iter->first.data(), key) != 0) {
+            if (strcmp(iter->first.data(), key.data()) != 0) {
                 ++iter;
             }
         }

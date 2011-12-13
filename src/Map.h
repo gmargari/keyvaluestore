@@ -33,25 +33,21 @@ class Map {
      * value are created and inserted into map.
      *
      * @param key key to be inserted
-     * @param keylen size of key
      * @param value value to be inserted
-     * @param valuelen size of value
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    bool put(Slice key, Slice value, uint64_t timestamp);
 
     /**
      * get the value for a specific key
      *
      * @param key (in) key to be searched
-     * @param keylen (in) size of key
      * @param value (out) value corresponding to the searched key
-     * @param valuelen (out) size of value
      * @param timestamp (out) timestamp of insertion
      * @return true if key was found, false if not
      */
-    bool get(const char *key, uint32_t keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
+    bool get(Slice key, Slice *value, uint64_t *timestamp);
 
     /**
      * return number of <key, value, timestamp> tuples in map
@@ -77,7 +73,7 @@ class Map {
     /**
      * size of KV when serialized and added to map
      */
-    static uint32_t kv_size(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    static uint32_t kv_size(Slice key, Slice value, uint64_t timestamp);
 
     /**
      * clear all elements of map
@@ -106,7 +102,7 @@ class Map {
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    KVTMap::iterator start_iter(const char *key, uint32_t keylen, bool key_incl);
+    KVTMap::iterator start_iter(Slice key, bool key_incl);
 
     /**
      * return an iterator which points at the last element which equal or
@@ -117,7 +113,7 @@ class Map {
      * @param key_incl whether the key should be inclusive or not
      * @return iterator at specific map element
      */
-    KVTMap::iterator end_iter(const char *key, uint32_t keylen, bool key_incl);
+    KVTMap::iterator end_iter(Slice key, bool key_incl);
 
     KVTMap   m_map;
     uint64_t m_size;             // size of map

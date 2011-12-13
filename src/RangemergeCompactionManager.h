@@ -37,7 +37,7 @@ class RangemergeCompactionManager: public CompactionManager {
     void     set_flushmem(uint64_t flushmem);
     uint64_t get_flushmem();
 
-    // inherited from CompactionManager (see CompactionManager.h for description)
+    // inherited from CompactionManager (see CompactionManager.h for info)
     void flush_bytes();
 
   private:

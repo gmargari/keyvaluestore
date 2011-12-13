@@ -14,7 +14,7 @@ using std::make_pair;
 MemStore::MemStore()
     : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
       m_size_when_serialized(0) {
-    add_map((char *)"", 0);
+    add_map(Slice("", 0));
 }
 
 /*============================================================================
@@ -43,14 +43,14 @@ uint64_t MemStore::get_maxsize() {
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool MemStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
+bool MemStore::put(Slice key, Slice value, uint64_t timestamp) {
     bool ret;
-    Map *map = get_map(key, keylen);
+    Map *map = get_map(key);
 
     m_num_keys -= map->get_num_keys();
     m_size -= map->get_size();
     m_size_when_serialized -= map->get_size_when_serialized();
-    ret = map->put((char *)key, keylen, value, valuelen, timestamp);
+    ret = map->put(key, value, timestamp);
     m_num_keys += map->get_num_keys();
     m_size += map->get_size();
     m_size_when_serialized += map->get_size_when_serialized();
@@ -61,12 +61,12 @@ bool MemStore::put(const char *key, uint32_t keylen, const char *value, uint32_t
 /*============================================================================
  *                                   get
  *============================================================================*/
-bool MemStore::get(const char *key, uint32_t keylen, char **value, uint32_t *valuelen, uint64_t *timestamp) {
-    const char *constvalue;
-
-    if (get_map(key, keylen)->get(key, keylen, &constvalue, valuelen, timestamp)) {
-        *value = (char *)malloc(*valuelen + 1);
-        memcpy(*value, constvalue, *valuelen + 1);  // copy value
+bool MemStore::get(Slice key, Slice *value, uint64_t *timestamp) {
+    char *valuecp;
+    if (get_map(key)->get(key, value, timestamp)) {
+        valuecp = (char *)malloc(value->size() + 1);
+        memcpy(valuecp, value->data(), value->size() + 1);  // copy value
+        *value = Slice(valuecp, value->size());
         return true;
     } else {
         return false;
@@ -97,8 +97,8 @@ uint64_t MemStore::get_size_when_serialized() {
 /*============================================================================
  *                           will_reach_size_limit
  *============================================================================*/
-bool MemStore::will_reach_size_limit(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
-    return (m_size + Map::kv_size(key, keylen, value, valuelen, timestamp) > m_maxsize);
+bool MemStore::will_reach_size_limit(Slice key, Slice value, uint64_t timestamp) {
+    return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 
 /*============================================================================
@@ -121,22 +121,22 @@ MapInputStream *MemStore::new_map_inputstream() {
 /*============================================================================
  *                             new_map_inputstream
  *============================================================================*/
-MapInputStream *MemStore::new_map_inputstream(const char *key, uint32_t keylen) {
-    return new MapInputStream(m_map[idx_of_map(key, keylen)].map);
+MapInputStream *MemStore::new_map_inputstream(Slice key) {
+    return new MapInputStream(m_map[idx_of_map(key)].map);
 }
 
 /*============================================================================
  *                                 add_map
  *============================================================================*/
-void MemStore::add_map(const char *key, uint32_t keylen) {
-    int pos = idx_of_map(key, keylen);
+void MemStore::add_map(Slice key) {
+    int pos = idx_of_map(key);
     StrMapPair newpair;
 
-    if (m_map.size() > 0 && strcmp(m_map[pos].key, key) == 0) {
+    if (m_map.size() > 0 && strcmp(m_map[pos].key, key.data()) == 0) {
         return;  // map with same key already exists
     }
 
-    memcpy(newpair.key, key, keylen + 1);
+    memcpy(newpair.key, key.data(), key.size() + 1);
     newpair.map = new Map();
 
     if (m_map.size()) {
@@ -165,15 +165,15 @@ Map *MemStore::get_map(int idx) {
 /*============================================================================
  *                                 get_map
  *============================================================================*/
-Map *MemStore::get_map(const char *key, uint32_t keylen) {
-    return m_map[idx_of_map(key, keylen)].map;
+Map *MemStore::get_map(Slice key) {
+    return m_map[idx_of_map(key)].map;
 }
 
 /*============================================================================
  *                                 clear_map
  *============================================================================*/
-void MemStore::clear_map(const char *key, uint32_t keylen) {
-    clear_map(get_map(key, keylen));
+void MemStore::clear_map(Slice key) {
+    clear_map(get_map(key));
 }
 
 /*============================================================================
@@ -196,7 +196,7 @@ void MemStore::clear_map(Map *map) {
 /*============================================================================
  *                                 idx_of_map
  *============================================================================*/
-int MemStore::idx_of_map(const char *key, uint32_t keylen) {
+int MemStore::idx_of_map(Slice key) {
     int first, last, mid, cmp;
 
     sanity_check();
@@ -209,7 +209,7 @@ int MemStore::idx_of_map(const char *key, uint32_t keylen) {
     last = m_map.size() - 1;
     while (first <= last) {
         mid = (last - first)/2 + first;  // avoid overflow
-        cmp = strcmp(key, m_map[mid].key);
+        cmp = strcmp(key.data(), m_map[mid].key);
         if (cmp > 0) {
             first = mid + 1;
         } else if (cmp < 0) {
@@ -219,13 +219,13 @@ int MemStore::idx_of_map(const char *key, uint32_t keylen) {
         }
     }
 
-    if (strcmp(key, m_map[mid].key) < 0) {
+    if (strcmp(key.data(), m_map[mid].key) < 0) {
         mid--;
     }
 
     // assert 'key' belongs to range [map[mid].key, map[mid+1].key)
-    assert(strcmp(key, m_map[mid].key) >= 0 &&
-           (mid == (int)m_map.size() - 1 || strcmp(key, m_map[mid+1].key) < 0));
+    assert(strcmp(key.data(), m_map[mid].key) >= 0 &&
+           (mid == (int)m_map.size() - 1 || strcmp(key.data(), m_map[mid+1].key) < 0));
     assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;

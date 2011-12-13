@@ -22,7 +22,7 @@ class GeomCompactionManager: public CompactionManager {
      */
     ~GeomCompactionManager();
 
-    // inherited from CompactionManager (see CompactionManager.h for description)
+    // inherited from CompactionManager (see CompactionManager.h for info)
     void flush_bytes();
 
     /**
@@ -50,7 +50,7 @@ class GeomCompactionManager: public CompactionManager {
     int partition_maxsize(int num);
 
     /**
-     * given the size of a partition, return which partition is this (e.g. the 4th)
+     * given the size of a partition, return which partition is this
      */
     int partition_num(int partition_size);
 

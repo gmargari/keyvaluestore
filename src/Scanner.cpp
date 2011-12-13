@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "./DiskStore.h"
+#include "./MemStore.h"
 #include "./KeyValueStore.h"
 #include "./DiskFileInputStream.h"
 #include "./PriorityInputStream.h"
@@ -27,15 +28,15 @@ Scanner::~Scanner() {
  *============================================================================*/
 int Scanner::point_get(const char *key, uint32_t keylen) {
     const char *k, *v;
-    uint32_t klen, vlen, valuelen;
-    char *value;
+    uint32_t klen, vlen;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
+    Slice K = Slice(key, keylen), V;
 
 //    // NOTE: don't read from memstore, it's not thread safe for concurrent puts and gets
 //     // first check memstore, since it has the most recent values
-//     if (m_kvstore->m_memstore->get(key, keylen, &value, &valuelen, &t)) {
-//         free(value); // it has been copied
+//     if (m_kvstore->m_memstore->get(K, &V, &t)) {
+//         free(const_cast<char *>(V.data()));  // it has been copied
 //         return 1;
 //     }
 

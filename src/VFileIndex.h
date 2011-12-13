@@ -9,6 +9,7 @@
 #include <map>
 
 #include "./Global.h"
+#include "./Slice.h"
 
 using std::map;
 
@@ -27,7 +28,7 @@ class VFileIndex {
     /**
      * add (append) a <key, offset> entry in index
      */
-    void add(const char *key, uint32_t keylen, off_t offset);
+    void add(Slice key, off_t offset);
 
     /**
      * set the vfile disk size (used to determine where the last entry ends,
@@ -38,7 +39,7 @@ class VFileIndex {
     /**
      * return first and last term in index
      */
-    void get_first_last_term(const char **first, uint32_t *firstlen, const char **last, uint32_t *lastlen);
+    void get_first_last_term(Slice *first, Slice *last);
 
     /**
      * find the location on disk where the value corresponding to key 'term'
@@ -46,11 +47,11 @@ class VFileIndex {
      * bytes stored on vfile between 'start_off' and 'end_off' and linearly
      * search for a <'term', value> pair.
      *
-     * @param term (in) term to search for
+     * @param key (in) term to search for
      * @param start_off (out) start offset on disk file
      * @param end_off (out) end offset on disk file
      */
-    bool search(const char *term, uint32_t termlen, off_t *start_off, off_t *end_off);
+    bool search(Slice key, off_t *start_off, off_t *end_off);
 
     /**
      * clear entries of index

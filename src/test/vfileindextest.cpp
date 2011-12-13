@@ -53,7 +53,7 @@ int main() {
     srand(tv.tv_usec);
 
     for (int i = 0; i < N; i++) {
-        index.add((char *)terms[i], strlen(terms[i]), offsets[i]);
+        index.add(Slice(terms[i], strlen(terms[i])), offsets[i]);
     }
     index.set_vfilesize(offsets[N-1] + 3);
 
@@ -61,22 +61,22 @@ int main() {
     // check values
     //========================================================
     for (int i = 0; i < N; i++) {
-        assert(index.search(terms[i], strlen(terms[i]), &off1, &off2));
+        assert(index.search(Slice(terms[i], strlen(terms[i])), &off1, &off2));
         sprintf(key, "%s%s", terms[i], "00");
         if (i < N - 1) {
-            assert(index.search(key, strlen(key), &off3, &off4));
+            assert(index.search(Slice(key, strlen(key)), &off3, &off4));
             assert(off1 == off3 && off2 == off4);
         } else {
-            assert(!(index.search(key, strlen(key), &off3, &off4)));
+            assert(!(index.search(Slice(key, strlen(key)), &off3, &off4)));
         }
     }
 
-    assert(!index.search((char *)"a", strlen("a"), &off1, &off2));
-    assert(!index.search((char *)"zzz", strlen("zzz"), &off1, &off2));
+    assert(!index.search(Slice("a", strlen("a")), &off1, &off2));
+    assert(!index.search(Slice("zzz", strlen("zzz")), &off1, &off2));
 
     for (int i = 0; i < num_keys; i++) {
         randstr(key, (int)(rand() % maxkeysize) + 1);
-        if (index.search(key, strlen(key), &off1, &off2)) {
+        if (index.search(Slice(key, strlen(key)), &off1, &off2)) {
             assert(strcmp(key, terms[0]) >= 0 && strcmp(key, terms[N-1]) <= 0);
         } else {
             assert(strcmp(key, terms[0]) < 0 || strcmp(key, terms[N-1]) > 0);

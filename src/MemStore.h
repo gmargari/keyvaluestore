@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "./Global.h"
+#include "./Slice.h"
 
 using std::pair;
 using std::vector;
@@ -40,25 +41,21 @@ class MemStore {
      * and value are created and inserted into memstore.
      *
      * @param key key to be inserted
-     * @param keylen size of key
      * @param value value to be inserted
-     * @param valuelen size of value
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    bool put(Slice key, Slice value, uint64_t timestamp);
 
     /**
      * get the (copy of) value for a specific key.
      *
      * @param key (in) key to be searched
-     * @param keylen (in) size of key
      * @param value (out) value corresponding to the searched key
-     * @param valuelen (out) size of value
      * @param timestamp (out) timestamp of insertion
      * @return true if key was found, false if not
      */
-    bool get(const char *key, uint32_t keylen, char **value, uint32_t *valuelen, uint64_t *timestamp);
+    bool get(Slice key, Slice *value, uint64_t *timestamp);
 
     /**
      * return number of <key, value, timestamp> tuples in memstore
@@ -79,7 +76,7 @@ class MemStore {
      * check if adding <key, value, timestamp> to memstore will reach memstore's
      * size limit
      */
-    bool will_reach_size_limit(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    bool will_reach_size_limit(Slice key, Slice value, uint64_t timestamp);
 
     /**
      * clear memstore
@@ -97,7 +94,7 @@ class MemStore {
      * this function is used from rangemerge c.m., where we have multiple maps in
      * memstore, one per range. NOTE: caller must delete inputstream when done with it.
      */
-    MapInputStream *new_map_inputstream(const char *key, uint32_t keylen);
+    MapInputStream *new_map_inputstream(Slice key);
 
     /**
      * when using rangemerge c.m. memstore consists of multiple maps, one for
@@ -105,11 +102,11 @@ class MemStore {
      * find the map responsible for storing/retrieving a specific key, and
      * clear the map that contains a key
      */
-    void add_map(const char *key, uint32_t keylen);
+    void add_map(Slice key);
     int  get_num_maps();
-    Map *get_map(const char *key, uint32_t keylen);
+    Map *get_map(Slice key);
     Map *get_map(int i);
-    void clear_map(const char *key, uint32_t keylen);
+    void clear_map(Slice key);
     void clear_map(int idx);
 
   private:
@@ -117,7 +114,7 @@ class MemStore {
      * used from add_map()/get_map()/clear_map() functions above
      * @return the index in vector 'm_map' of the map responsible for 'key'
      */
-    int idx_of_map(const char *key, uint32_t keylen);
+    int idx_of_map(Slice key);
 
     /**
      * used from clear_map() functions above

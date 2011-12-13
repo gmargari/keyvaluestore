@@ -81,7 +81,7 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
         if (m_start_key) {  // seek to first disk key that is > or >= 'startkey'
 
             // if m_start_key was stored on disk it would be between off1 & off2
-            ret = m_diskfile->search(m_start_key, m_start_keylen, &off1, &off2);
+            ret = m_diskfile->search(Slice(m_start_key, m_start_keylen), &off1, &off2);
             if (ret == false) {
                 return false;
             }

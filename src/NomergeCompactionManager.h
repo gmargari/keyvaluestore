@@ -19,7 +19,7 @@ class NomergeCompactionManager: public CompactionManager {
      */
     ~NomergeCompactionManager() { }
 
-    // inherited from CompactionManager (see CompactionManager.h for description)
+    // inherited from CompactionManager (see CompactionManager.h for info)
     void flush_bytes();
 };
 
@@ -27,14 +27,14 @@ class NomergeCompactionManager: public CompactionManager {
  *                               flush_memstore
  *============================================================================*/
 void NomergeCompactionManager::flush_bytes() {
-    DiskFile *memstore_file;
+    DiskFile *dfile;
 
-    memstore_file = memstore_flush_to_diskfile();
+    dfile = memstore_flush_to_diskfile();
     memstore_clear();
 
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     // insert first in diskstore as it contains the most recent <k,v> pairs
-    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), memstore_file);
+    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), dfile);
     pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 }
 

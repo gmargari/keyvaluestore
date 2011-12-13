@@ -15,6 +15,7 @@
 #include "./RangemergeCompactionManager.h"
 #include "./CassandraCompactionManager.h"
 #include "./Statistics.h"
+#include "./Slice.h"
 
 using std::cout;
 using std::endl;
@@ -78,8 +79,10 @@ uint64_t KeyValueStore::get_memstore_maxsize() {
  *                                   put
  *============================================================================*/
 bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
+    Slice k(key, keylen), v(value, valuelen);
+
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
-    if (m_memstore->will_reach_size_limit(key, keylen, value, valuelen, timestamp)) {
+    if (m_memstore->will_reach_size_limit(k, v, timestamp)) {
         time_start(&(g_stats.compaction_time));
         flush_bytes();
         time_end(&(g_stats.compaction_time));
@@ -88,7 +91,7 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uin
         print_stats();
     }
 
-    return m_memstore->put(key, keylen, value, valuelen, timestamp);
+    return m_memstore->put(k, v, timestamp);
 }
 
 /*============================================================================

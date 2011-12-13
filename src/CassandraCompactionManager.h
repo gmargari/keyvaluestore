@@ -22,7 +22,7 @@ class CassandraCompactionManager: public CompactionManager {
      */
     ~CassandraCompactionManager();
 
-    // inherited from CompactionManager (see CompactionManager.h for description)
+    // inherited from CompactionManager (see CompactionManager.h for info)
     void flush_bytes();
 
     /**
