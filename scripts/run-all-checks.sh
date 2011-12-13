@@ -33,4 +33,5 @@ run_check ./build/src/test/vfileindextest
 run_check ./scripts/check-save-and-load-kvstore.sh
 run_check ./scripts/check-kvstore.sh
 run_check ./scripts/check-md5sums-identical.sh
+run_check ./scripts/check-cppstyle.sh
 run_check ./scripts/check-memleaks.sh
