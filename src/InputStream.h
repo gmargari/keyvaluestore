@@ -15,7 +15,7 @@ class InputStream {
     InputStream() { }
 
     /**
-     * destructor (define as 'virtual' so it will call destructors of derived classes)
+     * destructor (define as 'virtual' so it'll call derived class destructor)
      */
     virtual ~InputStream() { }
 
@@ -30,7 +30,8 @@ class InputStream {
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    virtual void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) = 0;
+    virtual void set_key_range(Slice start_key, Slice end_key, bool start_incl,
+                               bool end_incl) = 0;
 
     /**
      * get next <key, value, timestamp> tuple from stream

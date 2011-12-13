@@ -70,7 +70,8 @@ bool VFileIndex::search(Slice key, off_t *start_off, off_t *end_off) {
 
     if (iter == m_map.end()) {  // no key greater than 'key'
         // if the last term of index is 'key'
-        if (m_map.size() > 0 && (iter--, 1) && strcmp(iter->first, key.data()) == 0) {
+        if (m_map.size() > 0 && (iter--, 1)
+              && strcmp(iter->first, key.data()) == 0) {
             *start_off = iter->second;
             *end_off = m_vfilesize;
             assert(*start_off < *end_off);
@@ -84,7 +85,8 @@ bool VFileIndex::search(Slice key, off_t *start_off, off_t *end_off) {
         *end_off = iter->second;
         --iter;
         *start_off = iter->second;
-        assert(strcmp(key.data(), iter->first) >= 0 && (iter++, 1) && strcmp(key.data(), iter->first) <= 0);
+        assert(strcmp(key.data(), iter->first) >= 0 && (iter++, 1)
+                 && strcmp(key.data(), iter->first) <= 0);
         assert(*start_off < *end_off);
         return true;
     } else {  // 'key' is smaller than first term in index
@@ -132,13 +134,14 @@ uint64_t VFileIndex::get_num_stored_leys() {
 void VFileIndex::save_to_disk(int fd) {
     size_t len;
     int num;
+    TermOffsetMap::iterator iter;
 
     // write number of entries
     num = m_map.size();
     write(fd, &num, sizeof(num));
 
     // write the entries
-    for (TermOffsetMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
+    for (iter = m_map.begin(); iter != m_map.end(); ++iter) {
         len = strlen(iter->first);
         write(fd, &len, sizeof(len));
         write(fd, iter->first, len);

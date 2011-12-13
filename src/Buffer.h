@@ -17,10 +17,6 @@ class Buffer {
      * constructor
      */
     Buffer(uint32_t bufsize);
-
-    /**
-     * constructor
-     */
     Buffer(char *buf, uint32_t bufsize);
 
     /**
@@ -88,7 +84,8 @@ class Buffer {
      * return number of bytes needed to serialize <k,v,t>
      * ('keylen' = strlen(k), 'valuelen' = strlen(v), 'timestamp' = t)
      */
-    static uint32_t serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp);
+    static uint32_t serialize_len(uint32_t keylen, uint32_t valuelen,
+                                  uint64_t timestamp);
 
     /**
      * serialize <k,v,t> and copy it to buffer
@@ -100,7 +97,8 @@ class Buffer {
      * strings pointed by 'key' and 'value' are valid only until next call of
      * function)
      */
-    bool deserialize(Slice *key, Slice *value, uint64_t *timestamp, bool copy_keyvalue);
+    bool deserialize(Slice *key, Slice *value, uint64_t *timestamp,
+                     bool copy_keyvalue);
 
     /**
      * undo deserialization previously done (rational similar to ungetc().
@@ -169,14 +167,17 @@ inline void Buffer::clear() {
 /*============================================================================
  *                               serialize_len
  *============================================================================*/
-inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64_t timestamp) {
-    return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + valuelen + 2);
+inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen,
+  uint64_t timestamp) {
+    return (sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen +
+            valuelen + 2);  // +2 for '\0's
 }
 
 /*============================================================================
  *                             undo_deserialize
  *============================================================================*/
-inline void Buffer::undo_deserialize(Slice key, Slice value, uint64_t timestamp) {
+inline void Buffer::undo_deserialize(Slice key, Slice value,
+                                     uint64_t timestamp) {
     m_bytes_used -= serialize_len(key.size(), value.size(), timestamp);
 }
 

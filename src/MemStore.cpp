@@ -97,7 +97,8 @@ uint64_t MemStore::get_size_when_serialized() {
 /*============================================================================
  *                           will_reach_size_limit
  *============================================================================*/
-bool MemStore::will_reach_size_limit(Slice key, Slice value, uint64_t timestamp) {
+bool MemStore::will_reach_size_limit(Slice key, Slice value,
+                                     uint64_t timestamp) {
     return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 
@@ -225,7 +226,8 @@ int MemStore::idx_of_map(Slice key) {
 
     // assert 'key' belongs to range [map[mid].key, map[mid+1].key)
     assert(strcmp(key.data(), m_map[mid].key) >= 0 &&
-           (mid == (int)m_map.size() - 1 || strcmp(key.data(), m_map[mid+1].key) < 0));
+             (mid == (int)m_map.size() - 1 ||
+               strcmp(key.data(), m_map[mid + 1].key) < 0));
     assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;

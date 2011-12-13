@@ -54,7 +54,8 @@ class KeyValueStore {
      * @param timestamp timestamp to be inserted
      * @return true for success, false for failure
      */
-    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    bool put(const char *key, uint32_t keylen, const char *value,
+             uint32_t valuelen, uint64_t timestamp);
 
     /**
      * insert a <key, value> tuple into store. copies of the key and value are
@@ -66,7 +67,8 @@ class KeyValueStore {
      * @param valuelen size of value
      * @return true for success, false for failure
      */
-    bool put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen);
+    bool put(const char *key, uint32_t keylen, const char *value,
+             uint32_t valuelen);
 
     /**
      * return number of <key, value, timestamp> tuples in memory

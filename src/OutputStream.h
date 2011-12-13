@@ -15,7 +15,7 @@ class OutputStream {
     OutputStream() { }
 
     /**
-     * destructor (define as 'virtual' so it will call destructors of derived classes)
+     * destructor (define as 'virtual' so it'll call derived class destructor)
      */
     virtual ~OutputStream() { }
 

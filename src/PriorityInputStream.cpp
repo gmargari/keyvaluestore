@@ -13,8 +13,9 @@ static const int SID_NOT_INITIALIZED = INT_MAX;
  *                            PriorityInputStream
  *============================================================================*/
 PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
-    : m_pqueue(), m_istreams(istreams), m_elements(), m_last_sid(SID_NOT_INITIALIZED),
-      m_start_key(), m_end_key(), m_start_incl(true), m_end_incl(true) {
+    : m_pqueue(), m_istreams(istreams), m_elements(),
+      m_last_sid(SID_NOT_INITIALIZED), m_start_key(), m_end_key(),
+      m_start_incl(true), m_end_incl(true) {
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
         m_elements.back()->sid = i;
@@ -33,14 +34,16 @@ PriorityInputStream::~PriorityInputStream() {
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) {
+void PriorityInputStream::set_key_range(Slice start_key, Slice end_key,
+                                        bool start_incl, bool end_incl) {
     m_start_key = start_key;
     m_end_key = end_key;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
+        m_istreams[i]->set_key_range(m_start_key, m_end_key,
+                                     m_start_incl, m_end_incl);
     }
 
     reset();
@@ -92,7 +95,7 @@ bool PriorityInputStream::read(Slice *key, Slice *value, uint64_t *timestamp) {
     }
 
     if (m_last_sid != -1) {
-        // the element poped from head last time belonged to stream 'm_last_sid'.
+        // last element popped from head belonged to stream 'm_last_sid'.
         // insert into priority queue a new element from that stream.
         assert(m_last_sid < (int)m_istreams.size());
         if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key),

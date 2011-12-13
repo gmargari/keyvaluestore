@@ -11,12 +11,24 @@
 /*============================================================================
  *                            DiskFileOutputStream
  *============================================================================*/
+DiskFileOutputStream::DiskFileOutputStream(DiskFile *file)
+    : m_file(file), m_file_size(0), m_buf(NULL), m_index(NULL),
+      m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1),
+      m_stored_keys(0) {
+    m_buf = new Buffer(MERGE_BUFSIZE);
+    m_last_key = (char *)malloc(MAX_KVTSIZE);
+    m_index = new VFileIndex();
+}
+
+/*============================================================================
+ *                            DiskFileOutputStream
+ *============================================================================*/
 DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
     : m_file(file), m_file_size(0), m_buf(NULL), m_index(NULL),
-      m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1), m_stored_keys(0) {
+      m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1),
+      m_stored_keys(0) {
     m_buf = new Buffer(bufsize);
     m_last_key = (char *)malloc(MAX_KVTSIZE);
-    m_last_key[0] = '\0';
     m_index = new VFileIndex();
 }
 
@@ -36,7 +48,8 @@ bool DiskFileOutputStream::append(Slice key, Slice value, uint64_t timestamp) {
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
-    if (Buffer::serialize_len(key.size(), value.size(), timestamp) > m_buf->free_space()) {
+    if (Buffer::serialize_len(key.size(), value.size(), timestamp)
+          > m_buf->free_space()) {
         m_file->append(m_buf);
     }
 
@@ -45,7 +58,8 @@ bool DiskFileOutputStream::append(Slice key, Slice value, uint64_t timestamp) {
 
         // if needed, add entry to index
         cur_offs = m_file_size;
-        if (m_last_idx_offs == -1 || cur_offs + len - m_last_idx_offs > MAX_INDEX_DIST) {
+        if (m_last_idx_offs == -1 ||
+              cur_offs + len - m_last_idx_offs > MAX_INDEX_DIST) {
             m_index->add(key, cur_offs);
             m_last_idx_offs = cur_offs;
         }

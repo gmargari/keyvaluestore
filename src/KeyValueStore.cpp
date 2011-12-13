@@ -29,22 +29,28 @@ KeyValueStore::KeyValueStore(cm_type type)
     m_diskstore = new DiskStore();
     switch (type) {
         case KeyValueStore::NOMERGE_CM:
-            m_compactionmanager = new NomergeCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new NomergeCompactionManager(m_memstore,
+                                                               m_diskstore);
             break;
         case KeyValueStore::IMM_CM:
-            m_compactionmanager = new ImmCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new ImmCompactionManager(m_memstore,
+                                                           m_diskstore);
             break;
         case KeyValueStore::GEOM_CM:
-            m_compactionmanager = new GeomCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new GeomCompactionManager(m_memstore,
+                                                            m_diskstore);
             break;
         case KeyValueStore::LOG_CM:
-            m_compactionmanager = new LogCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new LogCompactionManager(m_memstore,
+                                                           m_diskstore);
             break;
         case KeyValueStore::RNGMERGE_CM:
-            m_compactionmanager = new RangemergeCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new RangemergeCompactionManager(m_memstore,
+                                                                  m_diskstore);
             break;
         case KeyValueStore::CASSANDRA_CM:
-            m_compactionmanager = new CassandraCompactionManager(m_memstore, m_diskstore);
+            m_compactionmanager = new CassandraCompactionManager(m_memstore,
+                                                                 m_diskstore);
             break;
     }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);
@@ -78,7 +84,8 @@ uint64_t KeyValueStore::get_memstore_maxsize() {
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
+                        uint32_t valuelen, uint64_t timestamp) {
     Slice k(key, keylen), v(value, valuelen);
 
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
@@ -97,7 +104,8 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uin
 /*============================================================================
  *                                   put
  *============================================================================*/
-bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value, uint32_t valuelen) {
+bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
+                        uint32_t valuelen) {
     return put(key, keylen, value, valuelen, get_timestamp());
 }
 
@@ -162,11 +170,10 @@ uint64_t KeyValueStore::get_timestamp() {
     return ++t;
 }
 
-// TODO: move elsewhere
 /*============================================================================
  *                            check_parameters
  *============================================================================*/
-void KeyValueStore::check_parameters() {
+void KeyValueStore::check_parameters() {  // TODO: move elsewhere ?
     struct stat st;
 
     if (stat(ROOT_DIR, &st) != 0) {
@@ -176,5 +183,6 @@ void KeyValueStore::check_parameters() {
 
     // need at least these bytes (e.g. to fully decode a <k,v,t> read from disk:
     // <keylen, valuelen, key, value, timestamp>)
-    assert(MERGE_BUFSIZE >= (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
+    assert(MERGE_BUFSIZE >=
+             (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
 }

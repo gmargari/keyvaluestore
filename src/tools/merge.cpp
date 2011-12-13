@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < argc - 1; i++) {
         diskfiles.push_back(new DiskFile());;
         diskfiles.back()->open_existing(argv[i+1]);
-        istreams.push_back(new DiskFileInputStream(diskfiles.back(), MERGE_BUFSIZE));
+        istreams.push_back(new DiskFileInputStream(diskfiles.back()));
     }
 
     pistream = new PriorityInputStream(istreams);

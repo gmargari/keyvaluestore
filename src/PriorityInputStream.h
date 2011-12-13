@@ -30,7 +30,8 @@ class PriorityInputStream: public InputStream {
     ~PriorityInputStream();
 
     // inherited from InputStream
-    void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl);
+    void set_key_range(Slice start_key, Slice end_key, bool start_incl,
+                       bool end_incl);
     void set_key_range(Slice start_key, Slice end_key);
     bool read(Slice *key, Slice *value, uint64_t *timestamp);
 

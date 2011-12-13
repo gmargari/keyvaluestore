@@ -17,7 +17,8 @@ uint64_t dbg_lastsize = 0;  // used for sanity_check()
 /*============================================================================
  *                             GeomCompactionManager
  *============================================================================*/
-GeomCompactionManager::GeomCompactionManager(MemStore *memstore, DiskStore *diskstore)
+GeomCompactionManager::GeomCompactionManager(MemStore *memstore,
+                                             DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
       m_R(DEFAULT_GEOM_R), m_P(DEFAULT_GEOM_P), m_partition_size() {
     load_state_from_disk();
@@ -120,14 +121,13 @@ int GeomCompactionManager::compute_current_R() {
  *============================================================================*/
 void GeomCompactionManager::flush_bytes() {
     DiskFile *disk_file, *memstore_file;
-    DiskFileInputStream *memstore_file_istream, *istream;
-    vector<InputStream *> istreams_to_merge;
-    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<InputStream *> istreams;
+    vector<DiskFile *> &disk_files = m_diskstore->m_disk_files;
     int size, count, part_num;
 
     assert(sanity_check());
 
-    // if we bound number of partitions, re-adjust R so num of partitions is <= P
+    // if we bound num of partitions, re-adjust R so num of partitions is <= P
     if (m_P) {
         set_R(compute_current_R());
     }
@@ -136,16 +136,16 @@ void GeomCompactionManager::flush_bytes() {
     // 1) select disk files to merge with memstore, add their input streams
     //    to vector of streams to merge
     //--------------------------------------------------------------------------
-
     // merge the memstore with the sub-index in the first partition.
-    // if the merged sub-index is greater than the maximum size of the partition,
+    // if the merged sub-index is greater than the max size of the partition,
     // merge it with the next biggest sub-index. repeat until the merged
     // sub-index fits within a partition (we may need to create a new partition
     // that will store the sub-index, if new sub-index doesn't fit in any
     // existing partition)
+    //--------------------------------------------------------------------------
     count = 0;
     size = 1;  // 1 for memstore
-    for (uint i = 0; i < m_partition_size.size(); i++) {
+    for (unsigned int i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i]) {
             count++;
             size += m_partition_size[i];
@@ -154,11 +154,10 @@ void GeomCompactionManager::flush_bytes() {
             break;
         }
     }
-    assert(count <= (int)r_disk_files.size());
+    assert(count <= (int)disk_files.size());
 
     for (int i = 0; i < count; i++) {
-        istream = new DiskFileInputStream(r_disk_files[i], MERGE_BUFSIZE);
-        istreams_to_merge.push_back(istream);
+        istreams.push_back(new DiskFileInputStream(disk_files[i]));
     }
 
     //--------------------------------------------------------------------------
@@ -166,17 +165,16 @@ void GeomCompactionManager::flush_bytes() {
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
     memstore_clear();
-    memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
-    istreams_to_merge.push_back(memstore_file_istream);
+    istreams.push_back(new DiskFileInputStream(memstore_file));
 
     //--------------------------------------------------------------------------
     // 3) merge streams creating a new disk file
     //--------------------------------------------------------------------------
-    disk_file = Streams::merge_streams(istreams_to_merge);
+    disk_file = Streams::merge_streams(istreams);
 
     // delete all istreams
-    for (int i = 0; i < (int)istreams_to_merge.size(); i++) {
-        delete istreams_to_merge[i];
+    for (int i = 0; i < (int)istreams.size(); i++) {
+        delete istreams[i];
     }
 
     //--------------------------------------------------------------------------
@@ -190,17 +188,17 @@ void GeomCompactionManager::flush_bytes() {
     // delete all files merged as well as their input streams
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     for (int i = 0; i < count; i++) {
-        r_disk_files[i]->delete_from_disk();
-        delete r_disk_files[i];
+        disk_files[i]->delete_from_disk();
+        delete disk_files[i];
     }
-    r_disk_files.erase(r_disk_files.begin(), r_disk_files.begin() + count);
+    disk_files.erase(disk_files.begin(), disk_files.begin() + count);
 
     //--------------------------------------------------------------------------
     // 5) add new file to DiskStore
     //--------------------------------------------------------------------------
 
     // add new file at the front, since it contains most recent <k,v> pairs
-    r_disk_files.insert(r_disk_files.begin(), disk_file);
+    disk_files.insert(disk_files.begin(), disk_file);
     pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 
     //--------------------------------------------------------------------------
@@ -208,7 +206,7 @@ void GeomCompactionManager::flush_bytes() {
     //--------------------------------------------------------------------------
 
     // update partitions vector: zero the sizes of the 'count' partitions merged
-    for (uint i = 0; i < m_partition_size.size(); i++) {
+    for (unsigned int i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i] && count > 0) {
             m_partition_size[i] = 0;
             count--;
@@ -270,7 +268,8 @@ bool GeomCompactionManager::load_state_from_disk() {
     if ((fp = fopen(fname, "r")) != NULL) {
         fscanf(fp, "cmmanager: %s\n", cmmanager);
         if (strcmp(cmmanager, "geometric") != 0) {
-            printf("Error: expected 'geometric' cmanager in file %s, found '%s'\n", fname, cmmanager);
+            printf("Error: expected 'geometric' cmanager in %s, found '%s'\n",
+                   fname, cmmanager);
             exit(EXIT_FAILURE);
         }
         fscanf(fp, "R: %d\n", &m_R);
@@ -300,9 +299,11 @@ int GeomCompactionManager::sanity_check() {
     uint64_t cursize = 0;
 
     assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());
-    for (uint i = 0; i < m_partition_size.size(); i++) {
-        // if P != 0, there's a case when R increases before a flush that the assertion below does not hold
-        assert(m_P != 0 || (m_partition_size[i] == 0 || m_partition_size[i] >= partition_minsize(i)));
+    for (unsigned int i = 0; i < m_partition_size.size(); i++) {
+        // if P != 0, there's a case when R increases before a flush and
+        // the assertion below does not hold
+        assert(m_P != 0 || (m_partition_size[i] == 0 ||
+                 m_partition_size[i] >= partition_minsize(i)));
         assert(m_partition_size[i] <= partition_maxsize(i));
         cursize += m_partition_size[i];
     }

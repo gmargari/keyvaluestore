@@ -18,6 +18,7 @@ class DiskFileOutputStream: public OutputStream {
     /**
      * constructor
      */
+    DiskFileOutputStream(DiskFile *file);
     DiskFileOutputStream(DiskFile *file, uint32_t bufsize);
 
     /**
@@ -39,7 +40,7 @@ class DiskFileOutputStream: public OutputStream {
     Buffer      *m_buf;            // buffer used for I/O
 
     VFileIndex  *m_index;          // index of <key,offs> for diskfile keys
-    char        *m_last_key;       // last key written to disk // TODO CHANGE THIS TO SLICE
+    char        *m_last_key;       // last key written to disk
     uint32_t     m_last_keylen;    // length of last key written to disk
     off_t        m_last_offs;      // offset of last key written to disk
     off_t        m_last_idx_offs;  // last offset inserted in index

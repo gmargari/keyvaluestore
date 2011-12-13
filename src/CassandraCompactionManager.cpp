@@ -18,7 +18,8 @@
 /*============================================================================
  *                          CassandraCompactionManager
  *============================================================================*/
-CassandraCompactionManager::CassandraCompactionManager(MemStore *memstore, DiskStore *diskstore)
+CassandraCompactionManager::CassandraCompactionManager(MemStore *memstore,
+                                                       DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
       m_L(DEFAULT_CASS_K), m_level_files() {
     load_state_from_disk();
@@ -50,9 +51,8 @@ int CassandraCompactionManager::get_L() {
  *============================================================================*/
 void CassandraCompactionManager::flush_bytes() {
     DiskFile *disk_file, *memstore_file;
-    DiskFileInputStream *istream;
-    vector<InputStream *> istreams_to_merge;
-    vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
+    vector<InputStream *> istreams;
+    vector<DiskFile *> &disk_files = m_diskstore->m_disk_files;
     unsigned int merge_lvl;
 
     assert(sanity_check());
@@ -76,35 +76,35 @@ void CassandraCompactionManager::flush_bytes() {
         //----------------------------------------------------------------------
         // select disk files to merge
         //----------------------------------------------------------------------
-        istreams_to_merge.clear();
+        istreams.clear();
         for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
-            istream = new DiskFileInputStream(r_disk_files[i], MERGE_BUFSIZE);
-            istreams_to_merge.push_back(istream);
+            istreams.push_back(new DiskFileInputStream(disk_files[i]));
         }
 
         //----------------------------------------------------------------------
         // merge streams creating a new disk file
         //----------------------------------------------------------------------
-        disk_file = Streams::merge_streams(istreams_to_merge);
+        disk_file = Streams::merge_streams(istreams);
 
         //----------------------------------------------------------------------
         // delete merged files and streams
         //----------------------------------------------------------------------
-        for (int i = 0; i < (int)istreams_to_merge.size(); i++) {
-            delete istreams_to_merge[i];
+        for (int i = 0; i < (int)istreams.size(); i++) {
+            delete istreams[i];
         }
 
         pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
         for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
-            r_disk_files[i]->delete_from_disk();
-            delete r_disk_files[i];
+            disk_files[i]->delete_from_disk();
+            delete disk_files[i];
         }
-        r_disk_files.erase(r_disk_files.begin() + lvl*m_L, r_disk_files.begin() + lvl*m_L + m_L);
+        disk_files.erase(disk_files.begin() + lvl*m_L,
+                           disk_files.begin() + lvl*m_L + m_L);
 
         //----------------------------------------------------------------------
         // add new file to DiskStore
         //----------------------------------------------------------------------
-        r_disk_files.insert(r_disk_files.begin() + lvl*m_L, disk_file);
+        disk_files.insert(disk_files.begin() + lvl*m_L, disk_file);
         pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 
         //----------------------------------------------------------------------
@@ -125,7 +125,8 @@ void CassandraCompactionManager::flush_bytes() {
 
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
     // insert first in diskstore as it contains the most recent <k,v> pairs
-    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), memstore_file);
+    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(),
+                                     memstore_file);
     if (m_level_files.size() == 0) {
         m_level_files.push_back(0);
     }
@@ -174,7 +175,8 @@ bool CassandraCompactionManager::load_state_from_disk() {
     if ((fp = fopen(fname, "r")) != NULL) {
         fscanf(fp, "cmmanager: %s\n", cmmanager);
         if (strcmp(cmmanager, "cassandra") != 0) {
-            printf("Error: expected 'cassandra' cmanager in file %s, found '%s'\n", fname, cmmanager);
+            printf("Error: expected 'cassandra' cmanager in %s, found '%s'\n",
+                   fname, cmmanager);
             exit(EXIT_FAILURE);
         }
         fscanf(fp, "L: %d\n", &m_L);

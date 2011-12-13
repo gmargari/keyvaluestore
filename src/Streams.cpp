@@ -30,7 +30,8 @@ void Streams::copy_stream(InputStream *istream, OutputStream *ostream) {
 /*============================================================================
  *                           copy_stream_unique_keys
  *============================================================================*/
-void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostream) {
+void Streams::copy_stream_unique_keys(InputStream *istream,
+                                      OutputStream *ostream) {
     Slice key, value;
     uint64_t timestamp;
     char prev_key[MAX_KVTSIZE];
@@ -52,7 +53,8 @@ void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostrea
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, OutputStream *ostream) {
+void Streams::merge_streams(vector<InputStream *> istreams,
+                            OutputStream *ostream) {
     PriorityInputStream *pistream;
 
     pistream = new PriorityInputStream(istreams);
@@ -63,7 +65,8 @@ void Streams::merge_streams(vector<InputStream *> istreams, OutputStream *ostrea
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, DiskFile *diskfile) {
+void Streams::merge_streams(vector<InputStream *> istreams,
+                            DiskFile *diskfile) {
     DiskFileOutputStream *ostream;
 
     ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
@@ -87,7 +90,8 @@ DiskFile *Streams::merge_streams(vector<InputStream *> istreams) {
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles) {
+void Streams::merge_streams(vector<InputStream *> istreams,
+                            vector<DiskFile *> *diskfiles) {
     DiskFile *diskfile;
 
     diskfile = merge_streams(istreams);
@@ -97,7 +101,9 @@ void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles, uint64_t max_file_size) {
+int Streams::merge_streams(vector<InputStream *> istreams,
+                           vector<DiskFile *> *diskfiles,
+                           uint64_t max_file_size) {
     DiskFile *diskfile;
     PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;
@@ -121,8 +127,8 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *d
 
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key.data()) != 0) {
-            // if we appending current tuple to file will lead to a file size
-            // greater than 'max_file_size', crete a new file for remaining tuples
+            // if we appending current tuple to file will lead to file size
+            // > 'max_file_size', crete a new file for remaining tuples
             len = Buffer::serialize_len(key.size(), value.size(), timestamp);
             if (filesize + len > max_file_size) {
                 ostream->close();

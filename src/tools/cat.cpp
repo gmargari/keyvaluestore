@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
-    istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
+    istream = new DiskFileInputStream(diskfile);
     while (istream->read(&key, &value, &timestamp)) {
         cout << "[" << key.data() << "] [" << value.data() << "] [" << timestamp << "]" << endl;
     }

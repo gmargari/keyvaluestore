@@ -7,11 +7,26 @@
 
 #include "./VFile.h"
 
-// TODO: make these portable!
-#define ENCODE_NUM(_buf_, _num_, _used_) do { memcpy((_buf_) + _used_,  &(_num_), sizeof(_num_)); _used_ += sizeof(_num_); } while (0)
-#define DECODE_NUM(_buf_, _num_, _used_) do { memcpy(&(_num_), (_buf_) + _used_, sizeof(_num_)); _used_ += sizeof(_num_); } while (0)
-#define ENCODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_buf_) + _used_,  (_str_), (_len_)); _used_ += (_len_); } while (0)
-#define DECODE_STR(_buf_, _str_, _len_, _used_) do { memcpy((_str_), (_buf_) + _used_, (_len_)); _used_ += (_len_); } while (0)
+// TODO: make these portable
+#define ENCODE_NUM(buf_, num_, used_)                   \
+    STMT(memcpy((buf_) + used_, &(num_), sizeof(num_)); \
+         used_ += sizeof(num_);                         \
+    )
+
+#define DECODE_NUM(buf_, num_, used_)                   \
+    STMT(memcpy(&(num_), (buf_) + used_, sizeof(num_)); \
+         used_ += sizeof(num_);                         \
+    )
+
+#define ENCODE_STR(buf_, str_, len_, used_)             \
+    STMT(memcpy((buf_) + used_, (str_), (len_));        \
+         used_ += (len_);                               \
+    )
+
+#define DECODE_STR(buf_, str_, len_, used_)             \
+    STMT(memcpy((str_), (buf_) + used_, (len_));        \
+         used_ += (len_);                               \
+    )
 
 /*============================================================================
  *                                 Buffer
@@ -44,11 +59,8 @@ Buffer::~Buffer() {
  *                                  fill
  *============================================================================*/
 uint32_t Buffer::fill(VFile *vfile, uint32_t bytes, off_t offs) {
-    uint32_t bytes_read;
-
-    bytes_read = vfile->fs_pread(m_buf + size(), bytes, offs);
+    uint32_t bytes_read = vfile->fs_pread(m_buf + size(), bytes, offs);
     m_bytes_in_buf += bytes_read;
-
     return bytes_read;
 }
 
@@ -63,12 +75,9 @@ uint32_t Buffer::fill(VFile *vfile, off_t offs) {
  *                                 append
  *============================================================================*/
 uint32_t Buffer::append(VFile *vfile) {
-    uint32_t bytes_written;
-
-    bytes_written = vfile->fs_append(m_buf, size());
+    uint32_t bytes_written = vfile->fs_append(m_buf, size());
     assert(bytes_written == size());
     clear();
-
     return bytes_written;
 }
 
@@ -76,17 +85,16 @@ uint32_t Buffer::append(VFile *vfile) {
  *                                keep_unused
  *============================================================================*/
 void Buffer::keep_unused() {
-    uint32_t unused_bytes = m_bytes_in_buf - m_bytes_used;
-
-    memmove(m_buf, m_buf + m_bytes_used, unused_bytes);
-    m_bytes_in_buf = unused_bytes;
+    memmove(m_buf, m_buf + m_bytes_used, m_bytes_in_buf - m_bytes_used);
+    m_bytes_in_buf -= m_bytes_used;
     m_bytes_used = 0;
 }
 
 /*============================================================================
  *                                serialize
  *============================================================================*/
-bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp, uint32_t *len) {
+bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp,
+                       uint32_t *len) {
     uint32_t bytes_used = 0;
     char *ptr;
     uint32_t buflen;
@@ -116,8 +124,10 @@ bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp, uint32_t *len
     m_bytes_in_buf += *len;
 
     assert(bytes_used == *len);
-    assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen] == '\0');
-    assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + 1 + valuelen] == '\0');
+    assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen]
+             == '\0');
+    assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen
+             + 1 + valuelen] == '\0');
 #if DBGLVL > 1
     Slice kkk, vvv;
     uint64_t ts;
@@ -136,7 +146,8 @@ bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp, uint32_t *len
 /*============================================================================
  *                                deserialize
  *============================================================================*/
-bool Buffer::deserialize(Slice *key, Slice *value, uint64_t *timestamp, bool copy_keyvalue) {
+bool Buffer::deserialize(Slice *key, Slice *value, uint64_t *timestamp,
+                         bool copy_keyvalue) {
     uint32_t bytes_used = 0;
     char *tmpkey, *tmpvalue;
     const char *ptr;
@@ -166,8 +177,10 @@ bool Buffer::deserialize(Slice *key, Slice *value, uint64_t *timestamp, bool cop
         DECODE_STR(ptr, tmpkey, keylen + 1, bytes_used);
         DECODE_STR(ptr, tmpvalue, valuelen + 1, bytes_used);
     } else {
-        assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) == bytes_used);
-        tmpkey = (char *)ptr + sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp);
+        assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp)
+                 == bytes_used);
+        tmpkey = (char *)ptr + sizeof(keylen) + sizeof(valuelen)
+                    + sizeof(*timestamp);
         tmpvalue = tmpkey + keylen + 1;
     }
 

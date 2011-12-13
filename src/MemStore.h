@@ -84,15 +84,16 @@ class MemStore {
     void clear();
 
     /**
-     * create and return an input stream for memstore's map. NOTE: caller must delete
-     * inputstream when done with it.
+     * create and return an input stream for memstore's map. NOTE: caller must
+     * delete inputstream when done with it.
      */
     MapInputStream *new_map_inputstream();
 
     /**
-     * create and return an input stream for memstore's map that contains key 'key'.
-     * this function is used from rangemerge c.m., where we have multiple maps in
-     * memstore, one per range. NOTE: caller must delete inputstream when done with it.
+     * create and return an input stream for memstore's map that contains key
+     * 'key'. this function is used from rangemerge c.m., where we have
+     * multiple maps in memstore, one per range. NOTE: caller must delete
+     * inputstream when done with it.
      */
     MapInputStream *new_map_inputstream(Slice key);
 
@@ -129,22 +130,22 @@ class MemStore {
     } StrMapPair;
 
     static struct _pair_compare {
-        inline bool operator() (const StrMapPair & left, const StrMapPair right) {
+        inline bool operator() (const StrMapPair left, const StrMapPair right) {
             return strcmp(left.key, right.key);
         }
-        inline bool operator() (const StrMapPair & left, char * const & right) {
+        inline bool operator() (const StrMapPair left, char * const right) {
             return strcmp(left.key, right);
         }
-        inline bool operator() (char * const & left, const StrMapPair & right) {
+        inline bool operator() (char * const left, const StrMapPair right) {
             return strcmp(left, right.key);
         }
     } pair_compare;
 
-    vector < StrMapPair > m_map;
-    uint64_t  m_maxsize;
-    uint64_t  m_num_keys;
-    uint64_t  m_size;
-    uint64_t  m_size_when_serialized;
+    vector<StrMapPair> m_map;
+    uint64_t m_maxsize;
+    uint64_t m_num_keys;
+    uint64_t m_size;
+    uint64_t m_size_when_serialized;
 };
 
 #endif  // SRC_MEMSTORE_H_

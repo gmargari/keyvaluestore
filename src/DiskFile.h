@@ -127,7 +127,7 @@ class DiskFile {
     VFile       *m_file;           // file in which we store <key,value> pairs
     VFileIndex  *m_index;          // index of <key,offs> for diskfile
     static int   m_max_dfile_num;  // create unique filenames
-    bool         m_deleted;        // whether this disk file was delete from disk
+    bool         m_deleted;        // whether this file was delete from disk
 };
 
 #endif  // SRC_DISKFILE_H_

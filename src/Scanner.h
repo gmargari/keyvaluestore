@@ -35,13 +35,16 @@ class Scanner {
      *
      * @return number of keys read
      */
-    int range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen);
+    int range_get(const char *start_key, uint32_t start_keylen,
+                  const char *end_key, uint32_t end_keylen);
 
     /**
      * as above, but user can define whether 'start_key' and 'end_key' are
      * inclusive or not
      */
-    int range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl);
+    int range_get(const char *start_key, uint32_t start_keylen,
+                  const char *end_key, uint32_t end_keylen,
+                  bool start_incl, bool end_incl);
 
     // Undefined methods (just remove Weffc++ warning)
     Scanner(const Scanner&);

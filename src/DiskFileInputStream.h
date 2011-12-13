@@ -17,11 +17,8 @@ class DiskFileInputStream: public InputStream {
     /**
      * constructor
      */
+    DiskFileInputStream(DiskFile *file);
     DiskFileInputStream(DiskFile *file, uint32_t bufsize);
-
-    /**
-     * constructor
-     */
     DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize);
 
     /**
@@ -30,7 +27,8 @@ class DiskFileInputStream: public InputStream {
     ~DiskFileInputStream();
 
     // inherited from InputStream
-    void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl);
+    void set_key_range(Slice start_key, Slice end_key, bool start_incl,
+                       bool end_incl);
     void set_key_range(Slice start_key, Slice end_key);
     bool read(Slice *key, Slice *value, uint64_t *timestamp);
 

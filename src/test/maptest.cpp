@@ -161,8 +161,8 @@ int main() {
     // check that the two files have identical contents
     //========================================================
     value1 = (char *)malloc(MAX_KVTSIZE);
-    dfistream1 = new DiskFileInputStream(file1, MERGE_BUFSIZE);
-    dfistream2 = new DiskFileInputStream(file2, MERGE_BUFSIZE);
+    dfistream1 = new DiskFileInputStream(file1);
+    dfistream2 = new DiskFileInputStream(file2);
     num = 0;
     while (dfistream1->read(&k1, &v1, &ts1)) {
         dfistream2->read(&k2, &v2, &ts2);

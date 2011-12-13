@@ -80,8 +80,8 @@ void RequestThrottle::throttle() {
     }
 
     gettimeofday(&now, NULL);
-    assert(m_size != m_capacity ||
-           now.tv_sec - m_buffer[m_head].tv_sec + (now.tv_usec - m_buffer[m_head].tv_usec)/1000000.0 >= 1);
+    assert(m_size != m_capacity || now.tv_sec - m_buffer[m_head].tv_sec +
+            (now.tv_usec - m_buffer[m_head].tv_usec)/1000000.0 >= 1);
 
     // add new entry (probably overwriting oldest entry)
     m_buffer[m_head].tv_sec = now.tv_sec;

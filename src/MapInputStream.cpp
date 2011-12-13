@@ -22,7 +22,8 @@ MapInputStream::~MapInputStream() {
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void MapInputStream::set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) {
+void MapInputStream::set_key_range(Slice start_key, Slice end_key,
+                                   bool start_incl, bool end_incl) {
     m_start_key = start_key;
     m_end_key = end_key;
     m_start_incl = start_incl;

@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     prev_key[0] = '\0';
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
-    istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
+    istream = new DiskFileInputStream(diskfile);
     while (istream->read(&key, &value, &timestamp)) {
         if ((cmp = strcmp(prev_key, key.data())) > 0) {
             cout << "Error: prev_key: " << prev_key << " > cur_key: " << key.data() << endl;

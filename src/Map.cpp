@@ -43,7 +43,8 @@ bool Map::put(Slice Key, Slice Value, uint64_t timestamp) {
     assert(value);
 
     if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
-        printf("Error: key or value size greater than max size allowed (%Ld)\n", MAX_KVTSIZE);
+        printf("Error: key or value size greater than max size allowed (%Ld)\n",
+                 MAX_KVTSIZE);
         assert(0);
         return false;
     }
@@ -57,7 +58,8 @@ bool Map::put(Slice Key, Slice Value, uint64_t timestamp) {
 
         old_valuelen = iter->second.first.size();
         m_size -= keylen + 1 + old_valuelen + 1 + sizeof(new_pair);
-        m_size_serialized -= Buffer::serialize_len(keylen, old_valuelen, timestamp);
+        m_size_serialized -= Buffer::serialize_len(keylen, old_valuelen,
+                                                   timestamp);
         free(old_value);
         cpkey = key;
     } else {
@@ -161,9 +163,10 @@ void Map::clear() {
         timestamp = iter->second.second;
         assert(key.data());
         assert(value.data());
-        assert((dbg_bytes_cleaned += key.size() + 1 + sizeof(KVTPair) + value.size() + 1));  // replace with kv_Size()
+        assert((dbg_bytes_cleaned += kv_size(key, value, timestamp)));
         m_size -= key.size() + 1 + sizeof(KVTPair) + value.size() + 1;
-        m_size_serialized -= Buffer::serialize_len(key.size(), value.size(), timestamp);
+        m_size_serialized -= Buffer::serialize_len(key.size(), value.size(),
+                                                   timestamp);
         m_keys--;
         free(const_cast<char *>(key.data()));
         free(const_cast<char *>(value.data()));
@@ -247,7 +250,8 @@ int Map::sanity_check() {
         valuelen = iter->second.first.size();
         timestamp = iter->second.second;
         map_size += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
-        map_size_serialized += Buffer::serialize_len(keylen, valuelen, timestamp);
+        map_size_serialized += Buffer::serialize_len(keylen, valuelen,
+                                                     timestamp);
         assert(keylen + 1 <= MAX_KVTSIZE);
         assert(valuelen + 1 <= MAX_KVTSIZE);
         assert(timestamp != 0);

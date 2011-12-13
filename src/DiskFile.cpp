@@ -28,7 +28,8 @@ DiskFile::~DiskFile() {
         int fd;
 
         sprintf(fname, "%s%s", m_file->fs_name(), VFILE_INDEX_SUFFIX);
-        if ((fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR)) == -1) {
+        fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        if (fd == -1) {
             perror(fname);
             exit(EXIT_FAILURE);
         }

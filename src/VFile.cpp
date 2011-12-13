@@ -39,7 +39,8 @@ bool VFile::add_new_physical_file(bool open_existing) {
     char newfname[100], *fname;
     int fd, fdflag;
 
-    sprintf(newfname, "%s%s%02d", m_basefilename, VFILE_PART_PREFIX, (int)m_filedescs.size());
+    sprintf(newfname, "%s%s%02d", m_basefilename, VFILE_PART_PREFIX,
+                                   (int)m_filedescs.size());
     fname = strdup(newfname);
     assert(fname);
 
@@ -143,7 +144,9 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs) {
     size_t bytes_read, num;
 
     for (bytes_read = 0; bytes_read < count; ) {
-        if ((num = cur_fs_pread(buf + bytes_read, count - bytes_read, offs + bytes_read)) == 0) {
+        num = cur_fs_pread(buf + bytes_read, count - bytes_read,
+                           offs + bytes_read);
+        if (num == 0) {
             break;  // no bytes left in file
         }
         bytes_read += num;
@@ -159,7 +162,8 @@ ssize_t VFile::fs_append(const char *buf, size_t count) {
     size_t bytes_written;
 
     for (bytes_written = 0; bytes_written < count; ) {
-        bytes_written += cur_fs_append(buf + bytes_written, count - bytes_written);
+        bytes_written += cur_fs_append(buf + bytes_written,
+                                       count - bytes_written);
     }
 
     assert(bytes_written == count);
@@ -303,7 +307,8 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs) {
     offs_in_file = offs % MAX_FILE_SIZE;
 
     time_start(&(g_stats.read_time));
-    if ((actually_read = pread(m_filedescs[fileno], buf, count, offs_in_file)) == -1) {
+    actually_read = pread(m_filedescs[fileno], buf, count, offs_in_file);
+    if (actually_read == -1) {
         my_perror_exit();
     }
     time_end(&(g_stats.read_time));
@@ -340,7 +345,8 @@ ssize_t VFile::cur_fs_append(const char *buf, size_t count) {
     }
 
     time_start(&(g_stats.write_time));
-    if ((actually_written = pwrite(m_filedescs[fileno], buf, count, 0)) == -1) {
+    actually_written = pwrite(m_filedescs[fileno], buf, count, 0);
+    if (actually_written == -1) {
         my_perror_exit();
     }
     time_end(&(g_stats.write_time));

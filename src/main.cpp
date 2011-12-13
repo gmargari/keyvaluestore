@@ -32,7 +32,7 @@ void  *get_routine(void *args);
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, uint32_t *seed);
 int    zipf_r(uint32_t *seed);
-void   check_duplicate_arg(int flag, int opt);
+void   check_duplicate_arg_and_set(int *flag, int opt);
 int    numdigits(uint64_t num);
 
 //------------------------------------------------------------------------------
@@ -42,12 +42,13 @@ int    numdigits(uint64_t num);
 const uint64_t DEFAULT_INSERTBYTES = 1048576000LL;  // 1GB
 const uint32_t DEFAULT_KEY_SIZE =             100;  // 100 bytes
 const uint32_t DEFAULT_VALUE_SIZE =          1000;  // 1000 bytes
-const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
+const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES /
+                                     (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
 const int      DEFAULT_NUM_GET_THREADS =        0;
-const int      DEFAULT_PUT_THRPUT =             0;  // req per second, 0: disable throttling
-const int      DEFAULT_GET_THRPUT =            10;  // req per second, 0: disable throttling
+const int      DEFAULT_PUT_THRPUT =             0;  // req per sec, 0: disable
+const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 int32_t zipf_n = 1000000;     // parameter for zipf() function
@@ -75,34 +76,34 @@ bool put_thread_finished = false;
  *                             print_syntax
  *============================================================================*/
 void print_syntax(char *progname) {
-     cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
-     cout << endl;
-     cout << "COMPACTION MANAGER" << endl;
-     cout << " -c, --compaction-manager [VALUE]    \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
-     cout << " -r, --geometric-r [VALUE]           R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
-     cout << " -p, --geometric-p [VALUE]           P parameter (default: disabled)" << endl;
-     cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNGMERGE_BLOCKSIZE) << ")" << endl;
-     cout << " -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)" << endl;
-     cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
-     cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
-     cout << endl;
-     cout << "PUT" << endl;
-     cout << " -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
-     cout << " -n, --num-keys [VALUE]              number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
-     cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
-     cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
-     cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
-     cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
-     cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0 unlimited, default: " << DEFAULT_PUT_THRPUT << ")" << endl;
-     cout << endl;
-     cout << "GET" << endl;
-     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
-     cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0 unlimited, default: " << DEFAULT_GET_THRPUT << ")" << endl;
-     cout << endl;
-     cout << "VARIOUS" << endl;
-     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
-     cout << " -s, --read-kvs-from-stdin           read key-values from stdin" << endl;
-     cout << " -h, --help                          print this help message and exit" << endl;
+    cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
+    cout << endl;
+    cout << "COMPACTION MANAGER" << endl;
+    cout << " -c, --compaction-manager [VALUE]    \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
+    cout << " -r, --geometric-r [VALUE]           R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
+    cout << " -p, --geometric-p [VALUE]           P parameter (default: disabled)" << endl;
+    cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNG_BLOCKSIZE) << ")" << endl;
+    cout << " -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)" << endl;
+    cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
+    cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
+    cout << endl;
+    cout << "PUT" << endl;
+    cout << " -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
+    cout << " -n, --num-keys [VALUE]              number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
+    cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
+    cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
+    cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
+    cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
+    cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0 unlimited, default: " << DEFAULT_PUT_THRPUT << ")" << endl;
+    cout << endl;
+    cout << "GET" << endl;
+    cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
+    cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0 unlimited, default: " << DEFAULT_GET_THRPUT << ")" << endl;
+    cout << endl;
+    cout << "VARIOUS" << endl;
+    cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
+    cout << " -s, --read-kvs-from-stdin           read key-values from stdin" << endl;
+    cout << " -h, --help                          print this help message and exit" << endl;
 }
 
 /*============================================================================
@@ -167,7 +168,7 @@ int main(int argc, char **argv) {
              num_keys_to_insert;
     uint32_t keysize,
              valuesize;
-    char    *compmanager = NULL,
+    char    *cmanager = NULL,
             *key = NULL,
             *value = NULL,
             *end_key = NULL;
@@ -187,125 +188,107 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
     // get arguments
     //--------------------------------------------------------------------------
-    while ((myopt = getopt_long(argc, argv, short_args, long_opts, &indexptr)) != -1) {
+    while ((myopt = getopt_long(argc, argv, short_args, long_opts, &indexptr))
+              != -1) {
         switch (myopt)  {
+            case 'h':
+                print_syntax(argv[0]);
+                exit(EXIT_SUCCESS);
 
-        case 'h':
-            print_syntax(argv[0]);
-            exit(EXIT_SUCCESS);
+            case 'c':
+                check_duplicate_arg_and_set(&cflag, myopt);
+                cmanager = optarg;
+                break;
 
-        case 'c':
-            check_duplicate_arg(cflag, myopt);
-            cflag = 1;
-            compmanager = optarg;
-            break;
+            case 'r':
+                check_duplicate_arg_and_set(&rflag, myopt);
+                geom_r = atoi(optarg);
+                break;
 
-        case 'r':
-            check_duplicate_arg(rflag, myopt);
-            rflag = 1;
-            geom_r = atoi(optarg);
-            break;
+            case 'p':
+                check_duplicate_arg_and_set(&pflag, myopt);
+                geom_p = atoi(optarg);
+                break;
 
-        case 'p':
-            check_duplicate_arg(pflag, myopt);
-            pflag = 1;
-            geom_p = atoi(optarg);
-            break;
+            case 'b':
+                check_duplicate_arg_and_set(&bflag, myopt);
+                blocksize = mb2b(atoll(optarg));
+                break;
 
-        case 'b':
-            check_duplicate_arg(bflag, myopt);
-            bflag = 1;
-            blocksize = mb2b(atoll(optarg));
-            break;
+            case 'f':
+                check_duplicate_arg_and_set(&fflag, myopt);
+                flushmemorysize = mb2b(atoll(optarg));
+                break;
 
-        case 'f':
-            check_duplicate_arg(fflag, myopt);
-            fflag = 1;
-            flushmemorysize = mb2b(atoll(optarg));
-            break;
+            case 'l':
+                check_duplicate_arg_and_set(&lflag, myopt);
+                cass_l = atoi(optarg);
+                break;
 
-        case 'l':
-            check_duplicate_arg(lflag, myopt);
-            lflag = 1;
-            cass_l = atoi(optarg);
-            break;
+            case 'm':
+                check_duplicate_arg_and_set(&mflag, myopt);
+                memorysize = mb2b(atoll(optarg));
+                break;
 
-        case 'm':
-            check_duplicate_arg(mflag, myopt);
-            mflag = 1;
-            memorysize = mb2b(atoll(optarg));
-            break;
+            case 'i':
+                check_duplicate_arg_and_set(&iflag, myopt);
+                insertbytes = mb2b(atof(optarg));
+                break;
 
-        case 'i':
-            check_duplicate_arg(iflag, myopt);
-            iflag = 1;
-            insertbytes = mb2b(atof(optarg));
-            break;
+            case 'n':
+                check_duplicate_arg_and_set(&nflag, myopt);
+                num_keys_to_insert = atoll(optarg);
+                break;
 
-        case 'n':
-            check_duplicate_arg(nflag, myopt);
-            nflag = 1;
-            num_keys_to_insert = atoll(optarg);
-            break;
+            case 'k':
+                check_duplicate_arg_and_set(&kflag, myopt);
+                keysize = atoi(optarg);
+                break;
 
-        case 'k':
-            check_duplicate_arg(kflag, myopt);
-            kflag = 1;
-            keysize = atoi(optarg);
-            break;
+            case 'v':
+                check_duplicate_arg_and_set(&vflag, myopt);
+                valuesize = atoi(optarg);
+                break;
 
-        case 'v':
-            check_duplicate_arg(vflag, myopt);
-            vflag = 1;
-            valuesize = atoi(optarg);
-            break;
+            case 'u':
+                check_duplicate_arg_and_set(&uflag, myopt);
+                unique_keys = true;
+                break;
 
-        case 'u':
-            check_duplicate_arg(uflag, myopt);
-            uflag = 1;
-            unique_keys = true;
-            break;
+            case 'z':
+                check_duplicate_arg_and_set(&zflag, myopt);
+                zipf_keys = true;
+                break;
 
-        case 'z':
-            check_duplicate_arg(zflag, myopt);
-            zflag = 1;
-            zipf_keys = true;
-            break;
+            case 'P':
+                check_duplicate_arg_and_set(&Pflag, myopt);
+                put_thrput = atoi(optarg);
+                break;
 
-        case 'P':
-            check_duplicate_arg(Pflag, myopt);
-            Pflag = 1;
-            put_thrput = atoi(optarg);
-            break;
+            case 'g':
+                check_duplicate_arg_and_set(&gflag, myopt);
+                num_get_threads = atoi(optarg);
+                break;
 
-        case 'g':
-            check_duplicate_arg(gflag, myopt);
-            gflag = 1;
-            num_get_threads = atoi(optarg);
-            break;
+            case 'G':
+                check_duplicate_arg_and_set(&Gflag, myopt);
+                get_thrput = atoi(optarg);
+                break;
 
-        case 'G':
-            check_duplicate_arg(Gflag, myopt);
-            Gflag = 1;
-            get_thrput = atoi(optarg);
-            break;
+            case 'e':
+                check_duplicate_arg_and_set(&eflag, myopt);
+                print_kv_and_continue = true;
+                break;
 
-        case 'e':
-            check_duplicate_arg(eflag, myopt);
-            eflag = 1;
-            print_kv_and_continue = true;
-            break;
+            case 's':
+                check_duplicate_arg_and_set(&sflag, myopt);
+                break;
 
-        case 's':
-            check_duplicate_arg(sflag, myopt);
-            sflag = 1;
-            break;
+            case '?':
+                exit(EXIT_FAILURE);
 
-        case '?':
-            exit(EXIT_FAILURE);
-
-        default:
-            abort();
+            default:
+                abort();
         }
     }
 
@@ -324,10 +307,10 @@ int main(int argc, char **argv) {
         geom_p = DEFAULT_GEOM_P;
     }
     if (bflag == 0) {
-        blocksize = DEFAULT_RNGMERGE_BLOCKSIZE;
+        blocksize = DEFAULT_RNG_BLOCKSIZE;
     }
     if (fflag == 0) {
-        flushmemorysize = DEFAULT_RNGMERGE_FLUSHMEMSIZE;
+        flushmemorysize = DEFAULT_RNG_FLUSHMEMSIZE;
     }
     if (lflag == 0) {
         cass_l = DEFAULT_CASS_K;
@@ -374,13 +357,15 @@ int main(int argc, char **argv) {
         cout << "Error: you must set compaction manager" << endl;
         exit(EXIT_FAILURE);
     }
-    if (cflag && strcmp(compmanager, "nomerge") && strcmp(compmanager, "immediate") != 0
-         && strcmp(compmanager, "geometric") != 0 && strcmp(compmanager, "logarithmic") != 0
-         && strcmp(compmanager, "rangemerge") != 0 && strcmp(compmanager, "cassandra") != 0) {
-        cout << "Error: compaction manager can be \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\" or \"rangemerge\" or \"cassandra\"" << endl;
+    if (cflag && strcmp(cmanager, "nomerge") && strcmp(cmanager, "immediate")
+          && strcmp(cmanager, "geometric") && strcmp(cmanager, "logarithmic")
+          && strcmp(cmanager, "rangemerge") && strcmp(cmanager, "cassandra")) {
+        cout << "Error: compaction manager can be 'nomerge', 'immediate', ";
+        cout << "'geometric', 'logarithmic', 'rangemerge' or 'cassandra'";
+        cout << endl;
         exit(EXIT_FAILURE);
     }
-    if (rflag && pflag && strcmp(compmanager, "geometric") == 0) {
+    if (rflag && pflag && strcmp(cmanager, "geometric") == 0) {
         cout << "Error: you cannot set both 'r' and 'p' parameters" << endl;
         exit(EXIT_FAILURE);
     }
@@ -427,15 +412,15 @@ int main(int argc, char **argv) {
     // create keyvalue store and set parameter values
     //--------------------------------------------------------------------------
     // Null compaction manager
-    if (strcmp(compmanager, "nomerge") == 0) {
+    if (strcmp(cmanager, "nomerge") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::NOMERGE_CM);
     }
     // Immediate compaction manager
-    else if (strcmp(compmanager, "immediate") == 0) {
+    else if (strcmp(cmanager, "immediate") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::IMM_CM);
     }
     // Geometric compaction manager
-    else if (strcmp(compmanager, "geometric") == 0) {
+    else if (strcmp(cmanager, "geometric") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::GEOM_CM);
         if (rflag) {
             ((GeomCompactionManager *)kvstore->get_compaction_manager())->set_R(geom_r);
@@ -445,11 +430,11 @@ int main(int argc, char **argv) {
         }
     }
     // Logarithmic compaction manager
-    else if (strcmp(compmanager, "logarithmic") == 0) {
+    else if (strcmp(cmanager, "logarithmic") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::LOG_CM);
     }
     // Rangemerge compaction manager
-    else if (strcmp(compmanager, "rangemerge") == 0) {
+    else if (strcmp(cmanager, "rangemerge") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::RNGMERGE_CM);
         if (bflag) {
             ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
@@ -459,7 +444,7 @@ int main(int argc, char **argv) {
         }
     }
     // Cassandra compaction manager
-    else if (strcmp(compmanager, "cassandra") == 0) {
+    else if (strcmp(cmanager, "cassandra") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::CASSANDRA_CM);
         if (lflag) {
             ((CassandraCompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
@@ -472,7 +457,7 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
     // print values of parameters
     //--------------------------------------------------------------------------
-    cout << "# compaction_manager:  " << setw(15) << compmanager << endl;
+    cout << "# compaction_manager:  " << setw(15) << cmanager << endl;
     cout << "# memory_size:         " << setw(15) << b2mb(memorysize) << " MB " << (mflag == 0 ? "(default)" : "")  << endl;
     if (sflag) {
         cout << "# insert_bytes:        " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
@@ -492,13 +477,13 @@ int main(int argc, char **argv) {
     cout << "# put_throughput:      " << setw(15) << put_thrput << "    " << (Pflag == 0 ? "(default)" : "") << endl;
     cout << "# num_get_threads:     " << setw(15) << num_get_threads << "    " << (gflag == 0 ? "(default)" : "") << endl;
     cout << "# get_throughput:      " << setw(15) << get_thrput << "    " << (Gflag == 0 ? "(default)" : "") << endl;
-    if (strcmp(compmanager, "geometric") == 0) {
+    if (strcmp(cmanager, "geometric") == 0) {
         if (pflag == 0) {
             cout << "# geometric_r:         " << setw(15) << geom_r << "    " << (rflag == 0 ? "(default)" : "") << endl;
         } else {
             cout << "# geometric_p:         " << setw(15) << geom_p << "    " << (pflag == 0 ? "(default, disabled)" : "") << endl;
         }
-    } else if (strcmp(compmanager, "rangemerge") == 0) {
+    } else if (strcmp(cmanager, "rangemerge") == 0) {
         if (blocksize == 0) {
             cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB" << endl;
         } else {
@@ -506,7 +491,7 @@ int main(int argc, char **argv) {
         }
         cout << "# rngmerge_flushmem_size: " << setw(12) << b2mb(flushmemorysize) << " MB " << (fflag == 0 ? "(default)" : "") << endl;
     }
-    if (strcmp(compmanager, "cassandra") == 0) {
+    if (strcmp(cmanager, "cassandra") == 0) {
         cout << "# cassandra_l:         " << setw(15) << cass_l << "    " << (lflag == 0 ? "(default)" : "") << endl;
     }
     cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
@@ -526,7 +511,8 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
     // fill-in arguments of put thread and get threads
     //--------------------------------------------------------------------------
-    targs = (struct thread_args *)malloc((1 + num_get_threads) * sizeof(thread_args));
+    targs = (struct thread_args *) malloc((1 + num_get_threads) *
+                                          sizeof(thread_args));
     for (i = 0; i < 1 + num_get_threads; i++) {
         targs[i].tid = i;
         targs[i].uflag = uflag;
@@ -568,9 +554,10 @@ int main(int argc, char **argv) {
 
     if (!print_kv_and_continue) {  // if we did insert some kvs to kvstore
 
-        // if we crete unique keys, assert num keys in store equals num keys inserted
+        // if we crete unique keys, check num keys in store == num keys inserted
         if (uflag) {
-            assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys() == num_keys_to_insert);
+            assert(kvstore->get_num_mem_keys() + kvstore->get_num_disk_keys()
+                     == num_keys_to_insert);
         }
 
         // flush remaining memory tuples
@@ -622,7 +609,7 @@ void *put_routine(void *args) {
     key = (char *)malloc(MAX_KVTSIZE);
     value = (char *)malloc(MAX_KVTSIZE);
 
-    // if we read keys and values from stdin, set num_keys_to_insert to 'infinity'
+    // if we read keys and values from stdin set num_keys_to_insert to infinity
     if (sflag) {
         num_keys_to_insert = -1;  // ('num_keys_to_insert' is uint64_t)
     }
@@ -638,18 +625,18 @@ void *put_routine(void *args) {
         throttler.throttle();
 
         if (sflag) {
-            //----------------------------------------------------------------------
+            //------------------------------------------------------------------
             // read key and value from stdin
-            //----------------------------------------------------------------------
+            //------------------------------------------------------------------
             if (scanf("%s %s", key, value) != 2) {
                 break;
             }
             keylen = strlen(key);
             valuelen = strlen(value);
         } else {
-            //----------------------------------------------------------------------
+            //------------------------------------------------------------------
             // create a random key and a random value
-            //----------------------------------------------------------------------
+            //------------------------------------------------------------------
             if (zipf_keys) {
                 zipfstr_r(key, keysize, &kseed);
                 keylen = keysize;
@@ -658,7 +645,8 @@ void *put_routine(void *args) {
                 keylen = keysize;
             }
             if (uflag) {
-                sprintf(key, "%s.%Ld", key, i);  // make unique (TODO: undefined behaviour!)
+                // TODO: sprintf(key, "%s", key) -> undefined behaviour!
+                sprintf(key, "%s.%Ld", key, i);  // make unique
                 keylen += 1 + numdigits(i);
             }
             randstr_r(value, valuesize, &vseed);
@@ -727,7 +715,8 @@ void *get_routine(void *args) {
             keylen = keysize;
         }
         if (uflag) {
-            sprintf(key, "%s#%d", key, ++i);  // make unique (TODO: undefined behaviour!)
+            // TODO: sprintf(key, "%s", key) -> undefined behaviour!
+            sprintf(key, "%s#%d", key, ++i);
             keylen += 1 + numdigits(i);
         }
 
@@ -735,8 +724,8 @@ void *get_routine(void *args) {
         // execute range get()
         //--------------------------------------------------------------
         scanner->point_get(key, keylen);
-//         strcpy(end_key, key);  // NOTE need a better way to create end key than this _bad_ hack! using this hack,
-//         end_key[3] = 'z';      // NOTE as index grows, more and more keys fall within the range [key, end_key)
+//         strcpy(end_key, key);  // TODO bad hack! as index grows more and more
+//         end_key[3] = 'z';      // keys fall within range [key, end_key)
 //         scanner->range_get(key, keylen, end_key, keylen);
     }
 
@@ -778,7 +767,7 @@ void zipfstr_r(char *s, const int len, uint32_t *seed) {
 
     if (first) {
         first = false;
-        // key prefix must be common for all keys, so they follow zipf distribution
+        // key prefix must be common for all keys to follow zipf distribution
         randstr_r(key_prefix, len - num_digits, &kseed);
     }
 
@@ -859,13 +848,14 @@ int zipf_r(uint32_t *seed) {
 }
 
 /*============================================================================
- *                        check_duplicate_arg
+ *                        check_duplicate_arg_and_set
  *============================================================================*/
-void check_duplicate_arg(int flag, int opt) {
-    if (flag) {
+void check_duplicate_arg_and_set(int *flag, int opt) {
+    if (*flag) {
         cout << "Error: you have already set '-" << opt << "' argument" << endl;
         exit(EXIT_FAILURE);
     }
+    *flag = 1;
 }
 
 /*============================================================================

@@ -11,6 +11,16 @@
 /*============================================================================
  *                             DiskFileInputStream
  *============================================================================*/
+DiskFileInputStream::DiskFileInputStream(DiskFile *file)
+    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
+      m_start_incl(true), m_end_incl(true) {
+    m_buf = new Buffer(MERGE_BUFSIZE);
+    set_key_range(Slice(NULL, 0), Slice(NULL, 0));
+}
+
+/*============================================================================
+ *                             DiskFileInputStream
+ *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
     : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
       m_start_incl(true), m_end_incl(true) {
@@ -21,7 +31,8 @@ DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
 /*============================================================================
  *                             DiskFileInputStream
  *============================================================================*/
-DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize)
+DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf,
+                                         uint32_t bufsize)
     : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
       m_start_incl(true), m_end_incl(true) {
     m_buf = new Buffer(buf, bufsize);
@@ -38,7 +49,8 @@ DiskFileInputStream::~DiskFileInputStream() {
 /*============================================================================
  *                                set_key_range
  *============================================================================*/
-void DiskFileInputStream::set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) {
+void DiskFileInputStream::set_key_range(Slice start_key, Slice end_key,
+                                        bool start_incl, bool end_incl) {
     m_start_key = start_key;
     m_end_key = end_key;
     m_start_incl = start_incl;
@@ -76,7 +88,7 @@ bool DiskFileInputStream::read(Slice *key, Slice *value, uint64_t *timestamp) {
 
         assert(m_buf->used() == 0);
 
-        if (m_start_key.data()) {  // seek to first disk key that is > or >= 'startkey'
+        if (m_start_key.data()) {  // seek to first disk key > or >= 'startkey'
 
             // if m_start_key was stored on disk it would be between off1 & off2
             ret = m_diskfile->search(m_start_key, &off1, &off2);
