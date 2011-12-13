@@ -9,8 +9,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    const char *key, *value;
-    uint32_t keylen, valuelen;
+    Slice key, value;
     DiskFile *diskfile;
     DiskFileInputStream *istream;
     uint64_t timestamp;
@@ -25,8 +24,8 @@ int main(int argc, char **argv) {
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
-    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        cout << "[" << key << "] [" << value << "] [" << timestamp << "]" << endl;
+    while (istream->read(&key, &value, &timestamp)) {
+        cout << "[" << key.data() << "] [" << value.data() << "] [" << timestamp << "]" << endl;
     }
     delete istream;
     delete diskfile;

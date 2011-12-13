@@ -27,8 +27,7 @@ Scanner::~Scanner() {
  *                                point_get
  *============================================================================*/
 int Scanner::point_get(const char *key, uint32_t keylen) {
-    const char *k, *v;
-    uint32_t klen, vlen;
+    Slice k, v;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
     Slice K = Slice(key, keylen), V;
@@ -45,8 +44,8 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     pthread_rwlock_rdlock(&m_kvstore->m_diskstore->m_rwlock);
     for (int i = 0; i < (int)m_kvstore->m_diskstore->m_disk_files.size(); i++) {
         disk_istream = new DiskFileInputStream(m_kvstore->m_diskstore->m_disk_files[i], MAX_INDEX_DIST);
-        disk_istream->set_key_range(key, keylen, key, keylen, true, true);
-        if (disk_istream->read(&k, &klen, &v, &vlen, &t)) {
+        disk_istream->set_key_range(key, key, true, true);
+        if (disk_istream->read(&k, &v, &t)) {
             pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);
             delete disk_istream;
             return 1;
@@ -69,8 +68,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char 
  *                                range_get
  *============================================================================*/
 int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
-    const char *k, *v;
-    uint32_t klen, vlen;
+    Slice k, v;
     uint64_t t;
     int numkeys = 0, diskfiles;
     PriorityInputStream *pistream;
@@ -88,8 +86,8 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen, const char 
     pistream = new PriorityInputStream(istreams);
 
     // get all keys between 'start_key' and 'end_key'
-    pistream->set_key_range(start_key, start_keylen, end_key, end_keylen, start_incl, end_incl);
-    while (pistream->read(&k, &klen, &v, &vlen, &t)) {
+    pistream->set_key_range(Slice(start_key, start_keylen), Slice(end_key, end_keylen), start_incl, end_incl);
+    while (pistream->read(&k, &v, &t)) {
         numkeys++;
     }
     pthread_rwlock_unlock(&m_kvstore->m_diskstore->m_rwlock);

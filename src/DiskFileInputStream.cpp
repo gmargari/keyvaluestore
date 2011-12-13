@@ -12,19 +12,20 @@
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, uint32_t bufsize)
-    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_start_keylen(0),
-      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true) {
+    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
+      m_start_incl(true), m_end_incl(true) {
     m_buf = new Buffer(bufsize);
-    set_key_range(NULL, 0, NULL, 0);
+    set_key_range(Slice(NULL, 0), Slice(NULL, 0));
 }
 
 /*============================================================================
  *                             DiskFileInputStream
  *============================================================================*/
 DiskFileInputStream::DiskFileInputStream(DiskFile *file, char *buf, uint32_t bufsize)
-    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(NULL), m_start_keylen(0),
-      m_end_key(NULL), m_end_keylen(0), m_start_incl(true), m_end_incl(true) {
+    : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
+      m_start_incl(true), m_end_incl(true) {
     m_buf = new Buffer(buf, bufsize);
+    set_key_range(Slice(NULL, 0), Slice(NULL, 0));
 }
 
 /*============================================================================
@@ -37,11 +38,9 @@ DiskFileInputStream::~DiskFileInputStream() {
 /*============================================================================
  *                                set_key_range
  *============================================================================*/
-void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
+void DiskFileInputStream::set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) {
     m_start_key = start_key;
-    m_start_keylen = start_keylen;
     m_end_key = end_key;
-    m_end_keylen = end_keylen;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
@@ -51,23 +50,22 @@ void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_ke
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void DiskFileInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) {
-    set_key_range(start_key, start_keylen, end_key, end_keylen, true, false);
+void DiskFileInputStream::set_key_range(Slice start_key, Slice end_key) {
+    set_key_range(start_key, end_key, true, false);
 }
 
 /*============================================================================
  *                                  read
  *============================================================================*/
-bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
+bool DiskFileInputStream::read(Slice *key, Slice *value, uint64_t *timestamp) {
     int cmp;
     off_t off1, off2;
-    const char *tmpkey, *tmpvalue;
-    uint32_t tmpkeylen, tmpvaluelen;
+    Slice tmpkey, tmpvalue;
     uint64_t tmpts;
     bool ret;
 
-    *key = NULL;
-    *value = NULL;
+    *key = Slice(NULL, 0);
+    *value = Slice(NULL, 0);
     *timestamp = 0;
 
     //--------------------------------------------------------------------------
@@ -78,10 +76,10 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
 
         assert(m_buf->used() == 0);
 
-        if (m_start_key) {  // seek to first disk key that is > or >= 'startkey'
+        if (m_start_key.data()) {  // seek to first disk key that is > or >= 'startkey'
 
             // if m_start_key was stored on disk it would be between off1 & off2
-            ret = m_diskfile->search(Slice(m_start_key, m_start_keylen), &off1, &off2);
+            ret = m_diskfile->search(m_start_key, &off1, &off2);
             if (ret == false) {
                 return false;
             }
@@ -93,15 +91,15 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
             assert(m_buf->size() == off2 - off1);
 
             // check all buffer tuples until we find a key >= startkey
-            while (m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
-                if ((cmp = strcmp(tmpkey, m_start_key)) >= 0) {
+            while (m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
+                if ((cmp = strcmp(tmpkey.data(), m_start_key.data())) >= 0) {
                     break;
                 }
             }
 
             if (cmp > 0 || (cmp == 0 && m_start_incl == true)) {
                 // must seek back at beginning of key tuple
-                m_buf->undo_deserialize(tmpkey, tmpkeylen, tmpvalue, tmpvaluelen, tmpts);
+                m_buf->undo_deserialize(tmpkey, tmpvalue, tmpts);
             }
         } else {  // seek to first disk key
             m_offs = 0;
@@ -112,14 +110,14 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
     //--------------------------------------------------------------------------
     // read next <key,value,timestamp> from file
     //--------------------------------------------------------------------------
-    if (!m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
+    if (!m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
 
         // maybe we need to read more bytes in buffer to deserialize tuple
         m_buf->keep_unused();
         m_offs += m_diskfile->fill(m_buf, m_offs);
 
         // this should now work, unless there are no bytes left in file
-        if (!m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
+        if (!m_buf->deserialize(&tmpkey, &tmpvalue, &tmpts, false)) {
             assert(m_buf->unused() == 0);
             return false;
         }
@@ -128,16 +126,15 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
     //--------------------------------------------------------------------------
     // check if key read is within defined key range (i.e. smaller than endkey)
     //--------------------------------------------------------------------------
-    if (m_end_key) {
-        if ((cmp = strcmp(tmpkey, m_end_key)) > 0 || (cmp == 0 && m_end_incl == false)) {
+    if (m_end_key.data()) {
+        if ((cmp = strcmp(tmpkey.data(), m_end_key.data())) > 0
+              || (cmp == 0 && m_end_incl == false)) {
             return false;
         }
     }
 
     *key = tmpkey;
     *value = tmpvalue;
-    *keylen = tmpkeylen;
-    *valuelen = tmpvaluelen;
     *timestamp = tmpts;
     return true;
 }

@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #include "./Global.h"
+#include "./Slice.h"
 
 class VFile;
 
@@ -92,28 +93,28 @@ class Buffer {
     /**
      * serialize <k,v,t> and copy it to buffer
      */
-    bool serialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp, uint32_t *len);
+    bool serialize(Slice key, Slice value, uint64_t timestamp, uint32_t *len);
 
     /**
      * deserialize a <k,v,t> from buffer (in case 'copy_keyvalue = false',
      * strings pointed by 'key' and 'value' are valid only until next call of
      * function)
      */
-    bool deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue);
+    bool deserialize(Slice *key, Slice *value, uint64_t *timestamp, bool copy_keyvalue);
 
     /**
      * undo deserialization previously done (rational similar to ungetc().
      * needed from DiskFileInputStream::read() in case we "accidentally"
      * deserialized a <k,v,t>)
      */
-    void undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    void undo_deserialize(Slice key, Slice value, uint64_t timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     Buffer(const Buffer&);
     Buffer& operator=(const Buffer&);
 
   private:
-    bool str_is_alnum(const char *str, int len);
+    bool slice_is_alnum(Slice key);
 
     char     *m_buf;            // pointer to char buffer
     uint32_t  m_buf_size;       // buffer capacity
@@ -175,8 +176,8 @@ inline uint32_t Buffer::serialize_len(uint32_t keylen, uint32_t valuelen, uint64
 /*============================================================================
  *                             undo_deserialize
  *============================================================================*/
-inline void Buffer::undo_deserialize(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
-    m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
+inline void Buffer::undo_deserialize(Slice key, Slice value, uint64_t timestamp) {
+    m_bytes_used -= serialize_len(key.size(), value.size(), timestamp);
 }
 
 #endif  // SRC_BUFFER_H_

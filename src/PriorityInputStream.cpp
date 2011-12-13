@@ -14,8 +14,7 @@ static const int SID_NOT_INITIALIZED = INT_MAX;
  *============================================================================*/
 PriorityInputStream::PriorityInputStream(vector<InputStream *> istreams)
     : m_pqueue(), m_istreams(istreams), m_elements(), m_last_sid(SID_NOT_INITIALIZED),
-      m_start_key(NULL), m_start_keylen(0), m_end_key(NULL), m_end_keylen(0),
-      m_start_incl(true), m_end_incl(true) {
+      m_start_key(), m_end_key(), m_start_incl(true), m_end_incl(true) {
     for (int i = 0; i < (int)m_istreams.size(); i++) {
         m_elements.push_back((pq_elem *)malloc(sizeof(pq_elem)));
         m_elements.back()->sid = i;
@@ -34,16 +33,14 @@ PriorityInputStream::~PriorityInputStream() {
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl) {
+void PriorityInputStream::set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl) {
     m_start_key = start_key;
-    m_start_keylen = start_keylen;
     m_end_key = end_key;
-    m_end_keylen = end_keylen;
     m_start_incl = start_incl;
     m_end_incl = end_incl;
 
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        m_istreams[i]->set_key_range(m_start_key, m_start_keylen, m_end_key, m_end_keylen, m_start_incl, m_end_incl);
+        m_istreams[i]->set_key_range(m_start_key, m_end_key, m_start_incl, m_end_incl);
     }
 
     reset();
@@ -52,8 +49,8 @@ void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_ke
 /*============================================================================
  *                              set_key_range
  *============================================================================*/
-void PriorityInputStream::set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen) {
-    set_key_range(start_key, start_keylen, end_key, end_keylen, true, false);
+void PriorityInputStream::set_key_range(Slice start_key, Slice end_key) {
+    set_key_range(start_key, end_key, true, false);
 }
 
 /*============================================================================
@@ -69,8 +66,8 @@ void PriorityInputStream::reset() {
 
     // insert one element from each stream to priority queue
     for (int i = 0; i < (int)m_istreams.size(); i++) {
-        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->keylen),
-                                &(m_elements[i]->value), &(m_elements[i]->valuelen), &(m_elements[i]->timestamp))) {
+        if (m_istreams[i]->read(&(m_elements[i]->key), &(m_elements[i]->value),
+                                &(m_elements[i]->timestamp))) {
             m_pqueue.push(m_elements[i]);
         }
     }
@@ -82,7 +79,7 @@ void PriorityInputStream::reset() {
 /*============================================================================
  *                                   read
  *============================================================================*/
-bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) {
+bool PriorityInputStream::read(Slice *key, Slice *value, uint64_t *timestamp) {
     pq_elem *top;
 
     assert(sanity_check());
@@ -98,8 +95,9 @@ bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **
         // the element poped from head last time belonged to stream 'm_last_sid'.
         // insert into priority queue a new element from that stream.
         assert(m_last_sid < (int)m_istreams.size());
-        if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key), &(m_elements[m_last_sid]->keylen),
-                                         &(m_elements[m_last_sid]->value), &(m_elements[m_last_sid]->valuelen), &(m_elements[m_last_sid]->timestamp))) {
+        if (m_istreams[m_last_sid]->read(&(m_elements[m_last_sid]->key),
+              &(m_elements[m_last_sid]->value),
+              &(m_elements[m_last_sid]->timestamp))) {
             m_pqueue.push(m_elements[m_last_sid]);
         }
     }
@@ -111,9 +109,7 @@ bool PriorityInputStream::read(const char **key, uint32_t *keylen, const char **
     // get top element
     top = m_pqueue.top();
     *key = top->key;
-    *keylen = top->keylen;
     *value = top->value;
-    *valuelen = top->valuelen;
     *timestamp = top->timestamp;
     m_last_sid = top->sid;
     m_pqueue.pop();

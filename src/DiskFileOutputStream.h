@@ -7,6 +7,7 @@
 
 #include "./Global.h"
 #include "./OutputStream.h"
+#include "./Slice.h"
 
 class DiskFile;
 class Buffer;
@@ -25,7 +26,7 @@ class DiskFileOutputStream: public OutputStream {
     ~DiskFileOutputStream();
 
     // inherited from OutputStream
-    bool append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp);
+    bool append(Slice key, Slice value, uint64_t timestamp);
     void close();
 
     // Undefined methods (just remove Weffc++ warning)
@@ -38,7 +39,7 @@ class DiskFileOutputStream: public OutputStream {
     Buffer      *m_buf;            // buffer used for I/O
 
     VFileIndex  *m_index;          // index of <key,offs> for diskfile keys
-    char        *m_last_key;       // last key written to disk
+    char        *m_last_key;       // last key written to disk // TODO CHANGE THIS TO SLICE
     uint32_t     m_last_keylen;    // length of last key written to disk
     off_t        m_last_offs;      // offset of last key written to disk
     off_t        m_last_idx_offs;  // last offset inserted in index

@@ -10,8 +10,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    const char *key, *value;
-    uint32_t keylen, valuelen;
+    Slice key, value;
     char *prev_key;
     DiskFile *diskfile;
     DiskFileInputStream *istream;
@@ -30,16 +29,16 @@ int main(int argc, char **argv) {
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);
     istream = new DiskFileInputStream(diskfile, MERGE_BUFSIZE);
-    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        if ((cmp = strcmp(prev_key, key)) > 0) {
-            cout << "Error: prev_key: " << prev_key << " > cur_key: " << key << endl;
+    while (istream->read(&key, &value, &timestamp)) {
+        if ((cmp = strcmp(prev_key, key.data())) > 0) {
+            cout << "Error: prev_key: " << prev_key << " > cur_key: " << key.data() << endl;
             return EXIT_FAILURE;
         }
         else if (cmp == 0) {
-            cout << "Error: prev_key: " << prev_key << " == cur_key: "  << key << endl;
+            cout << "Error: prev_key: " << prev_key << " == cur_key: "  << key.data() << endl;
             return EXIT_FAILURE;
         }
-        memcpy(prev_key, key, keylen + 1);
+        memcpy(prev_key, key.data(), key.size() + 1);
     }
     free(prev_key);
     delete istream;

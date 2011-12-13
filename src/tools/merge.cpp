@@ -11,8 +11,7 @@ using namespace std;
 using std::vector;
 
 int main(int argc, char **argv) {
-    const char *key, *value;
-    uint32_t keylen, valuelen;
+    Slice key, value;
     char prev_key[MAX_KVTSIZE];
     vector<DiskFile *> diskfiles;
     vector<InputStream *> istreams;
@@ -34,11 +33,11 @@ int main(int argc, char **argv) {
 
     pistream = new PriorityInputStream(istreams);
     prev_key[0] = '\0';
-    while (pistream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        if (strcmp(prev_key, key) != 0) {
-            cout << "[" << key << "] ["  << value << "] [" << timestamp << "]" << endl;
+    while (pistream->read(&key, &value, &timestamp)) {
+        if (strcmp(prev_key, key.data()) != 0) {
+            cout << "[" << key.data() << "] ["  << value.data() << "] [" << timestamp << "]" << endl;
         }
-        memcpy(prev_key, key, keylen + 1);
+        memcpy(prev_key, key.data(), key.size() + 1);
     }
 
     for (unsigned int i = 0; i < istreams.size(); i++) {

@@ -31,22 +31,22 @@ DiskFileOutputStream::~DiskFileOutputStream() {
 /*============================================================================
  *                                 append
  *============================================================================*/
-bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *value, uint32_t valuelen, uint64_t timestamp) {
+bool DiskFileOutputStream::append(Slice key, Slice value, uint64_t timestamp) {
     uint32_t len;
     off_t cur_offs;
 
     // if there is not enough space in buffer for new <k,v> pair, flush buffer
-    if (Buffer::serialize_len(keylen, valuelen, timestamp) > m_buf->free_space()) {
+    if (Buffer::serialize_len(key.size(), value.size(), timestamp) > m_buf->free_space()) {
         m_file->append(m_buf);
     }
 
     // serialize and add new pair to buffer
-    if (m_buf->serialize(key, keylen, value, valuelen, timestamp, &len)) {
+    if (m_buf->serialize(key, value, timestamp, &len)) {
 
         // if needed, add entry to index
         cur_offs = m_file_size;
         if (m_last_idx_offs == -1 || cur_offs + len - m_last_idx_offs > MAX_INDEX_DIST) {
-            m_index->add(Slice(key, keylen), cur_offs);
+            m_index->add(key, cur_offs);
             m_last_idx_offs = cur_offs;
         }
 
@@ -54,8 +54,8 @@ bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *
         m_file_size += len;
         m_index->set_vfilesize(m_file_size);
 
-        m_last_keylen = keylen;
-        memcpy(m_last_key, key, keylen + 1);  // TODO: avoid this?
+        m_last_keylen = key.size();
+        memcpy(m_last_key, key.data(), key.size() + 1);  // TODO: avoid this?
         m_last_offs = cur_offs;
         return true;
     } else {

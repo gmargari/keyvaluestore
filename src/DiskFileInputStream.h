@@ -7,6 +7,7 @@
 
 #include "./Global.h"
 #include "./InputStream.h"
+#include "./Slice.h"
 
 class DiskFile;
 class Buffer;
@@ -29,24 +30,22 @@ class DiskFileInputStream: public InputStream {
     ~DiskFileInputStream();
 
     // inherited from InputStream
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl);
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen);
-    bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
+    void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl);
+    void set_key_range(Slice start_key, Slice end_key);
+    bool read(Slice *key, Slice *value, uint64_t *timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     DiskFileInputStream(const DiskFileInputStream&);
     DiskFileInputStream& operator=(const DiskFileInputStream&);
 
   private:
-    DiskFile    *m_diskfile;
-    off_t        m_offs;        // offset within diskfile we currently are
-    Buffer      *m_buf;         // buffer used for I/O
-    const char  *m_start_key;
-    uint32_t     m_start_keylen;
-    const char  *m_end_key;
-    uint32_t     m_end_keylen;
-    bool         m_start_incl;
-    bool         m_end_incl;
+    DiskFile *m_diskfile;
+    off_t     m_offs;        // offset within diskfile we currently are
+    Buffer   *m_buf;         // buffer used for I/O
+    Slice     m_start_key;
+    Slice     m_end_key;
+    bool      m_start_incl;
+    bool      m_end_incl;
 };
 
 #endif  // SRC_DISKFILEINPUTSTREAM_H_

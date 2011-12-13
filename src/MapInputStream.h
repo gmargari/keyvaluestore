@@ -6,6 +6,7 @@
 #include "./Global.h"
 #include "./InputStream.h"
 #include "./Map.h"
+#include "./Slice.h"
 
 class MapInputStream: public InputStream {
   public:
@@ -20,9 +21,9 @@ class MapInputStream: public InputStream {
     ~MapInputStream();
 
     // inherited from InputStream
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl);
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen);
-    bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
+    void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl);
+    void set_key_range(Slice start_key, Slice end_key);
+    bool read(Slice *key, Slice *value, uint64_t *timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     MapInputStream(const MapInputStream&);
@@ -32,10 +33,8 @@ class MapInputStream: public InputStream {
     Map                    *m_map;
     Map::KVTMap::iterator   m_iter;
     Map::KVTMap::iterator   m_iter_end;
-    const char             *m_start_key;
-    uint32_t                m_start_keylen;
-    const char             *m_end_key;
-    uint32_t                m_end_keylen;
+    Slice                   m_start_key;
+    Slice                   m_end_key;
     bool                    m_start_incl;
     bool                    m_end_incl;
 };

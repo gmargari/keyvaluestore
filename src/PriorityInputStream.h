@@ -9,6 +9,7 @@
 
 #include "./Global.h"
 #include "./InputStream.h"
+#include "./Slice.h"
 
 using std::vector;
 using std::priority_queue;
@@ -29,9 +30,9 @@ class PriorityInputStream: public InputStream {
     ~PriorityInputStream();
 
     // inherited from InputStream
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen, bool start_incl, bool end_incl);
-    void set_key_range(const char *start_key, uint32_t start_keylen, const char *end_key, uint32_t end_keylen);
-    bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp);
+    void set_key_range(Slice start_key, Slice end_key, bool start_incl, bool end_incl);
+    void set_key_range(Slice start_key, Slice end_key);
+    bool read(Slice *key, Slice *value, uint64_t *timestamp);
 
     // Undefined methods (just remove Weffc++ warning)
     PriorityInputStream(const PriorityInputStream&);
@@ -39,11 +40,9 @@ class PriorityInputStream: public InputStream {
 
   private:
     typedef struct {
-        const char *key;
-        uint32_t    keylen;
-        const char *value;
-        uint32_t    valuelen;
-        uint64_t    timestamp;
+        Slice key;
+        Slice value;
+        uint64_t timestamp;
         int sid;                // id of stream from which we read this tuple
     } pq_elem;
 
@@ -51,7 +50,7 @@ class PriorityInputStream: public InputStream {
       public:
         // returns true if e2 precedes e1
         bool operator()(const pq_elem *e1, const pq_elem *e2) {
-            int cmp = strcmp(e1->key, e2->key);
+            int cmp = strcmp(e1->key.data(), e2->key.data());
 
             if (cmp > 0) {
                 return true;
@@ -67,17 +66,14 @@ class PriorityInputStream: public InputStream {
 
     int sanity_check();
 
-    priority_queue<pq_elem *, vector<pq_elem *>, pq_cmp>   m_pqueue;
+    priority_queue<pq_elem *, vector<pq_elem *>, pq_cmp> m_pqueue;
     vector<InputStream *> m_istreams;
-    vector<pq_elem *>     m_elements;
-    int                   m_last_sid;  // id of stream last popped element belongs to
-
-    const char  *m_start_key;
-    uint32_t     m_start_keylen;
-    const char  *m_end_key;
-    uint32_t     m_end_keylen;
-    bool         m_start_incl;
-    bool         m_end_incl;
+    vector<pq_elem *> m_elements;
+    int   m_last_sid;  // id of stream last popped element belongs to
+    Slice m_start_key;
+    Slice m_end_key;
+    bool  m_start_incl;
+    bool  m_end_incl;
 };
 
 #endif  // SRC_PRIORITYINPUTSTREAM_H_

@@ -14,14 +14,13 @@
  *                                 copy_stream
  *============================================================================*/
 void Streams::copy_stream(InputStream *istream, OutputStream *ostream) {
-    const char *key, *value;
-    uint32_t keylen, valuelen;
+    Slice key, value;
     uint64_t timestamp;
 
     time_start(&(g_stats.merge_time));
 
-    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        ostream->append(key, keylen, value, valuelen, timestamp);
+    while (istream->read(&key, &value, &timestamp)) {
+        ostream->append(key, value, timestamp);
     }
     ostream->close();
 
@@ -32,18 +31,17 @@ void Streams::copy_stream(InputStream *istream, OutputStream *ostream) {
  *                           copy_stream_unique_keys
  *============================================================================*/
 void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostream) {
-    const char *key, *value;
-    uint32_t keylen, valuelen;
+    Slice key, value;
     uint64_t timestamp;
     char prev_key[MAX_KVTSIZE];
 
     time_start(&(g_stats.merge_time));
 
     prev_key[0] = '\0';
-    while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        if (strcmp(prev_key, key) != 0) {
-            ostream->append(key, keylen, value, valuelen, timestamp);
-            memcpy(prev_key, key, keylen + 1);  // TODO: avoid this?
+    while (istream->read(&key, &value, &timestamp)) {
+        if (strcmp(prev_key, key.data()) != 0) {
+            ostream->append(key, value, timestamp);
+            memcpy(prev_key, key.data(), key.size() + 1);  // TODO: avoid this?
         }
     }
     ostream->close();
@@ -103,12 +101,11 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *d
     DiskFile *diskfile;
     PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;
-    const char *key, *value;
+    Slice key, value;
     char prev_key[MAX_KVTSIZE];
     uint64_t timestamp, filesize;
     uint32_t len;
     int num_newfiles;
-    uint32_t keylen, valuelen;
 
     diskfile = new DiskFile;
     diskfile->open_new_unique();
@@ -122,11 +119,11 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *d
 
     time_start(&(g_stats.merge_time));
 
-    while (pistream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
-        if (strcmp(prev_key, key) != 0) {
+    while (pistream->read(&key, &value, &timestamp)) {
+        if (strcmp(prev_key, key.data()) != 0) {
             // if we appending current tuple to file will lead to a file size
             // greater than 'max_file_size', crete a new file for remaining tuples
-            len = Buffer::serialize_len(keylen, valuelen, timestamp);
+            len = Buffer::serialize_len(key.size(), value.size(), timestamp);
             if (filesize + len > max_file_size) {
                 ostream->close();
                 diskfiles->push_back(diskfile);
@@ -140,8 +137,8 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *d
             }
 
             filesize += len;
-            ostream->append(key, keylen, value, valuelen, timestamp);
-            memcpy(prev_key, key, keylen + 1);
+            ostream->append(key, value, timestamp);
+            memcpy(prev_key, key.data(), key.size() + 1);
         }
     }
     ostream->close();

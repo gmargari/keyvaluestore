@@ -44,8 +44,7 @@ int main() {
     DiskFileInputStream *dfistream1, *dfistream2;
     vector<InputStream *> istreams;
     char *key, *value, *key1, *key2, *key3, *value1, *prev_key;
-    const char *k1, *v1, *k2, *v2;
-    uint32_t k1len, v1len, k2len, v2len;
+    Slice k1, v1, k2, v2;
     struct timeval tv;
     int num_keys, num, maxkeysize, maxvaluesize;
     uint64_t timestamp, ts1, ts2;
@@ -92,10 +91,10 @@ int main() {
     istream = new MapInputStream(map);
     ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
     prev_key[0] = '\0';
-    while (istream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
-        assert(strcmp(k1, prev_key) != 0);
-        ostream1->append(k1, k1len, v1, v1len, timestamp);
-        memcpy(prev_key, k1, k1len + 1);
+    while (istream->read(&k1, &v1, &timestamp)) {
+        assert(strcmp(k1.data(), prev_key) != 0);
+        ostream1->append(k1, v1, timestamp);
+        memcpy(prev_key, k1.data(), k1.size() + 1);
     }
 
     ostream1->close();
@@ -129,10 +128,10 @@ int main() {
     istream3 = new MapInputStream(map);
     istream4 = new MapInputStream(map);
 
-    istream1->set_key_range(NULL, 0,            key1, strlen(key1));
-    istream2->set_key_range(key1, strlen(key1), key2, strlen(key2));
-    istream3->set_key_range(key2, strlen(key2), key3, strlen(key3));
-    istream4->set_key_range(key3, strlen(key3), NULL, 0);
+    istream1->set_key_range(Slice(NULL, 0),            Slice(key1, strlen(key1)));
+    istream2->set_key_range(Slice(key1, strlen(key1)), Slice(key2, strlen(key2)));
+    istream3->set_key_range(Slice(key2, strlen(key2)), Slice(key3, strlen(key3)));
+    istream4->set_key_range(Slice(key3, strlen(key3)), Slice(NULL, 0));
     istreams.push_back(istream1);
     istreams.push_back(istream2);
     istreams.push_back(istream3);
@@ -147,10 +146,10 @@ int main() {
     ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
     pistream = new PriorityInputStream(istreams);
     prev_key[0] = '\0';
-    while (pistream->read(&k1, &k1len, &v1, &v1len, &timestamp)) {
-        assert(strcmp(k1, prev_key) != 0);
-        ostream2->append(k1, k1len, v1, v1len, timestamp);
-        memcpy(prev_key, k1, k1len + 1);
+    while (pistream->read(&k1, &v1, &timestamp)) {
+        assert(strcmp(k1.data(), prev_key) != 0);
+        ostream2->append(k1, v1, timestamp);
+        memcpy(prev_key, k1.data(), k1.size() + 1);
     }
     ostream2->close();
 
@@ -165,19 +164,19 @@ int main() {
     dfistream1 = new DiskFileInputStream(file1, MERGE_BUFSIZE);
     dfistream2 = new DiskFileInputStream(file2, MERGE_BUFSIZE);
     num = 0;
-    while (dfistream1->read(&k1, &k1len, &v1, &v1len, &ts1)) {
-        dfistream2->read(&k2, &k2len, &v2, &v2len, &ts2);
-        if (strcmp(k1, k2) != 0) {
-            cout << num << ") k1: " << k1 << " != k2: " << k2 << endl;
+    while (dfistream1->read(&k1, &v1, &ts1)) {
+        dfistream2->read(&k2, &v2, &ts2);
+        if (strcmp(k1.data(), k2.data()) != 0) {
+            cout << num << ") k1: " << k1.data() << " != k2: " << k2.data() << endl;
             exit(EXIT_FAILURE);
         }
-        if (strcmp(v1, v2) != 0) {
-            cout << num << ") v1: " << v1 << " != v2: " << v2 << endl;
+        if (strcmp(v1.data(), v2.data()) != 0) {
+            cout << num << ") v1: " << v1.data() << " != v2: " << v2.data() << endl;
             exit(EXIT_FAILURE);
         }
         num++;
     }
-    assert(dfistream2->read(&k2, &k2len, &v2, &v2len, &ts2) == false);
+    assert(dfistream2->read(&k2, &v2, &ts2) == false);
 
     //========================================================
     // free mem / delete objects

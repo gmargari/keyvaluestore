@@ -86,18 +86,18 @@ void Buffer::keep_unused() {
 /*============================================================================
  *                                serialize
  *============================================================================*/
-bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
-                       uint32_t valuelen, uint64_t timestamp, uint32_t *len) {
+bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp, uint32_t *len) {
     uint32_t bytes_used = 0;
     char *ptr;
     uint32_t buflen;
+    uint32_t keylen = key.size(), valuelen = value.size();
 
-    assert(key && value);
+    assert(key.data() && value.data());
     assert(keylen <= MAX_KVTSIZE);
     assert(valuelen <= MAX_KVTSIZE);
     if (DBGLVL > 1) {
-        assert(str_is_alnum(key, keylen));
-        assert(str_is_alnum(value, valuelen));
+        assert(slice_is_alnum(key));
+        assert(slice_is_alnum(value));
     }
 
     ptr = m_buf + m_bytes_in_buf;
@@ -110,28 +110,24 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
     ENCODE_NUM(ptr, keylen, bytes_used);
     ENCODE_NUM(ptr, valuelen, bytes_used);
     ENCODE_NUM(ptr, timestamp, bytes_used);
-    ENCODE_STR(ptr, key, keylen + 1, bytes_used);
-    ENCODE_STR(ptr, value, valuelen + 1, bytes_used);
+    ENCODE_STR(ptr, key.data(), keylen + 1, bytes_used);
+    ENCODE_STR(ptr, value.data(), valuelen + 1, bytes_used);
+
+    m_bytes_in_buf += *len;
 
     assert(bytes_used == *len);
     assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen] == '\0');
     assert(ptr[sizeof(keylen) + sizeof(valuelen) + sizeof(timestamp) + keylen + 1 + valuelen] == '\0');
-
-    m_bytes_in_buf += *len;
-
 #if DBGLVL > 1
-    if (1) {
-        const char *kkk, *vvv;
-        uint32_t kkklen, vvvlen;
-        uint64_t ts;
-        uint32_t tmpused = m_bytes_in_buf;
-        m_bytes_used = m_bytes_in_buf - *len;
-        assert(deserialize(&kkk, &kkklen, &vvv, &vvvlen, &ts, false));
-        m_bytes_used = tmpused;
-        assert(strcmp(kkk, key) == 0);
-        assert(strcmp(vvv, value) == 0);
-        assert(ts == timestamp);
-    }
+    Slice kkk, vvv;
+    uint64_t ts;
+    uint32_t tmpused = m_bytes_in_buf;
+    m_bytes_used = m_bytes_in_buf - *len;
+    assert(deserialize(&kkk, &vvv, &ts, false));
+    m_bytes_used = tmpused;
+    assert(strcmp(kkk.data(), key.data()) == 0);
+    assert(strcmp(vvv.data(), value.data()) == 0);
+    assert(ts == timestamp);
 #endif
 
     return true;
@@ -140,12 +136,13 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
 /*============================================================================
  *                                deserialize
  *============================================================================*/
-bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp, bool copy_keyvalue) {
+bool Buffer::deserialize(Slice *key, Slice *value, uint64_t *timestamp, bool copy_keyvalue) {
     uint32_t bytes_used = 0;
     char *tmpkey, *tmpvalue;
     const char *ptr;
     uint32_t buflen;
     uint32_t len;
+    uint32_t keylen, valuelen;
 
     ptr = m_buf + m_bytes_used;
     buflen = m_bytes_in_buf - m_bytes_used;
@@ -154,44 +151,45 @@ bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value,
         return false;
     }
 
-    DECODE_NUM(ptr, *keylen, bytes_used);
-    DECODE_NUM(ptr, *valuelen, bytes_used);
+    DECODE_NUM(ptr, keylen, bytes_used);
+    DECODE_NUM(ptr, valuelen, bytes_used);
     DECODE_NUM(ptr, *timestamp, bytes_used);
 
-    if (buflen < serialize_len(*keylen, *valuelen, *timestamp)) {
+    if (buflen < serialize_len(keylen, valuelen, *timestamp)) {
         return false;
     }
 
     if (copy_keyvalue) {
-        tmpkey = (char *)malloc(*keylen + 1);
-        tmpvalue = (char *)malloc(*valuelen + 1);
+        tmpkey = (char *)malloc(keylen + 1);
+        tmpvalue = (char *)malloc(valuelen + 1);
         assert(tmpkey && tmpvalue);
-        DECODE_STR(ptr, tmpkey, *keylen + 1, bytes_used);
-        DECODE_STR(ptr, tmpvalue, *valuelen + 1, bytes_used);
+        DECODE_STR(ptr, tmpkey, keylen + 1, bytes_used);
+        DECODE_STR(ptr, tmpvalue, valuelen + 1, bytes_used);
     } else {
         assert(sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp) == bytes_used);
         tmpkey = (char *)ptr + sizeof(keylen) + sizeof(valuelen) + sizeof(*timestamp);
-        tmpvalue = tmpkey + *keylen + 1;
+        tmpvalue = tmpkey + keylen + 1;
     }
 
-    len = serialize_len(*keylen, *valuelen, *timestamp);
-    *key = tmpkey;
-    *value = tmpvalue;
+    len = serialize_len(keylen, valuelen, *timestamp);
     m_bytes_used += len;
 
-    assert(*key);
-    assert(*value);
-    assert(*keylen <= MAX_KVTSIZE);
-    assert(*valuelen <= MAX_KVTSIZE);
-    assert(*key + *keylen < ptr + buflen);
-    assert((*key)[*keylen] == '\0');
-    assert(*value + *valuelen < ptr + buflen);
-    assert((*value)[*valuelen] == '\0');
-    assert(strlen(*key) == *keylen);
-    assert(strlen(*value) == *valuelen);
+    *key = Slice(tmpkey, keylen);
+    *value = Slice(tmpvalue, valuelen);
+
+    assert(key->data());
+    assert(value->data());
+    assert(key->size() <= MAX_KVTSIZE);
+    assert(value->size() <= MAX_KVTSIZE);
+    assert(key->data() + key->size() < ptr + buflen);
+    assert(key->data()[key->size()] == '\0');
+    assert(value->data() + value->size() < ptr + buflen);
+    assert(value->data()[value->size()] == '\0');
+    assert(strlen(key->data()) == key->size());
+    assert(strlen(value->data()) == value->size());
     if (DBGLVL > 1) {
-        assert(str_is_alnum(*key, *keylen));
-        assert(str_is_alnum(*value, *valuelen));
+        assert(slice_is_alnum(*key));
+        assert(slice_is_alnum(*value));
     }
 
     return true;
@@ -200,9 +198,9 @@ bool Buffer::deserialize(const char **key, uint32_t *keylen, const char **value,
 /*============================================================================
  *                               str_is_alnum
  *============================================================================*/
-bool Buffer::str_is_alnum(const char *str, int len) {
-    for (int i = 0; i < len; i++)
-        if (!isalnum(str[i]))
+bool Buffer::slice_is_alnum(Slice key) {
+    for (int i = 0; i < (int)key.size(); i++)
+        if (!isalnum(key.data()[i]))
             return false;
 
     return true;
