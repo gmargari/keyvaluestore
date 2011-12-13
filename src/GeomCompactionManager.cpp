@@ -163,17 +163,17 @@ void GeomCompactionManager::flush_bytes() {
     // 2) add memstore stream to vector of streams to merge
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
+    memstore_clear();
     memstore_file_istream = new DiskFileInputStream(memstore_file, MERGE_BUFSIZE);
     istreams_to_merge.push_back(memstore_file_istream);
-    memstore_clear();
 
     //--------------------------------------------------------------------------
     // 3) merge streams creating a new disk file
     //--------------------------------------------------------------------------
     disk_file = Streams::merge_streams(istreams_to_merge);
 
-    // delete all istreams but memstore istream
-    for (int i = 0; i < (int)istreams_to_merge.size() - 1; i++) {
+    // delete all istreams
+    for (int i = 0; i < (int)istreams_to_merge.size(); i++) {
         delete istreams_to_merge[i];
     }
 
@@ -184,7 +184,6 @@ void GeomCompactionManager::flush_bytes() {
     // delete the memstore file and disk stream
     memstore_file->delete_from_disk();
     delete memstore_file;
-    delete memstore_file_istream;
 
     // delete all files merged as well as their input streams
     pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
