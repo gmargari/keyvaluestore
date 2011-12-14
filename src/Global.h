@@ -29,14 +29,14 @@
 //==============================================================================
 // vfile-related defines
 //==============================================================================
-#define ROOT_DIR                    "/tmp/kvstore/"  // dont forget trailing '/'
-#define CMMANAGER_FILENAME          "cmmanager.info"
-#define DISKSTORE_FILENAME          "dstore.info"
-#define DISKFILE_PREFIX             "dfile."
-#define VFILE_PART_PREFIX           ".part"
-#define VFILE_INFO_SUFFIX           ".info"
-#define VFILE_INDEX_SUFFIX          ".index"
-#define MAX_FILE_SIZE               2147483647LL    // 2GB
+#define ROOT_DIR            "/tmp/kvstore/"  // dont forget trailing '/'
+#define CMMANAGER_FILENAME  "cmmanager.info"
+#define DISKSTORE_FILENAME  "dstore.info"
+#define DISKFILE_PREFIX     "dfile."
+#define VFILE_PART_PREFIX   ".part"
+#define VFILE_INFO_SUFFIX   ".info"
+#define VFILE_INDEX_SUFFIX  ".index"
+#define MAX_FILE_SIZE       2147483647LL    // 2GB
 
 //==============================================================================
 // macros to convert bytes
@@ -73,86 +73,6 @@
 
 #define usec2msec(u) ((u)/1000.0)
 
-//==============================================================================
-// safe execution of macros
-//==============================================================================
-
-#define STMT( stuff )     do { stuff } while(0)
-
-//==============================================================================
-// macros to print an expression and its value
-//==============================================================================
-
-#if DBGLVL > 0
-    #include <stdio.h>  // for functions below
-#endif
-
-#define DEBUG_PROMPT "# [DEBUG]  "
-
-/* integers */
-#define dbg_i(expr)        STMT( if (DBGLVL) { printf("%s " #expr " = %d\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_i2(i1, i2)     STMT( if (DBGLVL) { printf("%s " #i1 " = %d , " #i2 " = %d\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-
-/* long integers */
-#define dbg_li(expr)       STMT( if (DBGLVL) { printf("%s " #expr " = %ld\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_li2(i1, i2)    STMT( if (DBGLVL) { printf("%s " #i1 " = %ld , " #i2 " = %ld\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-#define dbg_l(expr)        dbg_li(expr)
-#define dbg_l2(i1, i2)     dbg_li2( i1, i2)
-
-/* unsigned integers */
-#define dbg_ui(expr)       STMT( if (DBGLVL) { printf("%s " #expr " = %u\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_ui2(i1, i2)    STMT( if (DBGLVL) { printf("%s " #i1 " = %u , " #i2 " = %u\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-#define dbg_u(expr)        dbg_ui(expr)
-#define dbg_u2(i1, i2)     dbg_ui2( i1, i2)
-
-/* long unsigned integers */
-#define dbg_lui(expr)      STMT( if (DBGLVL) { printf("%s " #expr " = %lu\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_lui2(i1, i2)   STMT( if (DBGLVL) { printf("%s " #i1 " = %lu , " #i2 " = %lu\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-#define dbg_uli(expr)      dbg_lui(expr)
-#define dbg_ul(expr)       dbg_lui(expr)
-#define dbg_uli2(i1, i2)   dbg_lui2(i1, i2)
-
-/* long long unsigned integers */
-#define dbg_lli(expr)      STMT( if (DBGLVL) { printf("%s " #expr " = %Ld\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_lli2(i1, i2)   STMT( if (DBGLVL) { printf("%s " #i1 " = %Ld , " #i2 " = %Ld\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-
-/* long long unsigned integers */
-#define dbg_llui(expr)     STMT( if (DBGLVL) { printf("%s " #expr " = %Lu\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_llui2(i1, i2)  STMT( if (DBGLVL) { printf("%s " #i1 " = %Lu , " #i2 " = %Lu\n", DEBUG_PROMPT, i1, i2); fflush(stdout); } )
-#define dbg_ulli(expr)     dbg_llui(expr)
-#define dbg_ulli2(i1, i2)  dbg_llui2(i1, i2)
-
-/* floats */
-#define dbg_f(expr)        STMT( if (DBGLVL) { printf("%s " #expr " = %f\n", DEBUG_PROMPT, expr); fflush(stdout); } )
-#define dbg_f2(f1, f2)     STMT( if (DBGLVL) { printf("%s " #f1 " = %f , " #f2 " = %f\n", DEBUG_PROMPT, f1, f2); fflush(stdout); } )
-
-/* strings */
-#define dbg_s(str)         STMT( if (DBGLVL) { printf("%s " #str " = \"%s\"\n", DEBUG_PROMPT, str); fflush(stdout); } )
-#define dbg_s2(s1, s2)     STMT( if (DBGLVL) { printf("%s " #s1 " = \"%s\" , " #s2 " = \"%s\"\n", DEBUG_PROMPT, s1, s2); fflush(stdout); } )
-
-/* boolean expressions */
-#define dbg_b(expr)        STMT( if (DBGLVL) { printf("%s " #expr "  =>  %s\n", DEBUG_PROMPT, expr ? "[ TRUE ]" : "[ FALSE ]"); fflush(stdout); } )
-#define dbg_b2(b1, b2)     STMT( if (DBGLVL) { printf("%s " #b1 " = %s , " #b2 " = %s\n", DEBUG_PROMPT, b1 ? "[ TRUE ]" : "[ FALSE ]", b2 ? "[ TRUE ]" : "[ FALSE ]"); fflush(stdout); } )
-
-/* pointers */
-#define dbg_p(expr)                                                               \
-    STMT(                                                                      \
-        if (expr==NULL)                                                        \
-            printf("%s " #expr " = NULL\n", DEBUG_PROMPT);                     \
-        else                                                                   \
-            printf("%s " #expr " = %p\n", DEBUG_PROMPT, expr);                 \
-        fflush(stdout);                                                        \
-    )
-
-/* print code point (e.g. in order to see after which point does an error occur) */
-#define dbg()             STMT( if (DBGLVL) { printf("%s %s => %s:%d\n", DEBUG_PROMPT, __FUNCTION__, __FILE__, __LINE__); fflush(stdout); } )
-
-//==============================================================================
-// debugging level
-//==============================================================================
-
-#if DBGLVL == 0
-    #define NDEBUG  // disable assertions
-#endif
+#include "./Debug.h"
 
 #endif  // SRC_GLOBAL_H_

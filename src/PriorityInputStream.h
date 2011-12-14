@@ -48,10 +48,9 @@ class PriorityInputStream: public InputStream {
     } pq_elem;
 
     class pq_cmp {
-    public:
+      public:
         // returns true if e2 precedes e1
-        bool operator()(const pq_elem *e1, const pq_elem *e2)
-        {
+        bool operator()(const pq_elem *e1, const pq_elem *e2) {
             int cmp = strcmp(e1->key, e2->key);
 
             if (cmp > 0) {
