@@ -90,7 +90,7 @@ class MemStore {
     MapInputStream *new_map_inputstream();
 
     /**
-     * create and return an input stream for memstore's map that contains key
+     * create and return an input stream for memstore's map which contains key
      * 'key'. this function is used from rangemerge c.m., where we have
      * multiple maps in memstore, one per range. NOTE: caller must delete
      * inputstream when done with it.

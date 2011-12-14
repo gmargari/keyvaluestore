@@ -71,45 +71,35 @@ void CassandraCompactionManager::flush_bytes() {
     //--------------------------------------------------------------------------
     // if merge_lvl != 0, then for each level L from 0 to 'merge_lvl-1' we need
     // to merge its files, producing a new file at level L+1
-    for (int lvl = merge_lvl-1; lvl >= 0; lvl--) {
+    for (int lvl = merge_lvl - 1; lvl >= 0; lvl--) {
 
-        //----------------------------------------------------------------------
         // select disk files to merge
-        //----------------------------------------------------------------------
         istreams.clear();
-        for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
+        for (int i = lvl * m_L; i < lvl * m_L + m_L; i++) {
             istreams.push_back(new DiskFileInputStream(disk_files[i]));
         }
 
-        //----------------------------------------------------------------------
         // merge streams creating a new disk file
-        //----------------------------------------------------------------------
         disk_file = Streams::merge_streams(istreams);
 
-        //----------------------------------------------------------------------
-        // delete merged files and streams
-        //----------------------------------------------------------------------
+        // delete streams and merged files
         for (int i = 0; i < (int)istreams.size(); i++) {
             delete istreams[i];
         }
 
         m_diskstore->write_lock();
-        for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
+        for (int i = lvl * m_L; i < lvl * m_L + m_L; i++) {
             disk_files[i]->delete_from_disk();
             delete disk_files[i];
         }
-        disk_files.erase(disk_files.begin() + lvl*m_L,
-                           disk_files.begin() + lvl*m_L + m_L);
+        disk_files.erase(disk_files.begin() + lvl * m_L,
+                         disk_files.begin() + lvl * m_L + m_L);
 
-        //----------------------------------------------------------------------
         // add new file to DiskStore
-        //----------------------------------------------------------------------
-        disk_files.insert(disk_files.begin() + lvl*m_L, disk_file);
+        disk_files.insert(disk_files.begin() + lvl * m_L, disk_file);
         m_diskstore->write_unlock();
 
-        //----------------------------------------------------------------------
         // update vector 'm_level_files'
-        //----------------------------------------------------------------------
         m_level_files[lvl] = 0;
         if (lvl + 1 == (int)m_level_files.size()) {
             m_level_files.push_back(0);
@@ -127,11 +117,12 @@ void CassandraCompactionManager::flush_bytes() {
     // insert first in diskstore as it contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(),
                                      memstore_file);
+    m_diskstore->write_unlock();
+
     if (m_level_files.size() == 0) {
         m_level_files.push_back(0);
     }
     m_level_files[0] += 1;
-    m_diskstore->write_unlock();
 
     assert(sanity_check());
 }
