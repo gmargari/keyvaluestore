@@ -1,5 +1,7 @@
-#ifndef GLOBAL_H
-#define GLOBAL_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_GLOBAL_H_
+#define SRC_GLOBAL_H_
 
 // set debug level:
 //  0 - debugging disabled
@@ -10,33 +12,31 @@
 //==============================================================================
 // default values
 //==============================================================================
-#define DEFAULT_MEMSTORE_SIZE                   104857600LL // 100MB
-#define MAX_INDEX_DIST                                65536 // 64KB
-#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024)) // 1MB (max size for key and for value)
-#define MERGE_BUFSIZE        ((unsigned long)(4*1024*1024)) // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
-#define DEFAULT_STATS_ENABLED                         false
-#define DEFAULT_STATS_STEP            DEFAULT_MEMSTORE_SIZE
+#define DEFAULT_MEMSTORE_SIZE                   104857600LL  // 100MB
+#define MAX_INDEX_DIST                                65536  // 64KB
+#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024))  // 1MB (max size for key and for value)
+#define MERGE_BUFSIZE        ((unsigned long)(4*1024*1024))  // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
 //==============================================================================
 // compaction managers' default values
 //==============================================================================
 #define DEFAULT_GEOM_R                                    3
-#define DEFAULT_GEOM_P                                    0 // default disabled (no upper bound on number of partitions)
-#define DEFAULT_RNGMERGE_BLOCKSIZE              268435456LL // 256MB
-#define DEFAULT_RNGMERGE_FLUSHMEMSIZE                   0LL // 0 -> flush biggest range only
+#define DEFAULT_GEOM_P                                    0  // default disabled (no upper bound on number of partitions)
+#define DEFAULT_RNGMERGE_BLOCKSIZE              268435456LL  // 256MB
+#define DEFAULT_RNGMERGE_FLUSHMEMSIZE                   0LL  // 0 -> flush biggest range only
 #define DEFAULT_CASS_K                                    4
 
 //==============================================================================
 // vfile-related defines
 //==============================================================================
-#define ROOT_DIR                    "/tmp/kvstore/" // dont forget trailing '/'
+#define ROOT_DIR                    "/tmp/kvstore/"  // dont forget trailing '/'
 #define CMMANAGER_FILENAME          "cmmanager.info"
 #define DISKSTORE_FILENAME          "dstore.info"
 #define DISKFILE_PREFIX             "dfile."
 #define VFILE_PART_PREFIX           ".part"
 #define VFILE_INFO_SUFFIX           ".info"
 #define VFILE_INDEX_SUFFIX          ".index"
-#define MAX_FILE_SIZE               2147483647LL // 2GB
+#define MAX_FILE_SIZE               2147483647LL    // 2GB
 
 //==============================================================================
 // macros to convert bytes
@@ -84,7 +84,7 @@
 //==============================================================================
 
 #if DBGLVL > 0
-    #include <stdio.h> // for functions below
+    #include <stdio.h>  // for functions below
 #endif
 
 #define DEBUG_PROMPT "# [DEBUG]  "
@@ -152,8 +152,7 @@
 //==============================================================================
 
 #if DBGLVL == 0
-    #define NDEBUG // disable assertions
+    #define NDEBUG  // disable assertions
 #endif
 
-
-#endif
+#endif  // SRC_GLOBAL_H_

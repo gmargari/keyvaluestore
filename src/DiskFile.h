@@ -1,17 +1,19 @@
-#ifndef KVTDISKFILE_H
-#define KVTDISKFILE_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_DISKFILE_H_
+#define SRC_DISKFILE_H_
 
 #include <stdint.h>
 #include <sys/types.h>
+
+#include "./Global.h"
 
 class VFile;
 class VFileIndex;
 class Buffer;
 
 class DiskFile {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -120,12 +122,11 @@ public:
     DiskFile(const DiskFile&);
     DiskFile& operator=(const DiskFile&);
 
-protected:
-
-    VFile       *m_file;          // file in which we store <key,value> pairs
-    VFileIndex  *m_index;         // index of <key,offs> for diskfile
-    static int   m_max_dfile_num; // create unique filenames
-    bool         m_deleted;       // whether this disk file was delete from disk
+  protected:
+    VFile       *m_file;           // file in which we store <key,value> pairs
+    VFileIndex  *m_index;          // index of <key,offs> for diskfile
+    static int   m_max_dfile_num;  // create unique filenames
+    bool         m_deleted;        // whether this file was delete from disk
 };
 
-#endif
+#endif  // SRC_DISKFILE_H_

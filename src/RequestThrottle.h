@@ -1,14 +1,14 @@
-#ifndef REQUESTTHROTTLE_H
-#define REQUESTTHROTTLE_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_REQUESTTHROTTLE_H_
+#define SRC_REQUESTTHROTTLE_H_
 
 #include <sys/time.h>
 #include <assert.h>
 #include <unistd.h>
 
 class RequestThrottle {
-
-public:
-
+  public:
     /**
      * constructor ('target_rate' in number of requests per second)
      */
@@ -29,12 +29,12 @@ public:
     RequestThrottle(const RequestThrottle&);
     RequestThrottle& operator=(const RequestThrottle&);
 
-private:
-    int             m_req_per_sec; // target request rate (requests per second)
-    struct timeval *m_buffer;      // ring buffer of entries
-    int             m_capacity;    // capacity of ring buffer
-    int             m_size;        // number of entries in buffer
-    int             m_head;        // where next entry will be inserted
+  private:
+    int             m_req_per_sec;  // target request rate (requests per second)
+    struct timeval *m_buffer;       // ring buffer of entries
+    int             m_capacity;     // capacity of ring buffer
+    int             m_size;         // number of entries in buffer
+    int             m_head;         // where next entry will be inserted
 };
 
 
@@ -64,12 +64,11 @@ void RequestThrottle::throttle() {
     struct timeval now;
     double diff_sec;
 
-    if (m_req_per_sec == 0) { // throttling disabled
+    if (m_req_per_sec == 0) {  // throttling disabled
         return;
     }
 
     if (m_size == m_capacity) {
-
         // check the oldest entry. if it's less than 1 second in the past,
         // sleep for the time difference
         gettimeofday(&now, NULL);
@@ -93,4 +92,4 @@ void RequestThrottle::throttle() {
     }
 }
 
-#endif
+#endif  // SRC_REQUESTTHROTTLE_H_

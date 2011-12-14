@@ -1,12 +1,15 @@
-#ifndef MEMSTORE_H
-#define MEMSTORE_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "Global.h" // for MAX_KVTSIZE
+#ifndef SRC_MEMSTORE_H_
+#define SRC_MEMSTORE_H_
+
 #include <stdint.h>
+#include <string.h>
 #include <map>
 #include <algorithm>
-#include <string.h>
 #include <vector>
+
+#include "./Global.h"
 
 using std::pair;
 using std::vector;
@@ -15,9 +18,7 @@ class Map;
 class MapInputStream;
 
 class MemStore {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -111,8 +112,7 @@ public:
     void clear_map(const char *key, uint32_t keylen);
     void clear_map(int idx);
 
-protected:
-
+  protected:
     /**
      * used from add_map()/get_map()/clear_map() functions above
      * @return the index in vector 'm_map' of the map responsible for 'key'
@@ -150,4 +150,4 @@ protected:
     uint64_t  m_size_when_serialized;
 };
 
-#endif
+#endif  // SRC_MEMSTORE_H_

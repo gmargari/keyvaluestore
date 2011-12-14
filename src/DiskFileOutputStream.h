@@ -1,18 +1,19 @@
-#ifndef KVTDISKFILEOUTPUTSTREAM_H
-#define KVTDISKFILEOUTPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "OutputStream.h"
+#ifndef SRC_DISKFILEOUTPUTSTREAM_H_
+#define SRC_DISKFILEOUTPUTSTREAM_H_
 
 #include <sys/types.h>
+
+#include "./Global.h"
+#include "./OutputStream.h"
 
 class DiskFile;
 class Buffer;
 class VFileIndex;
 
 class DiskFileOutputStream: public OutputStream {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -31,18 +32,17 @@ public:
     DiskFileOutputStream(const DiskFileOutputStream&);
     DiskFileOutputStream& operator=(const DiskFileOutputStream&);
 
-protected:
+  protected:
+    DiskFile    *m_file;           // file in which we store <key,value> pairs
+    uint64_t     m_file_size;      // current size of diskfile
+    Buffer      *m_buf;            // buffer used for I/O
 
-    DiskFile    *m_file;          // file in which we store <key,value> pairs
-    uint64_t     m_file_size;     // current size of diskfile
-    Buffer      *m_buf;           // buffer used for I/O
-
-    VFileIndex  *m_index;         // index of <key,offs> for diskfile keys
-    char        *m_last_key;      // last key written to disk
-    uint32_t     m_last_keylen;   // length of last key written to disk
-    off_t        m_last_offs;     // offset of last key written to disk
-    off_t        m_last_idx_offs; // last offset inserted in index
-    uint64_t     m_stored_keys;   // number of keys stored in diskfile
+    VFileIndex  *m_index;          // index of <key,offs> for diskfile keys
+    char        *m_last_key;       // last key written to disk
+    uint32_t     m_last_keylen;    // length of last key written to disk
+    off_t        m_last_offs;      // offset of last key written to disk
+    off_t        m_last_idx_offs;  // last offset inserted in index
+    uint64_t     m_stored_keys;    // number of keys stored in diskfile
 };
 
-#endif
+#endif  // SRC_DISKFILEOUTPUTSTREAM_H_

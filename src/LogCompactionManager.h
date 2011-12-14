@@ -1,12 +1,12 @@
-#ifndef LOG_COMPACTIONMANAGER_H
-#define LOG_COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "GeomCompactionManager.h"
+#ifndef SRC_LOGCOMPACTIONMANAGER_H_
+#define SRC_LOGCOMPACTIONMANAGER_H_
+
+#include "./GeomCompactionManager.h"
 
 class LogCompactionManager: public GeomCompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -21,4 +21,4 @@ public:
     ~LogCompactionManager() { }
 };
 
-#endif
+#endif  // SRC_LOGCOMPACTIONMANAGER_H_

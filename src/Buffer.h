@@ -1,15 +1,17 @@
-#ifndef BUFFER_H
-#define BUFFER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_BUFFER_H_
+#define SRC_BUFFER_H_
 
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "./Global.h"
+
 class VFile;
 
 class Buffer {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -110,8 +112,7 @@ public:
     Buffer(const Buffer&);
     Buffer& operator=(const Buffer&);
 
-protected:
-
+  protected:
     bool str_is_alnum(const char *str, int len);
 
     char     *m_buf;            // pointer to char buffer
@@ -178,4 +179,4 @@ inline void Buffer::undo_deserialize(const char *key, uint32_t keylen, const cha
     m_bytes_used -= serialize_len(keylen, valuelen, timestamp);
 }
 
-#endif
+#endif  // SRC_BUFFER_H_

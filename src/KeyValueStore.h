@@ -1,17 +1,19 @@
-#ifndef KEYVALUESTORE_H
-#define KEYVALUESTORE_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_KEYVALUESTORE_H_
+#define SRC_KEYVALUESTORE_H_
 
 #include <stdint.h>
+
+#include "./Global.h"
 
 class MemStore;
 class DiskStore;
 class CompactionManager;
 
 class KeyValueStore {
-
-friend class Scanner;
-
-public:
+  public:
+    friend class Scanner;
 
     /**
      * Memory flush & compaction manager algorithm:
@@ -111,7 +113,7 @@ public:
     KeyValueStore(const KeyValueStore&);
     KeyValueStore& operator=(const KeyValueStore&);
 
-protected:
+  protected:
     void check_parameters();
 
     MemStore            *m_memstore;
@@ -119,4 +121,4 @@ protected:
     CompactionManager   *m_compactionmanager;
 };
 
-#endif
+#endif  // SRC_KEYVALUESTORE_H_

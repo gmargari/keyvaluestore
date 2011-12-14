@@ -1,17 +1,18 @@
-#ifndef KVTDISKFILEINPUTSTREAM_H
-#define KVTDISKFILEINPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "InputStream.h"
+#ifndef SRC_DISKFILEINPUTSTREAM_H_
+#define SRC_DISKFILEINPUTSTREAM_H_
 
 #include <sys/types.h>
+
+#include "./Global.h"
+#include "./InputStream.h"
 
 class DiskFile;
 class Buffer;
 
 class DiskFileInputStream: public InputStream {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -36,8 +37,7 @@ public:
     DiskFileInputStream(const DiskFileInputStream&);
     DiskFileInputStream& operator=(const DiskFileInputStream&);
 
-protected:
-
+  protected:
     DiskFile    *m_diskfile;
     off_t        m_offs;        // offset within diskfile we currently are
     Buffer      *m_buf;         // buffer used for I/O
@@ -49,4 +49,4 @@ protected:
     bool         m_end_incl;
 };
 
-#endif
+#endif  // SRC_DISKFILEINPUTSTREAM_H_

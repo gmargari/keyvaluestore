@@ -1,9 +1,13 @@
-#ifndef DISKSTORE_H
-#define DISKSTORE_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_DISKSTORE_H_
+#define SRC_DISKSTORE_H_
 
 #include <stdint.h>
-#include <vector>
 #include <pthread.h>
+#include <vector>
+
+#include "./Global.h"
 
 using std::vector;
 
@@ -11,17 +15,12 @@ class DiskFile;
 class DiskFileInputStream;
 
 class DiskStore {
-
-friend class CompactionManager;
-friend class NomergeCompactionManager;
-friend class ImmCompactionManager;
-friend class GeomCompactionManager;
-friend class LogCompactionManager;
-friend class RangemergeCompactionManager;
-friend class CassandraCompactionManager;
-friend class Scanner;
-
-public:
+  public:
+    friend class NomergeCompactionManager;
+    friend class GeomCompactionManager;
+    friend class RangemergeCompactionManager;
+    friend class CassandraCompactionManager;
+    friend class Scanner;
 
     /**
      * constructor
@@ -52,8 +51,7 @@ public:
      */
     int get_num_disk_files();
 
-protected:
-
+  protected:
     bool load_from_disk();
     bool save_to_disk();
 
@@ -61,4 +59,4 @@ protected:
     pthread_rwlock_t   m_rwlock;
 };
 
-#endif
+#endif  // SRC_DISKSTORE_H_

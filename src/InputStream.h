@@ -1,12 +1,12 @@
-#ifndef KVTINPUTSTREAM_H
-#define KVTINPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_INPUTSTREAM_H_
+#define SRC_INPUTSTREAM_H_
 
 #include <stdint.h>
 
 class InputStream {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -36,7 +36,6 @@ public:
      * @return false if no tuple left. else, true.
      */
     virtual bool read(const char **key, uint32_t *keylen, const char **value, uint32_t *valuelen, uint64_t *timestamp) = 0;
-
 };
 
-#endif
+#endif  // SRC_INPUTSTREAM_H_

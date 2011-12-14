@@ -1,19 +1,20 @@
-#ifndef KVTPRIORITYINPUTSTREAM_H
-#define KVTPRIORITYINPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "InputStream.h"
+#ifndef SRC_PRIORITYINPUTSTREAM_H_
+#define SRC_PRIORITYINPUTSTREAM_H_
 
+#include <string.h>
 #include <vector>
 #include <queue>
-#include <string.h>
+
+#include "./Global.h"
+#include "./InputStream.h"
 
 using std::vector;
 using std::priority_queue;
 
 class PriorityInputStream: public InputStream {
-
-public:
-
+  public:
     /**
      * constructor. each istream in 'istreams' must either be properly
      * positioned by caller (e.g. by calling set_key_range() for each istream),
@@ -36,8 +37,7 @@ public:
     PriorityInputStream(const PriorityInputStream&);
     PriorityInputStream& operator=(const PriorityInputStream&);
 
-protected:
-
+  protected:
     typedef struct {
         const char *key;
         uint32_t    keylen;
@@ -49,7 +49,8 @@ protected:
 
     class pq_cmp {
     public:
-        bool operator()(const pq_elem *e1, const pq_elem *e2) // returns true if e2 precedes e1
+        // returns true if e2 precedes e1
+        bool operator()(const pq_elem *e1, const pq_elem *e2)
         {
             int cmp = strcmp(e1->key, e2->key);
 
@@ -70,7 +71,7 @@ protected:
     priority_queue<pq_elem *, vector<pq_elem *>, pq_cmp>   m_pqueue;
     vector<InputStream *> m_istreams;
     vector<pq_elem *>     m_elements;
-    int                   m_last_sid; // id of stream last popped element belongs to
+    int                   m_last_sid;  // id of stream last popped element belongs to
 
     const char  *m_start_key;
     uint32_t     m_start_keylen;
@@ -80,4 +81,4 @@ protected:
     bool         m_end_incl;
 };
 
-#endif
+#endif  // SRC_PRIORITYINPUTSTREAM_H_

@@ -1,20 +1,22 @@
-#ifndef KVTMAP_H
-#define KVTMAP_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "Slice.h"
+#ifndef SRC_MAP_H_
+#define SRC_MAP_H_
 
 #include <stdint.h>
 #include <string.h>
 #include <map>
+#include <utility>
+
+#include "./Global.h"
+#include "./Slice.h"
 
 using std::map;
 using std::pair;
 
 class Map {
-
-friend class MapInputStream;
-
-public:
+  public:
+    friend class MapInputStream;
 
     /**
      * constructor
@@ -82,7 +84,7 @@ public:
      */
     void clear();
 
-    struct cmp_slice { // required, in order for the map to have its keys sorted
+    struct cmp_slice {  // required in order for the map to have its keys sorted
         bool operator()(Slice const a, Slice const b) {
             return strcmp(a.data(), b.data()) < 0;
         }
@@ -92,8 +94,7 @@ public:
     typedef pair<Slice, uint64_t > KVTPair;
     typedef map<const Slice, KVTPair, cmp_slice> KVTMap;
 
-protected:
-
+  protected:
     int sanity_check();
 
     /**
@@ -119,9 +120,9 @@ protected:
     KVTMap::iterator end_iter(const char *key, uint32_t keylen, bool key_incl);
 
     KVTMap      m_map;
-    uint64_t    m_size;            // size of map
-    uint64_t    m_size_serialized; // size of map when written to disk
-    uint64_t    m_keys;            // number of keys or tuples in map
+    uint64_t    m_size;             // size of map
+    uint64_t    m_size_serialized;  // size of map when written to disk
+    uint64_t    m_keys;             // number of keys or tuples in map
 };
 
-#endif
+#endif  // SRC_MAP_H_

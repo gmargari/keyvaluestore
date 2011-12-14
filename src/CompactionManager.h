@@ -1,14 +1,16 @@
-#ifndef COMPACTIONMANAGER_H
-#define COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_COMPACTIONMANAGER_H_
+#define SRC_COMPACTIONMANAGER_H_
+
+#include "./Global.h"
 
 class MemStore;
 class DiskStore;
 class DiskFile;
 
 class CompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -39,10 +41,9 @@ public:
     CompactionManager(const CompactionManager&);
     CompactionManager& operator=(const CompactionManager&);
 
-protected:
-
+  protected:
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };
 
-#endif
+#endif  // SRC_COMPACTIONMANAGER_H_

@@ -1,19 +1,20 @@
-#ifndef RANGEMERGE_COMPACTIONMANAGER_H
-#define RANGEMERGE_COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "CompactionManager.h"
+#ifndef SRC_RANGEMERGECOMPACTIONMANAGER_H_
+#define SRC_RANGEMERGECOMPACTIONMANAGER_H_
 
 #include <stdint.h>
 #include <vector>
+
+#include "./Global.h"
+#include "./CompactionManager.h"
 
 using std::vector;
 
 class Range;
 
 class RangemergeCompactionManager: public CompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -39,8 +40,7 @@ public:
     // inherited from CompactionManager (see CompactionManager.h for description)
     void flush_bytes();
 
-protected:
-
+  protected:
     /**
      * when loading an existing index from disk, create in memstore one map
      * for each range (add to memstore one map per range/disk file)
@@ -66,4 +66,4 @@ protected:
     uint64_t m_flushmem;
 };
 
-#endif
+#endif  // SRC_RANGEMERGECOMPACTIONMANAGER_H_

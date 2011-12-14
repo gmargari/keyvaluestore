@@ -1,14 +1,16 @@
-#ifndef SCANNER_H
-#define SCANNER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_SCANNER_H_
+#define SRC_SCANNER_H_
 
 #include <stdint.h>
+
+#include "./Global.h"
 
 class KeyValueStore;
 
 class Scanner {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -45,9 +47,8 @@ public:
     Scanner(const Scanner&);
     Scanner& operator=(const Scanner&);
 
-protected:
-
+  protected:
     KeyValueStore *m_kvstore;
 };
 
-#endif
+#endif  // SRC_SCANNER_H_

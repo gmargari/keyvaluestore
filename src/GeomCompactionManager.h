@@ -1,16 +1,17 @@
-#ifndef GEOM_COMPACTIONMANAGER_H
-#define GEOM_COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "CompactionManager.h"
+#ifndef SRC_GEOMCOMPACTIONMANAGER_H_
+#define SRC_GEOMCOMPACTIONMANAGER_H_
 
 #include <vector>
+
+#include "./Global.h"
+#include "./CompactionManager.h"
 
 using std::vector;
 
 class GeomCompactionManager: public CompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -37,8 +38,7 @@ public:
     void set_P(int p);
     int  get_P();
 
-protected:
-
+  protected:
     /**
      * return the lower bound on the size of 'num'-th partition.
      */
@@ -72,10 +72,9 @@ protected:
 
     int sanity_check();
 
-    int         m_R; // used to define the size limit of each partition
-    int         m_P; // maximum number of partition, 0 if disabled
+    int         m_R;  // used to define the size limit of each partition
+    int         m_P;  // maximum number of partition, 0 if disabled
     vector<int> m_partition_size;
-
 };
 
-#endif
+#endif  // SRC_GEOMCOMPACTIONMANAGER_H_

@@ -1,13 +1,14 @@
-#ifndef KVTMAPINPUTSTREAM_H
-#define KVTMAPINPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "InputStream.h"
-#include "Map.h"
+#ifndef SRC_MAPINPUTSTREAM_H_
+#define SRC_MAPINPUTSTREAM_H_
+
+#include "./Global.h"
+#include "./InputStream.h"
+#include "./Map.h"
 
 class MapInputStream: public InputStream {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -27,8 +28,7 @@ public:
     MapInputStream(const MapInputStream&);
     MapInputStream& operator=(const MapInputStream&);
 
-protected:
-
+  protected:
     Map                    *m_map;
     Map::KVTMap::iterator   m_iter;
     Map::KVTMap::iterator   m_iter_end;
@@ -40,4 +40,4 @@ protected:
     bool                    m_end_incl;
 };
 
-#endif
+#endif  // SRC_MAPINPUTSTREAM_H_

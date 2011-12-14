@@ -1,12 +1,12 @@
-#ifndef KVTOUTPUTSTREAM_H
-#define KVTOUTPUTSTREAM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_OUTPUTSTREAM_H_
+#define SRC_OUTPUTSTREAM_H_
 
 #include <stdint.h>
 
 class OutputStream {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -15,7 +15,7 @@ public:
     /**
      * destructor (define as 'virtual' so it will call destructors of derived classes)
      */
-    virtual ~OutputStream() { };
+    virtual ~OutputStream() { }
 
     /**
      * append <key, value, timestamp> tuple to stream
@@ -28,9 +28,6 @@ public:
      * close stream (e.g. flush to disk pending writes etc)
      */
     virtual void close() = 0;
-
-protected:
-
 };
 
-#endif
+#endif  // SRC_OUTPUTSTREAM_H_

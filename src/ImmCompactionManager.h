@@ -1,12 +1,12 @@
-#ifndef IMM_COMPACTIONMANAGER_H
-#define IMM_COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "GeomCompactionManager.h"
+#ifndef SRC_IMMCOMPACTIONMANAGER_H_
+#define SRC_IMMCOMPACTIONMANAGER_H_
+
+#include "./GeomCompactionManager.h"
 
 class ImmCompactionManager: public GeomCompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -21,4 +21,4 @@ public:
     ~ImmCompactionManager() { }
 };
 
-#endif
+#endif  // SRC_IMMCOMPACTIONMANAGER_H_

@@ -1,13 +1,13 @@
-#ifndef NULL_COMPACTIONMANAGER_H
-#define NULL_COMPACTIONMANAGER_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "CompactionManager.h"
-#include "pthread.h"
+#ifndef SRC_NOMERGECOMPACTIONMANAGER_H_
+#define SRC_NOMERGECOMPACTIONMANAGER_H_
+
+#include "./CompactionManager.h"
+#include "./pthread.h"
 
 class NomergeCompactionManager: public CompactionManager {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -38,4 +38,4 @@ void NomergeCompactionManager::flush_bytes() {
     pthread_rwlock_unlock(&m_diskstore->m_rwlock);
 }
 
-#endif
+#endif  // SRC_NOMERGECOMPACTIONMANAGER_H_

@@ -1,11 +1,13 @@
-#ifndef STATISTICS_H
-#define STATISTICS_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "Global.h"
+#ifndef SRC_STATISTICS_H_
+#define SRC_STATISTICS_H_
 
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/time.h>
+
+#include "./Global.h"
 
 //==============================================================================
 // structs to hold statistics
@@ -38,18 +40,18 @@ typedef struct {
  * Tmem:     time for string comparisons and string copies (strcmp & strcpy)
  */
 
-typedef struct { // NOTE: add new field -> update global_stats_init() and stats_sanity_check()
+typedef struct {  // NOTE: add new field -> update global_stats_init() and stats_sanity_check()
     byte_stats bytes_inserted;
     byte_stats bytes_written;
     byte_stats bytes_read;
     uint32_t   num_writes;
     uint32_t   num_reads;
-    time_stats total_time;      // Ttotal
-    time_stats compaction_time; // Tcompact
-    time_stats read_time;       // Twrite
-    time_stats write_time;      // Tread
-    time_stats merge_time;      // Tmerge
-    time_stats free_time;       // Tfree
+    time_stats total_time;
+    time_stats compaction_time;
+    time_stats read_time;
+    time_stats write_time;
+    time_stats merge_time;
+    time_stats free_time;
     int        disk_files;
 } keyvaluestore_stats;
 
@@ -103,4 +105,4 @@ void        print_stats();
 
 extern keyvaluestore_stats g_stats;
 
-#endif
+#endif  // SRC_STATISTICS_H_

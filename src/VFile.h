@@ -1,5 +1,7 @@
-#ifndef FILESIM_H
-#define FILESIM_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_VFILE_H_
+#define SRC_VFILE_H_
 
 /**
  * VFile class simulates a single virtual large file of theoritically
@@ -10,12 +12,12 @@
 #include <vector>
 #include <string>
 
+#include "./Global.h"
+
 using std::vector;
 
 class VFile {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -41,15 +43,14 @@ public:
     VFile(const VFile&);
     VFile& operator=(const VFile&);
 
-protected:
-
+  protected:
     char           *m_basefilename;
-    vector<char *>  m_names;     // we simulate a single virtual large file_
-    vector<int>     m_filedescs; // _using many physical files.
+    vector<char *>  m_names;      // we simulate a single virtual large file_
+    vector<int>     m_filedescs;  // _using many physical files.
 
     bool            add_new_physical_file(bool open_existing);
     ssize_t         cur_fs_append(const char *buf, size_t count);
     ssize_t         cur_fs_pread(char *buf, size_t count, off_t offs);
 };
 
-#endif
+#endif  // SRC_VFILE_H_

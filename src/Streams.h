@@ -1,8 +1,12 @@
-#ifndef STREAMS_H
-#define STREAMS_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_STREAMS_H_
+#define SRC_STREAMS_H_
 
 #include <stdint.h>
 #include <vector>
+
+#include "./Global.h"
 
 using std::vector;
 
@@ -11,9 +15,7 @@ class OutputStream;
 class DiskFile;
 
 class Streams {
-
-public:
-
+  public:
     /**
      * copy all <k,v> pairs of input stream to output stream
      */
@@ -57,4 +59,4 @@ public:
     static int merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size);
 };
 
-#endif
+#endif  // SRC_STREAMS_H_

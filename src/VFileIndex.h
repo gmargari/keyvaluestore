@@ -1,22 +1,19 @@
-#ifndef VFILEINDEX_H
-#define VFILEINDEX_H
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#ifndef SRC_VFILEINDEX_H_
+#define SRC_VFILEINDEX_H_
 
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <map>
 
+#include "./Global.h"
+
 using std::map;
 
-// TODO: since entries are appended in index, we could use a container that
-// has O(1) inserts, such as vectors, and use binary search to find a specific
-// term. But as long as insertions are rare, while searches are frequent, maybe
-// the map container is ok.
-
 class VFileIndex {
-
-public:
-
+  public:
     /**
      * constructor
      */
@@ -76,7 +73,7 @@ public:
      */
     void load_from_disk(int fd);
 
-    struct cmp_str { // required, in order for the map to have its keys sorted
+    struct cmp_str {  // required in order for the map to have its keys sorted
         bool operator()(char const *a, char const *b) {
             return strcmp(a, b) < 0;
         }
@@ -84,8 +81,7 @@ public:
 
     typedef map<const char *, off_t, cmp_str> TermOffsetMap;
 
-protected:
-
+  protected:
     int sanity_check();
 
     TermOffsetMap m_map;          // index containing <term, offset> pairs
@@ -93,4 +89,4 @@ protected:
     uint64_t      m_stored_keys;  // number of keys stored in vfile
 };
 
-#endif
+#endif  // SRC_VFILEINDEX_H_
