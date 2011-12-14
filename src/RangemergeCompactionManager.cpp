@@ -183,7 +183,7 @@ void RangemergeCompactionManager::flush_bytes() {
     // files from last to first (note: we store each block in a separate disk
     // file. 'm_block_num' is the index of file in diskfiles vector)
     sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_block_num);
-    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_lock();
     for (i = cur_rng - 1; i >= 0; i--) {
         int blocknum = ranges[i]->m_block_num;
         if (blocknum != NO_DISK_BLOCK) {
@@ -203,7 +203,7 @@ void RangemergeCompactionManager::flush_bytes() {
     for (i = 0; i < (int)new_disk_files.size(); i++) {
         disk_files.push_back(new_disk_files[i]);
     }
-    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_unlock();
 
     assert(sanity_check());
 }

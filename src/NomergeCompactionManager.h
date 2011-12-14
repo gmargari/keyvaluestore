@@ -32,10 +32,10 @@ void NomergeCompactionManager::flush_bytes() {
     dfile = memstore_flush_to_diskfile();
     memstore_clear();
 
-    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_lock();
     // insert first in diskstore as it contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), dfile);
-    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_unlock();
 }
 
 #endif  // SRC_NOMERGECOMPACTIONMANAGER_H_

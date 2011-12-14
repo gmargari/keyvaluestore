@@ -93,7 +93,7 @@ void CassandraCompactionManager::flush_bytes() {
             delete istreams[i];
         }
 
-        pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
+        m_diskstore->write_lock();
         for (int i = lvl*m_L; i < lvl*m_L + m_L; i++) {
             disk_files[i]->delete_from_disk();
             delete disk_files[i];
@@ -105,7 +105,7 @@ void CassandraCompactionManager::flush_bytes() {
         // add new file to DiskStore
         //----------------------------------------------------------------------
         disk_files.insert(disk_files.begin() + lvl*m_L, disk_file);
-        pthread_rwlock_unlock(&m_diskstore->m_rwlock);
+        m_diskstore->write_unlock();
 
         //----------------------------------------------------------------------
         // update vector 'm_level_files'
@@ -123,7 +123,7 @@ void CassandraCompactionManager::flush_bytes() {
     memstore_file = memstore_flush_to_diskfile();
     memstore_clear();
 
-    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_lock();
     // insert first in diskstore as it contains the most recent <k,v> pairs
     m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(),
                                      memstore_file);
@@ -131,7 +131,7 @@ void CassandraCompactionManager::flush_bytes() {
         m_level_files.push_back(0);
     }
     m_level_files[0] += 1;
-    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_unlock();
 
     assert(sanity_check());
 }

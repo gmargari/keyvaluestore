@@ -44,19 +44,19 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
 
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
-    pthread_rwlock_rdlock(&(diskstore->m_rwlock));
+    diskstore->read_lock();
     for (int i = 0; i < (int)diskstore->m_disk_files.size(); i++) {
         disk_istream = new DiskFileInputStream(diskstore->m_disk_files[i],
                                                MAX_INDEX_DIST);
         disk_istream->set_key_range(key, key, true, true);
         if (disk_istream->read(&k, &v, &t)) {
-            pthread_rwlock_unlock(&(diskstore->m_rwlock));
+            diskstore->read_unlock();
             delete disk_istream;
             return 1;
         }
         delete disk_istream;
     }
-    pthread_rwlock_unlock(&(diskstore->m_rwlock));
+    diskstore->read_unlock();
 
     return 0;
 }
@@ -85,7 +85,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
 
     // create a priority stream, containing a stream for memstore and one
     // stream for each disk file
-    pthread_rwlock_rdlock(&(diskstore->m_rwlock));
+    diskstore->read_lock();
     diskfiles = diskstore->m_disk_files.size();
     for (int i = 0; i < diskfiles; i++) {
         istreams.push_back(new DiskFileInputStream(diskstore->m_disk_files[i],
@@ -103,7 +103,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     while (pistream->read(&k, &v, &t)) {
         numkeys++;
     }
-    pthread_rwlock_unlock(&(diskstore->m_rwlock));
+    diskstore->read_unlock();
 
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];

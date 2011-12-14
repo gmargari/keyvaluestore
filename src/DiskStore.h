@@ -51,6 +51,16 @@ class DiskStore {
      */
     int get_num_disk_files();
 
+    /**
+     * diskstore contains a read-write lock: scanners read-lock diskstore
+     * and compaction manager write-locks diskstore, to avoid reading and
+     * modifying 'm_disk_files' concurrently
+     */
+    void read_lock();
+    void read_unlock();
+    void write_lock();
+    void write_unlock();
+
   private:
     bool load_from_disk();
     bool save_to_disk();
@@ -60,3 +70,31 @@ class DiskStore {
 };
 
 #endif  // SRC_DISKSTORE_H_
+
+/*============================================================================
+ *                                 read_lock
+ *============================================================================*/
+inline void DiskStore::read_lock() {
+    pthread_rwlock_rdlock(&m_rwlock);
+}
+
+/*============================================================================
+ *                                read_unlock
+ *============================================================================*/
+inline void DiskStore::read_unlock() {
+    pthread_rwlock_unlock(&m_rwlock);
+}
+
+/*============================================================================
+ *                                 write_lock
+ *============================================================================*/
+inline void DiskStore::write_lock() {
+    pthread_rwlock_wrlock(&m_rwlock);
+}
+
+/*============================================================================
+ *                                write_unlock
+ *============================================================================*/
+inline void DiskStore::write_unlock() {
+    pthread_rwlock_unlock(&m_rwlock);
+}

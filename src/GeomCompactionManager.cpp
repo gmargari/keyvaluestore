@@ -186,7 +186,7 @@ void GeomCompactionManager::flush_bytes() {
     delete memstore_file;
 
     // delete all files merged as well as their input streams
-    pthread_rwlock_wrlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_lock();
     for (int i = 0; i < count; i++) {
         disk_files[i]->delete_from_disk();
         delete disk_files[i];
@@ -199,7 +199,7 @@ void GeomCompactionManager::flush_bytes() {
 
     // add new file at the front, since it contains most recent <k,v> pairs
     disk_files.insert(disk_files.begin(), disk_file);
-    pthread_rwlock_unlock(&m_diskstore->m_rwlock);
+    m_diskstore->write_unlock();
 
     //--------------------------------------------------------------------------
     // 6) update vector of partitions
