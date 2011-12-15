@@ -23,8 +23,6 @@ using std::cout;
 using std::endl;
 using std::setw;
 
-#define CHECK_DUPLICATE_ARG(flag,opt) do {if (flag) { cout << "Error: you have already set '-" << opt << "' argument" << endl; exit(EXIT_FAILURE); }} while(0)
-
 //------------------------------------------------------------------------------
 // forward declaration of functions
 //------------------------------------------------------------------------------
@@ -34,24 +32,25 @@ void  *get_routine(void *args);
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, uint32_t *seed);
 int    zipf_r(uint32_t *seed);
+void   check_duplicate_arg(int flag, int opt);
 int    numdigits(uint64_t num);
 
 //------------------------------------------------------------------------------
 // default values
 //------------------------------------------------------------------------------
 
-const uint64_t DEFAULT_INSERTBYTES = 1048576000LL; // 1GB
-const uint32_t DEFAULT_KEY_SIZE =             100; // 100 bytes
-const uint32_t DEFAULT_VALUE_SIZE =          1000; // 1000 bytes
+const uint64_t DEFAULT_INSERTBYTES = 1048576000LL;  // 1GB
+const uint32_t DEFAULT_KEY_SIZE =             100;  // 100 bytes
+const uint32_t DEFAULT_VALUE_SIZE =          1000;  // 1000 bytes
 const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES / (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
 const int      DEFAULT_NUM_GET_THREADS =        0;
-const int      DEFAULT_PUT_THRPUT =             0; // req per second, 0: disable throttling
-const int      DEFAULT_GET_THRPUT =            10; // req per second, 0: disable throttling
+const int      DEFAULT_PUT_THRPUT =             0;  // req per second, 0: disable throttling
+const int      DEFAULT_GET_THRPUT =            10;  // req per second, 0: disable throttling
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
-long int zipf_n = 1000000;     // parameter for zipf() function
+int32_t zipf_n = 1000000;     // parameter for zipf() function
 // 'zipf_n' affects the generation time of a random zipf number: there
 // is a loop in zipf() that goes from 1 to 'n'. So, the greater 'n' is,
 // the more time zipf() needs to generate a zipf number.
@@ -196,109 +195,109 @@ int main(int argc, char **argv) {
             exit(EXIT_SUCCESS);
 
         case 'c':
-            CHECK_DUPLICATE_ARG(cflag, myopt);
+            check_duplicate_arg(cflag, myopt);
             cflag = 1;
             compmanager = optarg;
             break;
 
         case 'r':
-            CHECK_DUPLICATE_ARG(rflag, myopt);
+            check_duplicate_arg(rflag, myopt);
             rflag = 1;
             geom_r = atoi(optarg);
             break;
 
         case 'p':
-            CHECK_DUPLICATE_ARG(pflag, myopt);
+            check_duplicate_arg(pflag, myopt);
             pflag = 1;
             geom_p = atoi(optarg);
             break;
 
         case 'b':
-            CHECK_DUPLICATE_ARG(bflag, myopt);
+            check_duplicate_arg(bflag, myopt);
             bflag = 1;
             blocksize = mb2b(atoll(optarg));
             break;
 
         case 'f':
-            CHECK_DUPLICATE_ARG(fflag, myopt);
+            check_duplicate_arg(fflag, myopt);
             fflag = 1;
             flushmemorysize = mb2b(atoll(optarg));
             break;
 
         case 'l':
-            CHECK_DUPLICATE_ARG(lflag, myopt);
+            check_duplicate_arg(lflag, myopt);
             lflag = 1;
             cass_l = atoi(optarg);
             break;
 
         case 'm':
-            CHECK_DUPLICATE_ARG(mflag, myopt);
+            check_duplicate_arg(mflag, myopt);
             mflag = 1;
             memorysize = mb2b(atoll(optarg));
             break;
 
         case 'i':
-            CHECK_DUPLICATE_ARG(iflag, myopt);
+            check_duplicate_arg(iflag, myopt);
             iflag = 1;
             insertbytes = mb2b(atof(optarg));
             break;
 
         case 'n':
-            CHECK_DUPLICATE_ARG(nflag, myopt);
+            check_duplicate_arg(nflag, myopt);
             nflag = 1;
             num_keys_to_insert = atoll(optarg);
             break;
 
         case 'k':
-            CHECK_DUPLICATE_ARG(kflag, myopt);
+            check_duplicate_arg(kflag, myopt);
             kflag = 1;
             keysize = atoi(optarg);
             break;
 
         case 'v':
-            CHECK_DUPLICATE_ARG(vflag, myopt);
+            check_duplicate_arg(vflag, myopt);
             vflag = 1;
             valuesize = atoi(optarg);
             break;
 
         case 'u':
-            CHECK_DUPLICATE_ARG(uflag, myopt);
+            check_duplicate_arg(uflag, myopt);
             uflag = 1;
             unique_keys = true;
             break;
 
         case 'z':
-            CHECK_DUPLICATE_ARG(zflag, myopt);
+            check_duplicate_arg(zflag, myopt);
             zflag = 1;
             zipf_keys = true;
             break;
 
         case 'P':
-            CHECK_DUPLICATE_ARG(Pflag, myopt);
+            check_duplicate_arg(Pflag, myopt);
             Pflag = 1;
             put_thrput = atoi(optarg);
             break;
 
         case 'g':
-            CHECK_DUPLICATE_ARG(gflag, myopt);
+            check_duplicate_arg(gflag, myopt);
             gflag = 1;
             num_get_threads = atoi(optarg);
             break;
 
         case 'G':
-            CHECK_DUPLICATE_ARG(Gflag, myopt);
+            check_duplicate_arg(Gflag, myopt);
             Gflag = 1;
             get_thrput = atoi(optarg);
             break;
 
         case 'e':
-            CHECK_DUPLICATE_ARG(eflag, myopt);
+            check_duplicate_arg(eflag, myopt);
             eflag = 1;
             print_kv_and_continue = true;
             break;
 
         case 's':
-            CHECK_DUPLICATE_ARG(sflag, myopt);
+            check_duplicate_arg(sflag, myopt);
             sflag = 1;
             break;
 
@@ -465,9 +464,7 @@ int main(int argc, char **argv) {
         if (lflag) {
             ((CassandraCompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
         }
-    }
-    // other compaction manager?!
-    else {
+    } else {
         cout << "Error: unknown compaction manager (but we should not get here!)" << endl;
         exit(EXIT_FAILURE);
     }
@@ -569,7 +566,7 @@ int main(int argc, char **argv) {
         pthread_join(thread[i], NULL);
     }
 
-    if (!print_kv_and_continue) { // if we did insert some kvs to kvstore
+    if (!print_kv_and_continue) {  // if we did insert some kvs to kvstore
 
         // if we crete unique keys, assert num keys in store equals num keys inserted
         if (uflag) {
@@ -610,7 +607,7 @@ void *put_routine(void *args) {
     uint32_t keysize = targs->keysize,
              valuesize = targs->valuesize;
     KeyValueStore *kvstore = targs->kvstore;
-    uint32_t kseed = targs->tid, // kseed = getpid() + time(NULL);
+    uint32_t kseed = targs->tid,  // kseed = getpid() + time(NULL);
              vseed = kseed + 1;
     char    *key = NULL,
             *value = NULL;
@@ -627,7 +624,7 @@ void *put_routine(void *args) {
 
     // if we read keys and values from stdin, set num_keys_to_insert to 'infinity'
     if (sflag) {
-        num_keys_to_insert = -1; // ('num_keys_to_insert' is uint64_t)
+        num_keys_to_insert = -1;  // ('num_keys_to_insert' is uint64_t)
     }
 
     //--------------------------------------------------------------------------
@@ -702,7 +699,7 @@ void *get_routine(void *args) {
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys;
     uint32_t keysize = targs->keysize, keylen;
-    uint32_t kseed = targs->tid; // kseed = getpid() + time(NULL);
+    uint32_t kseed = targs->tid;  // kseed = getpid() + time(NULL);
     char     key[MAX_KVTSIZE];
     int      i = -1;
     Scanner *scanner = new Scanner(targs->kvstore);
@@ -730,7 +727,7 @@ void *get_routine(void *args) {
             keylen = keysize;
         }
         if (uflag) {
-            sprintf(key, "%s#%d", key, ++i); // make unique (TODO: undefined behaviour!)
+            sprintf(key, "%s#%d", key, ++i);  // make unique (TODO: undefined behaviour!)
             keylen += 1 + numdigits(i);
         }
 
@@ -777,7 +774,7 @@ void zipfstr_r(char *s, const int len, uint32_t *seed) {
     int zipf_num;
     char key_prefix[MAX_KVTSIZE];
     static bool first = true;
-    uint32_t kseed = 0; // kseed = getpid() + time(NULL);
+    uint32_t kseed = 0;  // kseed = getpid() + time(NULL);
 
     if (first) {
         first = false;
@@ -800,16 +797,16 @@ void zipfstr_r(char *s, const int len, uint32_t *seed) {
  *                               zipf_r
  *============================================================================*/
 int zipf_r(uint32_t *seed) {
-    static int *sum_prob = NULL; // sum of probabilities
-    int z,                       // uniform random number (0 <= z <= RAND_MAX)
-        zipf_value,              // computed exponential value to be returned
+    static int *sum_prob = NULL;  // sum of probabilities
+    int z,                        // uniform random number (0 <= z <= RAND_MAX)
+        zipf_value,               // computed exponential value to be returned
         i,
-        first, last, mid;        // for binary search
+        first, last, mid;         // for binary search
 
     // compute sum of probabilities on first call only
     if (sum_prob == NULL) {
         double *sum_prob_f;
-        double c = 0;            // normalization constant
+        double c = 0;             // normalization constant
 
         for (i = 1; i <= zipf_n; i++) {
             c = c + (1.0 / pow((double) i, zipf_alpha));
@@ -817,7 +814,7 @@ int zipf_r(uint32_t *seed) {
         c = 1.0 / c;
 
         // precompute sum of probabilities
-        sum_prob_f = (double *)malloc((zipf_n + 1) * sizeof(double));
+        sum_prob_f = (double *)malloc((zipf_n + 1) * sizeof(*sum_prob_f));
         sum_prob_f[0] = 0;
         for (i = 1; i <= zipf_n; i++) {
             sum_prob_f[i] = sum_prob_f[i-1] + c / pow((double) i, zipf_alpha);
@@ -826,7 +823,7 @@ int zipf_r(uint32_t *seed) {
         // from array of doubles sum_prob_f[] that contains values in range
         // [0,1], compute array of integers sum_prob_i[] that contains values
         // in range [0,RAND_MAX]
-        sum_prob = (int *)malloc((zipf_n + 1) * sizeof(int));
+        sum_prob = (int *)malloc((zipf_n + 1) * sizeof(*sum_prob));
         for (i = 0; i <= zipf_n; i++) {
             sum_prob[i] = (int)(sum_prob_f[i] * RAND_MAX);
         }
@@ -839,7 +836,7 @@ int zipf_r(uint32_t *seed) {
     first = 1;
     last = zipf_n;
     while (first <= last) {
-        mid = (last - first)/2 + first; // avoid overflow
+        mid = (last - first)/2 + first;  // avoid overflow
         if (z > sum_prob[mid]) {
             first = mid + 1;
         } else if (z < sum_prob[mid]) {
@@ -859,6 +856,16 @@ int zipf_r(uint32_t *seed) {
     assert((zipf_value >= 1) && (zipf_value <= zipf_n));
 
     return(zipf_value);
+}
+
+/*============================================================================
+ *                        check_duplicate_arg
+ *============================================================================*/
+void check_duplicate_arg(int flag, int opt) {
+    if (flag) {
+        cout << "Error: you have already set '-" << opt << "' argument" << endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*============================================================================
