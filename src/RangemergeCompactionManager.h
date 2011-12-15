@@ -40,7 +40,7 @@ class RangemergeCompactionManager: public CompactionManager {
     // inherited from CompactionManager (see CompactionManager.h for description)
     void flush_bytes();
 
-  protected:
+  private:
     /**
      * when loading an existing index from disk, create in memstore one map
      * for each range (add to memstore one map per range/disk file)

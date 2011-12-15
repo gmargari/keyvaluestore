@@ -41,7 +41,7 @@ class CompactionManager {
     CompactionManager(const CompactionManager&);
     CompactionManager& operator=(const CompactionManager&);
 
-  protected:
+  protected:  // TODO: make private
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };

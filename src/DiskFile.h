@@ -122,7 +122,7 @@ class DiskFile {
     DiskFile(const DiskFile&);
     DiskFile& operator=(const DiskFile&);
 
-  protected:
+  private:
     VFile       *m_file;           // file in which we store <key,value> pairs
     VFileIndex  *m_index;          // index of <key,offs> for diskfile
     static int   m_max_dfile_num;  // create unique filenames

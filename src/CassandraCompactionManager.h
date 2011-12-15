@@ -31,7 +31,7 @@ class CassandraCompactionManager: public CompactionManager {
     void set_L(int l);
     int  get_L();
 
-  protected:
+  private:
     /**
      * save/load compaction manager state to/from disk
      */

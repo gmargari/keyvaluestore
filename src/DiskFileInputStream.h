@@ -37,7 +37,7 @@ class DiskFileInputStream: public InputStream {
     DiskFileInputStream(const DiskFileInputStream&);
     DiskFileInputStream& operator=(const DiskFileInputStream&);
 
-  protected:
+  private:
     DiskFile    *m_diskfile;
     off_t        m_offs;        // offset within diskfile we currently are
     Buffer      *m_buf;         // buffer used for I/O

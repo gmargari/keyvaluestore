@@ -28,7 +28,7 @@ class MapInputStream: public InputStream {
     MapInputStream(const MapInputStream&);
     MapInputStream& operator=(const MapInputStream&);
 
-  protected:
+  private:
     Map                    *m_map;
     Map::KVTMap::iterator   m_iter;
     Map::KVTMap::iterator   m_iter_end;

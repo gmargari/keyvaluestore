@@ -51,7 +51,7 @@ class DiskStore {
      */
     int get_num_disk_files();
 
-  protected:
+  private:
     bool load_from_disk();
     bool save_to_disk();
 

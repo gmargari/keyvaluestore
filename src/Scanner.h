@@ -47,7 +47,7 @@ class Scanner {
     Scanner(const Scanner&);
     Scanner& operator=(const Scanner&);
 
-  protected:
+  private:
     KeyValueStore *m_kvstore;
 };
 

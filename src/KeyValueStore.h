@@ -113,7 +113,7 @@ class KeyValueStore {
     KeyValueStore(const KeyValueStore&);
     KeyValueStore& operator=(const KeyValueStore&);
 
-  protected:
+  private:
     void check_parameters();
 
     MemStore            *m_memstore;

@@ -43,7 +43,7 @@ class VFile {
     VFile(const VFile&);
     VFile& operator=(const VFile&);
 
-  protected:
+  private:
     char           *m_basefilename;
     vector<char *>  m_names;      // we simulate a single virtual large file_
     vector<int>     m_filedescs;  // _using many physical files.

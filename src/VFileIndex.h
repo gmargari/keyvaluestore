@@ -81,7 +81,7 @@ class VFileIndex {
 
     typedef map<const char *, off_t, cmp_str> TermOffsetMap;
 
-  protected:
+  private:
     int sanity_check();
 
     TermOffsetMap m_map;          // index containing <term, offset> pairs

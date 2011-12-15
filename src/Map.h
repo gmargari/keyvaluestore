@@ -94,7 +94,7 @@ class Map {
     typedef pair<Slice, uint64_t > KVTPair;
     typedef map<const Slice, KVTPair, cmp_slice> KVTMap;
 
-  protected:
+  private:
     int sanity_check();
 
     /**

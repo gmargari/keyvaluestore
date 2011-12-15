@@ -112,7 +112,7 @@ class Buffer {
     Buffer(const Buffer&);
     Buffer& operator=(const Buffer&);
 
-  protected:
+  private:
     bool str_is_alnum(const char *str, int len);
 
     char     *m_buf;            // pointer to char buffer

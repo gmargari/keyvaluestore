@@ -38,7 +38,7 @@ class GeomCompactionManager: public CompactionManager {
     void set_P(int p);
     int  get_P();
 
-  protected:
+  private:
     /**
      * return the lower bound on the size of 'num'-th partition.
      */

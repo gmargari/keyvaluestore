@@ -112,7 +112,7 @@ class MemStore {
     void clear_map(const char *key, uint32_t keylen);
     void clear_map(int idx);
 
-  protected:
+  private:
     /**
      * used from add_map()/get_map()/clear_map() functions above
      * @return the index in vector 'm_map' of the map responsible for 'key'

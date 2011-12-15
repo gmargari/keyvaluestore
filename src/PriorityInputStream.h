@@ -37,7 +37,7 @@ class PriorityInputStream: public InputStream {
     PriorityInputStream(const PriorityInputStream&);
     PriorityInputStream& operator=(const PriorityInputStream&);
 
-  protected:
+  private:
     typedef struct {
         const char *key;
         uint32_t    keylen;

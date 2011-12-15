@@ -32,7 +32,7 @@ class DiskFileOutputStream: public OutputStream {
     DiskFileOutputStream(const DiskFileOutputStream&);
     DiskFileOutputStream& operator=(const DiskFileOutputStream&);
 
-  protected:
+  private:
     DiskFile    *m_file;           // file in which we store <key,value> pairs
     uint64_t     m_file_size;      // current size of diskfile
     Buffer      *m_buf;            // buffer used for I/O
