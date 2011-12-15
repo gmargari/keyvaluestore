@@ -1,11 +1,14 @@
-#include "Global.h"
-#include "Streams.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskFile.h"
-#include "DiskFileOutputStream.h"
-#include "PriorityInputStream.h"
-#include "Buffer.h"
-#include "Statistics.h"
+#include "./Streams.h"
+
+#include <vector>
+
+#include "./DiskFile.h"
+#include "./DiskFileOutputStream.h"
+#include "./PriorityInputStream.h"
+#include "./Buffer.h"
+#include "./Statistics.h"
 
 /*============================================================================
  *                                 copy_stream

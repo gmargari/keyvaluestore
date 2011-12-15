@@ -1,11 +1,12 @@
-#include "Global.h"
-#include "DiskFile.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "VFile.h"
-#include "VFileIndex.h"
-#include "Buffer.h"
+#include "./DiskFile.h"
 
 #include <fcntl.h>
+
+#include "./VFile.h"
+#include "./VFileIndex.h"
+#include "./Buffer.h"
 
 int DiskFile::m_max_dfile_num = 0;
 

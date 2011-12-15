@@ -1,13 +1,14 @@
-#include "Global.h"
-#include "CompactionManager.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "MemStore.h"
-#include "MapInputStream.h"
-#include "DiskFile.h"
-#include "DiskFileOutputStream.h"
-#include "Streams.h"
+#include "./CompactionManager.h"
 
 #include <assert.h>
+
+#include "./MemStore.h"
+#include "./MapInputStream.h"
+#include "./DiskFile.h"
+#include "./DiskFileOutputStream.h"
+#include "./Streams.h"
 
 /*============================================================================
  *                              CompactionManager

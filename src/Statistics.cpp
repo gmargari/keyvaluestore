@@ -1,10 +1,15 @@
-#include "Statistics.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#include "./Statistics.h"
 
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::setw;
+using std::right;
 
 /* decleration of global variable holding stats */
 keyvaluestore_stats g_stats;

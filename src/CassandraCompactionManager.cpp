@@ -1,16 +1,19 @@
-#include "Global.h"
-#include "CassandraCompactionManager.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskStore.h"
-#include "DiskFile.h"
-#include "DiskFileInputStream.h"
-#include "Streams.h"
+#include "./CassandraCompactionManager.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
-#include <math.h>
 #include <string.h>
+#include <math.h>
+#include <assert.h>
+
+#include <vector>
+
+#include "./DiskStore.h"
+#include "./DiskFile.h"
+#include "./DiskFileInputStream.h"
+#include "./Streams.h"
 
 /*============================================================================
  *                          CassandraCompactionManager

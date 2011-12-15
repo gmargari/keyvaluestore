@@ -1,13 +1,12 @@
-#include "Global.h"
-#include "DiskStore.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskFile.h"
+#include "./DiskStore.h"
 
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
 
-using namespace std;
+#include "./DiskFile.h"
 
 /*============================================================================
  *                                 DiskStore

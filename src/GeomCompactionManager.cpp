@@ -1,16 +1,18 @@
-#include "Global.h"
-#include "GeomCompactionManager.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskStore.h"
-#include "MapInputStream.h"
-#include "DiskFile.h"
-#include "DiskFileInputStream.h"
-#include "Streams.h"
+#include "./GeomCompactionManager.h"
 
 #include <assert.h>
 #include <math.h>
+#include <vector>
 
-uint64_t dbg_lastsize = 0; // used for sanity_check()
+#include "./DiskStore.h"
+#include "./MapInputStream.h"
+#include "./DiskFile.h"
+#include "./DiskFileInputStream.h"
+#include "./Streams.h"
+
+uint64_t dbg_lastsize = 0;  // used for sanity_check()
 
 /*============================================================================
  *                             GeomCompactionManager

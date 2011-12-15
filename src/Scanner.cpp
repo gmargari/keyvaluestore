@@ -1,10 +1,13 @@
-#include "Global.h"
-#include "Scanner.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskStore.h"
-#include "KeyValueStore.h"
-#include "DiskFileInputStream.h"
-#include "PriorityInputStream.h"
+#include "./Scanner.h"
+
+#include <vector>
+
+#include "./DiskStore.h"
+#include "./KeyValueStore.h"
+#include "./DiskFileInputStream.h"
+#include "./PriorityInputStream.h"
 
 /*============================================================================
  *                                 Scanner

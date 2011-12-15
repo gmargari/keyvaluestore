@@ -1,23 +1,27 @@
-#include "Global.h"
-#include "KeyValueStore.h"
-#include "ImmCompactionManager.h"
-#include "GeomCompactionManager.h"
-#include "LogCompactionManager.h"
-#include "RangemergeCompactionManager.h"
-#include "CassandraCompactionManager.h"
-#include "Statistics.h"
-#include "Scanner.h"
-#include "RequestThrottle.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
 #include <math.h>
 #include <string.h>
 #include <assert.h>
-#include <iostream>
-#include <iomanip>
 #include <pthread.h>
 #include <getopt.h>
+#include <iostream>
+#include <iomanip>
 
-using namespace std;
+#include "./Global.h"
+#include "./KeyValueStore.h"
+#include "./ImmCompactionManager.h"
+#include "./GeomCompactionManager.h"
+#include "./LogCompactionManager.h"
+#include "./RangemergeCompactionManager.h"
+#include "./CassandraCompactionManager.h"
+#include "./Statistics.h"
+#include "./Scanner.h"
+#include "./RequestThrottle.h"
+
+using std::cout;
+using std::endl;
+using std::setw;
 
 #define CHECK_DUPLICATE_ARG(flag,opt) do {if (flag) { cout << "Error: you have already set '-" << opt << "' argument" << endl; exit(EXIT_FAILURE); }} while(0)
 

@@ -1,5 +1,6 @@
-#include "Global.h"
-#include "MapInputStream.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#include "./MapInputStream.h"
 
 #include <assert.h>
 

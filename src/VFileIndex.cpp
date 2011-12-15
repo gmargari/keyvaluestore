@@ -1,5 +1,6 @@
-#include "Global.h"
-#include "VFileIndex.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#include "./VFileIndex.h"
 
 #include <assert.h>
 #include <stdlib.h>

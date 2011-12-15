@@ -1,11 +1,12 @@
-#include "Global.h"
-#include "DiskFileInputStream.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskFile.h"
-#include "Buffer.h"
+#include "./DiskFileInputStream.h"
 
 #include <string.h>
 #include <assert.h>
+
+#include "./DiskFile.h"
+#include "./Buffer.h"
 
 /*============================================================================
  *                             DiskFileInputStream

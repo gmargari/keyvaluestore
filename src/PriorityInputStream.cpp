@@ -1,9 +1,11 @@
-#include "Global.h"
-#include "PriorityInputStream.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
+
+#include "./PriorityInputStream.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <vector>
 
 static const int SID_NOT_INITIALIZED = INT_MAX;
 

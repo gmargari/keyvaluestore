@@ -1,9 +1,10 @@
-#include "Global.h"
-#include "MemStore.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "MapInputStream.h"
+#include "./MemStore.h"
 
 #include <assert.h>
+
+#include "./MapInputStream.h"
 
 using std::make_pair;
 

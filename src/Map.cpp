@@ -1,10 +1,12 @@
-#include "Global.h"
-#include "Map.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "Buffer.h"
-#include "Statistics.h"
+#include "./Map.h"
 
 #include <assert.h>
+#include <utility>
+
+#include "./Buffer.h"
+#include "./Statistics.h"
 
 using std::make_pair;
 

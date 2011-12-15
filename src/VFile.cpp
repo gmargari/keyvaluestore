@@ -1,7 +1,6 @@
-#include "Global.h"
-#include "VFile.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "Statistics.h"
+#include "./VFile.h"
 
 #include <string.h>
 #include <assert.h>
@@ -9,8 +8,7 @@
 #include <math.h>
 #include <sys/stat.h>
 
-#define my_perror_exit() STMT ( printf("Error: %s => %s:%d\n", __FUNCTION__, __FILE__, __LINE__); perror(""); exit(EXIT_FAILURE); )
-#define my_exit()        STMT ( printf("Error: %s => %s:%d\n", __FUNCTION__, __FILE__, __LINE__); exit(EXIT_FAILURE); )
+#include "./Statistics.h"
 
 /*============================================================================
  *                                 VFile

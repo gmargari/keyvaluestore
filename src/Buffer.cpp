@@ -1,10 +1,11 @@
-#include "Global.h"
-#include "Buffer.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "VFile.h"
+#include "./Buffer.h"
 
 #include <assert.h>
 #include <string.h>
+
+#include "./VFile.h"
 
 // TODO: make these portable!
 #define ENCODE_NUM(_buf_, _num_, _used_) do { memcpy((_buf_) + _used_,  &(_num_), sizeof(_num_)); _used_ += sizeof(_num_); } while (0)

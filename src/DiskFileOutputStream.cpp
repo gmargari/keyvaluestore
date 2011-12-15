@@ -1,11 +1,12 @@
-#include "Global.h"
-#include "DiskFileOutputStream.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "DiskFile.h"
-#include "VFileIndex.h"
-#include "Buffer.h"
+#include "./DiskFileOutputStream.h"
 
 #include <stdlib.h>
+
+#include "./DiskFile.h"
+#include "./VFileIndex.h"
+#include "./Buffer.h"
 
 /*============================================================================
  *                            DiskFileOutputStream

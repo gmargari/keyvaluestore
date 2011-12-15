@@ -1,21 +1,23 @@
-#include "Global.h"
-#include "KeyValueStore.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "MemStore.h"
-#include "DiskStore.h"
-#include "NomergeCompactionManager.h"
-#include "ImmCompactionManager.h"
-#include "LogCompactionManager.h"
-#include "GeomCompactionManager.h"
-#include "RangemergeCompactionManager.h"
-#include "CassandraCompactionManager.h"
-#include "Statistics.h"
+#include "./KeyValueStore.h"
 
 #include <assert.h>
 #include <sys/stat.h>
 #include <iostream>
 
-using namespace std;
+#include "./MemStore.h"
+#include "./DiskStore.h"
+#include "./NomergeCompactionManager.h"
+#include "./ImmCompactionManager.h"
+#include "./LogCompactionManager.h"
+#include "./GeomCompactionManager.h"
+#include "./RangemergeCompactionManager.h"
+#include "./CassandraCompactionManager.h"
+#include "./Statistics.h"
+
+using std::cout;
+using std::endl;
 
 /*============================================================================
  *                               KeyValueStore

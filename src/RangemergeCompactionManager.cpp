@@ -1,24 +1,28 @@
-#include "Global.h"
-#include "RangemergeCompactionManager.h"
+// Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#include "MemStore.h"
-#include "DiskStore.h"
-#include "MapInputStream.h"
-#include "DiskFile.h"
-#include "DiskFileInputStream.h"
-#include "Range.h"
-#include "Streams.h"
+#include "./RangemergeCompactionManager.h"
 
 #include <assert.h>
 #include <limits.h>
 #include <pthread.h>
+#include <algorithm>
+#include <utility>
+#include <vector>
+
+#include "./MemStore.h"
+#include "./DiskStore.h"
+#include "./MapInputStream.h"
+#include "./DiskFile.h"
+#include "./DiskFileInputStream.h"
+#include "./Range.h"
+#include "./Streams.h"
 
 using std::vector;
 using std::min;
 
 char *EMPTY_STRING = (char *)"";
 
-#define SPLIT_PERC 0.6 // move to Global.h?
+#define SPLIT_PERC 0.6  // move to Global.h?
 
 /*============================================================================
  *                        RangemergeCompactionManager
