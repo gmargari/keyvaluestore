@@ -55,7 +55,7 @@ bool DiskFileOutputStream::append(const char *key, uint32_t keylen, const char *
         m_index->set_vfilesize(m_file_size);
 
         m_last_keylen = keylen;
-        memcpy(m_last_key, key, keylen + 1); // TODO: can we avoid this memcpy?
+        memcpy(m_last_key, key, keylen + 1);  // TODO: avoid this?
         m_last_offs = cur_offs;
         return true;
     } else {

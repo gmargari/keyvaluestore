@@ -43,7 +43,7 @@ void Streams::copy_stream_unique_keys(InputStream *istream, OutputStream *ostrea
     while (istream->read(&key, &keylen, &value, &valuelen, &timestamp)) {
         if (strcmp(prev_key, key) != 0) {
             ostream->append(key, keylen, value, valuelen, timestamp);
-            memcpy(prev_key, key, keylen + 1);
+            memcpy(prev_key, key, keylen + 1);  // TODO: avoid this?
         }
     }
     ostream->close();

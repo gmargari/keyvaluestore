@@ -14,7 +14,7 @@
 DiskStore::DiskStore()
     : m_disk_files(), m_rwlock() {
     pthread_rwlock_init(&m_rwlock, NULL);
-    if ( ! load_from_disk()) {
+    if (!load_from_disk()) {
         DiskFile::set_max_dfile_num(0);
     }
 }

@@ -108,7 +108,7 @@ int GeomCompactionManager::partition_num(int partition_size) {
 int GeomCompactionManager::compute_current_R() {
     int size_of_bytes_inserted = 0;
 
-    size_of_bytes_inserted = 1; // 1 for memstore that will be flushed to disk
+    size_of_bytes_inserted = 1;  // 1 for memstore that will be flushed to disk
     for (uint i = 0; i < m_partition_size.size(); i++) {
         size_of_bytes_inserted += m_partition_size[i];
     }
@@ -144,7 +144,7 @@ void GeomCompactionManager::flush_bytes() {
     // that will store the sub-index, if new sub-index doesn't fit in any
     // existing partition)
     count = 0;
-    size = 1; // 1 for memstore
+    size = 1;  // 1 for memstore
     for (uint i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i]) {
             count++;

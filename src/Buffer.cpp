@@ -120,7 +120,7 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
     m_bytes_in_buf += *len;
 
 #if DBGLVL > 1
-    {
+    if (1) {
         const char *kkk, *vvv;
         uint32_t kkklen, vvvlen;
         uint64_t ts;
@@ -128,8 +128,8 @@ bool Buffer::serialize(const char *key, uint32_t keylen, const char *value,
         m_bytes_used = m_bytes_in_buf - *len;
         assert(deserialize(&kkk, &kkklen, &vvv, &vvvlen, &ts, false));
         m_bytes_used = tmpused;
-        assert(strcmp(kkk, key)==0);
-        assert(strcmp(vvv, value)==0);
+        assert(strcmp(kkk, key) == 0);
+        assert(strcmp(vvv, value) == 0);
         assert(ts == timestamp);
     }
 #endif

@@ -78,8 +78,7 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
 
         assert(m_buf->used() == 0);
 
-        // if caller defined a startkey, seek to the first valid key on disk
-        if (m_start_key) {
+        if (m_start_key) {  // seek to first disk key that is > or >= 'startkey'
 
             // if m_start_key was stored on disk it would be between off1 & off2
             ret = m_diskfile->search(m_start_key, m_start_keylen, &off1, &off2);
@@ -104,9 +103,7 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
                 // must seek back at beginning of key tuple
                 m_buf->undo_deserialize(tmpkey, tmpkeylen, tmpvalue, tmpvaluelen, tmpts);
             }
-        }
-        // else, seek to the first key on disk
-        else {
+        } else {  // seek to first disk key
             m_offs = 0;
             m_offs += m_diskfile->fill(m_buf, m_offs);
         }
@@ -115,14 +112,14 @@ bool DiskFileInputStream::read(const char **key, uint32_t *keylen, const char **
     //--------------------------------------------------------------------------
     // read next <key,value,timestamp> from file
     //--------------------------------------------------------------------------
-    if ( ! m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
+    if (!m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
 
         // maybe we need to read more bytes in buffer to deserialize tuple
         m_buf->keep_unused();
         m_offs += m_diskfile->fill(m_buf, m_offs);
 
         // this should now work, unless there are no bytes left in file
-        if ( ! m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
+        if (!m_buf->deserialize(&tmpkey, &tmpkeylen, &tmpvalue, &tmpvaluelen, &tmpts, false)) {
             assert(m_buf->unused() == 0);
             return false;
         }

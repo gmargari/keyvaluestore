@@ -15,14 +15,12 @@
  *============================================================================*/
 CompactionManager::CompactionManager(MemStore *memstore, DiskStore *diskstore)
     : m_memstore(memstore), m_diskstore(diskstore) {
-
 }
 
 /*============================================================================
  *                              ~CompactionManager
  *============================================================================*/
 CompactionManager::~CompactionManager() {
-
 }
 
 /*============================================================================

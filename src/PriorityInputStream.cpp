@@ -133,9 +133,9 @@ int PriorityInputStream::sanity_check() {
     int num_streams;
 
     num_streams = m_istreams.size();
-    x = (int *)malloc(num_streams * sizeof(int));
-    memset(x, 0, num_streams*sizeof(int));
-    assert(m_pqueue.size() <= (unsigned)num_streams); // always at most 'm_istreams.size()' elements in queue
+    x = (int *)malloc(num_streams * sizeof(*x));
+    memset(x, 0, num_streams*sizeof(*x));
+    assert(m_pqueue.size() <= (unsigned)num_streams);
 
     // get all elements of priority queue, check everything is ok
     while (!m_pqueue.empty()) {

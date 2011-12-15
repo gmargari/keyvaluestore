@@ -66,7 +66,7 @@ bool MemStore::get(const char *key, uint32_t keylen, char **value, uint32_t *val
 
     if (get_map(key, keylen)->get(key, keylen, &constvalue, valuelen, timestamp)) {
         *value = (char *)malloc(*valuelen + 1);
-        memcpy(*value, constvalue, *valuelen + 1); // copy value
+        memcpy(*value, constvalue, *valuelen + 1);  // copy value
         return true;
     } else {
         return false;
@@ -133,7 +133,7 @@ void MemStore::add_map(const char *key, uint32_t keylen) {
     StrMapPair newpair;
 
     if (m_map.size() > 0 && strcmp(m_map[pos].key, key) == 0) {
-        return; // map with same key already exists
+        return;  // map with same key already exists
     }
 
     memcpy(newpair.key, key, keylen + 1);
@@ -208,7 +208,7 @@ int MemStore::idx_of_map(const char *key, uint32_t keylen) {
     first = 0;
     last = m_map.size() - 1;
     while (first <= last) {
-        mid = (last - first)/2 + first; // avoid overflow
+        mid = (last - first)/2 + first;  // avoid overflow
         cmp = strcmp(key, m_map[mid].key);
         if (cmp > 0) {
             first = mid + 1;

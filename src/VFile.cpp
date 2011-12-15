@@ -15,7 +15,7 @@
  *============================================================================*/
 VFile::VFile()
     : m_basefilename(NULL), m_names(), m_filedescs() {
-    assert(sizeof(off_t) == 8); // ensure 64bit offsets
+    assert(sizeof(off_t) == 8);  // ensure 64bit offsets
 }
 
 /*============================================================================
@@ -86,7 +86,7 @@ bool VFile::fs_open_existing(char *filename) {
         my_perror_exit();
     }
 
-    while(fscanf(fp, "%s %ld\n", vfilename, &filesize) == 2) {
+    while (fscanf(fp, "%s %ld\n", vfilename, &filesize) == 2) {
 
         // check file size of file to be opened is the one expected.
         stat(vfilename, &filestatus);
@@ -144,7 +144,7 @@ ssize_t VFile::fs_pread(char *buf, size_t count, off_t offs) {
 
     for (bytes_read = 0; bytes_read < count; ) {
         if ((num = cur_fs_pread(buf + bytes_read, count - bytes_read, offs + bytes_read)) == 0) {
-            break; // no bytes left in file
+            break;  // no bytes left in file
         }
         bytes_read += num;
     }
@@ -187,11 +187,9 @@ void VFile::fs_truncate(off_t length) {
         // delete all files except the first 'new_files'
         assert(m_filedescs.size() == m_names.size());
         for (int i = new_files; i < (int)m_names.size(); i++) {
-
             if (DBGLVL > 0) {
                 printf("# [DEBUG]   %s [-]\n", m_names[i]);
             }
-
             if (remove(m_names[i]) == -1) {
                 my_perror_exit();
             }
@@ -200,9 +198,7 @@ void VFile::fs_truncate(off_t length) {
 
         m_names.erase(m_names.begin() + new_files, m_names.end());
         m_filedescs.erase(m_filedescs.begin() + new_files, m_filedescs.end());
-    }
-    // else, if we need to extend the virtual file
-    else if (new_files > (int)m_names.size()) {
+    } else if (new_files > (int)m_names.size()) {  // if we need to extend file
 
         // create 'new_files - m_names.size()' new files.
         num = m_names.size();
@@ -221,7 +217,7 @@ void VFile::fs_truncate(off_t length) {
 
     if (length && length % MAX_FILE_SIZE != 0) {
         len = length % MAX_FILE_SIZE;
-    } else if (length ) {
+    } else if (length) {
         len = MAX_FILE_SIZE;
     } else {
         len = length;
@@ -298,7 +294,7 @@ ssize_t VFile::cur_fs_pread(char *buf, size_t count, off_t offs) {
     off_t offs_in_file;
     int fileno;
 
-    if (offs >= (off_t)fs_size()) { // if no bytes left to read
+    if (offs >= (off_t)fs_size()) {  // if no bytes left to read
         return 0;
     }
 

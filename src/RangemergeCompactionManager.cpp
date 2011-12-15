@@ -50,7 +50,7 @@ void RangemergeCompactionManager::set_blocksize(uint64_t blocksize) {
     } else {
         // if blocksize == 0 block splitting is disabled and Rangemerge behaves
         // identically to Immediate Merge
-        m_blocksize = ULONG_MAX; // practically, infinite block size
+        m_blocksize = ULONG_MAX;  // practically, infinite block size
     }
 }
 
@@ -131,7 +131,7 @@ void RangemergeCompactionManager::flush_bytes() {
         // a separate block.
         if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
             newfiles = Streams::merge_streams(istreams_to_merge, new_disk_files, SPLIT_PERC * m_blocksize);
-            // assert(newfiles > 1); // this may not hold true (i.e. if all memory keys exist on disk and no split occurs)
+            // assert(newfiles > 1);  // this may not hold true (i.e. if all memory keys exist on disk and no split occurs)
         } else {
             // merge memory and disk istreams, creating a new file on disk.
             // set 'm_blocksize' as max file size, which will cause only
@@ -248,11 +248,9 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges) {
             ranges[i]->m_memsize = sizes.first;
             ranges[i]->m_memsize_serialized = sizes.second;
         }
-    }
-    // else, if this is the first time we flush bytes to disk (no disk file)
-    else {
+    } else {  // if this is the first time we flush bytes to disk (no disk file)
         rng = new Range();
-        rng->m_first = EMPTY_STRING; // to get all memory tuples
+        rng->m_first = EMPTY_STRING;  // to get all memory tuples
         rng->m_last = NULL;
         sizes = m_memstore->get_map(rng->m_first, rng->m_firstlen)->get_sizes();
         rng->m_memsize = sizes.first;
@@ -326,7 +324,7 @@ void RangemergeCompactionManager::add_maps_to_memstore() {
     vector<Range *> ranges;
 
     create_ranges(ranges);
-    for (int i = 1; i < (int)ranges.size(); i++) { // i = 1: MemStore constructor has inserted map for key ""
+    for (int i = 1; i < (int)ranges.size(); i++) {  // i = 1: MemStore constructor has inserted map for key ""
         m_memstore->add_map(ranges[i]->m_first, ranges[i]->m_firstlen);
     }
     delete_ranges(ranges);

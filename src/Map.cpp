@@ -15,7 +15,6 @@ using std::make_pair;
  *============================================================================*/
 Map::Map()
     : m_map(), m_size(0), m_size_serialized(0), m_keys(0) {
-
 }
 
 /*============================================================================
@@ -243,7 +242,7 @@ int Map::sanity_check() {
     uint64_t timestamp;
     uint32_t keylen, valuelen;
 
-    for(KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
+    for (KVTMap::iterator iter = m_map.begin(); iter != m_map.end(); ++iter) {
         key = iter->first.data();
         keylen = iter->first.size();
         value = iter->second.first.data();

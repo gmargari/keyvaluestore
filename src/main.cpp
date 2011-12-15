@@ -658,7 +658,7 @@ void *put_routine(void *args) {
                 keylen = keysize;
             }
             if (uflag) {
-                sprintf(key, "%s.%Ld", key, i); // make unique (TODO: undefined behaviour!)
+                sprintf(key, "%s.%Ld", key, i);  // make unique (TODO: undefined behaviour!)
                 keylen += 1 + numdigits(i);
             }
             randstr_r(value, valuesize, &vseed);

@@ -11,7 +11,6 @@
  *============================================================================*/
 VFileIndex::VFileIndex()
     : m_map(), m_vfilesize(), m_stored_keys(0) {
-
 }
 
 /*============================================================================
@@ -69,8 +68,7 @@ bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off
 
     iter = m_map.upper_bound(key);
 
-    // if no key greater than 'key'
-    if (iter == m_map.end()) {
+    if (iter == m_map.end()) {  // no key greater than 'key'
         // if the last term of index is 'key'
         if (m_map.size() > 0 && (iter--, 1) && strcmp(iter->first, key) == 0) {
             *start_off = iter->second;
@@ -82,18 +80,14 @@ bool VFileIndex::search(const char *key, uint32_t termlen, off_t *start_off, off
             *end_off = -1;
             return false;
         }
-    }
-    // else, if 'key' is between 'iter' and 'iter - 1'
-    else if (iter != m_map.begin()) {
+    } else if (iter != m_map.begin()) {  // 'key' is between 'iter' and 'iter-1'
         *end_off = iter->second;
         --iter;
         *start_off = iter->second;
         assert(strcmp(key, iter->first) >= 0 && (iter++, 1) && strcmp(key, iter->first) <= 0);
         assert(*start_off < *end_off);
         return true;
-    }
-    // else, 'key' is smaller than first term in index
-    else {
+    } else {  // 'key' is smaller than first term in index
         *start_off = -1;
         *end_off = -1;
         return false;
