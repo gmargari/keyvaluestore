@@ -51,7 +51,7 @@ class RangemergeCompactionManager: public CompactionManager {
      * based on disk files and memstore, create the vector of ranges. ranges
      * are sorted in lexicographical order
      */
-    void create_ranges(vector<Range *>& ranges);
+    void create_ranges(vector<Range *> *ranges);
     void delete_ranges(vector<Range *> ranges);
 
     /**

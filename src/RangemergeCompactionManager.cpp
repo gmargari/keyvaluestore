@@ -97,7 +97,7 @@ void RangemergeCompactionManager::flush_bytes() {
     //--------------------------------------------------------------------------
     // create vector of ranges
     //--------------------------------------------------------------------------
-    create_ranges(ranges);
+    create_ranges(&ranges);
 
     //--------------------------------------------------------------------------
     // sort ranges by memory size
@@ -206,7 +206,7 @@ void RangemergeCompactionManager::flush_bytes() {
 /*============================================================================
  *                               create_ranges
  *============================================================================*/
-void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges) {
+void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
     vector<DiskFile *> &r_disk_files = m_diskstore->m_disk_files;
     Range *rng;
     int i;
@@ -228,25 +228,25 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges) {
             r_disk_files[i]->get_first_last_term(&rng->m_first, &rng->m_firstlen, &rng->m_last, &rng->m_lastlen);
             rng->m_disksize = r_disk_files[i]->get_size();
             rng->m_block_num = i;
-            ranges.push_back(rng);
+            ranges->push_back(rng);
         }
 
-        sort(ranges.begin(), ranges.end(), Range::cmp_by_term);
+        sort(ranges->begin(), ranges->end(), Range::cmp_by_term);
 
-        ranges[0]->m_first = EMPTY_STRING;
-        ranges[ranges.size() - 1]->m_last = NULL;
+        ranges->at(0)->m_first = EMPTY_STRING;
+        ranges->at(ranges->size() - 1)->m_last = NULL;
 
-        for (i = 0; i < (int)ranges.size() - 1; i++) {
-            ranges[i]->m_last = ranges[i+1]->m_first;
+        for (i = 0; i < (int)ranges->size() - 1; i++) {
+            ranges->at(i)->m_last = ranges->at(i+1)->m_first;
         }
 
-        for (i = 0; i < (int)ranges.size(); i++) {
+        for (i = 0; i < (int)ranges->size(); i++) {
             // since we want to know exactly the size of tuples when written to
             // disk, in order to know when a block will overflow, we use
             // get_size_when_serialized() and not get_size().
-            sizes = m_memstore->get_map(ranges[i]->m_first, ranges[i]->m_firstlen)->get_sizes();
-            ranges[i]->m_memsize = sizes.first;
-            ranges[i]->m_memsize_serialized = sizes.second;
+            sizes = m_memstore->get_map(ranges->at(i)->m_first, ranges->at(i)->m_firstlen)->get_sizes();
+            ranges->at(i)->m_memsize = sizes.first;
+            ranges->at(i)->m_memsize_serialized = sizes.second;
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
         rng = new Range();
@@ -257,7 +257,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *>& ranges) {
         rng->m_memsize_serialized = sizes.second;
         rng->m_disksize = 0;
         rng->m_block_num = NO_DISK_BLOCK;
-        ranges.push_back(rng);
+        ranges->push_back(rng);
     }
 }
 
@@ -323,7 +323,7 @@ bool RangemergeCompactionManager::load_state_from_disk() {
 void RangemergeCompactionManager::add_maps_to_memstore() {
     vector<Range *> ranges;
 
-    create_ranges(ranges);
+    create_ranges(&ranges);
     for (int i = 1; i < (int)ranges.size(); i++) {  // i = 1: MemStore constructor has inserted map for key ""
         m_memstore->add_map(ranges[i]->m_first, ranges[i]->m_firstlen);
     }
@@ -342,7 +342,7 @@ int RangemergeCompactionManager::sanity_check() {
         assert(m_diskstore->m_disk_files[i]->get_size() <= m_blocksize);
     }
 
-    create_ranges(ranges);
+    create_ranges(&ranges);
 
     assert(m_memstore->get_num_maps() == (int)ranges.size());
     for (unsigned int i = 0; i < ranges.size(); i++) {
