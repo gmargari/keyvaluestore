@@ -77,7 +77,7 @@ bool VFile::fs_open_existing(char *filename) {
     char fname[100], vfilename[100];
     FILE *fp;
     struct stat filestatus;
-    long int filesize;
+    off64_t filesize;
 
     m_basefilename = strdup(filename);
 
@@ -86,7 +86,7 @@ bool VFile::fs_open_existing(char *filename) {
         my_perror_exit();
     }
 
-    while (fscanf(fp, "%s %ld\n", vfilename, &filesize) == 2) {
+    while (fscanf(fp, "%s %Ld\n", vfilename, &filesize) == 2) {
 
         // check file size of file to be opened is the one expected.
         stat(vfilename, &filestatus);
@@ -126,7 +126,7 @@ void VFile::fs_close() {
 
         for (int i = 0; i < (int)m_filedescs.size(); i++) {
             stat(m_names[i], &filestatus);
-            fprintf(fp, "%s %ld\n", m_names[i], filestatus.st_size);
+            fprintf(fp, "%s %Ld\n", m_names[i], filestatus.st_size);
             if (close(m_filedescs[i]) == -1) {
                 my_perror_exit();
             }

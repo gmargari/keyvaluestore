@@ -72,9 +72,9 @@ class GeomCompactionManager: public CompactionManager {
 
     int sanity_check();
 
-    int         m_R;  // used to define the size limit of each partition
-    int         m_P;  // maximum number of partition, 0 if disabled
-    vector<int> m_partition_size;
+    int         m_R;               // size limit of each partition
+    int         m_P;               // max number of partition, 0 if disabled
+    vector<int> m_partition_size;  // size of each partition
 };
 
 #endif  // SRC_GEOMCOMPACTIONMANAGER_H_

@@ -14,8 +14,8 @@
 //==============================================================================
 #define DEFAULT_MEMSTORE_SIZE                   104857600LL  // 100MB
 #define MAX_INDEX_DIST                                65536  // 64KB
-#define MAX_KVTSIZE          ((unsigned long)(1*1024*1024))  // 1MB (max size for key and for value)
-#define MERGE_BUFSIZE        ((unsigned long)(4*1024*1024))  // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
+#define MAX_KVTSIZE               ((uint64_t)(1*1024*1024))  // 1MB (max size for key and for value)
+#define MERGE_BUFSIZE             ((uint64_t)(4*1024*1024))  // 4MB (must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
 //==============================================================================
 // compaction managers' default values

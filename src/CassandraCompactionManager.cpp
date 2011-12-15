@@ -151,7 +151,7 @@ bool CassandraCompactionManager::save_state_to_disk() {
 
     fprintf(fp, "cmmanager: %s\n", "cassandra");
     fprintf(fp, "L: %d\n", m_L);
-    fprintf(fp, "levels: %d\n", (int)m_level_files.size());
+    fprintf(fp, "levels: %d\n", m_level_files.size());
     for (int i = 0; i < (int)m_level_files.size(); i++) {
         fprintf(fp, "level_files: %d\n", m_level_files[i]);
     }

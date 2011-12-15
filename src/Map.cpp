@@ -40,7 +40,7 @@ bool Map::put(const char *key, uint32_t keylen, const char *value, uint32_t valu
     assert(value);
 
     if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
-        printf("Error: key or value size greater than max size allowed (%ld)\n", MAX_KVTSIZE);
+        printf("Error: key or value size greater than max size allowed (%Ld)\n", MAX_KVTSIZE);
         assert(0);
         return false;
     }

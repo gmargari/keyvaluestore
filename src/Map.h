@@ -119,10 +119,10 @@ class Map {
      */
     KVTMap::iterator end_iter(const char *key, uint32_t keylen, bool key_incl);
 
-    KVTMap      m_map;
-    uint64_t    m_size;             // size of map
-    uint64_t    m_size_serialized;  // size of map when written to disk
-    uint64_t    m_keys;             // number of keys or tuples in map
+    KVTMap   m_map;
+    uint64_t m_size;             // size of map
+    uint64_t m_size_serialized;  // size of map when written to disk
+    uint64_t m_keys;             // number of keys or tuples in map
 };
 
 #endif  // SRC_MAP_H_
