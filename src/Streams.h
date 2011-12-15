@@ -47,7 +47,7 @@ class Streams {
      * same as function above, but a pointer to new file will be appended to
      * vector 'diskfiles'
      */
-    static void merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles);
+    static void merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles);
 
     /**
      * merge all input streams creating one or more diskfiles. each disk file
@@ -56,7 +56,7 @@ class Streams {
      *
      * @return number of new files created
      */
-    static int merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size);
+    static int merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles, uint64_t max_file_size);
 };
 
 #endif  // SRC_STREAMS_H_

@@ -89,17 +89,17 @@ DiskFile *Streams::merge_streams(vector<InputStream *> istreams) {
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles) {
+void Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles) {
     DiskFile *diskfile;
 
     diskfile = merge_streams(istreams);
-    diskfiles.push_back(diskfile);
+    diskfiles->push_back(diskfile);
 }
 
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& diskfiles, uint64_t max_file_size) {
+int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *> *diskfiles, uint64_t max_file_size) {
     DiskFile *diskfile;
     PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;
@@ -129,7 +129,7 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& d
             len = Buffer::serialize_len(keylen, valuelen, timestamp);
             if (filesize + len > max_file_size) {
                 ostream->close();
-                diskfiles.push_back(diskfile);
+                diskfiles->push_back(diskfile);
                 num_newfiles++;
 
                 diskfile = new DiskFile;
@@ -148,7 +148,7 @@ int Streams::merge_streams(vector<InputStream *> istreams, vector<DiskFile *>& d
 
     time_end(&(g_stats.merge_time));
 
-    diskfiles.push_back(diskfile);
+    diskfiles->push_back(diskfile);
     num_newfiles++;
 
     delete pistream;
