@@ -1,5 +1,7 @@
 // Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
+#include "./Global.h"
+
 #include <math.h>
 #include <string.h>
 #include <assert.h>
@@ -8,7 +10,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include "./Global.h"
 #include "./KeyValueStore.h"
 #include "./ImmCompactionManager.h"
 #include "./GeomCompactionManager.h"

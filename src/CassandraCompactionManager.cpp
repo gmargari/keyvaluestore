@@ -1,5 +1,6 @@
 // Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
+#include "./Global.h"
 #include "./CassandraCompactionManager.h"
 
 #include <stdlib.h>
