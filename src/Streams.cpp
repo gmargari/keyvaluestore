@@ -91,17 +91,6 @@ DiskFile *Streams::merge_streams(vector<InputStream *> istreams) {
 /*============================================================================
  *                               merge_streams
  *============================================================================*/
-void Streams::merge_streams(vector<InputStream *> istreams,
-                            vector<DiskFile *> *diskfiles) {
-    DiskFile *diskfile;
-
-    diskfile = merge_streams(istreams);
-    diskfiles->push_back(diskfile);
-}
-
-/*============================================================================
- *                               merge_streams
- *============================================================================*/
 int Streams::merge_streams(vector<InputStream *> istreams,
                            vector<DiskFile *> *diskfiles,
                            uint64_t max_file_size) {

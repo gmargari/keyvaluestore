@@ -47,13 +47,6 @@ class Streams {
     static DiskFile *merge_streams(vector<InputStream *> istreams);
 
     /**
-     * same as function above, but a pointer to new file will be appended to
-     * vector 'diskfiles'
-     */
-    static void merge_streams(vector<InputStream *> istreams,
-                              vector<DiskFile *> *diskfiles);
-
-    /**
      * merge all input streams creating one or more diskfiles. each disk file
      * will have size at most 'max_file_size'. pointers to new files created
      * are appended to vector 'diskfiles'.
