@@ -123,7 +123,6 @@ int GeomCompactionManager::compute_current_R() {
 void GeomCompactionManager::flush_bytes() {
     DiskFile *disk_file, *memstore_file;
     vector<InputStream *> istreams;
-    vector<DiskFile *> &disk_files = m_diskstore->m_disk_files;
     int size, count, part_num;
 
     assert(sanity_check());
@@ -155,10 +154,11 @@ void GeomCompactionManager::flush_bytes() {
             break;
         }
     }
-    assert(count <= (int)disk_files.size());
+    assert(count <= m_diskstore->get_num_disk_files());
 
     for (int i = 0; i < count; i++) {
-        istreams.push_back(new DiskFileInputStream(disk_files[i]));
+        DiskFile *dfile = m_diskstore->get_diskfile(i);
+        istreams.push_back(new DiskFileInputStream(dfile));
     }
 
     //--------------------------------------------------------------------------
@@ -188,18 +188,17 @@ void GeomCompactionManager::flush_bytes() {
 
     // delete all files merged as well as their input streams
     m_diskstore->write_lock();
-    for (int i = 0; i < count; i++) {
-        disk_files[i]->delete_from_disk();
-        delete disk_files[i];
+    for (int i = count - 1; i >= 0; i--) {
+        m_diskstore->get_diskfile(i)->delete_from_disk();
+        m_diskstore->rm_diskfile(i);
     }
-    disk_files.erase(disk_files.begin(), disk_files.begin() + count);
 
     //--------------------------------------------------------------------------
     // 5) add new file to DiskStore
     //--------------------------------------------------------------------------
 
     // add new file at the front, since it contains most recent <k,v> pairs
-    disk_files.insert(disk_files.begin(), disk_file);
+    m_diskstore->add_diskfile(disk_file, 0);
     m_diskstore->write_unlock();
 
     //--------------------------------------------------------------------------
@@ -299,7 +298,7 @@ bool GeomCompactionManager::load_state_from_disk() {
 int GeomCompactionManager::sanity_check() {
     uint64_t cursize = 0;
 
-    assert(m_partition_size.size() >= m_diskstore->m_disk_files.size());
+    assert((int)m_partition_size.size() >= m_diskstore->get_num_disk_files());
     for (unsigned int i = 0; i < m_partition_size.size(); i++) {
         // if P != 0, there's a case when R increases before a flush and
         // the assertion below does not hold
@@ -312,7 +311,7 @@ int GeomCompactionManager::sanity_check() {
     dbg_lastsize = cursize;
 
     if (m_P) {
-        assert((int)m_diskstore->m_disk_files.size() <= m_P);
+        assert(m_diskstore->get_num_disk_files() <= m_P);
     }
 
     return 1;

@@ -80,9 +80,7 @@ uint64_t RangemergeCompactionManager::get_flushmem() {
  *============================================================================*/
 void RangemergeCompactionManager::flush_bytes() {
     MapInputStream *map_istream;
-    DiskFileInputStream *disk_stream;
     vector<DiskFile *> new_disk_files;
-    vector<DiskFile *> &disk_files = m_diskstore->m_disk_files;
     vector<InputStream *> istreams;
     vector<Range *> ranges;
     Range *rng;
@@ -122,8 +120,8 @@ void RangemergeCompactionManager::flush_bytes() {
 
         // get istream for file that stores all tuples that belong to range
         if (rng->m_block_num != NO_DISK_BLOCK) {
-            disk_stream = new DiskFileInputStream(disk_files[rng->m_block_num]);
-            istreams.push_back(disk_stream);
+            DiskFile *dfile = m_diskstore->get_diskfile(rng->m_block_num);
+            istreams.push_back(new DiskFileInputStream(dfile));
         }
 
         // check if block will overflow. in case of overflow, range will be
@@ -188,9 +186,8 @@ void RangemergeCompactionManager::flush_bytes() {
     for (i = cur_rng - 1; i >= 0; i--) {
         int blocknum = ranges[i]->m_block_num;
         if (blocknum != NO_DISK_BLOCK) {
-            disk_files[blocknum]->delete_from_disk();
-            delete disk_files[blocknum];
-            disk_files.erase(disk_files.begin() + blocknum);
+            m_diskstore->get_diskfile(blocknum)->delete_from_disk();
+            m_diskstore->rm_diskfile(blocknum);
         }
     }
     delete_ranges(ranges);
@@ -202,7 +199,8 @@ void RangemergeCompactionManager::flush_bytes() {
     // stored in exaclty one file on disk, so there is no need to search
     // all files from most recent to oldest -we'll search in exaclty one file.
     for (i = 0; i < (int)new_disk_files.size(); i++) {
-        disk_files.push_back(new_disk_files[i]);
+        m_diskstore->add_diskfile(new_disk_files[i],
+                                  m_diskstore->get_num_disk_files());
     }
     m_diskstore->write_unlock();
 
@@ -213,16 +211,18 @@ void RangemergeCompactionManager::flush_bytes() {
  *                               create_ranges
  *============================================================================*/
 void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
-    vector<DiskFile *> disk_files = m_diskstore->m_disk_files;
+    int num_disk_files = m_diskstore->get_num_disk_files();
     Range *rng;
     Slice last;
     pair<uint64_t, uint64_t> sizes;
 
-    if (disk_files.size()) {  // if there are files on disk
-        for (unsigned int i = 0; i < disk_files.size(); i++) {
+    ranges->clear();
+    if (num_disk_files) {
+        for (int i = 0; i < num_disk_files; i++) {
+            DiskFile *dfile = m_diskstore->get_diskfile(i);
             rng = new Range();
-            disk_files[i]->get_first_last_term(&rng->m_first, &last);
-            rng->m_disksize = disk_files[i]->get_size();
+            dfile->get_first_last_term(&rng->m_first, &last);
+            rng->m_disksize = dfile->get_size();
             rng->m_block_num = i;
             ranges->push_back(rng);
         }
@@ -330,8 +330,8 @@ void RangemergeCompactionManager::add_maps_to_memstore() {
 int RangemergeCompactionManager::sanity_check() {
     vector<Range *> ranges;
 
-    for (unsigned int i = 0; i < m_diskstore->m_disk_files.size(); i++) {
-        assert(m_diskstore->m_disk_files[i]->get_size() <= m_blocksize);
+    for (int i = 0; i < m_diskstore->get_num_disk_files(); i++) {
+        assert(m_diskstore->get_diskfile(i)->get_size() <= m_blocksize);
     }
     create_ranges(&ranges);
     assert(m_memstore->get_num_maps() == (int)ranges.size());

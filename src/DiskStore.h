@@ -8,20 +8,14 @@
 #include <vector>
 
 #include "./Global.h"
+#include "./DiskFile.h"
 
 using std::vector;
 
-class DiskFile;
 class DiskFileInputStream;
 
 class DiskStore {
   public:
-    friend class NomergeCompactionManager;
-    friend class GeomCompactionManager;
-    friend class RangemergeCompactionManager;
-    friend class CassandraCompactionManager;
-    friend class Scanner;
-
     /**
      * constructor
      */
@@ -52,6 +46,13 @@ class DiskStore {
     int get_num_disk_files();
 
     /**
+     * add, delete or get a specific disk file to/from diskstore
+     */
+     void      add_diskfile(DiskFile *df, int pos);
+     void      rm_diskfile(int pos);
+     DiskFile *get_diskfile(int pos);
+
+    /**
      * diskstore contains a read-write lock: scanners read-lock diskstore
      * and compaction manager write-locks diskstore, to avoid reading and
      * modifying 'm_disk_files' concurrently
@@ -70,6 +71,28 @@ class DiskStore {
 };
 
 #endif  // SRC_DISKSTORE_H_
+
+/*============================================================================
+ *                               add_diskfile
+ *============================================================================*/
+inline void DiskStore::add_diskfile(DiskFile *dfile, int pos) {
+    m_disk_files.insert(m_disk_files.begin() + pos, dfile);
+}
+
+/*============================================================================
+ *                               rm_diskfile
+ *============================================================================*/
+inline void DiskStore::rm_diskfile(int pos) {
+    delete m_disk_files[pos];
+    m_disk_files.erase(m_disk_files.begin() + pos);
+}
+
+/*============================================================================
+ *                               get_diskfile
+ *============================================================================*/
+inline DiskFile *DiskStore::get_diskfile(int pos) {
+    return m_disk_files[pos];
+}
 
 /*============================================================================
  *                                 read_lock

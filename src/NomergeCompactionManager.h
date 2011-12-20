@@ -33,8 +33,7 @@ void NomergeCompactionManager::flush_bytes() {
     memstore_clear();
 
     m_diskstore->write_lock();
-    // insert first in diskstore as it contains the most recent <k,v> pairs
-    m_diskstore->m_disk_files.insert(m_diskstore->m_disk_files.begin(), dfile);
+    m_diskstore->add_diskfile(dfile, 0);  // insert 1st, has the most recent KVs
     m_diskstore->write_unlock();
 }
 
