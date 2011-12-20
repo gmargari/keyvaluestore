@@ -9,7 +9,7 @@
 
 #include "./Slice.h"
 
-#define NO_DISK_BLOCK (-1)
+#define NO_DISK_FILE (-1)
 
 class Range {
   public:
@@ -39,21 +39,19 @@ class Range {
     static bool cmp_by_term(const Range *r1, const Range *r2);
 
     /**
-     * compare ranges by field 'm_block_num' (ascending order)
+     * compare ranges by field 'm_file_num' (ascending order)
      */
-    static bool cmp_by_block_num(const Range *r1, const Range *r2);
+    static bool cmp_by_file_num(const Range *r1, const Range *r2);
 
     // Undefined methods (just remove Weffc++ warning)
     Range(const Range&);
     Range& operator=(const Range&);
 
-    Slice    m_first;               // first key stored on disk block
+    Slice    m_first;               // first key stored on disk file
     uint64_t m_memsize;             // byte size of memory tuples
     uint64_t m_memsize_serialized;  // byte size of serialized memory tuples
-    uint64_t m_disksize;            // size of tuples stored on disk block
-    int      m_block_num;           // index in DiskStore's vector of disk
-                                    // files (we store each block in a
-                                    // separate disk file)
+    uint64_t m_disksize;            // size of tuples stored on disk file
+    int      m_file_num;            // index in DiskStore's vector of disk files
 };
 
 /*============================================================================
@@ -61,7 +59,7 @@ class Range {
  *============================================================================*/
 Range::Range()
     : m_first(), m_memsize(0), m_memsize_serialized(0), m_disksize(0),
-      m_block_num(NO_DISK_BLOCK) {
+      m_file_num(NO_DISK_FILE) {
 }
 
 /*============================================================================
@@ -93,10 +91,10 @@ inline bool Range::cmp_by_term(const Range *r1, const Range *r2) {
 
 
 /*============================================================================
- *                            cmp_by_block_num
+ *                            cmp_by_file_num
  *============================================================================*/
-inline bool Range::cmp_by_block_num(const Range *r1, const Range *r2) {
-    return (r1->m_block_num < r2->m_block_num);  // asc order
+inline bool Range::cmp_by_file_num(const Range *r1, const Range *r2) {
+    return (r1->m_file_num < r2->m_file_num);  // asc order
 }
 
 #endif  // SRC_RANGE_H_

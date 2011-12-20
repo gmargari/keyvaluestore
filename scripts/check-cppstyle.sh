@@ -11,6 +11,8 @@ filter=$filter",-runtime/printf"           # Never use sprintf.  Use snprintf in
 filter=$filter",-runtime/explicit"         # Single-argument constructors should be marked explicit.
 filter=$filter",-readability/todo"         # Missing username in TODO; it should look like "// TODO(my_username): Stuff."
 
+filter=$filter",-build/include_order"
+
 for f in *.h; do
     if [ $f == "Slice.h" -o $f == "Debug.h" ]; then
         continue

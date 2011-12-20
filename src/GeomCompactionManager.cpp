@@ -172,21 +172,16 @@ void GeomCompactionManager::flush_bytes() {
     // 3) merge streams creating a new disk file
     //--------------------------------------------------------------------------
     disk_file = Streams::merge_streams(istreams);
-
-    // delete all istreams
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];
     }
 
     //--------------------------------------------------------------------------
-    // 4) delete merged files from DiskStore
+    // 4) delete merged files
     //--------------------------------------------------------------------------
-
-    // delete the memstore file and disk stream
     memstore_file->delete_from_disk();
     delete memstore_file;
 
-    // delete all files merged as well as their input streams
     m_diskstore->write_lock();
     for (int i = count - 1; i >= 0; i--) {
         m_diskstore->get_diskfile(i)->delete_from_disk();
@@ -194,25 +189,23 @@ void GeomCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 5) add new file to DiskStore
+    // 5) add new file to DiskStore (add first: it contains the most recent KVs)
     //--------------------------------------------------------------------------
-
-    // add new file at the front, since it contains most recent <k,v> pairs
     m_diskstore->add_diskfile(disk_file, 0);
     m_diskstore->write_unlock();
 
     //--------------------------------------------------------------------------
     // 6) update vector of partitions
     //--------------------------------------------------------------------------
-
-    // update partitions vector: zero the sizes of the 'count' partitions merged
+    // zero the sizes of the 'count' partitions merged
     for (unsigned int i = 0; i < m_partition_size.size(); i++) {
         if (m_partition_size[i] && count > 0) {
             m_partition_size[i] = 0;
             count--;
         }
     }
-    // update partitions vector: add new partition
+
+    // add new partition
     part_num = partition_num(size);
     if (part_num == (int)m_partition_size.size()) {
         m_partition_size.push_back(size);

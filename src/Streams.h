@@ -17,12 +17,12 @@ class DiskFile;
 class Streams {
   public:
     /**
-     * copy all <k,v> pairs of input stream to output stream
+     * copy all KVs of input stream to output stream
      */
     static void copy_stream(InputStream *istream, OutputStream *ostream);
 
     /**
-     * copy all <k,v> pairs of input stream with unique keys to output stream
+     * copy all KVs of input stream with unique keys to output stream
      */
     static void copy_stream_unique_keys(InputStream *istream,
                                         OutputStream *ostream);

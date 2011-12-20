@@ -118,25 +118,20 @@ void RangemergeCompactionManager::flush_bytes() {
         istreams.clear();
         istreams.push_back(map_istream);
 
-        // get istream for file that stores all tuples that belong to range
-        if (rng->m_block_num != NO_DISK_BLOCK) {
-            DiskFile *dfile = m_diskstore->get_diskfile(rng->m_block_num);
+        // get istream for file that stores all tuples that belong to cur range
+        if (rng->m_file_num != NO_DISK_FILE) {
+            DiskFile *dfile = m_diskstore->get_diskfile(rng->m_file_num);
             istreams.push_back(new DiskFileInputStream(dfile));
         }
 
-        // check if block will overflow. in case of overflow, range will be
-        // split to a number of subranges, each of which will be stored on
-        // a separate block.
+        // if block may overflow, split merged block into a number of blocks
+        // of max file size 'SPLIT_PERC * m_blocksize'
         if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
             newfiles = Streams::merge_streams(istreams, &new_disk_files,
                                               SPLIT_PERC * m_blocksize);
             // assert(newfiles > 1);  // this may be false (i.e. if all mem keys
                                       // exist on disk and no split occurs)
         } else {
-            // merge memory and disk istreams, creating a new file on disk.
-            // set 'm_blocksize' as max file size, which will cause only
-            // one file to be created (we have ensured aboce block will not
-            // overflow)
             newfiles = Streams::merge_streams(istreams, &new_disk_files,
                                               m_blocksize);
             assert(newfiles == 1);
@@ -178,16 +173,16 @@ void RangemergeCompactionManager::flush_bytes() {
     // delete old files from disk and remove them from diskstore
     //--------------------------------------------------------------------------
     // we flushed to disk the first 'cur_rng' ranges. in order to avoid problems
-    // with file deletion, sort first 'cur_rng' ranges by 'block_num' and delete
+    // with file deletion, sort first 'cur_rng' ranges by 'file_num' and delete
     // files from last to first (note: we store each block in a separate disk
-    // file. 'm_block_num' is the index of file in diskfiles vector)
-    sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_block_num);
+    // file. 'file_num' is the index of file in DiskStore's files vector)
+    sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_file_num);
     m_diskstore->write_lock();
     for (i = cur_rng - 1; i >= 0; i--) {
-        int blocknum = ranges[i]->m_block_num;
-        if (blocknum != NO_DISK_BLOCK) {
-            m_diskstore->get_diskfile(blocknum)->delete_from_disk();
-            m_diskstore->rm_diskfile(blocknum);
+        int filenum = ranges[i]->m_file_num;
+        if (filenum != NO_DISK_FILE) {
+            m_diskstore->get_diskfile(filenum)->delete_from_disk();
+            m_diskstore->rm_diskfile(filenum);
         }
     }
     delete_ranges(ranges);
@@ -212,7 +207,6 @@ void RangemergeCompactionManager::flush_bytes() {
  *============================================================================*/
 void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
     int num_disk_files = m_diskstore->get_num_disk_files();
-    Range *rng;
     Slice last;
     pair<uint64_t, uint64_t> sizes;
 
@@ -220,10 +214,10 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
     if (num_disk_files) {
         for (int i = 0; i < num_disk_files; i++) {
             DiskFile *dfile = m_diskstore->get_diskfile(i);
-            rng = new Range();
+            Range *rng = new Range();
             dfile->get_first_last_term(&rng->m_first, &last);
             rng->m_disksize = dfile->get_size();
-            rng->m_block_num = i;
+            rng->m_file_num = i;
             ranges->push_back(rng);
         }
 
@@ -240,13 +234,13 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
             ranges->at(i)->m_memsize_serialized = sizes.second;
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
-        rng = new Range();
+        Range *rng = new Range();
         rng->m_first = Slice("", 0);  // to get all terms
         sizes = m_memstore->get_map(rng->m_first)->get_sizes();
         rng->m_memsize = sizes.first;
         rng->m_memsize_serialized = sizes.second;
         rng->m_disksize = 0;
-        rng->m_block_num = NO_DISK_BLOCK;
+        rng->m_file_num = NO_DISK_FILE;
         ranges->push_back(rng);
     }
 }

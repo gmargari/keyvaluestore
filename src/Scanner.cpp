@@ -33,6 +33,7 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     DiskFileInputStream *disk_istream = NULL;
     MemStore *memstore = m_kvstore->m_memstore;
     DiskStore *diskstore = m_kvstore->m_diskstore;
+    int diskfiles;
 
     // NOTE: don't read from memstore, it's not thread-safe for concurrent puts
     // and gets
@@ -46,7 +47,8 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
     diskstore->read_lock();
-    for (int i = 0; i < diskstore->get_num_disk_files(); i++) {
+    diskfiles = diskstore->get_num_disk_files();
+    for (int i = 0; i < diskfiles; i++) {
         DiskFile *dfile = diskstore->get_diskfile(i);
         disk_istream = new DiskFileInputStream(dfile, MAX_INDEX_DIST);
         disk_istream->set_key_range(key, key, true, true);

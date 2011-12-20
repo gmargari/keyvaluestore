@@ -27,23 +27,18 @@ class DiskStore {
     ~DiskStore();
 
     /**
-     * number of <key, value> pairs in diskstore
+     * number of KVs in diskstore
      *
-     * @return number of <key, value> pairs in diskstore
+     * @return number of KVs in diskstore
      */
     uint64_t get_num_keys();
 
     /**
      * byte size of diskstore
      *
-     * @return byte size of <key, value> pairs in diskstore
+     * @return byte size of KVs in diskstore
      */
     uint64_t get_size();
-
-    /**
-     * return number of disk files
-     */
-    int get_num_disk_files();
 
     /**
      * add, delete or get a specific disk file to/from diskstore
@@ -51,6 +46,7 @@ class DiskStore {
      void      add_diskfile(DiskFile *df, int pos);
      void      rm_diskfile(int pos);
      DiskFile *get_diskfile(int pos);
+     int       get_num_disk_files();
 
     /**
      * diskstore contains a read-write lock: scanners read-lock diskstore
@@ -92,6 +88,13 @@ inline void DiskStore::rm_diskfile(int pos) {
  *============================================================================*/
 inline DiskFile *DiskStore::get_diskfile(int pos) {
     return m_disk_files[pos];
+}
+
+/*============================================================================
+ *                            get_num_disk_files
+ *============================================================================*/
+inline int DiskStore::get_num_disk_files() {
+    return m_disk_files.size();
 }
 
 /*============================================================================

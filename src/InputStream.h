@@ -20,7 +20,7 @@ class InputStream {
     virtual ~InputStream() { }
 
     /**
-     * return only pairs with keys between 'start_key' (inclusive) and 'end_key'
+     * return only KVs with keys between 'start_key' (inclusive) and 'end_key'
      * (exclusive), i.e. all keys K where: start_key <= K < end_key.
      * 'start_key' and 'end_key' are not copied.
      */

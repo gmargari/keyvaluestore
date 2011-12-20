@@ -35,7 +35,7 @@ class DiskFileOutputStream: public OutputStream {
     DiskFileOutputStream& operator=(const DiskFileOutputStream&);
 
   private:
-    DiskFile    *m_file;           // file in which we store <key,value> pairs
+    DiskFile    *m_file;           // file in which we store KVs
     uint64_t     m_file_size;      // current size of diskfile
     Buffer      *m_buf;            // buffer used for I/O
 

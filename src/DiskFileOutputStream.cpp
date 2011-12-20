@@ -48,13 +48,13 @@ bool DiskFileOutputStream::append(Slice key, Slice value, uint64_t timestamp) {
     uint32_t len;
     off_t cur_offs;
 
-    // if there is not enough space in buffer for new <k,v> pair, flush buffer
+    // if there is not enough space in buffer for new KV, flush buffer
     if (Buffer::serialize_len(key.size(), value.size(), timestamp)
           > m_buf->free_space()) {
         m_file->append(m_buf);
     }
 
-    // serialize and add new pair to buffer
+    // serialize and add new KV to buffer
     if (m_buf->serialize(key, value, timestamp, &len)) {
 
         // if needed, add entry to index

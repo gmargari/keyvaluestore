@@ -58,8 +58,8 @@ class KeyValueStore {
              uint32_t valuelen, uint64_t timestamp);
 
     /**
-     * insert a <key, value> tuple into store. copies of the key and value are
-     * created and inserted into the store.
+     * insert a KV into store. copies of the key and value are created and
+     * inserted into the store.
      *
      * @param key key to be inserted
      * @param keylen size of key

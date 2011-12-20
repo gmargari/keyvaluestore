@@ -33,7 +33,7 @@ class CompactionManager {
     void memstore_clear();
 
     /**
-     * flush <k,v> pairs from memory to disk, creating free space for new pairs
+     * flush KVs from memory to disk, creating free space for new KVs
      */
     virtual void flush_bytes() = 0;
 
@@ -41,7 +41,7 @@ class CompactionManager {
     CompactionManager(const CompactionManager&);
     CompactionManager& operator=(const CompactionManager&);
 
-  protected:  // TODO: make private
+  protected:
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };

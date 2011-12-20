@@ -30,11 +30,7 @@ execute() {
 mkdir -p /tmp/kvstore
 
 execute "nomerge"
-execute "logarithmic" 
 execute "geometric"
-execute "geometric  -p 3"
-execute "rangemerge"
 execute "rangemerge -b 2"
 execute "immediate"
 execute "cassandra"
-execute "cassandra  -l 10"
