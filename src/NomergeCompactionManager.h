@@ -4,7 +4,6 @@
 #define SRC_NOMERGECOMPACTIONMANAGER_H_
 
 #include "./CompactionManager.h"
-#include "./pthread.h"
 
 class NomergeCompactionManager: public CompactionManager {
   public:

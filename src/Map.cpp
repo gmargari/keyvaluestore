@@ -44,7 +44,7 @@ bool Map::put(Slice Key, Slice Value, uint64_t timestamp) {
     assert(value);
 
     if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
-        printf("Error: key or value size greater than max size allowed (%Ld)\n",
+        printf("Error: key or value size greater than max size allowed (%ld)\n",
                  MAX_KVTSIZE);
         assert(0);
         return false;

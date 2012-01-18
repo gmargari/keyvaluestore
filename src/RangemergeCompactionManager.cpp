@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <limits.h>
-#include <pthread.h>
 #include <algorithm>
 #include <utility>
 #include <vector>
