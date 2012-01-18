@@ -14,7 +14,6 @@
  *============================================================================*/
 DiskStore::DiskStore()
     : m_disk_files(), m_rwlock() {
-    pthread_rwlock_init(&m_rwlock, NULL);
     if (!load_from_disk()) {
         DiskFile::set_max_dfile_num(0);
     }
@@ -38,11 +37,11 @@ DiskStore::~DiskStore() {
 uint64_t DiskStore::get_num_keys() {
     uint64_t total_keys = 0;
 
-    pthread_rwlock_rdlock(&m_rwlock);
+    read_lock();
     for (int i = 0; i < (int)m_disk_files.size(); i++) {
         total_keys += m_disk_files[i]->get_num_keys();
     }
-    pthread_rwlock_unlock(&m_rwlock);
+    read_unlock();
 
     return total_keys;
 }
@@ -53,11 +52,11 @@ uint64_t DiskStore::get_num_keys() {
 uint64_t DiskStore::get_size() {
     uint64_t total_size = 0;
 
-    pthread_rwlock_rdlock(&m_rwlock);
+    read_lock();
     for (int i = 0; i < (int)m_disk_files.size(); i++) {
         total_size += m_disk_files[i]->get_size();
     }
-    pthread_rwlock_unlock(&m_rwlock);
+    read_unlock();
 
     return total_size;
 }

@@ -3,12 +3,11 @@
 #ifndef SRC_DISKSTORE_H_
 #define SRC_DISKSTORE_H_
 
-#include <stdint.h>
-#include <pthread.h>
 #include <vector>
 
 #include "./Global.h"
 #include "./DiskFile.h"
+#include "./ReadWriteMutex.h"
 
 using std::vector;
 
@@ -63,7 +62,7 @@ class DiskStore {
     bool save_to_disk();
 
     vector<DiskFile *> m_disk_files;
-    pthread_rwlock_t   m_rwlock;
+    ReadWriteMutex     m_rwlock;
 };
 
 #endif  // SRC_DISKSTORE_H_
@@ -101,26 +100,26 @@ inline int DiskStore::get_num_disk_files() {
  *                                 read_lock
  *============================================================================*/
 inline void DiskStore::read_lock() {
-    pthread_rwlock_rdlock(&m_rwlock);
+    m_rwlock.read_lock();
 }
 
 /*============================================================================
  *                                read_unlock
  *============================================================================*/
 inline void DiskStore::read_unlock() {
-    pthread_rwlock_unlock(&m_rwlock);
+    m_rwlock.read_unlock();
 }
 
 /*============================================================================
  *                                 write_lock
  *============================================================================*/
 inline void DiskStore::write_lock() {
-    pthread_rwlock_wrlock(&m_rwlock);
+    m_rwlock.write_lock();
 }
 
 /*============================================================================
  *                                write_unlock
  *============================================================================*/
 inline void DiskStore::write_unlock() {
-    pthread_rwlock_unlock(&m_rwlock);
+    m_rwlock.write_unlock();
 }
