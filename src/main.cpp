@@ -589,7 +589,8 @@ void *put_routine(void *args) {
     int      uflag = targs->uflag,
              sflag = targs->sflag,
              zipf_keys = targs->zipf_keys,
-             print_kv_and_continue = targs->print_kv_and_continue;
+             print_kv_and_continue = targs->print_kv_and_continue,
+             compaction_occured = 0;
     uint64_t num_keys_to_insert = targs->num_keys_to_insert;
     uint32_t keysize = targs->keysize,
              valuesize = targs->valuesize;
@@ -661,11 +662,23 @@ void *put_routine(void *args) {
             continue;
         }
 
+        // if this put will trigger a compaction, print stats before compaction
+        if (kvstore->memstore_will_fill(key, keylen, value, valuelen)) {
+            print_stats();
+            compaction_occured = 1;
+        }
+
         //----------------------------------------------------------------------
         // insert <key, value> into store
         //----------------------------------------------------------------------
         kvstore->put(key, keylen, value, valuelen);
         bytes_inserted += keylen + valuelen;
+
+        // if this put triggered a compaction, print stats after compaction
+        if (compaction_occured) {
+            print_stats();
+            compaction_occured = 0;
+        }
     }
 
     if (DBGLVL > 0) {

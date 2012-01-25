@@ -95,8 +95,6 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
         flush_bytes();
         time_end(&(g_stats.compaction_time));
         g_stats.disk_files = m_diskstore->get_num_disk_files();
-
-        print_stats();
     }
 
     return m_memstore->put(k, v, timestamp);
