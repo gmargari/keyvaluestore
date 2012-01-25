@@ -52,6 +52,7 @@ const int      DEFAULT_NUM_GET_THREADS =        0;
 const int      DEFAULT_PUT_THRPUT =             0;  // req per sec, 0: disable
 const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
 const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
+const bool     DEFAULT_FLUSH_PCACHE =       false;
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 int32_t zipf_n = 1000000;     // parameter for zipf() function
@@ -71,6 +72,7 @@ struct thread_args {
     int put_thrput;
     int get_thrput;
     int range_get_size;
+    bool flush_page_cache;
     KeyValueStore *kvstore;
 };
 
@@ -102,8 +104,9 @@ void print_syntax(char *progname) {
     cout << endl;
     cout << "GET" << endl;
     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
-    cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0 unlimited, default: " << DEFAULT_GET_THRPUT << ")" << endl;
+    cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0: unlimited. default: " << DEFAULT_GET_THRPUT << ")" << endl;
     cout << " -R, --range-get-size [VALUE]        max number of KVs to read (1: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
+    cout << " -x, --flush-page-cache              flush page cache after each compaction (default: " << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << ")" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
@@ -115,7 +118,7 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:esh";
+    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:xesh";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -134,6 +137,7 @@ int main(int argc, char **argv) {
              {"get-threads",          required_argument,  0, 'g'},
              {"get-throughput",       required_argument,  0, 'G'},
              {"range-get-size",       required_argument,  0, 'R'},
+             {"flush-page-cache",     no_argument,        0, 'x'},
              {"print-kvs-to-stdout",  no_argument,        0, 'e'},
              {"read-kvs-from-stdin",  no_argument,        0, 's'},
              {"help",                 no_argument,        0, 'h'},
@@ -156,8 +160,9 @@ int main(int argc, char **argv) {
              gflag = 0,
              Gflag = 0,
              Rflag = 0,
-             sflag = 0,
+             xflag = 0,
              eflag = 0,
+             sflag = 0,
              myopt,
              i,
              geom_r,
@@ -182,7 +187,8 @@ int main(int argc, char **argv) {
             *end_key = NULL;
     bool     unique_keys,
              zipf_keys,
-             print_kv_and_continue = false;
+             print_kv_and_continue = false,
+             flush_page_cache;
     KeyValueStore *kvstore;
     struct thread_args *targs;
     pthread_t *thread;
@@ -288,6 +294,11 @@ int main(int argc, char **argv) {
                 range_get_size = atoi(optarg);
                 break;
 
+            case 'x':
+                check_duplicate_arg_and_set(&xflag, myopt);
+                flush_page_cache = true;
+                break;
+
             case 'e':
                 check_duplicate_arg_and_set(&eflag, myopt);
                 print_kv_and_continue = true;
@@ -365,7 +376,9 @@ int main(int argc, char **argv) {
     if (Rflag == 0) {
         range_get_size = DEFAULT_RANGE_GET_SIZE;
     }
-
+    if (xflag == 0) {
+        flush_page_cache = DEFAULT_FLUSH_PCACHE;
+    }
     //--------------------------------------------------------------------------
     // check values
     //--------------------------------------------------------------------------
@@ -512,6 +525,7 @@ int main(int argc, char **argv) {
         cout << "# cassandra_l:         " << setw(15) << cass_l << "    " << (lflag == 0 ? "(default)" : "") << endl;
     }
     cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
+    cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "    " << (xflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
@@ -543,6 +557,7 @@ int main(int argc, char **argv) {
         targs[i].put_thrput = put_thrput;
         targs[i].get_thrput = get_thrput;
         targs[i].range_get_size = range_get_size;
+        targs[i].flush_page_cache = flush_page_cache;
     }
 
     //--------------------------------------------------------------------------
@@ -607,6 +622,7 @@ void *put_routine(void *args) {
              zipf_keys = targs->zipf_keys,
              print_kv_and_continue = targs->print_kv_and_continue,
              compaction_occured = 0;
+    bool     flush_page_cache = targs->flush_page_cache;
     uint64_t num_keys_to_insert = targs->num_keys_to_insert;
     uint32_t keysize = targs->keysize,
              valuesize = targs->valuesize;
@@ -694,6 +710,11 @@ void *put_routine(void *args) {
         if (compaction_occured) {
             print_stats();
             compaction_occured = 0;
+
+            // flush page cache after compaction, so next get()s will go to disk
+            if (flush_page_cache) {
+                system("sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'");
+            }
         }
     }
 
@@ -883,7 +904,7 @@ int zipf_r(uint32_t *seed) {
  *============================================================================*/
 void check_duplicate_arg_and_set(int *flag, int opt) {
     if (*flag) {
-        cerr << "Error: you have already set '-" << opt << "' argument" << endl;
+        cerr << "Error: you have already set '-" << (char)opt << "' argument" << endl;
         exit(EXIT_FAILURE);
     }
     *flag = 1;
