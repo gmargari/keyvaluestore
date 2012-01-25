@@ -96,10 +96,9 @@ uint64_t MemStore::get_size_when_serialized() {
 }
 
 /*============================================================================
- *                           will_reach_size_limit
+ *                                  will_fill
  *============================================================================*/
-bool MemStore::will_reach_size_limit(Slice key, Slice value,
-                                     uint64_t timestamp) {
+bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
     return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 

@@ -96,6 +96,15 @@ class KeyValueStore {
     int get_num_disk_files();
 
     /**
+     * check if adding <key, value, timestamp> to keyvaluestore will
+     * cause memstore to fill and thus trigger a compaction
+     */
+    bool memstore_will_fill(const char *key, uint32_t keylen,
+                            const char *value, uint32_t valuelen,
+                            uint64_t timestamp);
+    bool memstore_will_fill(const char *key, uint32_t keylen,
+                            const char *value, uint32_t valuelen);
+    /**
      * explicitly call compaction manager's flush_bytes()
      */
     void flush_bytes();

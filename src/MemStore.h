@@ -73,10 +73,10 @@ class MemStore {
     uint64_t get_size_when_serialized();
 
     /**
-     * check if adding <key, value, timestamp> to memstore will reach memstore's
-     * size limit
+     * check if adding <key, value, timestamp> to memstore will cause memstore
+     * to pass its size limit
      */
-    bool will_reach_size_limit(Slice key, Slice value, uint64_t timestamp);
+    bool will_fill(Slice key, Slice value, uint64_t timestamp);
 
     /**
      * clear memstore
