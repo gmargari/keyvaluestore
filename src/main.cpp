@@ -21,6 +21,7 @@
 #include "./RequestThrottle.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::setw;
 
@@ -294,7 +295,7 @@ int main(int argc, char **argv) {
     }
 
     for (i = optind; i < argc; i++) {
-        cout << "Error: non-option argument: '" << argv[i] << "'" << endl;
+        cerr << "Error: non-option argument: '" << argv[i] << "'" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -355,55 +356,55 @@ int main(int argc, char **argv) {
     // check values
     //--------------------------------------------------------------------------
     if (!cflag) {
-        cout << "Error: you must set compaction manager" << endl;
+        cerr << "Error: you must set compaction manager" << endl;
         exit(EXIT_FAILURE);
     }
     if (cflag && strcmp(cmanager, "nomerge") && strcmp(cmanager, "immediate")
           && strcmp(cmanager, "geometric") && strcmp(cmanager, "logarithmic")
           && strcmp(cmanager, "rangemerge") && strcmp(cmanager, "cassandra")) {
-        cout << "Error: compaction manager can be 'nomerge', 'immediate', ";
-        cout << "'geometric', 'logarithmic', 'rangemerge' or 'cassandra'";
-        cout << endl;
+        cerr << "Error: compaction manager can be 'nomerge', 'immediate', ";
+        cerr << "'geometric', 'logarithmic', 'rangemerge' or 'cassandra'";
+        cerr << endl;
         exit(EXIT_FAILURE);
     }
     if (rflag && pflag && strcmp(cmanager, "geometric") == 0) {
-        cout << "Error: you cannot set both 'r' and 'p' parameters" << endl;
+        cerr << "Error: you cannot set both 'r' and 'p' parameters" << endl;
         exit(EXIT_FAILURE);
     }
     if (fflag && flushmemorysize > memorysize) {
-        cout << "Error: flush memory size cannot be greater than memory size" << endl;
+        cerr << "Error: flush memory size cannot be greater than memory size" << endl;
         exit(EXIT_FAILURE);
     }
     if (kflag && keysize > MAX_KVTSIZE) {
-        cout << "Error: 'keysize' cannot be bigger than " << MAX_KVTSIZE << endl;
+        cerr << "Error: 'keysize' cannot be bigger than " << MAX_KVTSIZE << endl;
         exit(EXIT_FAILURE);
     }
     if (vflag && valuesize > MAX_KVTSIZE) {
-        cout << "Error: 'valuesize' cannot be bigger than " << MAX_KVTSIZE << endl;
+        cerr << "Error: 'valuesize' cannot be bigger than " << MAX_KVTSIZE << endl;
         exit(EXIT_FAILURE);
     }
     if (nflag && iflag) {
-        cout << "Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters" << endl;
+        cerr << "Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters" << endl;
         exit(EXIT_FAILURE);
     }
     if (sflag) {
         if (kflag) {
-            cout << "Ignoring '-k' flag (keysize): keys will be read from stdin" << endl;
+            cerr << "Ignoring '-k' flag (keysize): keys will be read from stdin" << endl;
             kflag = 0;
             keysize = DEFAULT_KEY_SIZE;
         }
         if (vflag) {
-            cout << "Ignoring '-v' flag (valuesize): values will be read from stdin" << endl;
+            cerr << "Ignoring '-v' flag (valuesize): values will be read from stdin" << endl;
             vflag = 0;
             valuesize = DEFAULT_VALUE_SIZE;
         }
         if (uflag) {
-            cout << "Ignoring '-u' flag (unique keys): keys will be read from stdin" << endl;
+            cerr << "Ignoring '-u' flag (unique keys): keys will be read from stdin" << endl;
             uflag = 0;
             unique_keys = DEFAULT_UNIQUE_KEYS;
         }
         if (zflag) {
-            cout << "Ignoring '-z' flag (zipf keys): keys will be read from stdin" << endl;
+            cerr << "Ignoring '-z' flag (zipf keys): keys will be read from stdin" << endl;
             zflag = 0;
             zipf_keys = DEFAULT_ZIPF_KEYS;
         }
@@ -451,7 +452,7 @@ int main(int argc, char **argv) {
             ((CassandraCompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
         }
     } else {
-        cout << "Error: unknown compaction manager (but we should not get here!)" << endl;
+        cerr << "Error: unknown compaction manager (but we should not get here!)" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -532,8 +533,6 @@ int main(int argc, char **argv) {
     // create put thread and get threads
     //--------------------------------------------------------------------------
     thread = (pthread_t *)malloc((1 + num_get_threads) * sizeof(pthread_t));
-
-    // create get threads
     for (i = 0; i < 1 + num_get_threads; i++) {
         if (i == 0) {
             retval = pthread_create(&thread[i], NULL, put_routine, (void *)&targs[i]);
@@ -853,7 +852,7 @@ int zipf_r(uint32_t *seed) {
  *============================================================================*/
 void check_duplicate_arg_and_set(int *flag, int opt) {
     if (*flag) {
-        cout << "Error: you have already set '-" << opt << "' argument" << endl;
+        cerr << "Error: you have already set '-" << opt << "' argument" << endl;
         exit(EXIT_FAILURE);
     }
     *flag = 1;
