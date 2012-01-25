@@ -734,12 +734,10 @@ void *get_routine(void *args) {
         }
 
         //--------------------------------------------------------------
-        // execute range get()
+        // execute range get() or point get()
         //--------------------------------------------------------------
         scanner->point_get(key, keylen);
-//         strcpy(end_key, key);  // TODO bad hack! as index grows more and more
-//         end_key[3] = 'z';      // keys fall within range [key, end_key)
-//         scanner->range_get(key, keylen, end_key, keylen);
+//        scanner->range_get(key, keylen, NULL, 0, 10); // get at most 10 KVs
     }
 
     if (DBGLVL > 0) {

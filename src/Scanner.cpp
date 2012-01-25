@@ -68,16 +68,8 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
  *                                range_get
  *============================================================================*/
 int Scanner::range_get(const char *start_key, uint32_t start_keylen,
-                       const char *end_key, uint32_t end_keylen) {
-    return range_get(start_key, start_keylen, end_key, end_keylen, true, false);
-}
-
-/*============================================================================
- *                                range_get
- *============================================================================*/
-int Scanner::range_get(const char *start_key, uint32_t start_keylen,
                        const char *end_key, uint32_t end_keylen,
-                       bool start_incl, bool end_incl) {
+                       bool start_incl, bool end_incl, int max_entries) {
     Slice startkey, endkey, k, v;
     uint64_t t;
     int numkeys = 0, diskfiles;
@@ -105,6 +97,9 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     pistream->set_key_range(startkey, endkey, start_incl, end_incl);
     while (pistream->read(&k, &v, &t)) {
         numkeys++;
+        if (max_entries && numkeys == max_entries) {
+            break;
+        }
     }
     diskstore->read_unlock();
 
@@ -115,4 +110,23 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     delete pistream;
 
     return numkeys;
+}
+
+/*============================================================================
+ *                                range_get
+ *============================================================================*/
+int Scanner::range_get(const char *start_key, uint32_t start_keylen,
+                       const char *end_key, uint32_t end_keylen,
+                       int max_entries) {
+    return range_get(start_key, start_keylen, end_key, end_keylen,
+                     true, false, max_entries);
+}
+
+/*============================================================================
+ *                                range_get
+ *============================================================================*/
+int Scanner::range_get(const char *start_key, uint32_t start_keylen,
+                       const char *end_key, uint32_t end_keylen) {
+    return range_get(start_key, start_keylen, end_key, end_keylen,
+                     true, false, 0);
 }
