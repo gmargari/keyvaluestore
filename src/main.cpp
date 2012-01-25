@@ -51,6 +51,7 @@ const bool     DEFAULT_ZIPF_KEYS =          false;
 const int      DEFAULT_NUM_GET_THREADS =        0;
 const int      DEFAULT_PUT_THRPUT =             0;  // req per sec, 0: disable
 const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
+const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 int32_t zipf_n = 1000000;     // parameter for zipf() function
@@ -69,6 +70,7 @@ struct thread_args {
     uint32_t valuesize;
     int put_thrput;
     int get_thrput;
+    int range_get_size;
     KeyValueStore *kvstore;
 };
 
@@ -96,11 +98,12 @@ void print_syntax(char *progname) {
     cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
     cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
     cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
-    cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0 unlimited, default: " << DEFAULT_PUT_THRPUT << ")" << endl;
+    cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0: unlimited. default: " << DEFAULT_PUT_THRPUT << ")" << endl;
     cout << endl;
     cout << "GET" << endl;
     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
     cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0 unlimited, default: " << DEFAULT_GET_THRPUT << ")" << endl;
+    cout << " -R, --range-get-size [VALUE]        max number of KVs to read (1: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
@@ -112,7 +115,7 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:esh";
+    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:esh";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -130,6 +133,7 @@ int main(int argc, char **argv) {
              {"put-throughput",       required_argument,  0, 'P'},
              {"get-threads",          required_argument,  0, 'g'},
              {"get-throughput",       required_argument,  0, 'G'},
+             {"range-get-size",       required_argument,  0, 'R'},
              {"print-kvs-to-stdout",  no_argument,        0, 'e'},
              {"read-kvs-from-stdin",  no_argument,        0, 's'},
              {"help",                 no_argument,        0, 'h'},
@@ -151,6 +155,7 @@ int main(int argc, char **argv) {
              zflag = 0,
              gflag = 0,
              Gflag = 0,
+             Rflag = 0,
              sflag = 0,
              eflag = 0,
              myopt,
@@ -162,7 +167,8 @@ int main(int argc, char **argv) {
              retval,
              indexptr,
              put_thrput,
-             get_thrput;
+             get_thrput,
+             range_get_size;
     uint64_t blocksize,
              flushmemorysize,
              memorysize,
@@ -277,6 +283,11 @@ int main(int argc, char **argv) {
                 get_thrput = atoi(optarg);
                 break;
 
+            case 'R':
+                check_duplicate_arg_and_set(&Rflag, myopt);
+                range_get_size = atoi(optarg);
+                break;
+
             case 'e':
                 check_duplicate_arg_and_set(&eflag, myopt);
                 print_kv_and_continue = true;
@@ -350,6 +361,9 @@ int main(int argc, char **argv) {
     }
     if (Gflag == 0) {
         get_thrput = DEFAULT_GET_THRPUT;
+    }
+    if (Rflag == 0) {
+        range_get_size = DEFAULT_RANGE_GET_SIZE;
     }
 
     //--------------------------------------------------------------------------
@@ -479,6 +493,7 @@ int main(int argc, char **argv) {
     cout << "# put_throughput:      " << setw(15) << put_thrput << "    " << (Pflag == 0 ? "(default)" : "") << endl;
     cout << "# num_get_threads:     " << setw(15) << num_get_threads << "    " << (gflag == 0 ? "(default)" : "") << endl;
     cout << "# get_throughput:      " << setw(15) << get_thrput << "    " << (Gflag == 0 ? "(default)" : "") << endl;
+    cout << "# range_get_size:      " << setw(15) << range_get_size << "    " << (Rflag == 0 ? "(default)" : "") << endl;
     if (strcmp(cmanager, "geometric") == 0) {
         if (pflag == 0) {
             cout << "# geometric_r:         " << setw(15) << geom_r << "    " << (rflag == 0 ? "(default)" : "") << endl;
@@ -527,6 +542,7 @@ int main(int argc, char **argv) {
         targs[i].kvstore = kvstore;
         targs[i].put_thrput = put_thrput;
         targs[i].get_thrput = get_thrput;
+        targs[i].range_get_size = range_get_size;
     }
 
     //--------------------------------------------------------------------------
@@ -698,7 +714,8 @@ void *put_routine(void *args) {
 void *get_routine(void *args) {
     struct thread_args *targs = (struct thread_args *)args;
     int      uflag = targs->uflag,
-             zipf_keys = targs->zipf_keys;
+             zipf_keys = targs->zipf_keys,
+             range_get_size = targs->range_get_size;
     uint32_t keysize = targs->keysize, keylen;
     uint32_t kseed = targs->tid;  // kseed = getpid() + time(NULL);
     char     key[MAX_KVTSIZE];
@@ -736,8 +753,11 @@ void *get_routine(void *args) {
         //--------------------------------------------------------------
         // execute range get() or point get()
         //--------------------------------------------------------------
-        scanner->point_get(key, keylen);
-//        scanner->range_get(key, keylen, NULL, 0, 10); // get at most 10 KVs
+        if (range_get_size == 1) {
+            scanner->point_get(key, keylen);
+        } else {
+            scanner->range_get(key, keylen, NULL, 0, range_get_size);
+        }
     }
 
     if (DBGLVL > 0) {
