@@ -17,9 +17,9 @@
 //==============================================================================
 const uint64_t DEFAULT_MEMSTORE_SIZE = 104857600;  // total memory used by prog
 const uint64_t MAX_FILE_SIZE = 2147483647;         // max size of disk files
-const uint32_t MAX_KVTSIZE = 1048576;              // max size for key or value
+const uint32_t MAX_KVTSIZE = 102400;               // max size for key or value
 const uint32_t MAX_INDEX_DIST = 65536;             // for VFileIndex
-const uint64_t MERGE_BUFSIZE = 4194304;            // size of IOs done for merge
+const uint64_t MERGE_BUFSIZE = 524288;             // size of IOs done for merge
 // (MERGE_BUFSIZE must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
 
 //==============================================================================

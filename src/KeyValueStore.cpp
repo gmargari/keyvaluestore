@@ -19,6 +19,7 @@
 #include "./Slice.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
 /*============================================================================
@@ -196,12 +197,15 @@ void KeyValueStore::check_parameters() {  // TODO: move elsewhere ?
     struct stat st;
 
     if (stat(ROOT_DIR, &st) != 0) {
-        cout << "Error: " << ROOT_DIR << " does not exist" << endl;
+        cerr << "Error: " << ROOT_DIR << " does not exist" << endl;
         exit(EXIT_FAILURE);
     }
 
     // need at least these bytes (e.g. to fully decode a <k,v,t> read from disk:
     // <keylen, valuelen, key, value, timestamp>)
-    assert(MERGE_BUFSIZE >=
-             (2 * sizeof(uint64_t) + 2 * MAX_KVTSIZE + sizeof(uint64_t)));
+    if (MERGE_BUFSIZE < 2*sizeof(uint64_t) + 2*MAX_KVTSIZE + sizeof(uint64_t)) {
+        cerr << "Error: MERGE_BUFSIZE must be >= "
+             << 2*sizeof(uint64_t) + 2*MAX_KVTSIZE + sizeof(uint64_t) << endl;
+        exit(EXIT_FAILURE);
+    }
 }
