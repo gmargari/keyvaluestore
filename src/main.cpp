@@ -828,6 +828,7 @@ void *get_routine(void *args) {
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys,
              range_get_size = targs->range_get_size;
+    bool     print_periodic_stats = targs->print_periodic_stats;
     uint32_t keysize = targs->keysize, keylen;
     uint32_t kseed = targs->tid;  // kseed = getpid() + time(NULL);
     char     key[MAX_KVTSIZE];
@@ -866,16 +867,22 @@ void *get_routine(void *args) {
         //--------------------------------------------------------------
         // execute range get() or point get()
         //--------------------------------------------------------------
-        gettimeofday(&start, NULL);
+        if (print_periodic_stats) {
+            gettimeofday(&start, NULL);
+        }
+
         if (range_get_size == 0) {
             scanner->point_get(key, keylen);
         } else {
             scanner->range_get(key, keylen, NULL, 0, range_get_size);
         }
-        gettimeofday(&end, NULL);
-        gets_count[targs->tid - 1]++;
-        gets_latency[targs->tid - 1] += (end.tv_sec - start.tv_sec)*1000 +
-                                        (end.tv_usec - start.tv_usec)/1000;
+
+        if (print_periodic_stats) {
+            gettimeofday(&end, NULL);
+            gets_count[targs->tid - 1]++;
+            gets_latency[targs->tid - 1] += (end.tv_sec - start.tv_sec)*1000 +
+                                            (end.tv_usec - start.tv_usec)/1000;
+        }
     }
 
     if (DBGLVL > 0) {
