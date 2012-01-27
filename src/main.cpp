@@ -555,6 +555,7 @@ int main(int argc, char **argv) {
     cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "    " << (xflag == 0 ? "(default)" : "") << endl;
     cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "    " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
+    cout << "# mergebuf_size:       " << setw(15) << MERGE_BUFSIZE << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
     print_stats_header();
