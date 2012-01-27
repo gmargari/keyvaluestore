@@ -114,11 +114,11 @@ void print_syntax(char *progname) {
     cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
     cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
     cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
-    cout << " -P, --put-throughput [VALUE]        throttle requests per sec (0: unlimited. default: " << DEFAULT_PUT_THRPUT << ")" << endl;
+    cout << " -P, --put-throughput [VALUE]        put requests per sec (0: unlimited. default: " << DEFAULT_PUT_THRPUT << ")" << endl;
     cout << endl;
     cout << "GET" << endl;
     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
-    cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0: unlimited. default: " << DEFAULT_GET_THRPUT << ")" << endl;
+    cout << " -G, --get-throughput [VALUE]        get requests per sec per thread (0: unlimited. default: " << DEFAULT_GET_THRPUT << ")" << endl;
     cout << " -R, --range-get-size [VALUE]        max number of KVs to read (0: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
     cout << " -x, --flush-page-cache              flush page cache after each compaction (default: " << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << ")" << endl;
     cout << endl;
@@ -514,48 +514,51 @@ int main(int argc, char **argv) {
     // print values of parameters
     //--------------------------------------------------------------------------
     cout << "# compaction_manager:  " << setw(15) << cmanager << endl;
-    cout << "# memory_size:         " << setw(15) << b2mb(memorysize) << " MB " << (mflag == 0 ? "(default)" : "")  << endl;
+    cout << "# memory_size:         " << setw(15) << b2mb(memorysize) << " MB    " << (mflag == 0 ? "(default)" : "")  << endl;
     if (sflag) {
-        cout << "# insert_bytes:        " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
-        cout << "# key_size:            " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
-        cout << "# value_size:          " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
-        cout << "# keys_to_insert:      " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
-        cout << "# unique_keys:         " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
-        cout << "# zipf_keys:           " << setw(15) << "?" << "    (keys and values will be read from stdin)" << endl;
+        cout << "# insert_bytes:        " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# key_size:            " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# value_size:          " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# keys_to_insert:      " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# unique_keys:         " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# zipf_keys:           " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
     } else {
-        cout << "# insert_bytes:        " << setw(15) << b2mb(insertbytes) << " MB " << (iflag == 0 ? "(default)" : "") << endl;
-        cout << "# key_size:            " << setw(15) << keysize << "    " << (kflag == 0 ? "(default)" : "") << endl;
-        cout << "# value_size:          " << setw(15) << valuesize << "    " << (vflag == 0 ? "(default)" : "") << endl;
+        cout << "# insert_bytes:        " << setw(15) << b2mb(insertbytes) << " MB    " << (iflag == 0 ? "(default)" : "") << endl;
+        cout << "# key_size:            " << setw(15) << keysize << " B     " << (kflag == 0 ? "(default)" : "") << endl;
+        cout << "# value_size:          " << setw(15) << valuesize << " B     " << (vflag == 0 ? "(default)" : "") << endl;
         cout << "# keys_to_insert:      " << setw(15) << num_keys_to_insert << endl;
-        cout << "# unique_keys:         " << setw(15) << (unique_keys ? "true" : "false") << "    " << (uflag == 0 ? "(default)" : "") << endl;
-        cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "    " << (zflag == 0 ? "(default)" : "") << endl;
+        cout << "# unique_keys:         " << setw(15) << (unique_keys ? "true" : "false") << "       " << (uflag == 0 ? "(default)" : "") << endl;
+        cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "       " << (zflag == 0 ? "(default)" : "") << endl;
     }
-    cout << "# put_throughput:      " << setw(15) << put_thrput << "    " << (Pflag == 0 ? "(default)" : "") << endl;
-    cout << "# num_get_threads:     " << setw(15) << num_get_threads << "    " << (gflag == 0 ? "(default)" : "") << endl;
-    cout << "# get_throughput:      " << setw(15) << get_thrput << "    " << (Gflag == 0 ? "(default)" : "") << endl;
-    cout << "# range_get_size:      " << setw(15) << range_get_size << "    " << (Rflag == 0 ? "(default)" : "") << endl;
+    cout << "# put_throughput:      " << setw(15) << put_thrput << " req/s " << (Pflag == 0 ? "(default)" : "") << endl;
+    cout << "# get_threads:         " << setw(15) << num_get_threads << "       " << (gflag == 0 ? "(default)" : "") << endl;
+    cout << "# get_throughput:      " << setw(15) << get_thrput << " req/s " << (Gflag == 0 ? "(default)" : "") << endl;
+    cout << "# get_type:            " << setw(15) << (range_get_size ? "range" : "point") << endl;
+    if (range_get_size) {
+        cout << "# range_get_size:      " << setw(15) << range_get_size << " keys  " << (Rflag == 0 ? "(default)" : "") << endl;
+    }
     if (strcmp(cmanager, "geometric") == 0) {
         if (pflag == 0) {
-            cout << "# geometric_r:         " << setw(15) << geom_r << "    " << (rflag == 0 ? "(default)" : "") << endl;
+            cout << "# geometric_r:         " << setw(15) << geom_r << "       " << (rflag == 0 ? "(default)" : "") << endl;
         } else {
-            cout << "# geometric_p:         " << setw(15) << geom_p << "    " << (pflag == 0 ? "(default, disabled)" : "") << endl;
+            cout << "# geometric_p:         " << setw(15) << geom_p << "       " << (pflag == 0 ? "(default, disabled)" : "") << endl;
         }
     } else if (strcmp(cmanager, "rangemerge") == 0) {
         if (blocksize == 0) {
-            cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB" << endl;
+            cout << "# rngmerge_block_size: " << setw(15) << "inf" << " MB   " << endl;
         } else {
-            cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB " << (bflag == 0 ? "(default)" : "") << endl;
+            cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB    " << (bflag == 0 ? "(default)" : "") << endl;
         }
-        cout << "# rngmerge_flushmem_size: " << setw(12) << b2mb(flushmemorysize) << " MB " << (fflag == 0 ? "(default)" : "") << endl;
+        cout << "# rngmerge_flushmem_size: " << setw(12) << b2mb(flushmemorysize) << " MB    " << (fflag == 0 ? "(default)" : "") << endl;
     }
     if (strcmp(cmanager, "cassandra") == 0) {
-        cout << "# cassandra_l:         " << setw(15) << cass_l << "    " << (lflag == 0 ? "(default)" : "") << endl;
+        cout << "# cassandra_l:         " << setw(15) << cass_l << "       " << (lflag == 0 ? "(default)" : "") << endl;
     }
-    cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
-    cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "    " << (xflag == 0 ? "(default)" : "") << endl;
-    cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "    " << (tflag == 0 ? "(default)" : "") << endl;
+    cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << "       " << (sflag == 0 ? "(default)" : "") << endl;
+    cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "       " << (xflag == 0 ? "(default)" : "") << endl;
+    cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "       " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
-    cout << "# mergebuf_size:       " << setw(15) << MERGE_BUFSIZE << endl;
+    cout << "# mergebuf_size:       " << setw(15) << MERGE_BUFSIZE << " MB" << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
     print_stats_header();
