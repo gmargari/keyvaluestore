@@ -160,7 +160,7 @@ void VFileIndex::save_to_disk(int fd) {
 void VFileIndex::load_from_disk(int fd) {
     size_t len;
     int num;
-    char key[MAX_INDEX_DIST];
+    char key[MAX_KVTSIZE];
     off_t offset;
 
     clear();
