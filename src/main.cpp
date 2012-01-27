@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <pthread.h>
 #include <getopt.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
@@ -24,6 +27,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::setw;
+using std::right;
+using std::flush;
 
 //------------------------------------------------------------------------------
 // forward declaration of functions
@@ -31,6 +36,9 @@ using std::setw;
 
 void  *put_routine(void *args);
 void  *get_routine(void *args);
+void   print_get_throughput(int signum);
+// call once to initialize. next calls return time difference from first call
+uint64_t get_cur_time();
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, uint32_t *seed);
 int    zipf_r(uint32_t *seed);
@@ -53,6 +61,8 @@ const int      DEFAULT_PUT_THRPUT =             0;  // req per sec, 0: disable
 const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
 const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
 const bool     DEFAULT_FLUSH_PCACHE =       false;
+const bool     DEFAULT_STATS_PRINT =        false;
+const int      DEFAULT_STATS_PRINT_INTERVAL =   5;  // print stats every 5 sec
 
 double zipf_alpha = 0.9;       // parameter for zipf() function
 int32_t zipf_n = 1000000;     // parameter for zipf() function
@@ -73,10 +83,14 @@ struct thread_args {
     int get_thrput;
     int range_get_size;
     bool flush_page_cache;
+    bool print_periodic_stats;
     KeyValueStore *kvstore;
 };
 
 bool put_thread_finished = false;
+uint32_t *gets_count = NULL;
+uint32_t *gets_latency = NULL;
+int gets_num_threads = 0;
 
 /*============================================================================
  *                             print_syntax
@@ -105,12 +119,13 @@ void print_syntax(char *progname) {
     cout << "GET" << endl;
     cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
     cout << " -G, --get-throughput [VALUE]        throttle requests per sec per thread (0: unlimited. default: " << DEFAULT_GET_THRPUT << ")" << endl;
-    cout << " -R, --range-get-size [VALUE]        max number of KVs to read (1: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
+    cout << " -R, --range-get-size [VALUE]        max number of KVs to read (0: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
     cout << " -x, --flush-page-cache              flush page cache after each compaction (default: " << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << ")" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
     cout << " -s, --read-kvs-from-stdin           read key-values from stdin" << endl;
+    cout << " -t, --print-periodic-stats          print stats on stderr about compactions and gets every " << DEFAULT_STATS_PRINT_INTERVAL << " sec" << endl;
     cout << " -h, --help                          print this help message and exit" << endl;
 }
 
@@ -118,7 +133,7 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:xesh";
+    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:xesth";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -140,6 +155,7 @@ int main(int argc, char **argv) {
              {"flush-page-cache",     no_argument,        0, 'x'},
              {"print-kvs-to-stdout",  no_argument,        0, 'e'},
              {"read-kvs-from-stdin",  no_argument,        0, 's'},
+             {"print-periodic-stats", no_argument,        0, 't'},
              {"help",                 no_argument,        0, 'h'},
              {0, 0, 0, 0}
     };
@@ -163,6 +179,7 @@ int main(int argc, char **argv) {
              xflag = 0,
              eflag = 0,
              sflag = 0,
+             tflag = 0,
              myopt,
              i,
              geom_r,
@@ -188,7 +205,8 @@ int main(int argc, char **argv) {
     bool     unique_keys,
              zipf_keys,
              print_kv_and_continue = false,
-             flush_page_cache;
+             flush_page_cache,
+             print_periodic_stats;
     KeyValueStore *kvstore;
     struct thread_args *targs;
     pthread_t *thread;
@@ -308,6 +326,11 @@ int main(int argc, char **argv) {
                 check_duplicate_arg_and_set(&sflag, myopt);
                 break;
 
+            case 't':
+                check_duplicate_arg_and_set(&tflag, myopt);
+                print_periodic_stats = true;
+                break;
+
             case '?':
                 exit(EXIT_FAILURE);
 
@@ -379,6 +402,10 @@ int main(int argc, char **argv) {
     if (xflag == 0) {
         flush_page_cache = DEFAULT_FLUSH_PCACHE;
     }
+    if (tflag == 0) {
+        print_periodic_stats = DEFAULT_STATS_PRINT;
+    }
+
     //--------------------------------------------------------------------------
     // check values
     //--------------------------------------------------------------------------
@@ -526,6 +553,7 @@ int main(int argc, char **argv) {
     }
     cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << endl;
     cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "    " << (xflag == 0 ? "(default)" : "") << endl;
+    cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "    " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
@@ -558,6 +586,38 @@ int main(int argc, char **argv) {
         targs[i].get_thrput = get_thrput;
         targs[i].range_get_size = range_get_size;
         targs[i].flush_page_cache = flush_page_cache;
+        targs[i].print_periodic_stats = print_periodic_stats;
+    }
+
+    //--------------------------------------------------------------------------
+    // set signal handler and timer for periodic printing of get latency/thrput
+    //--------------------------------------------------------------------------
+    if (print_periodic_stats && num_get_threads) {
+        struct itimerval timer;
+
+        gets_num_threads = num_get_threads;
+        gets_count = (uint32_t *)malloc(sizeof(uint32_t) * gets_num_threads);
+        gets_latency = (uint32_t *)malloc(sizeof(uint32_t) * gets_num_threads);
+        for (i = 0; i < gets_num_threads; i++) {
+            gets_count[i] = 0;
+            gets_latency[i] = 0;
+        }
+
+        if (signal(SIGALRM, print_get_throughput) == SIG_ERR) {
+            perror("Could not set signal handler");
+            exit(EXIT_FAILURE);
+        }
+
+        timer.it_interval.tv_sec = DEFAULT_STATS_PRINT_INTERVAL;
+        timer.it_interval.tv_usec = 0;
+        timer.it_value.tv_sec = timer.it_interval.tv_sec;
+        timer.it_value.tv_usec = timer.it_interval.tv_usec;
+        if (setitimer(ITIMER_REAL, &timer, NULL) == -1) {
+            perror("Could not set timer");
+            exit(EXIT_FAILURE);
+        }
+
+        get_cur_time(); // call once to initialize
     }
 
     //--------------------------------------------------------------------------
@@ -602,6 +662,8 @@ int main(int argc, char **argv) {
         }
     }
 
+    free(gets_count);
+    free(gets_latency);
     free(key);
     free(end_key);
     free(value);
@@ -622,7 +684,8 @@ void *put_routine(void *args) {
              zipf_keys = targs->zipf_keys,
              print_kv_and_continue = targs->print_kv_and_continue,
              compaction_occured = 0;
-    bool     flush_page_cache = targs->flush_page_cache;
+    bool     flush_page_cache = targs->flush_page_cache,
+             print_periodic_stats = targs->print_periodic_stats;
     uint64_t num_keys_to_insert = targs->num_keys_to_insert;
     uint32_t keysize = targs->keysize,
              valuesize = targs->valuesize;
@@ -634,6 +697,7 @@ void *put_routine(void *args) {
     uint32_t keylen, valuelen;
     uint64_t bytes_inserted = 0;
     RequestThrottle throttler(targs->put_thrput);
+    std::ostringstream buf;
 
     if (DBGLVL > 0) {
         cout << "# [DEBUG]   put thread started" << endl;
@@ -698,6 +762,13 @@ void *put_routine(void *args) {
         if (kvstore->memstore_will_fill(key, keylen, value, valuelen)) {
             print_stats();
             compaction_occured = 1;
+
+            if (print_periodic_stats) {
+                buf.str("");
+                buf << "[FLUSH_MEM] " << setw(9) << right << get_cur_time() << " START "
+                    << kvstore->get_num_disk_files() << endl;
+                cerr << buf.str() << flush;
+            }
         }
 
         //----------------------------------------------------------------------
@@ -713,7 +784,26 @@ void *put_routine(void *args) {
 
             // flush page cache after compaction, so next get()s will go to disk
             if (flush_page_cache) {
+                if (print_periodic_stats) {
+                    buf.str("");
+                    buf << "[DROP_CACH] " << setw(9) << right << get_cur_time() << " START" << endl;
+                    cerr << buf.str() << flush;
+                }
+
                 system("sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'");
+
+                if (print_periodic_stats) {
+                    buf.str("");
+                    buf << "[DROP_CACH] " << setw(9) << right << get_cur_time() << " END" << endl;
+                    cerr << buf.str() << flush;
+                }
+            }
+
+            if (print_periodic_stats) {
+                buf.str("");
+                buf << "[FLUSH_MEM] " << setw(9) << right << get_cur_time() << " END "
+                    << kvstore->get_num_disk_files() << endl;
+                cerr << buf.str() << flush;
             }
         }
     }
@@ -743,6 +833,7 @@ void *get_routine(void *args) {
     int      i = -1;
     Scanner *scanner = new Scanner(targs->kvstore);
     RequestThrottle throttler(targs->get_thrput);
+    struct timeval start, end;
 
     if (DBGLVL > 0) {
         cout << "# [DEBUG]   get thread " << targs->tid << " started" << endl;
@@ -774,11 +865,16 @@ void *get_routine(void *args) {
         //--------------------------------------------------------------
         // execute range get() or point get()
         //--------------------------------------------------------------
-        if (range_get_size == 1) {
+        gettimeofday(&start, NULL);
+        if (range_get_size == 0) {
             scanner->point_get(key, keylen);
         } else {
             scanner->range_get(key, keylen, NULL, 0, range_get_size);
         }
+        gettimeofday(&end, NULL);
+        gets_count[targs->tid - 1]++;
+        gets_latency[targs->tid - 1] += (end.tv_sec - start.tv_sec)*1000 +
+                                        (end.tv_usec - start.tv_usec)/1000;
     }
 
     if (DBGLVL > 0) {
@@ -789,6 +885,74 @@ void *get_routine(void *args) {
     pthread_exit(NULL);
 }
 
+/*============================================================================
+ *                        print_get_throughput
+ *============================================================================*/
+void print_get_throughput(int signum) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static uint64_t gets_count_old = 0, gets_latency_old = 0, old_time = 0;
+    uint64_t gets_count_cur, gets_latency_cur, cur_time;
+    float sec_lapsed;
+    std::ostringstream buf;
+
+    // needed in some architectures
+    if (signal(SIGALRM, print_get_throughput) == SIG_ERR) {
+        perror("Could not set signal handler");
+        exit(EXIT_FAILURE);
+    }
+
+    // if mutex locked, signal was caught while last signal handling is not
+    // completed: return immediately (we'll catch next signal)
+    if (pthread_mutex_trylock(&mutex) != 0) {
+        return;
+    }
+
+    gets_count_cur = 0;
+    gets_latency_cur = 0;
+    for (int i = 0; i < gets_num_threads; i++) {
+        gets_count_cur += gets_count[i];
+        gets_latency_cur += gets_latency[i];
+    }
+
+    gets_count_cur -= gets_count_old;
+    gets_latency_cur -= gets_latency_old;
+
+    cur_time = get_cur_time();
+    if (old_time == 0) {
+        sec_lapsed = DEFAULT_STATS_PRINT_INTERVAL;
+    } else {
+        sec_lapsed = (cur_time - old_time) / 1000.0;
+    }
+    old_time = cur_time;
+
+    buf.str("");
+    buf << "[GET_STATS] " << setw(9) << right << cur_time << " "
+        << sec_lapsed << " " << gets_count_cur << " " << gets_latency_cur << endl;
+    cerr << buf.str() << flush;
+
+    gets_count_old += gets_count_cur;
+    gets_latency_old += gets_latency_cur;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+/*============================================================================
+ *                            get_cur_time
+ *============================================================================*/
+uint64_t get_cur_time() {
+    static struct timeval start;
+    struct timeval now;
+    static int first_time = 1;
+
+    if (first_time) {
+        first_time = 0;
+        gettimeofday(&start, NULL);
+        return 0;
+    }
+
+    gettimeofday(&now, NULL);
+    return (now.tv_sec - start.tv_sec)*1000 + (now.tv_usec - start.tv_usec)/1000;
+}
 
 /*============================================================================
  *                              randstr_r
