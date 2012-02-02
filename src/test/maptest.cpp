@@ -71,9 +71,9 @@ int main() {
 
     srand(tv.tv_usec);
 
-    key = (char *)malloc(MAX_KVTSIZE);
-    value = (char *)malloc(MAX_KVTSIZE);
-    prev_key = (char *)malloc(MAX_KVTSIZE);
+    key = (char *)malloc(MAX_KEY_SIZE + 1);
+    value = (char *)malloc(MAX_VALUE_SIZE + 1);
+    prev_key = (char *)malloc(MAX_KEY_SIZE + 1);
 
     for (int i = 0; i < num_keys; i++) {
         uint32_t keylen = rand() % maxkeysize + 1,
@@ -89,7 +89,7 @@ int main() {
     file1 = new DiskFile();
     file1->open_new_unique();
     istream = new MapInputStream(map);
-    ostream1 = new DiskFileOutputStream(file1, MERGE_BUFSIZE);
+    ostream1 = new DiskFileOutputStream(file1, MERGEBUF_SIZE);
     prev_key[0] = '\0';
     while (istream->read(&k1, &v1, &timestamp)) {
         assert(strcmp(k1.data(), prev_key) != 0);
@@ -116,9 +116,9 @@ int main() {
     // create 4 distinct subranges of keys, create a stream for each, and
     // then create a priority stream with all 4 streams
     //========================================================
-    key1 = (char *)malloc(MAX_KVTSIZE);
-    key2 = (char *)malloc(MAX_KVTSIZE);
-    key3 = (char *)malloc(MAX_KVTSIZE);
+    key1 = (char *)malloc(MAX_KEY_SIZE + 1);
+    key2 = (char *)malloc(MAX_KEY_SIZE + 1);
+    key3 = (char *)malloc(MAX_KEY_SIZE + 1);
     memcpy(key1, "fff", 4);
     memcpy(key2, "mmm", 4);
     memcpy(key3, "ttt", 4);
@@ -143,7 +143,7 @@ int main() {
     //========================================================
     file2 = new DiskFile();
     file2->open_new_unique();
-    ostream2 = new DiskFileOutputStream(file2, MERGE_BUFSIZE);
+    ostream2 = new DiskFileOutputStream(file2, MERGEBUF_SIZE);
     pistream = new PriorityInputStream(istreams);
     prev_key[0] = '\0';
     while (pistream->read(&k1, &v1, &timestamp)) {
@@ -160,7 +160,7 @@ int main() {
     //========================================================
     // check that the two files have identical contents
     //========================================================
-    value1 = (char *)malloc(MAX_KVTSIZE);
+    value1 = (char *)malloc(MAX_VALUE_SIZE + 1);
     dfistream1 = new DiskFileInputStream(file1);
     dfistream2 = new DiskFileInputStream(file2);
     num = 0;

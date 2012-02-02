@@ -23,7 +23,7 @@ class NomergeCompactionManager: public CompactionManager {
 };
 
 /*============================================================================
- *                               flush_memstore
+ *                                flush_bytes
  *============================================================================*/
 void NomergeCompactionManager::flush_bytes() {
     DiskFile *dfile;

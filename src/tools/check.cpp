@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 
     global_stats_init(); // avoid assertion error...
 
-    prev_key = (char *)malloc(MAX_KVTSIZE);
+    prev_key = (char *)malloc(MAX_KEY_SIZE + 1);
     prev_key[0] = '\0';
     diskfile = new DiskFile();
     diskfile->open_existing(argv[1]);

@@ -125,7 +125,7 @@ class MemStore {
     int sanity_check();
 
     typedef struct {
-        char key[MAX_KVTSIZE];
+        char key[MAX_KEY_SIZE + 1];
         Map *map;
     } StrMapPair;
 

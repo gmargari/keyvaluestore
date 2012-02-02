@@ -12,7 +12,7 @@ using std::vector;
 
 int main(int argc, char **argv) {
     Slice key, value;
-    char prev_key[MAX_KVTSIZE];
+    char prev_key[MAX_KEY_SIZE + 1];
     vector<DiskFile *> diskfiles;
     vector<InputStream *> istreams;
     PriorityInputStream *pistream;

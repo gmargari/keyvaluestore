@@ -35,7 +35,7 @@ void Streams::copy_stream_unique_keys(InputStream *istream,
                                       OutputStream *ostream) {
     Slice key, value;
     uint64_t timestamp;
-    char prev_key[MAX_KVTSIZE];
+    char prev_key[MAX_KEY_SIZE + 1];
 
     time_start(&(g_stats.merge_time));
 
@@ -70,7 +70,7 @@ void Streams::merge_streams(vector<InputStream *> istreams,
                             DiskFile *diskfile) {
     DiskFileOutputStream *ostream;
 
-    ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+    ostream = new DiskFileOutputStream(diskfile, MERGEBUF_SIZE);
     merge_streams(istreams, ostream);
     delete ostream;
 }
@@ -98,14 +98,14 @@ int Streams::merge_streams(vector<InputStream *> istreams,
     PriorityInputStream *pistream;
     DiskFileOutputStream *ostream;
     Slice key, value;
-    char prev_key[MAX_KVTSIZE];
+    char prev_key[MAX_KEY_SIZE + 1];
     uint64_t timestamp, filesize;
     uint32_t len;
     int num_newfiles;
 
     diskfile = new DiskFile;
     diskfile->open_new_unique();
-    ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+    ostream = new DiskFileOutputStream(diskfile, MERGEBUF_SIZE);
 
     pistream = new PriorityInputStream(istreams);
 
@@ -117,8 +117,8 @@ int Streams::merge_streams(vector<InputStream *> istreams,
 
     while (pistream->read(&key, &value, &timestamp)) {
         if (strcmp(prev_key, key.data()) != 0) {
-            // if we appending current tuple to file will lead to file size
-            // > 'max_file_size', crete a new file for remaining tuples
+            // if appending current tuple to file will lead to file size >
+            // 'max_file_size', create a new file for remaining tuples
             len = Buffer::serialize_len(key.size(), value.size(), timestamp);
             if (filesize + len > max_file_size) {
                 ostream->close();
@@ -128,7 +128,7 @@ int Streams::merge_streams(vector<InputStream *> istreams,
                 diskfile = new DiskFile;
                 diskfile->open_new_unique();
                 delete ostream;
-                ostream = new DiskFileOutputStream(diskfile, MERGE_BUFSIZE);
+                ostream = new DiskFileOutputStream(diskfile, MERGEBUF_SIZE);
                 filesize = 0;
             }
 

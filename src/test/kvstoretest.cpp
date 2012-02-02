@@ -66,8 +66,8 @@ int main() {
     cout << "max key size:    " << setw(12) << right << MAX_KEY_SIZE << endl;
     cout << "max value size:  " << setw(12) << right << MAX_VALUE_SIZE << endl;
 
-    key = (char *)malloc(MAX_KVTSIZE);
-    value = (char *)malloc(MAX_KVTSIZE);
+    key = (char *)malloc(MAX_KEY_SIZE + 1);
+    value = (char *)malloc(MAX_VALUE_SIZE + 1);
 
     //================================================================
     // insert values

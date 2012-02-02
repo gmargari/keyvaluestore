@@ -15,7 +15,7 @@
 DiskFileInputStream::DiskFileInputStream(DiskFile *file)
     : m_diskfile(file), m_offs(0), m_buf(NULL), m_start_key(), m_end_key(),
       m_start_incl(true), m_end_incl(true) {
-    m_buf = new Buffer(MERGE_BUFSIZE);
+    m_buf = new Buffer(MERGEBUF_SIZE);
     set_key_range(Slice(NULL, 0), Slice(NULL, 0));
 }
 

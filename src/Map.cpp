@@ -5,11 +5,14 @@
 
 #include <assert.h>
 #include <utility>
+#include <iostream>
 
 #include "./Buffer.h"
 #include "./Statistics.h"
 
 using std::make_pair;
+using std::cerr;
+using std::endl;
 
 /*============================================================================
  *                                    Map
@@ -43,10 +46,10 @@ bool Map::put(Slice Key, Slice Value, uint64_t timestamp) {
     assert(key);
     assert(value);
 
-    if (keylen + 1 > MAX_KVTSIZE || valuelen + 1 > MAX_KVTSIZE) {
-        printf("Error: key or value size greater than max size allowed (%ld)\n",
-                 MAX_KVTSIZE);
-        assert(0);
+    if (keylen > MAX_KEY_SIZE || valuelen > MAX_VALUE_SIZE) {
+        cerr << "Error: key or value size greater than max size allowed, " <<
+          MAX_KEY_SIZE << " and " << MAX_VALUE_SIZE << " respectively" << endl;
+        exit(0);
         return false;
     }
 
@@ -253,8 +256,8 @@ int Map::sanity_check() {
         map_size += keylen + 1 + sizeof(KVTPair) + valuelen + 1;
         map_size_serialized += Buffer::serialize_len(keylen, valuelen,
                                                      timestamp);
-        assert(keylen + 1 <= MAX_KVTSIZE);
-        assert(valuelen + 1 <= MAX_KVTSIZE);
+        assert(keylen <= MAX_KEY_SIZE);
+        assert(valuelen <= MAX_VALUE_SIZE);
         assert(timestamp != 0);
     }
     assert(m_size == map_size);

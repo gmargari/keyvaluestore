@@ -35,7 +35,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile() {
     // write memstore to a new file on disk
     disk_file = new DiskFile();
     disk_file->open_new_unique();
-    disk_ostream = new DiskFileOutputStream(disk_file, MERGE_BUFSIZE);
+    disk_ostream = new DiskFileOutputStream(disk_file, MERGEBUF_SIZE);
     map_istream = m_memstore->new_map_inputstream();
     // no need to use copy_stream_unique_keys() since map keys are unique
     Streams::copy_stream(map_istream, disk_ostream);

@@ -15,12 +15,28 @@
 //==============================================================================
 // default values
 //==============================================================================
-const uint64_t DEFAULT_MEMSTORE_SIZE = 104857600;  // total memory used by prog
-const uint64_t MAX_FILE_SIZE = 2147483647;         // max size of disk files
-const uint32_t MAX_KVTSIZE = 102400;               // max size for key or value
-const uint32_t MAX_INDEX_DIST = 65536;             // for VFileIndex
-const uint64_t MERGE_BUFSIZE = 524288;             // size of IOs done for merge
-// (MERGE_BUFSIZE must be at least 2*MAX_KVTSIZE + 2*sizeof(uint64_t))
+// size of memstore
+const uint64_t DEFAULT_MEMSTORE_SIZE = 104857600;
+
+// max size of each disk file created (limit probably imposed by file system)
+const uint64_t MAX_FILE_SIZE = 2147483647;
+
+// max size for key or value
+const uint32_t MAX_KEY_SIZE = 1024;
+const uint32_t MAX_VALUE_SIZE = 102400;
+
+// I/O operations from/to disk for compactions are done in units of this size.
+// 'MERGEBUF_SIZE' must be at least:
+//   2 * sizeof(uint64_t) + MAX_KEY_SIZE + MAX_VALUE_SIZE + sizeof(uint64_t)
+// (e.g. to be able read from disk a KV: <klen, vlen, key, value, timestamp>)
+const uint64_t MERGEBUF_SIZE = 524288;
+
+// chunk size: keep in memory the key that appears every 'CHUNK_SIZE' bytes on
+// disk files, along with the exact offset it appears.
+// reads from disk for get() operations are done in units of chunks.
+// decreasing this means we read less bytes for each get(), but increases the
+// size of the in-memory chunk index (BigTable, HBase and Hypertable use 64KB)
+const uint32_t CHUNK_SIZE = 65536;
 
 //==============================================================================
 // compaction managers' default values

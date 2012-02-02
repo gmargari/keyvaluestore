@@ -160,7 +160,7 @@ void VFileIndex::save_to_disk(int fd) {
 void VFileIndex::load_from_disk(int fd) {
     size_t len;
     int num;
-    char key[MAX_KVTSIZE];
+    char key[MAX_KEY_SIZE + 1];
     off_t offset;
 
     clear();
@@ -195,7 +195,7 @@ int VFileIndex::sanity_check() {
     for (iter = m_map.begin(); iter != m_map.end(); ++iter) {
         assert(prev_key == NULL || strcmp(iter->first, prev_key) > 0);
         assert(prev_offs == -1  || iter->second > prev_offs);
-        assert(prev_offs != -1  || iter->second - prev_offs <= MAX_INDEX_DIST);
+        assert(prev_offs != -1  || iter->second - prev_offs <= CHUNK_SIZE);
         prev_key = iter->first;
         prev_offs = iter->second;
     }

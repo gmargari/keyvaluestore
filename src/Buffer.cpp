@@ -102,8 +102,8 @@ bool Buffer::serialize(Slice key, Slice value, uint64_t timestamp,
     uint32_t keylen = key.size(), valuelen = value.size();
 
     assert(key.data() && value.data());
-    assert(keylen <= MAX_KVTSIZE);
-    assert(valuelen <= MAX_KVTSIZE);
+    assert(keylen <= MAX_KEY_SIZE);
+    assert(valuelen <= MAX_VALUE_SIZE);
     if (DBGLVL > 1) {
         assert(slice_is_alnum(key));
         assert(slice_is_alnum(value));
@@ -193,8 +193,8 @@ bool Buffer::deserialize(Slice *key, Slice *value, uint64_t *timestamp,
 
     assert(key->data());
     assert(value->data());
-    assert(key->size() <= MAX_KVTSIZE);
-    assert(value->size() <= MAX_KVTSIZE);
+    assert(key->size() <= MAX_KEY_SIZE);
+    assert(value->size() <= MAX_VALUE_SIZE);
     assert(key->data() + key->size() < ptr + buflen);
     assert(key->data()[key->size()] == '\0');
     assert(value->data() + value->size() < ptr + buflen);

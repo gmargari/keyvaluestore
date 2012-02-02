@@ -195,6 +195,7 @@ uint64_t KeyValueStore::get_timestamp() {
  *============================================================================*/
 void KeyValueStore::check_parameters() {  // TODO: move elsewhere ?
     struct stat st;
+    uint64_t maxsize;
 
     if (stat(ROOT_DIR, &st) != 0) {
         cerr << "Error: " << ROOT_DIR << " does not exist" << endl;
@@ -203,9 +204,10 @@ void KeyValueStore::check_parameters() {  // TODO: move elsewhere ?
 
     // need at least these bytes (e.g. to fully decode a <k,v,t> read from disk:
     // <keylen, valuelen, key, value, timestamp>)
-    if (MERGE_BUFSIZE < 2*sizeof(uint64_t) + 2*MAX_KVTSIZE + sizeof(uint64_t)) {
-        cerr << "Error: MERGE_BUFSIZE must be >= "
-             << 2*sizeof(uint64_t) + 2*MAX_KVTSIZE + sizeof(uint64_t) << endl;
+    maxsize = 2 * sizeof(uint64_t) + MAX_KEY_SIZE + MAX_VALUE_SIZE
+                + sizeof(uint64_t);
+    if (MERGEBUF_SIZE < maxsize) {
+        cerr << "Error: MERGEBUF_SIZE must be >= " << maxsize << endl;
         exit(EXIT_FAILURE);
     }
 }

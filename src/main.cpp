@@ -429,12 +429,12 @@ int main(int argc, char **argv) {
         cerr << "Error: flush memory size cannot be greater than memory size" << endl;
         exit(EXIT_FAILURE);
     }
-    if (kflag && keysize > MAX_KVTSIZE) {
-        cerr << "Error: 'keysize' cannot be bigger than " << MAX_KVTSIZE << endl;
+    if (kflag && keysize > MAX_KEY_SIZE) {
+        cerr << "Error: 'keysize' cannot be bigger than " << MAX_KEY_SIZE << endl;
         exit(EXIT_FAILURE);
     }
-    if (vflag && valuesize > MAX_KVTSIZE) {
-        cerr << "Error: 'valuesize' cannot be bigger than " << MAX_KVTSIZE << endl;
+    if (vflag && valuesize > MAX_VALUE_SIZE) {
+        cerr << "Error: 'valuesize' cannot be bigger than " << MAX_VALUE_SIZE << endl;
         exit(EXIT_FAILURE);
     }
     if (nflag && iflag) {
@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
     cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "       " << (xflag == 0 ? "(default)" : "") << endl;
     cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "       " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
-    cout << "# mergebuf_size:       " << setw(15) << MERGE_BUFSIZE << " MB" << endl;
+    cout << "# mergebuf_size:       " << setw(15) << MERGEBUF_SIZE << " MB" << endl;
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
     print_stats_header();
@@ -567,9 +567,9 @@ int main(int argc, char **argv) {
     // initialize variables
     //--------------------------------------------------------------------------
     kvstore->set_memstore_maxsize(memorysize);
-    key = (char *)malloc(MAX_KVTSIZE);
-    end_key = (char *)malloc(MAX_KVTSIZE);
-    value = (char *)malloc(MAX_KVTSIZE);
+    key = (char *)malloc(MAX_KEY_SIZE + 1);
+    end_key = (char *)malloc(MAX_KEY_SIZE + 1);
+    value = (char *)malloc(MAX_VALUE_SIZE + 1);
 
     //--------------------------------------------------------------------------
     // fill-in arguments of put thread and get threads
@@ -707,8 +707,8 @@ void *put_routine(void *args) {
         cout << "# [DEBUG]   put thread started" << endl;
     }
 
-    key = (char *)malloc(MAX_KVTSIZE);
-    value = (char *)malloc(MAX_KVTSIZE);
+    key = (char *)malloc(MAX_KEY_SIZE + 1);
+    value = (char *)malloc(MAX_VALUE_SIZE + 1);
 
     // if we read keys and values from stdin set num_keys_to_insert to infinity
     if (sflag) {
@@ -834,7 +834,7 @@ void *get_routine(void *args) {
     bool     print_periodic_stats = targs->print_periodic_stats;
     uint32_t keysize = targs->keysize, keylen;
     uint32_t kseed = targs->tid;  // kseed = getpid() + time(NULL);
-    char     key[MAX_KVTSIZE];
+    char     key[MAX_KEY_SIZE + 1];
     int      i = -1;
     Scanner *scanner = new Scanner(targs->kvstore);
     RequestThrottle throttler(targs->get_thrput);
@@ -988,7 +988,7 @@ void randstr_r(char *s, const int len, uint32_t *seed) {
 void zipfstr_r(char *s, const int len, uint32_t *seed) {
     int num_digits = log10(zipf_n) + 1;
     int zipf_num;
-    char key_prefix[MAX_KVTSIZE];
+    char key_prefix[MAX_KEY_SIZE + 1];
     static bool first = true;
     uint32_t kseed = 0;  // kseed = getpid() + time(NULL);
 

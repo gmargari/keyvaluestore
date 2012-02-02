@@ -25,7 +25,7 @@ void randstr(char *s, const int len) {
 
 int main() {
     VFileIndex index;
-    char key[MAX_KVTSIZE];
+    char key[MAX_KEY_SIZE + 1];
     off_t off1, off2;
 #if DBGLVL > 0
     off_t off3, off4;

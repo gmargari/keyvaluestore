@@ -16,8 +16,8 @@ DiskFileOutputStream::DiskFileOutputStream(DiskFile *file)
     : m_file(file), m_file_size(0), m_buf(NULL), m_index(NULL),
       m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1),
       m_stored_keys(0) {
-    m_buf = new Buffer(MERGE_BUFSIZE);
-    m_last_key = (char *)malloc(MAX_KVTSIZE);
+    m_buf = new Buffer(MERGEBUF_SIZE);
+    m_last_key = (char *)malloc(MAX_KEY_SIZE + 1);
     m_index = new VFileIndex();
 }
 
@@ -29,7 +29,7 @@ DiskFileOutputStream::DiskFileOutputStream(DiskFile *file, uint32_t bufsize)
       m_last_key(NULL), m_last_keylen(0), m_last_offs(-1), m_last_idx_offs(-1),
       m_stored_keys(0) {
     m_buf = new Buffer(bufsize);
-    m_last_key = (char *)malloc(MAX_KVTSIZE);
+    m_last_key = (char *)malloc(MAX_KEY_SIZE + 1);
     m_index = new VFileIndex();
 }
 
@@ -60,7 +60,7 @@ bool DiskFileOutputStream::append(Slice key, Slice value, uint64_t timestamp) {
         // if needed, add entry to index
         cur_offs = m_file_size;
         if (m_last_idx_offs == -1 ||
-              cur_offs + len - m_last_idx_offs > MAX_INDEX_DIST) {
+              cur_offs + len - m_last_idx_offs > CHUNK_SIZE) {
             m_index->add(key, cur_offs);
             m_last_idx_offs = cur_offs;
         }

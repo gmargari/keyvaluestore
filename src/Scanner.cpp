@@ -50,7 +50,7 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     diskfiles = diskstore->get_num_disk_files();
     for (int i = 0; i < diskfiles; i++) {
         DiskFile *dfile = diskstore->get_diskfile(i);
-        disk_istream = new DiskFileInputStream(dfile, MAX_INDEX_DIST);
+        disk_istream = new DiskFileInputStream(dfile, CHUNK_SIZE);
         disk_istream->set_key_range(key, key, true, true);
         if (disk_istream->read(&k, &v, &t)) {
             diskstore->read_unlock();
@@ -84,7 +84,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     diskfiles = diskstore->get_num_disk_files();
     for (int i = 0; i < diskfiles; i++) {
         DiskFile *dfile = diskstore->get_diskfile(i);
-        istreams.push_back(new DiskFileInputStream(dfile, MAX_INDEX_DIST));
+        istreams.push_back(new DiskFileInputStream(dfile, CHUNK_SIZE));
     }
     // NOTE: don't read from memstore, it's not thread safe for concurrent puts
     //       and gets
