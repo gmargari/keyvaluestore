@@ -103,7 +103,6 @@ void print_syntax(char *progname) {
     cout << " -r, --geometric-r [VALUE]           R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
     cout << " -p, --geometric-p [VALUE]           P parameter (default: disabled)" << endl;
     cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNG_BLOCKSIZE) << ")" << endl;
-    cout << " -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)" << endl;
     cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
     cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
     cout << endl;
@@ -133,13 +132,12 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:f:l:m:i:n:k:v:uzP:g:G:R:xesth";
+    const char short_args[] = "c:r:p:b:l:m:i:n:k:v:uzP:g:G:R:xesth";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
              {"geometric-p",          required_argument,  0, 'p'},
              {"rangemerge-blocksize", required_argument,  0, 'b'},
-             {"rangemerge-flushmem",  required_argument,  0, 'f'},
              {"cassandra-l",          required_argument,  0, 'l'},
              {"memory-size",          required_argument,  0, 'm'},
              {"insert-bytes",         required_argument,  0, 'i'},
@@ -163,7 +161,6 @@ int main(int argc, char **argv) {
              rflag = 0,
              pflag = 0,
              bflag = 0,
-             fflag = 0,
              lflag = 0,
              mflag = 0,
              iflag = 0,
@@ -192,7 +189,6 @@ int main(int argc, char **argv) {
              get_thrput,
              range_get_size;
     uint64_t blocksize,
-             flushmemorysize,
              memorysize,
              insertbytes,
              num_keys_to_insert;
@@ -245,11 +241,6 @@ int main(int argc, char **argv) {
             case 'b':
                 check_duplicate_arg_and_set(&bflag, myopt);
                 blocksize = mb2b(atoll(optarg));
-                break;
-
-            case 'f':
-                check_duplicate_arg_and_set(&fflag, myopt);
-                flushmemorysize = mb2b(atoll(optarg));
                 break;
 
             case 'l':
@@ -356,9 +347,6 @@ int main(int argc, char **argv) {
     if (bflag == 0) {
         blocksize = DEFAULT_RNG_BLOCKSIZE;
     }
-    if (fflag == 0) {
-        flushmemorysize = DEFAULT_RNG_FLUSHMEMSIZE;
-    }
     if (lflag == 0) {
         cass_l = DEFAULT_CASS_K;
     }
@@ -423,10 +411,6 @@ int main(int argc, char **argv) {
     }
     if (rflag && pflag && strcmp(cmanager, "geometric") == 0) {
         cerr << "Error: you cannot set both 'r' and 'p' parameters" << endl;
-        exit(EXIT_FAILURE);
-    }
-    if (fflag && flushmemorysize > memorysize) {
-        cerr << "Error: flush memory size cannot be greater than memory size" << endl;
         exit(EXIT_FAILURE);
     }
     if (kflag && keysize > MAX_KEY_SIZE) {
@@ -495,9 +479,6 @@ int main(int argc, char **argv) {
         if (bflag) {
             ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
         }
-        if (fflag) {
-            ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_flushmem(flushmemorysize);
-        }
     }
     // Cassandra compaction manager
     else if (strcmp(cmanager, "cassandra") == 0) {
@@ -549,7 +530,6 @@ int main(int argc, char **argv) {
         } else {
             cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB    " << (bflag == 0 ? "(default)" : "") << endl;
         }
-        cout << "# rngmerge_flushmem_size: " << setw(12) << b2mb(flushmemorysize) << " MB    " << (fflag == 0 ? "(default)" : "") << endl;
     }
     if (strcmp(cmanager, "cassandra") == 0) {
         cout << "# cassandra_l:         " << setw(15) << cass_l << "       " << (lflag == 0 ? "(default)" : "") << endl;

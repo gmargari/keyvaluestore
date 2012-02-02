@@ -31,12 +31,6 @@ class RangemergeCompactionManager: public CompactionManager {
     void     set_blocksize(uint64_t blocksize);
     uint64_t get_blocksize();
 
-    /**
-     * set/get the size of memory flushed each time memory gets full
-     */
-    void     set_flushmem(uint64_t flushmem);
-    uint64_t get_flushmem();
-
     // inherited from CompactionManager (see CompactionManager.h for info)
     void flush_bytes();
 
@@ -63,7 +57,6 @@ class RangemergeCompactionManager: public CompactionManager {
     int sanity_check();
 
     uint64_t m_blocksize;
-    uint64_t m_flushmem;
 };
 
 #endif  // SRC_RANGEMERGECOMPACTIONMANAGER_H_

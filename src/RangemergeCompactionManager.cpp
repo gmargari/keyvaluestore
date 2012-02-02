@@ -28,7 +28,7 @@ using std::min;
 RangemergeCompactionManager::RangemergeCompactionManager(MemStore *memstore,
                                                          DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
-      m_blocksize(DEFAULT_RNG_BLOCKSIZE), m_flushmem(DEFAULT_RNG_FLUSHMEMSIZE) {
+      m_blocksize(DEFAULT_RNG_BLOCKSIZE) {
     load_state_from_disk();
     add_maps_to_memstore();
 }
@@ -61,20 +61,6 @@ uint64_t RangemergeCompactionManager::get_blocksize() {
 }
 
 /*============================================================================
- *                               set_flushmem
- *============================================================================*/
-void RangemergeCompactionManager::set_flushmem(uint64_t flushmem) {
-    m_flushmem = flushmem;
-}
-
-/*============================================================================
- *                               get_flushmem
- *============================================================================*/
-uint64_t RangemergeCompactionManager::get_flushmem() {
-    return m_flushmem;
-}
-
-/*============================================================================
  *                               flush_bytes
  *============================================================================*/
 void RangemergeCompactionManager::flush_bytes() {
@@ -83,8 +69,7 @@ void RangemergeCompactionManager::flush_bytes() {
     vector<InputStream *> istreams;
     vector<Range *> ranges;
     Range *rng;
-    uint64_t bytes_flushed, memstore_size, memstore_maxsize;
-    int i, cur_rng, newfiles;
+    int i, newfiles;
 #if DBGLVL > 0
     uint64_t dbg_memsize, dbg_memsize_serial;
 #endif
@@ -102,15 +87,10 @@ void RangemergeCompactionManager::flush_bytes() {
     sort(ranges.begin(), ranges.end(), Range::cmp_by_memsize);
 
     //--------------------------------------------------------------------------
-    // flush 'm_flushmem' bytes
+    // flush biggest range
     //--------------------------------------------------------------------------
-    cur_rng = 0;
-    bytes_flushed = 0;
-    memstore_size = m_memstore->get_size();
-    memstore_maxsize = m_memstore->get_maxsize();
-    do {
-        assert(cur_rng < (int)ranges.size());
-        rng = ranges[cur_rng];
+    {
+        rng = ranges[0];
 
         // get istream with all memory tuples that belong to current range
         map_istream = m_memstore->new_map_inputstream(rng->m_first);
@@ -161,24 +141,14 @@ void RangemergeCompactionManager::flush_bytes() {
         assert(dbg_memsize - rng->m_memsize == m_memstore->get_size());
         assert(dbg_memsize_serial - rng->m_memsize_serialized
                  == m_memstore->get_size_when_serialized());
-
-        bytes_flushed += rng->m_memsize;
-        cur_rng++;
-
-    // flush ranges until memory size drops below 'memstore_maxsize - flushmem'
-    } while (memstore_size - bytes_flushed > memstore_maxsize - m_flushmem);
+    }
 
     //--------------------------------------------------------------------------
     // delete old files from disk and remove them from diskstore
     //--------------------------------------------------------------------------
-    // we flushed to disk the first 'cur_rng' ranges. in order to avoid problems
-    // with file deletion, sort first 'cur_rng' ranges by 'file_num' and delete
-    // files from last to first (note: we store each block in a separate disk
-    // file. 'file_num' is the index of file in DiskStore's files vector)
-    sort(ranges.begin(), ranges.begin() + cur_rng, Range::cmp_by_file_num);
     m_diskstore->write_lock();
-    for (i = cur_rng - 1; i >= 0; i--) {
-        int filenum = ranges[i]->m_file_num;
+    {
+        int filenum = ranges[0]->m_file_num;
         if (filenum != NO_DISK_FILE) {
             m_diskstore->get_diskfile(filenum)->delete_from_disk();
             m_diskstore->rm_diskfile(filenum);
@@ -269,7 +239,6 @@ bool RangemergeCompactionManager::save_state_to_disk() {
 
     fprintf(fp, "cmmanager: %s\n", "rangemerge");
     fprintf(fp, "blocksize: %Ld\n", m_blocksize);
-    fprintf(fp, "flushmem: %Ld\n", m_flushmem);
     fclose(fp);
 
     return true;
@@ -292,7 +261,6 @@ bool RangemergeCompactionManager::load_state_from_disk() {
             exit(EXIT_FAILURE);
         }
         fscanf(fp, "blocksize: %Ld\n", &m_blocksize);
-        fscanf(fp, "flushmem: %Ld\n", &m_flushmem);
         fclose(fp);
 
         return true;

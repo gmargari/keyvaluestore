@@ -44,7 +44,6 @@ const uint32_t CHUNK_SIZE = 65536;
 const int      DEFAULT_GEOM_R = 3;
 const int      DEFAULT_GEOM_P = 0;
 const uint64_t DEFAULT_RNG_BLOCKSIZE = 268435456;
-const uint64_t DEFAULT_RNG_FLUSHMEMSIZE = 0;      // 0: flush biggest range only
 const int      DEFAULT_CASS_K = 4;
 
 //==============================================================================
