@@ -57,7 +57,7 @@ void CassandraCompactionManager::flush_bytes() {
     assert(sanity_check());
 
     //--------------------------------------------------------------------------
-    // 1) check if we need to perform compactions before flushing memstore
+    // check if we need to perform compactions before flushing memstore
     //--------------------------------------------------------------------------
     for (merge_level = 0; merge_level < m_level_files.size(); merge_level++) {
         if (m_level_files[merge_level] < m_L) {
@@ -66,7 +66,7 @@ void CassandraCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 2) perform a cascade of compactions, if neccessary
+    // perform a cascade of compactions, if neccessary
     //--------------------------------------------------------------------------
     // if merge_lvl != 0, then for each level L from 0 to 'merge_lvl-1' we need
     // to merge its files, producing a new file at level L+1
@@ -106,7 +106,7 @@ void CassandraCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 3) flush memstore to disk, at level 0
+    // flush memstore to disk, at level 0
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
     memstore_clear();

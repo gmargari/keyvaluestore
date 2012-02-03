@@ -163,7 +163,6 @@ bool KeyValueStore::memstore_will_fill(const char *key, uint32_t keylen,
     return memstore_will_fill(key, keylen, value, valuelen, 0);
 }
 
-
 /*============================================================================
  *                                flush_bytes
  *============================================================================*/

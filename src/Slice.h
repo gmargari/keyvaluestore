@@ -79,9 +79,6 @@ class Slice {
   const char* data_;
   size_t size_;
 
-  // Compute a hash for this slice at construction to speed up comparisons
-  unsigned long hash(unsigned char *str);
-
   // Intentionally copyable
 };
 

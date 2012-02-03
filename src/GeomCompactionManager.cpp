@@ -111,7 +111,7 @@ int GeomCompactionManager::compute_current_R() {
     int size_of_bytes_inserted = 0;
 
     size_of_bytes_inserted = 1;  // 1 for memstore that will be flushed to disk
-    for (uint i = 0; i < m_partition_size.size(); i++) {
+    for (int i = 0; i < (int)m_partition_size.size(); i++) {
         size_of_bytes_inserted += m_partition_size[i];
     }
     return (int)ceil( pow(size_of_bytes_inserted, 1.0 / m_P) );
@@ -133,8 +133,8 @@ void GeomCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 1) select disk files to merge with memstore, add their input streams
-    //    to vector of streams to merge
+    // select disk files to merge with memstore, add their input streams
+    // to vector of streams to merge
     //--------------------------------------------------------------------------
     // merge the memstore with the sub-index in the first partition.
     // if the merged sub-index is greater than the max size of the partition,
@@ -142,7 +142,6 @@ void GeomCompactionManager::flush_bytes() {
     // sub-index fits within a partition (we may need to create a new partition
     // that will store the sub-index, if new sub-index doesn't fit in any
     // existing partition)
-    //--------------------------------------------------------------------------
     count = 0;
     size = 1;  // 1 for memstore
     for (unsigned int i = 0; i < m_partition_size.size(); i++) {
@@ -162,14 +161,14 @@ void GeomCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 2) add memstore stream to vector of streams to merge
+    // add memstore stream to vector of streams to merge, clear memstore
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
     memstore_clear();
     istreams.push_back(new DiskFileInputStream(memstore_file));
 
     //--------------------------------------------------------------------------
-    // 3) merge streams creating a new disk file
+    // merge streams creating a new disk file
     //--------------------------------------------------------------------------
     disk_file = Streams::merge_streams(istreams);
     for (int i = 0; i < (int)istreams.size(); i++) {
@@ -177,7 +176,7 @@ void GeomCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 4) delete merged files
+    // delete merged files
     //--------------------------------------------------------------------------
     memstore_file->delete_from_disk();
     delete memstore_file;
@@ -189,16 +188,16 @@ void GeomCompactionManager::flush_bytes() {
     }
 
     //--------------------------------------------------------------------------
-    // 5) add new file to DiskStore (add first: it contains the most recent KVs)
+    // add new file to DiskStore (add first: it contains the most recent KVs)
     //--------------------------------------------------------------------------
     m_diskstore->add_diskfile(disk_file, 0);
     m_diskstore->write_unlock();
 
     //--------------------------------------------------------------------------
-    // 6) update vector of partitions
+    // update vector of partitions
     //--------------------------------------------------------------------------
     // zero the sizes of the 'count' partitions merged
-    for (unsigned int i = 0; i < m_partition_size.size(); i++) {
+    for (int i = 0; i < (int)m_partition_size.size(); i++) {
         if (m_partition_size[i] && count > 0) {
             m_partition_size[i] = 0;
             count--;
@@ -292,7 +291,7 @@ int GeomCompactionManager::sanity_check() {
     uint64_t cursize = 0;
 
     assert((int)m_partition_size.size() >= m_diskstore->get_num_disk_files());
-    for (unsigned int i = 0; i < m_partition_size.size(); i++) {
+    for (int i = 0; i < (int)m_partition_size.size(); i++) {
         // if P != 0, there's a case when R increases before a flush and
         // the assertion below does not hold
         assert(m_P != 0 || (m_partition_size[i] == 0 ||
