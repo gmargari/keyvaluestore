@@ -12,6 +12,8 @@
 
 \usepackage{epsfig}
 \usepackage{subfigure}
+\usepackage[margin=0.5in]{geometry}
+
 % \usepackage{epstopdf}
 
 % \usepackage{comment}
@@ -28,78 +30,44 @@
 
 
 
-\section*{Key-value Store}
-
 \footnotesize
 \begin{verbatim}
 syntax: ./build/src/sim -c compactionmanager [options]
- COMPACTION MANAGER
-    -c compactionmanager:   "nomerge", "immediate", "geometric", "logarithmic",
-                            "rangemerge", "cassandra"
-    -m memorysize:          memory size in MB (default: 100)
-    -r value:               [geometric c.m.] R parameter (default: 3)
-    -p value:               [geometric c.m.] P parameter (default: disabled)
-    -b blocksize:           [rangemerge c.m.] block size in MB (default: 256)
-    -f flushmem:            [rangemerge c.m.] flush memory size in MB
-                            (default: 0, when memory is full flush only the biggest range)
-    -l value:               [cassandra c.m.] L parameter (default: 4)
 
- PUT
-    -i insertbytes:         number of bytes to insert in MB (default: 1000)
-    -n numkeystoinsert:     number of keys to insert (default: 953250)
-    -k keysize:             size of keys, in bytes (default: 100)
-    -v valuesize:           size of values, in bytes (default: 1000)
-    -u:                     create unique keys (default: false)
-    -z:                     create zipfian keys (default: false, uniform keys)
-    -s:                     read key-values from stdin
+COMPACTION MANAGER
+ -c, --compaction-manager [VALUE]    "nomerge", "immediate", "geometric", "logarithmic", "rangemerge", "cassandra"
+ -r, --geometric-r [VALUE]           R parameter (default: 3)
+ -p, --geometric-p [VALUE]           P parameter (default: disabled)
+ -b, --rangemerge-blocksize [VALUE]  block size in MB (default: 256)
+ -f, --rangemerge-flushmem [VALUE]   flush memory size in MB (default: 0, flush only the biggest range)
+ -l, --cassandra-l [VALUE]           L parameter (default: 4)
+ -m, --memorysize [VALUE]            memory size in MB (default: 100)
 
- GET
-    -g numgetthreads:       number of get threads (default: 0)
+PUT
+ -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: 1000)
+ -n, --num-keys [VALUE]              number of keys to insert (default: 953250)
+ -k, --key-size [VALUE]              size of keys, in bytes (default: 100)
+ -v, --value-size [VALUE]            size of values, in bytes (default: 1000)
+ -u, --unique-keys                   create unique keys (default: false)
+ -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)
+ -P, --put-throughput [VALUE]        put requests per sec (0: unlimited. default: 0)
 
- VARIOUS
-    -e:                     print key-values that would be inserted and exit
-    -o statsperiod:         every that many MB inserted print stats (default: memorysize/2)
-    -h:                     print this help message and exit
+GET
+ -g, --get-threads [VALUE]           number of get threads (default: 0)
+ -G, --get-throughput [VALUE]        get requests per sec per thread (0: unlimited. default: 10)
+ -R, --range-get-size [VALUE]        max number of KVs to read (0: point get. default: 10)
+ -x, --flush-page-cache              flush page cache after each compaction (default: false)
+
+VARIOUS
+ -e, --print-kvs-to-stdout           print key-values that would be inserted and exit
+ -s, --read-kvs-from-stdin           read key-values from stdin
+ -t, --print-periodic-stats          print stats on stderr about compactions and gets every 5 sec
+ -h, --help                          print this help message and exit
 \end{verbatim}
 
-In all experiments below we insert in a store of \textbf{128MB} of available
-memory \textbf{10GB} of data, in order to simulate a datastore of 1GB memory
-to which we insert 100GB. Data is inserted as key-value pairs where key is
-100B and value is 1KB.
-
-\clearpage
-
-%=============================================================================================================
-% Fragmentation
-%=============================================================================================================
-
-% \begin{figure}[ht]
-%   \begin{center}
-%     \includegraphics{eps/allmethods.fragm.eps}
-%     \caption{GB inserted in system vs. fragmentation (number of runs per list)}
-%   \end{center}
-% \end{figure}
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}Fragmentation\end{huge}
-
-    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.fragm.eps}}
-    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.fragm.eps}}
-    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.fragm.eps}}
-    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.fragm.eps}}
-    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.fragm.eps}}
-    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.fragm.eps}}
-    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.fragm.eps}}
-    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.fragm.eps}}
-    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.fragm.eps}}
-    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.fragm.eps}}
-    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.fragm.eps}}
-    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.fragm.eps}}
-    \caption{GB inserted in system vs. fragmentation (number of runs per list)}
-  \end{center}
-\end{figure}
+In all experiments below we insert in a datastore of \textbf{512MB} of available
+memory \textbf{10GB} of data. \\
+Keys are 100B and values are 1KB.
 
 \clearpage
 
@@ -112,27 +80,16 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Data transferred (GB)\end{huge}
 
-    \subfigure[All methods]{\includegraphics{eps/allmethods.gbtransferred.eps}}
-    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.gbtransferred.eps}}
-    \caption{GB inserted in system vs. Data transferred (GB)}
-  \end{center}
-\end{figure}
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}Data transferred (GB)\end{huge}
-
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.gbtransferred.eps}}
-    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.gbtransferred.eps}}
+     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.gbtransferred.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.gbtransferred.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.gbtransferred.eps}}    
+	\subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.gbtransferred.eps}}
     \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.gbtransferred.eps}}
     \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.gbtransferred.eps}}
     \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.gbtransferred.eps}}
     \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.gbtransferred.eps}}
     \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.gbtransferred.eps}}
-    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.gbtransferred.eps}}
-    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.gbtransferred.eps}}
-    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.gbtransferred.eps}}    
     \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.gbtransferred.eps}}
     \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.gbtransferred.eps}}
     \caption{GB inserted in system vs. Data transferred (GB)}
@@ -144,17 +101,6 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 %=============================================================================================================
 % I/O time
 %=============================================================================================================
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}I/O time\end{huge}
-
-    \subfigure[All methods]{\includegraphics{eps/allmethods.iotime.eps}}
-    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.iotime.eps}}
-    \caption{GB inserted in system vs. I/O Time (s)}
-  \end{center}
-\end{figure}
 
 \begin{figure}[ht]
   \begin{center}
@@ -188,17 +134,6 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Compaction time\end{huge}
 
-    \subfigure[All methods]{\includegraphics{eps/allmethods.compacttime.eps}}
-    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.compacttime.eps}}
-    \caption{GB inserted in system vs. Compaction Time (s)}
-  \end{center}
-\end{figure}
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}Compaction time\end{huge}
-
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.compacttime.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.compacttime.eps}}
     \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.compacttime.eps}}
@@ -226,17 +161,6 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Insertion time\end{huge}
 
-    \subfigure[All methods]{\includegraphics{eps/allmethods.totaltime.eps}}
-    \subfigure[All methods, without Immediate Merge and RangeMerge]{\includegraphics{eps/allmethods-no-imm-no-rngmrg.totaltime.eps}}
-    \caption{GB inserted in system vs. Insertion time (s)}
-  \end{center}
-\end{figure}
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}Insertion time\end{huge}
-
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.totaltime.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.totaltime.eps}}
     \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.totaltime.eps}}
@@ -256,13 +180,217 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 \clearpage
 
 %=============================================================================================================
+% Fragmentation
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Fragmentation\end{huge}
+
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge.fragm.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4.fragm.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3.fragm.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2.fragm.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.fragm.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3.fragm.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4.fragm.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4.fragm.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3.fragm.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2.fragm.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge.fragm.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate.fragm.eps}}
+    \caption{GB inserted in system vs. fragmentation (number of runs per list)}
+  \end{center}
+\end{figure}
+
+
+%=============================================================================================================
+% Get latency /throughput during compactions - Mergebuf 512KB
+%=============================================================================================================
+
+\begin{figure}[h]
+  \begin{center}
+
+    \begin{huge}Get Latency during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-2500-mergebuf-512KB.latency.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{2500} req/s. Mergebuf = \textbf{512KB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+  
+    \begin{huge}Get Throughput during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{2500} req/s. Mergebuf = \textbf{512KB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+
+    \begin{huge}Get Latency during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-0-mergebuf-512KB.latency.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{infinite} req/s. Mergebuf = \textbf{512KB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+  
+    \begin{huge}Get Throughput during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-0-mergebuf-512KB.thrput.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-0-mergebuf-512KB.thrput.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{infinite} req/s. Mergebuf = \textbf{512KB}}
+  \end{center}
+\end{figure}
+
+%=============================================================================================================
+% Get latency /throughput during compactions - Mergebuf 4MB
+%=============================================================================================================
+
+\begin{figure}[h]
+  \begin{center}
+
+    \begin{huge}Get Latency during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-2500-mergebuf-4MB.latency.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-2500-mergebuf-4MB.latency.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{2500} req/s. Mergebuf = \textbf{4MB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+  
+    \begin{huge}Get Throughput during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-2500-mergebuf-4MB.thrput.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{2500} req/s. Mergebuf = \textbf{4MB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+
+    \begin{huge}Get Latency during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-0-mergebuf-4MB.latency.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-0-mergebuf-4MB.latency.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{infinite} req/s. Mergebuf = \textbf{4MB}}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+  
+    \begin{huge}Get Throughput during compactions\end{huge}
+  
+    \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=3]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-3-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Cassandra l=2]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-2-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Logarithmic/Geometric r=2] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric r=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric r=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-r-4-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=4]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-4-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=3]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-3-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Geometric p=2]             {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[RangeMerge]                {\includegraphics[width=0.32\textwidth]{eps/rangemerge-put-thrput-0-mergebuf-4MB.thrput.eps}}
+    \subfigure[Immediate/Geometric p=1]   {\includegraphics[width=0.32\textwidth]{eps/immediate-put-thrput-0-mergebuf-4MB.thrput.eps}}
+	\caption{1 get thread x 20 get/s. Put throughput = \textbf{infinite} req/s. Mergebuf = \textbf{4MB}}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
 % Memory size - per method
 %=============================================================================================================
 
 \begin{figure}[ht]
   \begin{center}
 
-    \begin{huge}Memory size vs. Data transferred\end{huge}
+    \begin{huge}Memory size sensitivity\end{huge}
 
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.gbtransferred.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.gbtransferred.eps}}
@@ -280,11 +408,10 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-%--------- Strange behaviour for NoMerge... increasing memory increases time!
 \begin{figure}[ht]
   \begin{center}
 
-    \begin{huge}Memory size vs. I/O time\end{huge}
+    \begin{huge}Memory size sensitivity\end{huge}
 
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.iotime.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.iotime.eps}}
@@ -302,11 +429,10 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
   \end{center}
 \end{figure}
 
-%--------- Strange behaviour for NoMerge... increasing memory increases time!
 \begin{figure}[ht]
   \begin{center}
 
-    \begin{huge}Memory size vs. Compaction time\end{huge}
+    \begin{huge}Memory size sensitivity\end{huge}
 
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.compacttime.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.compacttime.eps}}
@@ -327,7 +453,7 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 \begin{figure}[ht]
   \begin{center}
 
-    \begin{huge}Memory size vs. Insertion time\end{huge}
+    \begin{huge}Memory size sensitivity\end{huge}
 
     \subfigure[NoMerge]                   {\includegraphics[width=0.32\textwidth]{eps/nomerge-memsize.totalstats.totaltime.eps}}
     \subfigure[Cassandra l=4]             {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-memsize.totalstats.totaltime.eps}}
@@ -347,8 +473,78 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
 \clearpage
 
+
+
 %=============================================================================================================
-% Memory size - all methods together
+% Rangemerge - Blocksize
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Rangemerge - Blocksize sensitivity\end{huge}
+
+    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]  		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.compacttime.eps}}
+    \subfigure[Total time] 		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Blocksize}
+  \end{center}
+\end{figure}
+
+%=============================================================================================================
+% Rangemerge - Flushmem
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Rangemerge - Flushmem sensitivity\end{huge}
+
+    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]  		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.compacttime.eps}}
+    \subfigure[Total time] 		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Flushmem}
+  \end{center}
+\end{figure}
+
+%=============================================================================================================
+% Rangemerge - Flushmem
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Rangemerge - Flushmem sensitivity\end{huge}
+
+    \subfigure[Blocksize = 16MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0016-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Blocksize = 32MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0032-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Blocksize = 64MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0064-put-thrput-2500-mergebuf-512KB.latency.eps}}
+%    \subfigure[Blocksize = 128MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0128-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Blocksize = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0256-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Blocksize = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-0512-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Blocksize = 1024MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-b-1024-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \caption{Rangemerge - Get latency vs Blocksize (put throughpu}
+  \end{center}
+\end{figure}
+
+
+
+%=============================================================================================================
+%=============================================================================================================
+%\begin{center}
+%\begin{Huge}Selected methods comparison\end{Huge}
+%\end{center}
+%\newpage
+%=============================================================================================================
+%=============================================================================================================
+
+
+
+    
+%=============================================================================================================
+% Selected methods - Memory size
 %=============================================================================================================
 
 \begin{figure}[ht]
@@ -356,11 +552,10 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Memory size vs. Data transferred\end{huge}
 
-    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.gbtransferred.eps}}
-    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.gbtransferred.eps}}
-    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.gbtransferred.eps}}
-    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.gbtransferred.eps}}
-    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.gbtransferred.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0256.gbtransferred.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0512.gbtransferred.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-1024.gbtransferred.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-2048.gbtransferred.eps}}
     \caption{Memory size vs. Data transferred (GB)}
   \end{center}
 \end{figure}
@@ -370,11 +565,10 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Memory size vs. I/O time\end{huge}
 
-    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.iotime.eps}}
-    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.iotime.eps}}
-    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.iotime.eps}}
-    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.iotime.eps}}
-    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.iotime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0256.iotime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0512.iotime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-1024.iotime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-2048.iotime.eps}}
     \caption{Memory size vs. I/O time (s)}
   \end{center}
 \end{figure}
@@ -384,11 +578,10 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Memory size vs. Compaction time\end{huge}
 
-    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.compacttime.eps}}
-    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.compacttime.eps}}
-    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.compacttime.eps}}
-    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.compacttime.eps}}
-    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.compacttime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0256.compacttime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0512.compacttime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-1024.compacttime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-2048.compacttime.eps}}
     \caption{Memory size vs. Compaction time (s)}
   \end{center}
 \end{figure}
@@ -398,42 +591,82 @@ to which we insert 100GB. Data is inserted as key-value pairs where key is
 
     \begin{huge}Memory size vs. Insertion time\end{huge}
 
-    \subfigure[Memory size = 128MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0128.totaltime.eps}}
-    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0256.totaltime.eps}}
-    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-0512.totaltime.eps}}
-    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-1024.totaltime.eps}}
-    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.40\textwidth]{eps/allmethods-memsize-2048.totaltime.eps}}
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0256.totaltime.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0512.totaltime.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-1024.totaltime.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-2048.totaltime.eps}}
+    \caption{Memory size vs. Insertion time (s)}
+  \end{center}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Memory size vs. Insertion time\end{huge}
+
+    \subfigure[Memory size = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0256.totaltime.breakdown.eps}}
+    \subfigure[Memory size = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-0512.totaltime.breakdown.eps}}
+    \subfigure[Memory size = 1024MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-1024.totaltime.breakdown.eps}}
+    \subfigure[Memory size = 2048MB] {\includegraphics[width=0.49\textwidth]{eps/allmethods-memsize-2048.totaltime.breakdown.eps}}
     \caption{Memory size vs. Insertion time (s)}
   \end{center}
 \end{figure}
 
 \clearpage
 
-\begin{figure}[ht]
+
+%=============================================================================================================
+% Selected methods - Various times and GB trasferred
+%=============================================================================================================
+
+\begin{figure}[h]
   \begin{center}
-
-    \begin{huge}Rangemerge - Blocksize\end{huge}
-
-    \subfigure[GB transferred]  {\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.gbtransferred.eps}}
-    \subfigure[I/O time]  		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.iotime.eps}}
-    \subfigure[Compaction time] {\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.compacttime.eps}}
-    \subfigure[Total time] 		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-blocksize.totalstats.totaltime.eps}}
-    \caption{Rangemerge - Blocksize}
+    \subfigure[GB inserted in system vs. Data transferred (GB)] {\includegraphics{eps/8methods.logyscale.gbtransferred.eps}}
+    \subfigure[GB inserted in system vs. IO time (s)]           {\includegraphics{eps/8methods.logyscale.iotime.eps}}
+  	\caption{}
   \end{center}
 \end{figure}
 
-\begin{figure}[ht]
+\clearpage
+
+\begin{figure}[h]
   \begin{center}
-
-    \begin{huge}Rangemerge - Flushmem\end{huge}
-
-    \subfigure[GB transferred]  {\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.gbtransferred.eps}}
-    \subfigure[I/O time]  		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.iotime.eps}}
-    \subfigure[Compaction time] {\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.compacttime.eps}}
-    \subfigure[Total time] 		{\includegraphics[width=0.48\textwidth]{eps/rangemerge-flushmem.totalstats.totaltime.eps}}
-    \caption{Rangemerge - Flushmem}
+	\subfigure[GB inserted in system vs. Compaction time (s)] {\includegraphics{eps/8methods.logyscale.compacttime.eps}}
+	\subfigure[GB inserted in system vs. Insertion time (s)]  {\includegraphics{eps/8methods.logyscale.totaltime.eps}}
+	\caption{}
   \end{center}
 \end{figure}
 
+\clearpage
+
+%=============================================================================================================
+% Selected methods - Get latency/throughpu during compactions
+%=============================================================================================================
+
+\begin{figure}[h]
+  \begin{center}
+    \subfigure[Put throughput = 2500 req/s] {\includegraphics[width=0.49\textwidth]{eps/log-rng-geom-put-thrput-2500-mergebuf-512KB.latency.eps}}
+    \subfigure[Put throughput = infinite]   {\includegraphics[width=0.49\textwidth]{eps/log-rng-geom-put-thrput-0-mergebuf-512KB.latency.eps}}
+    \subfigure[Put throughput = 2500 req/s] {\includegraphics[width=0.49\textwidth]{eps/log-rng-geom-put-thrput-2500-mergebuf-512KB.thrput.eps}}
+    \subfigure[Put throughput = infinite]   {\includegraphics[width=0.49\textwidth]{eps/log-rng-geom-put-thrput-0-mergebuf-512KB.thrput.eps}} 
+    \caption{1 get thread. Get throughput = 20 get/s. Mergebuf = 512KB}
+  \end{center}
+\end{figure}
+
+\clearpage
+
+%=============================================================================================================
+% Different memory and data size - Same behaviour
+%=============================================================================================================
+
+\begin{figure}[h]
+  \begin{center}
+  	\subfigure[]{\includegraphics{eps/logarithmic.searchlog.eps}}
+  	\subfigure[]{\includegraphics{eps/diff-mem-datasize-same-scale.eps}}
+  \end{center}
+\end{figure}
+
+
+\clearpage
 
 \end{document}

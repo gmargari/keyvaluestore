@@ -3,6 +3,14 @@
 executable="/home/gmargari/Dropbox/phd/keyvaluestore/build/src/sim"
 kvstorefolder="/tmp/kvstore/"
 
+#============================
+# my_print()
+#============================
+scriptname=`basename $0`
+my_print() {
+    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
+}
+
 #========================================================
 # execute_sim()
 #========================================================
@@ -11,8 +19,8 @@ execute_sim() {
     echo $command
     rm -rf ${kvstorefolder}/*
     mkdir -p ${statsfolder}
-    $command > ${statsfolder}/${outputname}.stats && return
-    
+    $command > ${statsfolder}/${outputname}.stats 2> ${statsfolder}/${outputname}.stderr && return
+
     echo "Error running $command"
     echo "Error running $command" | mail -s "Error running kvstore experiment" -t "gmargari@gmail.com"
     exit 1
@@ -118,7 +126,7 @@ cassandra_memsize() {
 #========================================================
 rangemerge_flushmem() {
     memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins   
+    bytesins=$def_mb_to_ins
     mergername="rangemerge"
     for fmem in ${flushmemsizes[@]}; do
         mergerparams="-b 256 -f $fmem";  outputname="rangemerge-flushmem-$fmem";  execute_sim;
@@ -147,14 +155,14 @@ rangemerge_blocksize() {
 if [ $# -ne 1 ]; then
     echo "Syntax: $0 <stats folder>"
     exit 1
-fi     
+fi
 statsfolder=$1
 
 rm -rf ${kvstorefolder}/*
 rm -rf ${statsfolder}/*
 
 # assert that debug level is 0 before starting experiments
-if [ "`${executable} -c rangemerge -i 0 | grep debug_level | awk '{print $3}'`" != "0" ]; then 
+if [ "`${executable} -c rangemerge -i 0 | grep debug_level | awk '{print $3}'`" != "0" ]; then
     echo "Error: debug level not zero"
     exit 1
 fi
@@ -175,29 +183,29 @@ def_memsize_in_mb=1024
 # You can change these
 #---------------------------------
 
-echo -e "\e[1;31m [ $0: all methods ] \e[m"
+my_print "all methods"
 all_methods
 
-echo -e "\e[1;31m [ $0: nomerge memsize ] \e[m"
+my_print "nomerge memsize"
 nomerge_memsize
 
-echo -e "\e[1;31m [ $0: geometric-r memsize ] \e[m"
+my_print "geometric-r memsize"
 geometric_r_memsize
 
-echo -e "\e[1;31m [ $0: geometric-p memsize ] \e[m"
+my_print "geometric-p memsize"
 geometric_p_memsize
 
-echo -e "\e[1;31m [ $0: rangemerge memsize ] \e[m"
+my_print "rangemerge memsize"
 rangemerge_memsize
 
-echo -e "\e[1;31m [ $0: immediate memsize ] \e[m"
+my_print "immediate memsize"
 immediate_memsize
 
-echo -e "\e[1;31m [ $0: cassandra memsize ] \e[m"
+my_print "cassandra memsize"
 cassandra_memsize
 
-echo -e "\e[1;31m [ $0: rangemerge blocksize ] \e[m"
+my_print "rangemerge blocksize"
 rangemerge_blocksize
 
-echo -e "\e[1;31m [ $0: rangemerge flushmem ] \e[m"
+my_print "rangemerge flushmem"
 rangemerge_flushmem
