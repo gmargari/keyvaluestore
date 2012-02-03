@@ -69,7 +69,7 @@ void RangemergeCompactionManager::flush_bytes() {
     vector<InputStream *> istreams;
     vector<Range *> ranges;
     Range *rng;
-    int i, newfiles;
+    int newfiles;
 #if DBGLVL > 0
     uint64_t dbg_memsize, dbg_memsize_serial;
 #endif
@@ -77,96 +77,83 @@ void RangemergeCompactionManager::flush_bytes() {
     assert(sanity_check());
 
     //--------------------------------------------------------------------------
-    // create vector of ranges
+    // get range with max memory size
     //--------------------------------------------------------------------------
     create_ranges(&ranges);
-
-    //--------------------------------------------------------------------------
-    // sort ranges by memory size
-    //--------------------------------------------------------------------------
     sort(ranges.begin(), ranges.end(), Range::cmp_by_memsize);
+    rng = ranges[0];
 
     //--------------------------------------------------------------------------
-    // flush biggest range
+    // merge range's disk tuples with range's memory tuples
     //--------------------------------------------------------------------------
-    {
-        rng = ranges[0];
+    // get istream for all memory tuples that belong to range
+    map_istream = m_memstore->new_map_inputstream(rng->m_first);
+    istreams.push_back(map_istream);
 
-        // get istream with all memory tuples that belong to current range
-        map_istream = m_memstore->new_map_inputstream(rng->m_first);
-        istreams.clear();
-        istreams.push_back(map_istream);
-
-        // get istream for file that stores all tuples that belong to cur range
-        if (rng->m_file_num != NO_DISK_FILE) {
-            DiskFile *dfile = m_diskstore->get_diskfile(rng->m_file_num);
-            istreams.push_back(new DiskFileInputStream(dfile));
-        }
-
-        // if block may overflow, split merged block into a number of blocks
-        // of max file size 'SPLIT_PERC * m_blocksize'
-        if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
-            newfiles = Streams::merge_streams(istreams, &new_disk_files,
-                                              SPLIT_PERC * m_blocksize);
-            // assert(newfiles > 1);  // this may be false (i.e. if all mem keys
-                                      // exist on disk and no split occurs)
-        } else {
-            newfiles = Streams::merge_streams(istreams, &new_disk_files,
-                                              m_blocksize);
-            assert(newfiles == 1);
-        }
-
-        // delete all istreams
-        for (i = 0; i < (int)istreams.size(); i++) {
-            delete istreams[i];
-        }
-
-        assert((dbg_memsize = m_memstore->get_size()) || true);
-        assert((dbg_memsize_serial = m_memstore->get_size_when_serialized())
-                 || true);
-
-        // remove from memstore tuples of current range
-        m_memstore->clear_map(rng->m_first);
-
-        // add new map(s) to memstore if new range(s) was created (range split)
-        for (int j = 0; j < newfiles - 1; j++) {
-            int new_file_index;
-            Slice ft, lt;
-
-            new_file_index = new_disk_files.size() - j - 1;
-            new_disk_files.at(new_file_index)->get_first_last_term(&ft, &lt);
-            m_memstore->add_map(ft);
-        }
-
-        assert(dbg_memsize - rng->m_memsize == m_memstore->get_size());
-        assert(dbg_memsize_serial - rng->m_memsize_serialized
-                 == m_memstore->get_size_when_serialized());
+    // get istream for file that stores all tuples that belong to range
+    if (rng->m_file_num != NO_DISK_FILE) {
+        DiskFile *dfile = m_diskstore->get_diskfile(rng->m_file_num);
+        istreams.push_back(new DiskFileInputStream(dfile));
     }
 
+    // if block may overflow, split merged block into a number of blocks
+    // of max file size 'SPLIT_PERC * m_blocksize'
+    if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
+        newfiles = Streams::merge_streams(istreams, &new_disk_files,
+                                          SPLIT_PERC * m_blocksize);
+        // assert(newfiles > 1);  // can be false (e.g. all mem keys exist on
+                                  // disk -> values are overwritten -> no split)
+    } else {
+        newfiles = Streams::merge_streams(istreams, &new_disk_files,
+                                          m_blocksize);
+        assert(newfiles == 1);
+    }
+
+    // delete all istreams
+    for (int i = 0; i < (int)istreams.size(); i++) {
+        delete istreams[i];
+    }
+
+    assert((dbg_memsize = m_memstore->get_size()) || 1);
+    assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
+
     //--------------------------------------------------------------------------
-    // delete old files from disk and remove them from diskstore
+    // update memstore
     //--------------------------------------------------------------------------
+    // remove from memstore tuples of range
+    m_memstore->clear_map(rng->m_first);
+
+    // add new map(s) to memstore if new range(s) was created (range split)
+    for (int i = 0; i < newfiles - 1; i++) {
+        int new_file_index;
+        Slice ft, lt;
+
+        new_file_index = new_disk_files.size() - i - 1;
+        new_disk_files.at(new_file_index)->get_first_last_term(&ft, &lt);
+        m_memstore->add_map(ft);
+    }
+
+    assert(dbg_memsize - rng->m_memsize == m_memstore->get_size());
+    assert(dbg_memsize_serial - rng->m_memsize_serialized
+             == m_memstore->get_size_when_serialized());
+
+    //--------------------------------------------------------------------------
+    // update diskstore
+    //--------------------------------------------------------------------------
+    // delete old file from disk and remove from diskstore
     m_diskstore->write_lock();
-    {
-        int filenum = ranges[0]->m_file_num;
-        if (filenum != NO_DISK_FILE) {
-            m_diskstore->get_diskfile(filenum)->delete_from_disk();
-            m_diskstore->rm_diskfile(filenum);
-        }
+    if (rng->m_file_num != NO_DISK_FILE) {
+        m_diskstore->get_diskfile(rng->m_file_num)->delete_from_disk();
+        m_diskstore->rm_diskfile(rng->m_file_num);
     }
-    delete_ranges(ranges);
 
-    //--------------------------------------------------------------------------
-    // add new files to diskstore
-    //--------------------------------------------------------------------------
-    // doesn't matter where we insert them in vector: in Rangemerge each key is
-    // stored in exaclty one file on disk, so there is no need to search
-    // all files from most recent to oldest -we'll search in exaclty one file.
-    for (i = 0; i < (int)new_disk_files.size(); i++) {
-        m_diskstore->add_diskfile(new_disk_files[i],
-                                  m_diskstore->get_num_disk_files());
+    // add new files to diskstore (doesn't matter where)
+    for (int i = 0; i < (int)new_disk_files.size(); i++) {
+        m_diskstore->add_diskfile(new_disk_files[i], 0);
     }
     m_diskstore->write_unlock();
+
+    delete_ranges(ranges);
 
     assert(sanity_check());
 }
@@ -194,10 +181,9 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
 
         ranges->at(0)->m_first = Slice("", 0);
 
-        for (unsigned int i = 0; i < ranges->size(); i++) {
-            // since we want to know exactly the size of tuples when written to
-            // disk, in order to know when a block will overflow, we use
-            // get_size_when_serialized() and not get_size().
+        for (int i = 0; i < (int)ranges->size(); i++) {
+            // m_memsize_serialized: we want to know the exact size of tuples
+            // written to disk, in order to know when a block will overflow
             sizes = m_memstore->get_map(ranges->at(i)->m_first)->get_sizes();
             ranges->at(i)->m_memsize = sizes.first;
             ranges->at(i)->m_memsize_serialized = sizes.second;
@@ -294,15 +280,13 @@ int RangemergeCompactionManager::sanity_check() {
     for (int i = 0; i < m_diskstore->get_num_disk_files(); i++) {
         assert(m_diskstore->get_diskfile(i)->get_size() <= m_blocksize);
     }
+
     create_ranges(&ranges);
     assert(m_memstore->get_num_maps() == (int)ranges.size());
-    for (unsigned int i = 0; i < ranges.size(); i++) {
+    for (int i = 0; i < (int)ranges.size(); i++) {
         assert(m_memstore->get_map(i)
                  == m_memstore->get_map(ranges[i]->m_first));
     }
-
-    // assert ranges are non interleaving, i.e. each key is stored in at most
-    // one disk file, and that each memory tuple belongs to exaclty one range
     assert(strcmp(ranges[0]->m_first.data(), "") == 0);
     delete_ranges(ranges);
 
