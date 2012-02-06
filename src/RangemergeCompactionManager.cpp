@@ -161,12 +161,12 @@ void RangemergeCompactionManager::flush_bytes() {
 /*============================================================================
  *                               create_ranges
  *============================================================================*/
-void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
+void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
     int num_disk_files = m_diskstore->get_num_disk_files();
     Slice last;
-    pair<uint64_t, uint64_t> sizes;
+    Map *map;
 
-    ranges->clear();
+    rngs->clear();
     if (num_disk_files) {
         for (int i = 0; i < num_disk_files; i++) {
             DiskFile *dfile = m_diskstore->get_diskfile(i);
@@ -174,29 +174,28 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *ranges) {
             dfile->get_first_last_term(&rng->m_first, &last);
             rng->m_disksize = dfile->get_size();
             rng->m_file_num = i;
-            ranges->push_back(rng);
+            rngs->push_back(rng);
         }
 
-        sort(ranges->begin(), ranges->end(), Range::cmp_by_term);
+        sort(rngs->begin(), rngs->end(), Range::cmp_by_term);
 
-        ranges->at(0)->m_first = Slice("", 0);
-
-        for (int i = 0; i < (int)ranges->size(); i++) {
+        rngs->at(0)->m_first = Slice("", 0);
+        for (int i = 0; i < (int)rngs->size(); i++) {
             // m_memsize_serialized: we want to know the exact size of tuples
             // written to disk, in order to know when a block will overflow
-            sizes = m_memstore->get_map(ranges->at(i)->m_first)->get_sizes();
-            ranges->at(i)->m_memsize = sizes.first;
-            ranges->at(i)->m_memsize_serialized = sizes.second;
+            map = m_memstore->get_map(rngs->at(i)->m_first);
+            rngs->at(i)->m_memsize = map->get_size();
+            rngs->at(i)->m_memsize_serialized = map->get_size_when_serialized();
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
         Range *rng = new Range();
         rng->m_first = Slice("", 0);  // to get all terms
-        sizes = m_memstore->get_map(rng->m_first)->get_sizes();
-        rng->m_memsize = sizes.first;
-        rng->m_memsize_serialized = sizes.second;
+        map = m_memstore->get_map(rng->m_first);
+        rng->m_memsize = map->get_size();
+        rng->m_memsize_serialized = map->get_size_when_serialized();
         rng->m_disksize = 0;
         rng->m_file_num = NO_DISK_FILE;
-        ranges->push_back(rng);
+        rngs->push_back(rng);
     }
 }
 

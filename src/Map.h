@@ -65,12 +65,6 @@ class Map {
     uint64_t get_size_when_serialized();
 
     /**
-     * return both the byte size of memory tuples and the byte size of
-     * memory tuples when serialized
-     */
-    pair<uint64_t, uint64_t> get_sizes();
-
-    /**
      * size of KV when serialized and added to map
      */
     static uint32_t kv_size(Slice key, Slice value, uint64_t timestamp);
