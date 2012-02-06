@@ -67,8 +67,7 @@ void RangemergeCompactionManager::flush_bytes() {
     MapInputStream *map_istream;
     vector<DiskFile *> new_disk_files;
     vector<InputStream *> istreams;
-    vector<Range *> ranges;
-    Range *rng;
+    Range rng;
     int newfiles;
 #if DBGLVL > 0
     uint64_t dbg_memsize, dbg_memsize_serial;
@@ -77,28 +76,26 @@ void RangemergeCompactionManager::flush_bytes() {
     assert(sanity_check());
 
     //--------------------------------------------------------------------------
-    // get range with max memory size
+    // select a range to flush
     //--------------------------------------------------------------------------
-    create_ranges(&ranges);
-    sort(ranges.begin(), ranges.end(), Range::cmp_by_memsize);
-    rng = ranges[0];
+    rng = get_best_range();
 
     //--------------------------------------------------------------------------
     // merge range's disk tuples with range's memory tuples
     //--------------------------------------------------------------------------
     // get istream for all memory tuples that belong to range
-    map_istream = m_memstore->new_map_inputstream(rng->m_first);
+    map_istream = m_memstore->new_map_inputstream(rng.m_first);
     istreams.push_back(map_istream);
 
     // get istream for file that stores all tuples that belong to range
-    if (rng->m_file_num != NO_DISK_FILE) {
-        DiskFile *dfile = m_diskstore->get_diskfile(rng->m_file_num);
+    if (rng.m_file_num != NO_DISK_FILE) {
+        DiskFile *dfile = m_diskstore->get_diskfile(rng.m_file_num);
         istreams.push_back(new DiskFileInputStream(dfile));
     }
 
     // if block may overflow, split merged block into a number of blocks
     // of max file size 'SPLIT_PERC * m_blocksize'
-    if (rng->m_memsize_serialized + rng->m_disksize > m_blocksize) {
+    if (rng.m_memsize_serialized + rng.m_disksize > m_blocksize) {
         newfiles = Streams::merge_streams(istreams, &new_disk_files,
                                           SPLIT_PERC * m_blocksize);
         // assert(newfiles > 1);  // can be false (e.g. all mem keys exist on
@@ -121,41 +118,52 @@ void RangemergeCompactionManager::flush_bytes() {
     // update memstore
     //--------------------------------------------------------------------------
     // remove from memstore tuples of range
-    m_memstore->clear_map(rng->m_first);
+    m_memstore->clear_map(rng.m_first);
 
     // add new map(s) to memstore if new range(s) was created (range split)
     for (int i = 0; i < newfiles - 1; i++) {
-        int new_file_index;
         Slice ft, lt;
-
-        new_file_index = new_disk_files.size() - i - 1;
-        new_disk_files.at(new_file_index)->get_first_last_term(&ft, &lt);
+        new_disk_files[newfiles - i - 1]->get_first_last_term(&ft, &lt);
         m_memstore->add_map(ft);
     }
 
-    assert(dbg_memsize - rng->m_memsize == m_memstore->get_size());
-    assert(dbg_memsize_serial - rng->m_memsize_serialized
+    assert(dbg_memsize - rng.m_memsize == m_memstore->get_size());
+    assert(dbg_memsize_serial - rng.m_memsize_serialized
              == m_memstore->get_size_when_serialized());
 
     //--------------------------------------------------------------------------
     // update diskstore
     //--------------------------------------------------------------------------
-    // delete old file from disk and remove from diskstore
     m_diskstore->write_lock();
-    if (rng->m_file_num != NO_DISK_FILE) {
-        m_diskstore->get_diskfile(rng->m_file_num)->delete_from_disk();
-        m_diskstore->rm_diskfile(rng->m_file_num);
+    // delete old file from disk and remove from diskstore
+    if (rng.m_file_num != NO_DISK_FILE) {
+        m_diskstore->get_diskfile(rng.m_file_num)->delete_from_disk();
+        m_diskstore->rm_diskfile(rng.m_file_num);
     }
 
-    // add new files to diskstore (doesn't matter where)
-    for (int i = 0; i < (int)new_disk_files.size(); i++) {
+    // add new file(s) to diskstore (doesn't matter where)
+    for (int i = 0; i < newfiles; i++) {
         m_diskstore->add_diskfile(new_disk_files[i], 0);
     }
     m_diskstore->write_unlock();
 
-    delete_ranges(ranges);
-
     assert(sanity_check());
+}
+
+/*============================================================================
+ *                               get_best_range
+ *============================================================================*/
+Range RangemergeCompactionManager::get_best_range() {
+    vector<Range *> rngs;
+    Range rng;
+
+    // get range with max memory size
+    create_ranges(&rngs);
+    sort(rngs.begin(), rngs.end(), Range::cmp_by_memsize);
+    rng = *(rngs[0]);
+    delete_ranges(rngs);
+
+    return rng;
 }
 
 /*============================================================================

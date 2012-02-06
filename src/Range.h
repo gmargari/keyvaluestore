@@ -43,10 +43,6 @@ class Range {
      */
     static bool cmp_by_file_num(const Range *r1, const Range *r2);
 
-    // Undefined methods (just remove Weffc++ warning)
-    Range(const Range&);
-    Range& operator=(const Range&);
-
     Slice    m_first;               // first key stored on disk file
     uint64_t m_memsize;             // byte size of memory tuples
     uint64_t m_memsize_serialized;  // byte size of serialized memory tuples
