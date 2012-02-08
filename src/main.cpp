@@ -578,7 +578,7 @@ int main(int argc, char **argv) {
     cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "       " << (xflag == 0 ? "(default)" : "") << endl;
     cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "       " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
-    cout << "# mergebuf_size:       " << setw(15) << MERGEBUF_SIZE << " MB" << endl;
+    cout << "# mergebuf_size:       " << setw(15) << MERGEBUF_SIZE << " B" << endl;
 
     time(&now);
     current = localtime(&now);
