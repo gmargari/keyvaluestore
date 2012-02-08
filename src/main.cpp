@@ -41,6 +41,7 @@ void   print_get_throughput(int signum);
 uint64_t get_cur_time();
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed);
+void   orderedstr_r(char *s, const int len, uint64_t max_num, uint32_t *seed);
 int    zipf_r(double zipf_param, uint32_t *seed);
 void   check_duplicate_arg_and_set(int *flag, int opt);
 int    numdigits(uint64_t num);
@@ -56,6 +57,7 @@ const uint64_t DEFAULT_INSERTKEYS =  DEFAULT_INSERTBYTES /
                                      (DEFAULT_KEY_SIZE + DEFAULT_VALUE_SIZE);
 const bool     DEFAULT_UNIQUE_KEYS =        false;
 const bool     DEFAULT_ZIPF_KEYS =          false;
+const bool     DEFAULT_ORDERED_KEYS =       false;
 const int      DEFAULT_NUM_GET_THREADS =        0;
 const int      DEFAULT_PUT_THRPUT =             0;  // req per sec, 0: disable
 const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
@@ -75,6 +77,8 @@ struct thread_args {
     int uflag;
     int zipf_keys;
     double zipf_param;
+    int ordered_keys;
+    double ordered_prob;
     int print_kv_and_continue;
     uint64_t num_keys_to_insert;
     uint32_t keysize;
@@ -114,6 +118,7 @@ void print_syntax(char *progname) {
     cout << " -v, --value-size VALUE              size of values, in bytes [" << DEFAULT_VALUE_SIZE << "]" << endl;
     cout << " -u, --unique-keys                   create unique keys [" << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << "]" << endl;
     cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distrib. parameter [" << (DEFAULT_ZIPF_KEYS ? "true " : "false") << "]" << endl;
+    cout << " -o, --ordered-keys VALUE            keys created are ordered, with VALUE probability being random [" << (DEFAULT_ORDERED_KEYS ? "true " : "false") << "]" << endl;
     cout << " -P, --put-throughput VALUE          put requests per sec (0: unlimited) [" << DEFAULT_PUT_THRPUT << "]" << endl;
     cout << endl;
     cout << "GET" << endl;
@@ -133,7 +138,7 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:l:m:i:n:k:v:uz:P:g:G:R:xesth";
+    const char short_args[] = "c:r:p:b:l:m:i:n:k:v:uz:o:P:g:G:R:xesth";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -147,6 +152,7 @@ int main(int argc, char **argv) {
              {"value-size",           required_argument,  0, 'v'},
              {"unique-keys",          no_argument,        0, 'u'},
              {"zipf-keys",            required_argument,  0, 'z'},
+             {"ordered-keys",         required_argument,  0, 'o'},
              {"put-throughput",       required_argument,  0, 'P'},
              {"get-threads",          required_argument,  0, 'g'},
              {"get-throughput",       required_argument,  0, 'G'},
@@ -171,6 +177,7 @@ int main(int argc, char **argv) {
              uflag = 0,
              Pflag = 0,
              zflag = 0,
+             oflag = 0,
              gflag = 0,
              Gflag = 0,
              Rflag = 0,
@@ -195,13 +202,15 @@ int main(int argc, char **argv) {
              num_keys_to_insert;
     uint32_t keysize,
              valuesize;
-    double   zipf_param;
+    double   zipf_param,
+             ordered_prob;
     char    *cmanager = NULL,
             *key = NULL,
             *value = NULL,
             *end_key = NULL;
     bool     unique_keys,
              zipf_keys,
+             ordered_keys,
              print_kv_and_continue = false,
              flush_page_cache,
              print_periodic_stats;
@@ -289,6 +298,12 @@ int main(int argc, char **argv) {
                 zipf_param = atof(optarg);
                 break;
 
+            case 'o':
+                check_duplicate_arg_and_set(&oflag, myopt);
+                ordered_keys = true;
+                ordered_prob = atof(optarg);
+                break;
+
             case 'P':
                 check_duplicate_arg_and_set(&Pflag, myopt);
                 put_thrput = atoi(optarg);
@@ -371,6 +386,9 @@ int main(int argc, char **argv) {
     if (zflag == 0) {
         zipf_keys = DEFAULT_ZIPF_KEYS;
     }
+    if (oflag == 0) {
+        ordered_keys = DEFAULT_ORDERED_KEYS;
+    }
     if (Pflag == 0) {
         put_thrput = DEFAULT_PUT_THRPUT;
     }
@@ -429,6 +447,10 @@ int main(int argc, char **argv) {
     }
     if (zflag && zipf_param <= 0) {
         cerr << "Error: zipf parameter must be > 0" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if (oflag && (ordered_prob < 0 || ordered_prob > 1)) {
+        cerr << "Error: probability for ordered keys must be in [0, 1]" << endl;
         exit(EXIT_FAILURE);
     }
     if (nflag && iflag) {
@@ -513,6 +535,7 @@ int main(int argc, char **argv) {
         cout << "# keys_to_insert:      " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
         cout << "# unique_keys:         " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
         cout << "# zipf_keys:           " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# ordered_keys:        " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
     } else {
         cout << "# insert_bytes:        " << setw(15) << b2mb(insertbytes) << " MB    " << (iflag == 0 ? "(default)" : "") << endl;
         cout << "# key_size:            " << setw(15) << keysize << " B     " << (kflag == 0 ? "(default)" : "") << endl;
@@ -522,6 +545,10 @@ int main(int argc, char **argv) {
         cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "       " << (zflag == 0 ? "(default)" : "") << endl;
         if (zipf_keys) {
             cout << "# zipf_parameter:      " << setw(15) << zipf_param << endl;
+        }
+        cout << "# ordered_keys:        " << setw(15) << (ordered_keys ? "true" : "false") << "       " << (oflag == 0 ? "(default)" : "") << endl;
+        if (ordered_keys) {
+            cout << "# ordered_prob:        " << setw(15) << ordered_prob << endl;
         }
     }
     cout << "# put_throughput:      " << setw(15) << put_thrput << " req/s " << (Pflag == 0 ? "(default)" : "") << endl;
@@ -585,6 +612,8 @@ int main(int argc, char **argv) {
         targs[i].sflag = sflag;
         targs[i].zipf_keys = zipf_keys;
         targs[i].zipf_param = zipf_param;
+        targs[i].ordered_keys = ordered_keys;
+        targs[i].ordered_prob = ordered_prob;
         targs[i].print_kv_and_continue = print_kv_and_continue;
         targs[i].num_keys_to_insert = num_keys_to_insert;
         targs[i].keysize = keysize,
@@ -699,9 +728,11 @@ void *put_routine(void *args) {
     int      uflag = targs->uflag,
              sflag = targs->sflag,
              zipf_keys = targs->zipf_keys,
+             ordered_keys = targs->ordered_keys,
              print_kv_and_continue = targs->print_kv_and_continue,
              compaction_occured = 0;
-    double   zipf_param = targs->zipf_param;
+    double   zipf_param = targs->zipf_param,
+             ordered_prob = targs->ordered_prob;
     bool     flush_page_cache = targs->flush_page_cache,
              print_periodic_stats = targs->print_periodic_stats;
     uint64_t num_keys_to_insert = targs->num_keys_to_insert;
@@ -754,6 +785,15 @@ void *put_routine(void *args) {
             //------------------------------------------------------------------
             if (zipf_keys) {
                 zipfstr_r(key, keysize, zipf_param, &kseed);
+                keylen = keysize;
+            } else if (ordered_keys) {
+                // with probability 'ordered_prob', create a random key. else,
+                // create an ordered key
+                if ((float)rand_r(&kseed) / (float)RAND_MAX < ordered_prob) {
+                    randstr_r(key, keysize, &kseed);
+                } else {
+                    orderedstr_r(key, keysize, num_keys_to_insert, &kseed);
+                }
                 keylen = keysize;
             } else {
                 randstr_r(key, keysize, &kseed);
@@ -1017,6 +1057,22 @@ void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
     sprintf(s, "%s%0*d", key_prefix, num_digits, zipf_num);
 }
 
+/*============================================================================
+ *                             orderedstr_r
+ *============================================================================*/
+void orderedstr_r(char *s, const int len, uint64_t max_num, uint32_t *seed) {
+    static int num_digits = log10(max_num) + 1;
+    char key_prefix[MAX_KEY_SIZE + 1];
+    static uint64_t i = 0;
+
+    if (i == 0) {
+        // key prefix must be common for all keys
+        randstr_r(key_prefix, len - num_digits, seed);
+    }
+
+    i++;
+    sprintf(s, "%s%0*Ld", key_prefix, num_digits, i);
+}
 /*
  * code below from (has been modified for fastest number generation):
  *    http://www.csee.usf.edu/~christen/tools/toolpage.html
