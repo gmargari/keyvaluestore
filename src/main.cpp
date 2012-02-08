@@ -99,27 +99,28 @@ void print_syntax(char *progname) {
     cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
     cout << endl;
     cout << "COMPACTION MANAGER" << endl;
-    cout << " -c, --compaction-manager [VALUE]    \"nomerge\", \"immediate\", \"geometric\", \"logarithmic\", \"rangemerge\", \"cassandra\"" << endl;
-    cout << " -r, --geometric-r [VALUE]           R parameter (default: " << DEFAULT_GEOM_R << ")" << endl;
-    cout << " -p, --geometric-p [VALUE]           P parameter (default: disabled)" << endl;
-    cout << " -b, --rangemerge-blocksize [VALUE]  block size in MB (default: " << b2mb(DEFAULT_RNG_BLOCKSIZE) << ")" << endl;
-    cout << " -l, --cassandra-l [VALUE]           L parameter (default: " << DEFAULT_CASS_K << ")" << endl;
-    cout << " -m, --memorysize [VALUE]            memory size in MB (default: " << b2mb(DEFAULT_MEMSTORE_SIZE) << ")" << endl;
+    cout << " -c, --compaction-manager VALUE      'nomerge', 'immediate', 'geometric', 'logarithmic'," << endl;
+    cout << "                                     'rangemerge' or 'cassandra'" << endl;
+    cout << " -r, --geometric-r VALUE             Geometric R parameter [" << DEFAULT_GEOM_R << "]" << endl;
+    cout << " -p, --geometric-p VALUE             Geometric P parameter [disabled]" << endl;
+    cout << " -b, --rangemerge-blocksize VALUE    Rangemerge block size, in MB [" << b2mb(DEFAULT_RNG_BLOCKSIZE) << "]" << endl;
+    cout << " -l, --cassandra-l VALUE             Cassandra L parameter [" << DEFAULT_CASS_K << "]" << endl;
+    cout << " -m, --memstore-size VALUE           memstore size, in MB [" << b2mb(DEFAULT_MEMSTORE_SIZE) << "]" << endl;
     cout << endl;
     cout << "PUT" << endl;
-    cout << " -i, --insert-bytes [VALUE]          number of bytes to insert in MB (default: " << b2mb(DEFAULT_INSERTBYTES) << ")" << endl;
-    cout << " -n, --num-keys [VALUE]              number of keys to insert (default: " << DEFAULT_INSERTKEYS << ")" << endl;
-    cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
-    cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
-    cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
-    cout << " -z, --zipf-keys [VALUE]             create zipfian keys, with given distrib. parameter (default: " << (DEFAULT_ZIPF_KEYS ? "true " : "false") << ")" << endl;
-    cout << " -P, --put-throughput [VALUE]        put requests per sec (0: unlimited. default: " << DEFAULT_PUT_THRPUT << ")" << endl;
+    cout << " -i, --insert-bytes VALUE            number of bytes to insert in MB [" << b2mb(DEFAULT_INSERTBYTES) << "]" << endl;
+    cout << " -n, --num-keys VALUE                number of keys to insert [" << DEFAULT_INSERTKEYS << "]" << endl;
+    cout << " -k, --key-size VALUE                size of keys, in bytes [" << DEFAULT_KEY_SIZE << "]" << endl;
+    cout << " -v, --value-size VALUE              size of values, in bytes [" << DEFAULT_VALUE_SIZE << "]" << endl;
+    cout << " -u, --unique-keys                   create unique keys [" << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << "]" << endl;
+    cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distrib. parameter [" << (DEFAULT_ZIPF_KEYS ? "true " : "false") << "]" << endl;
+    cout << " -P, --put-throughput VALUE          put requests per sec (0: unlimited) [" << DEFAULT_PUT_THRPUT << "]" << endl;
     cout << endl;
     cout << "GET" << endl;
-    cout << " -g, --get-threads [VALUE]           number of get threads (default: " << DEFAULT_NUM_GET_THREADS << ")" << endl;
-    cout << " -G, --get-throughput [VALUE]        get requests per sec per thread (0: unlimited. default: " << DEFAULT_GET_THRPUT << ")" << endl;
-    cout << " -R, --range-get-size [VALUE]        max number of KVs to read (0: point get. default: " << DEFAULT_RANGE_GET_SIZE << ")" << endl;
-    cout << " -x, --flush-page-cache              flush page cache after each compaction (default: " << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << ")" << endl;
+    cout << " -g, --get-threads VALUE             number of get threads [" << DEFAULT_NUM_GET_THREADS << "]" << endl;
+    cout << " -G, --get-throughput VALUE          get requests per sec per thread (0: unlimited) [" << DEFAULT_GET_THRPUT << "]" << endl;
+    cout << " -R, --range-get-size VALUE          max number of KVs to read (0: point get) [" << DEFAULT_RANGE_GET_SIZE << "]" << endl;
+    cout << " -x, --flush-page-cache              flush page cache after each compaction [" << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << "]" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
     cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
@@ -139,7 +140,7 @@ int main(int argc, char **argv) {
              {"geometric-p",          required_argument,  0, 'p'},
              {"rangemerge-blocksize", required_argument,  0, 'b'},
              {"cassandra-l",          required_argument,  0, 'l'},
-             {"memory-size",          required_argument,  0, 'm'},
+             {"memstore-size",        required_argument,  0, 'm'},
              {"insert-bytes",         required_argument,  0, 'i'},
              {"num-keys",             required_argument,  0, 'n'},
              {"key-size",             required_argument,  0, 'k'},
@@ -189,7 +190,7 @@ int main(int argc, char **argv) {
              get_thrput,
              range_get_size;
     uint64_t blocksize,
-             memorysize,
+             memstore_size,
              insertbytes,
              num_keys_to_insert;
     uint32_t keysize,
@@ -207,6 +208,9 @@ int main(int argc, char **argv) {
     KeyValueStore *kvstore;
     struct thread_args *targs;
     pthread_t *thread;
+    std::ostringstream buf;
+    struct tm *current;
+    time_t now;
 
     // we need at least compaction manager
     if (argc == 1) {
@@ -251,7 +255,7 @@ int main(int argc, char **argv) {
 
             case 'm':
                 check_duplicate_arg_and_set(&mflag, myopt);
-                memorysize = mb2b(atoll(optarg));
+                memstore_size = mb2b(atoll(optarg));
                 break;
 
             case 'i':
@@ -353,7 +357,7 @@ int main(int argc, char **argv) {
         cass_l = DEFAULT_CASS_K;
     }
     if (mflag == 0) {
-        memorysize = DEFAULT_MEMSTORE_SIZE;
+        memstore_size = DEFAULT_MEMSTORE_SIZE;
     }
     if (kflag == 0) {
         keysize = DEFAULT_KEY_SIZE;
@@ -501,14 +505,14 @@ int main(int argc, char **argv) {
     // print values of parameters
     //--------------------------------------------------------------------------
     cout << "# compaction_manager:  " << setw(15) << cmanager << endl;
-    cout << "# memory_size:         " << setw(15) << b2mb(memorysize) << " MB    " << (mflag == 0 ? "(default)" : "")  << endl;
+    cout << "# memstore_size:       " << setw(15) << b2mb(memstore_size) << " MB    " << (mflag == 0 ? "(default)" : "") << endl;
     if (sflag) {
-        cout << "# insert_bytes:        " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
-        cout << "# key_size:            " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
-        cout << "# value_size:          " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
-        cout << "# keys_to_insert:      " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
-        cout << "# unique_keys:         " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
-        cout << "# zipf_keys:           " << setw(15) << "?" << "       (keys and values will be read from stdin)" << endl;
+        cout << "# insert_bytes:        " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# key_size:            " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# value_size:          " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# keys_to_insert:      " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# unique_keys:         " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
+        cout << "# zipf_keys:           " << setw(15) << "?       (keys and values will be read from stdin)" << endl;
     } else {
         cout << "# insert_bytes:        " << setw(15) << b2mb(insertbytes) << " MB    " << (iflag == 0 ? "(default)" : "") << endl;
         cout << "# key_size:            " << setw(15) << keysize << " B     " << (kflag == 0 ? "(default)" : "") << endl;
@@ -548,6 +552,16 @@ int main(int argc, char **argv) {
     cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "       " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     cout << "# mergebuf_size:       " << setw(15) << MERGEBUF_SIZE << " MB" << endl;
+
+    time(&now);
+    current = localtime(&now);
+    buf.str("");
+    buf << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900;
+    cout << "# start_date:          " << setw(15) << buf.str() << endl;
+    buf.str("");
+    buf << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec;
+    cout << "# start_time:          " << setw(15) << buf.str() << endl;
+
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
     print_stats_header();
@@ -555,7 +569,7 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
     // initialize variables
     //--------------------------------------------------------------------------
-    kvstore->set_memstore_maxsize(memorysize);
+    kvstore->set_memstore_maxsize(memstore_size);
     key = (char *)malloc(MAX_KEY_SIZE + 1);
     end_key = (char *)malloc(MAX_KEY_SIZE + 1);
     value = (char *)malloc(MAX_VALUE_SIZE + 1);
@@ -655,6 +669,15 @@ int main(int argc, char **argv) {
             assert(kvstore->get_num_disk_keys() == num_keys_to_insert);
         }
     }
+
+    time(&now);
+    current = localtime(&now);
+    buf.str("");
+    buf << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900;
+    cout << "# end_date:            " << setw(15) << buf.str() << endl;
+    buf.str("");
+    buf << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec;
+    cout << "# end_time:            " << setw(15) << buf.str() << endl;
 
     free(gets_count);
     free(gets_latency);
