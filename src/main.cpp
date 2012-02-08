@@ -113,11 +113,11 @@ void print_syntax(char *progname) {
     cout << endl;
     cout << "PUT" << endl;
     cout << " -i, --insert-bytes VALUE            number of bytes to insert in MB [" << b2mb(DEFAULT_INSERTBYTES) << "]" << endl;
-    cout << " -n, --num-keys VALUE                number of keys to insert [" << DEFAULT_INSERTKEYS << "]" << endl;
+    cout << " -n, --num-keys VALUE                number of KVs to insert [" << DEFAULT_INSERTKEYS << "]" << endl;
     cout << " -k, --key-size VALUE                size of keys, in bytes [" << DEFAULT_KEY_SIZE << "]" << endl;
     cout << " -v, --value-size VALUE              size of values, in bytes [" << DEFAULT_VALUE_SIZE << "]" << endl;
     cout << " -u, --unique-keys                   create unique keys [" << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << "]" << endl;
-    cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distrib. parameter [" << (DEFAULT_ZIPF_KEYS ? "true " : "false") << "]" << endl;
+    cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distribution parameter [" << (DEFAULT_ZIPF_KEYS ? "true " : "false") << "]" << endl;
     cout << " -o, --ordered-keys VALUE            keys created are ordered, with VALUE probability being random [" << (DEFAULT_ORDERED_KEYS ? "true " : "false") << "]" << endl;
     cout << " -P, --put-throughput VALUE          put requests per sec (0: unlimited) [" << DEFAULT_PUT_THRPUT << "]" << endl;
     cout << endl;
@@ -128,8 +128,8 @@ void print_syntax(char *progname) {
     cout << " -x, --flush-page-cache              flush page cache after each compaction [" << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << "]" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
-    cout << " -e, --print-kvs-to-stdout           print key-values that would be inserted and exit" << endl;
-    cout << " -s, --read-kvs-from-stdin           read key-values from stdin" << endl;
+    cout << " -e, --print-kvs-to-stdout           print KVs that would be inserted and exit" << endl;
+    cout << " -s, --read-kvs-from-stdin           read KVs from stdin" << endl;
     cout << " -t, --print-periodic-stats          print stats on stderr about compactions and gets every " << DEFAULT_STATS_PRINT_INTERVAL << " sec" << endl;
     cout << " -h, --help                          print this help message and exit" << endl;
 }
@@ -1045,12 +1045,11 @@ void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
     int zipf_num;
     char key_prefix[MAX_KEY_SIZE + 1];
     static bool first = true;
-    uint32_t kseed = 0;  // kseed = getpid() + time(NULL);
 
     if (first) {
         first = false;
         // key prefix must be common for all keys to follow zipf distribution
-        randstr_r(key_prefix, len - num_digits, &kseed);
+        randstr_r(key_prefix, len - num_digits, seed);
     }
 
     zipf_num = zipf_r(zipf_param, seed);
