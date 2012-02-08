@@ -40,8 +40,8 @@ void   print_get_throughput(int signum);
 // call once to initialize. next calls return time difference from first call
 uint64_t get_cur_time();
 void   randstr_r(char *s, const int len, uint32_t *seed);
-void   zipfstr_r(char *s, const int len, uint32_t *seed);
-int    zipf_r(uint32_t *seed);
+void   zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed);
+int    zipf_r(double zipf_param, uint32_t *seed);
 void   check_duplicate_arg_and_set(int *flag, int opt);
 int    numdigits(uint64_t num);
 
@@ -64,7 +64,6 @@ const bool     DEFAULT_FLUSH_PCACHE =       false;
 const bool     DEFAULT_STATS_PRINT =        false;
 const int      DEFAULT_STATS_PRINT_INTERVAL =   5;  // print stats every 5 sec
 
-double zipf_alpha = 0.9;       // parameter for zipf() function
 int32_t zipf_n = 1000000;     // parameter for zipf() function
 // 'zipf_n' affects the generation time of a random zipf number: there
 // is a loop in zipf() that goes from 1 to 'n'. So, the greater 'n' is,
@@ -75,6 +74,7 @@ struct thread_args {
     int sflag;
     int uflag;
     int zipf_keys;
+    double zipf_param;
     int print_kv_and_continue;
     uint64_t num_keys_to_insert;
     uint32_t keysize;
@@ -112,7 +112,7 @@ void print_syntax(char *progname) {
     cout << " -k, --key-size [VALUE]              size of keys, in bytes (default: " << DEFAULT_KEY_SIZE << ")" << endl;
     cout << " -v, --value-size [VALUE]            size of values, in bytes (default: " << DEFAULT_VALUE_SIZE << ")" << endl;
     cout << " -u, --unique-keys                   create unique keys (default: " << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << ")" << endl;
-    cout << " -z, --zipf-keys                     create zipfian keys (default: false, uniform keys)" << endl;
+    cout << " -z, --zipf-keys [VALUE]             create zipfian keys, with given distrib. parameter (default: " << (DEFAULT_ZIPF_KEYS ? "true " : "false") << ")" << endl;
     cout << " -P, --put-throughput [VALUE]        put requests per sec (0: unlimited. default: " << DEFAULT_PUT_THRPUT << ")" << endl;
     cout << endl;
     cout << "GET" << endl;
@@ -132,7 +132,7 @@ void print_syntax(char *progname) {
  *                                main
  *============================================================================*/
 int main(int argc, char **argv) {
-    const char short_args[] = "c:r:p:b:l:m:i:n:k:v:uzP:g:G:R:xesth";
+    const char short_args[] = "c:r:p:b:l:m:i:n:k:v:uz:P:g:G:R:xesth";
     const struct option long_opts[] = {
              {"compaction-manager",   required_argument,  0, 'c'},
              {"geometric-r",          required_argument,  0, 'r'},
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
              {"key-size",             required_argument,  0, 'k'},
              {"value-size",           required_argument,  0, 'v'},
              {"unique-keys",          no_argument,        0, 'u'},
-             {"zipf-keys",            no_argument,        0, 'z'},
+             {"zipf-keys",            required_argument,  0, 'z'},
              {"put-throughput",       required_argument,  0, 'P'},
              {"get-threads",          required_argument,  0, 'g'},
              {"get-throughput",       required_argument,  0, 'G'},
@@ -194,6 +194,7 @@ int main(int argc, char **argv) {
              num_keys_to_insert;
     uint32_t keysize,
              valuesize;
+    double   zipf_param;
     char    *cmanager = NULL,
             *key = NULL,
             *value = NULL,
@@ -281,6 +282,7 @@ int main(int argc, char **argv) {
             case 'z':
                 check_duplicate_arg_and_set(&zflag, myopt);
                 zipf_keys = true;
+                zipf_param = atof(optarg);
                 break;
 
             case 'P':
@@ -421,6 +423,10 @@ int main(int argc, char **argv) {
         cerr << "Error: 'valuesize' cannot be bigger than " << MAX_VALUE_SIZE << endl;
         exit(EXIT_FAILURE);
     }
+    if (zflag && zipf_param <= 0) {
+        cerr << "Error: zipf parameter must be > 0" << endl;
+        exit(EXIT_FAILURE);
+    }
     if (nflag && iflag) {
         cerr << "Error: you cannot set both 'insertbytes' and 'numkeystoinsert' parameters" << endl;
         exit(EXIT_FAILURE);
@@ -510,6 +516,9 @@ int main(int argc, char **argv) {
         cout << "# keys_to_insert:      " << setw(15) << num_keys_to_insert << endl;
         cout << "# unique_keys:         " << setw(15) << (unique_keys ? "true" : "false") << "       " << (uflag == 0 ? "(default)" : "") << endl;
         cout << "# zipf_keys:           " << setw(15) << (zipf_keys ? "true" : "false") << "       " << (zflag == 0 ? "(default)" : "") << endl;
+        if (zipf_keys) {
+            cout << "# zipf_parameter:      " << setw(15) << zipf_param << endl;
+        }
     }
     cout << "# put_throughput:      " << setw(15) << put_thrput << " req/s " << (Pflag == 0 ? "(default)" : "") << endl;
     cout << "# get_threads:         " << setw(15) << num_get_threads << "       " << (gflag == 0 ? "(default)" : "") << endl;
@@ -561,6 +570,7 @@ int main(int argc, char **argv) {
         targs[i].uflag = uflag;
         targs[i].sflag = sflag;
         targs[i].zipf_keys = zipf_keys;
+        targs[i].zipf_param = zipf_param;
         targs[i].print_kv_and_continue = print_kv_and_continue;
         targs[i].num_keys_to_insert = num_keys_to_insert;
         targs[i].keysize = keysize,
@@ -668,6 +678,7 @@ void *put_routine(void *args) {
              zipf_keys = targs->zipf_keys,
              print_kv_and_continue = targs->print_kv_and_continue,
              compaction_occured = 0;
+    double   zipf_param = targs->zipf_param;
     bool     flush_page_cache = targs->flush_page_cache,
              print_periodic_stats = targs->print_periodic_stats;
     uint64_t num_keys_to_insert = targs->num_keys_to_insert;
@@ -719,7 +730,7 @@ void *put_routine(void *args) {
             // create a random key and a random value
             //------------------------------------------------------------------
             if (zipf_keys) {
-                zipfstr_r(key, keysize, &kseed);
+                zipfstr_r(key, keysize, zipf_param, &kseed);
                 keylen = keysize;
             } else {
                 randstr_r(key, keysize, &kseed);
@@ -811,6 +822,7 @@ void *get_routine(void *args) {
     int      uflag = targs->uflag,
              zipf_keys = targs->zipf_keys,
              range_get_size = targs->range_get_size;
+    double   zipf_param = targs->zipf_param;
     bool     print_periodic_stats = targs->print_periodic_stats;
     uint32_t keysize = targs->keysize, keylen;
     uint32_t kseed = targs->tid;  // kseed = getpid() + time(NULL);
@@ -835,7 +847,7 @@ void *get_routine(void *args) {
         // create a random key
         //--------------------------------------------------------------
         if (zipf_keys) {
-            zipfstr_r(key, keysize, &kseed);
+            zipfstr_r(key, keysize, zipf_param, &kseed);
             keylen = keysize;
         } else {
             randstr_r(key, keysize, &kseed);
@@ -965,8 +977,8 @@ void randstr_r(char *s, const int len, uint32_t *seed) {
 /*============================================================================
  *                              zipfstr_r
  *============================================================================*/
-void zipfstr_r(char *s, const int len, uint32_t *seed) {
-    int num_digits = log10(zipf_n) + 1;
+void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
+    static int num_digits = log10(zipf_n) + 1;
     int zipf_num;
     char key_prefix[MAX_KEY_SIZE + 1];
     static bool first = true;
@@ -978,7 +990,7 @@ void zipfstr_r(char *s, const int len, uint32_t *seed) {
         randstr_r(key_prefix, len - num_digits, &kseed);
     }
 
-    zipf_num = zipf_r(seed);
+    zipf_num = zipf_r(zipf_param, seed);
     sprintf(s, "%s%0*d", key_prefix, num_digits, zipf_num);
 }
 
@@ -992,7 +1004,7 @@ void zipfstr_r(char *s, const int len, uint32_t *seed) {
 /*============================================================================
  *                               zipf_r
  *============================================================================*/
-int zipf_r(uint32_t *seed) {
+int zipf_r(double zipf_param, uint32_t *seed) {
     static int *sum_prob = NULL;  // sum of probabilities
     int z,                        // uniform random number (0 <= z <= RAND_MAX)
         zipf_value,               // computed exponential value to be returned
@@ -1005,7 +1017,7 @@ int zipf_r(uint32_t *seed) {
         double c = 0;             // normalization constant
 
         for (i = 1; i <= zipf_n; i++) {
-            c = c + (1.0 / pow((double) i, zipf_alpha));
+            c = c + (1.0 / pow((double) i, zipf_param));
         }
         c = 1.0 / c;
 
@@ -1013,7 +1025,7 @@ int zipf_r(uint32_t *seed) {
         sum_prob_f = (double *)malloc((zipf_n + 1) * sizeof(*sum_prob_f));
         sum_prob_f[0] = 0;
         for (i = 1; i <= zipf_n; i++) {
-            sum_prob_f[i] = sum_prob_f[i-1] + c / pow((double) i, zipf_alpha);
+            sum_prob_f[i] = sum_prob_f[i-1] + c / pow((double) i, zipf_param);
         }
 
         // from array of doubles sum_prob_f[] that contains values in range
