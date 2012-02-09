@@ -1043,7 +1043,7 @@ void randstr_r(char *s, const int len, uint32_t *seed) {
 void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
     static int num_digits = log10(zipf_n) + 1;
     int zipf_num;
-    char key_prefix[MAX_KEY_SIZE + 1];
+    static char key_prefix[MAX_KEY_SIZE + 1];
     static bool first = true;
 
     if (first) {
@@ -1061,7 +1061,7 @@ void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
  *============================================================================*/
 void orderedstr_r(char *s, const int len, uint64_t max_num, uint32_t *seed) {
     static int num_digits = log10(max_num) + 1;
-    char key_prefix[MAX_KEY_SIZE + 1];
+    static char key_prefix[MAX_KEY_SIZE + 1];
     static uint64_t i = 0;
 
     if (i == 0) {
