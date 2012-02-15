@@ -9,6 +9,7 @@
 #include <getopt.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <limits.h>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -41,7 +42,7 @@ void   print_get_throughput(int signum);
 uint64_t get_cur_time();
 void   randstr_r(char *s, const int len, uint32_t *seed);
 void   zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed);
-void   orderedstr_r(char *s, const int len, uint64_t max_num, uint32_t *seed);
+void   orderedstr_r(char *s, const int len, uint32_t *seed);
 int    zipf_r(double zipf_param, uint32_t *seed);
 void   check_duplicate_arg_and_set(int *flag, int opt);
 int    numdigits(uint64_t num);
@@ -65,11 +66,7 @@ const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
 const bool     DEFAULT_FLUSH_PCACHE =       false;
 const bool     DEFAULT_STATS_PRINT =        false;
 const int      DEFAULT_STATS_PRINT_INTERVAL =   5;  // print stats every 5 sec
-
-int32_t zipf_n = 1000000;     // parameter for zipf() function
-// 'zipf_n' affects the generation time of a random zipf number: there
-// is a loop in zipf() that goes from 1 to 'n'. So, the greater 'n' is,
-// the more time zipf() needs to generate a zipf number.
+const int32_t  ZIPF_MAX_NUM =             1000000;
 
 struct thread_args {
     int tid;
@@ -740,7 +737,9 @@ void *put_routine(void *args) {
              valuesize = targs->valuesize;
     KeyValueStore *kvstore = targs->kvstore;
     uint32_t kseed = targs->tid,  // kseed = getpid() + time(NULL);
-             vseed = kseed + 1;
+             vseed = kseed + 1,
+             sseed = 0,
+             pseed = 0;
     char    *key = NULL,
             *value = NULL;
     uint32_t keylen, valuelen;
@@ -789,10 +788,10 @@ void *put_routine(void *args) {
             } else if (ordered_keys) {
                 // with probability 'ordered_prob', create a random key. else,
                 // create an ordered key
-                if ((float)rand_r(&kseed) / (float)RAND_MAX < ordered_prob) {
+                if ((float)rand_r(&pseed) / (float)RAND_MAX < ordered_prob) {
                     randstr_r(key, keysize, &kseed);
                 } else {
-                    orderedstr_r(key, keysize, num_keys_to_insert, &kseed);
+                    orderedstr_r(key, keysize, &sseed);
                 }
                 keylen = keysize;
             } else {
@@ -801,7 +800,7 @@ void *put_routine(void *args) {
             }
             if (uflag) {
                 // TODO: sprintf(key, "%s", key) -> undefined behaviour!
-                sprintf(key, "%s.%Ld", key, i);  // make unique
+                sprintf(key, "%s.%Lu", key, i);  // make unique
                 keylen += 1 + numdigits(i);
             }
             randstr_r(value, valuesize, &vseed);
@@ -1030,6 +1029,8 @@ void randstr_r(char *s, const int len, uint32_t *seed) {
         "abcdefghijklmnopqrstuvwxyz";
     int size = sizeof(alphanum);
 
+    assert(len >= 0);
+
     for (int i = 0; i < len; i++) {
         s[i] = alphanum[rand_r(seed) % (size - 1)];
     }
@@ -1041,8 +1042,7 @@ void randstr_r(char *s, const int len, uint32_t *seed) {
  *                              zipfstr_r
  *============================================================================*/
 void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
-    static int num_digits = log10(zipf_n) + 1;
-    int zipf_num;
+    static int num_digits = log10(ZIPF_MAX_NUM) + 1;
     static char key_prefix[MAX_KEY_SIZE + 1];
     static bool first = true;
 
@@ -1052,30 +1052,30 @@ void zipfstr_r(char *s, const int len, double zipf_param, uint32_t *seed) {
         randstr_r(key_prefix, len - num_digits, seed);
     }
 
-    zipf_num = zipf_r(zipf_param, seed);
-    sprintf(s, "%s%0*d", key_prefix, num_digits, zipf_num);
+    sprintf(s, "%s%0*d", key_prefix, num_digits, zipf_r(zipf_param, seed));
 }
 
 /*============================================================================
  *                             orderedstr_r
  *============================================================================*/
-void orderedstr_r(char *s, const int len, uint64_t max_num, uint32_t *seed) {
-    static int num_digits = log10(max_num) + 1;
+void orderedstr_r(char *s, const int len, uint32_t *seed) {
+    static int num_digits = log10(ULONG_MAX) + 1;
     static char key_prefix[MAX_KEY_SIZE + 1];
-    static uint64_t i = 0;
+    static bool first = true;
 
-    if (i == 0) {
+    if (first) {
+        first = false;
         // key prefix must be common for all keys
         randstr_r(key_prefix, len - num_digits, seed);
     }
 
-    i++;
-    sprintf(s, "%s%0*Ld", key_prefix, num_digits, i);
+    sprintf(s, "%s%0*lu", key_prefix, num_digits, (*seed)++);
 }
+
 /*
- * code below from (has been modified for fastest number generation):
+ * code below from:
  *    http://www.csee.usf.edu/~christen/tools/toolpage.html
- * code was modified to precomput sum of probabilities and use integers
+ * code was modified to precompute sum of probabilities and use integers
  * instead of doubles
  */
 
@@ -1094,23 +1094,23 @@ int zipf_r(double zipf_param, uint32_t *seed) {
         double *sum_prob_f;
         double c = 0;             // normalization constant
 
-        for (i = 1; i <= zipf_n; i++) {
+        for (i = 1; i <= ZIPF_MAX_NUM; i++) {
             c = c + (1.0 / pow((double) i, zipf_param));
         }
         c = 1.0 / c;
 
         // precompute sum of probabilities
-        sum_prob_f = (double *)malloc((zipf_n + 1) * sizeof(*sum_prob_f));
+        sum_prob_f = (double *)malloc((ZIPF_MAX_NUM + 1) * sizeof(*sum_prob_f));
         sum_prob_f[0] = 0;
-        for (i = 1; i <= zipf_n; i++) {
+        for (i = 1; i <= ZIPF_MAX_NUM; i++) {
             sum_prob_f[i] = sum_prob_f[i-1] + c / pow((double) i, zipf_param);
         }
 
         // from array of doubles sum_prob_f[] that contains values in range
         // [0,1], compute array of integers sum_prob_i[] that contains values
         // in range [0,RAND_MAX]
-        sum_prob = (int *)malloc((zipf_n + 1) * sizeof(*sum_prob));
-        for (i = 0; i <= zipf_n; i++) {
+        sum_prob = (int *)malloc((ZIPF_MAX_NUM + 1) * sizeof(*sum_prob));
+        for (i = 0; i <= ZIPF_MAX_NUM; i++) {
             sum_prob[i] = (int)(sum_prob_f[i] * RAND_MAX);
         }
     }
@@ -1120,7 +1120,7 @@ int zipf_r(double zipf_param, uint32_t *seed) {
 
     // map z to the value (find the first 'i' for which sum_prob[i] >= z)
     first = 1;
-    last = zipf_n;
+    last = ZIPF_MAX_NUM;
     while (first <= last) {
         mid = (last - first)/2 + first;  // avoid overflow
         if (z > sum_prob[mid]) {
@@ -1141,7 +1141,7 @@ int zipf_r(double zipf_param, uint32_t *seed) {
     // assert that zipf_value is between 1 and N
     assert((zipf_value >= 1) && (zipf_value <= zipf_n));
 
-    return(zipf_value);
+    return (zipf_value);
 }
 
 /*============================================================================
