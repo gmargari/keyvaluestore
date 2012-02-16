@@ -7,17 +7,17 @@ fi
 
 statsfolder=$1
 
-#============================
+#========================================================
 # my_print()
-#============================
+#========================================================
 scriptname=`basename $0`
 my_print() {
     echo -e "\e[1;31m [ $scriptname ] $* \e[m"
 }
 
-#============================
+#========================================================
 # create_log_files()
-#============================
+#========================================================
 create_log_files() {
 
     my_print "create_log_files()"
@@ -40,9 +40,9 @@ create_log_files() {
     done
 }
 
-#============================
+#========================================================
 # collect_allmethods_stats()
-#============================
+#========================================================
 collect_allmethods_stats() {
 
     my_print "collect_allmethods_stats()"
@@ -76,12 +76,12 @@ collect_allmethods_stats() {
     fi
 }
 
-#============================
+#========================================================
 # collect_memsize_stats_per_method()
-#============================
+#========================================================
 collect_memsize_stats_per_method() {
 
-    my_print "collect_memsize_stats_per_method() $prefix memory_size"
+    my_print "collect_memsize_stats_per_method() $prefix memstore_size"
 
     # if no files exist return, instead of creating an empty file
     if [ "`cat ${statsfolder}/$prefix-????.stats 2> /dev/null | wc -l`" == "0" ]; then
@@ -90,7 +90,7 @@ collect_memsize_stats_per_method() {
     fi
 
     for f in ${statsfolder}/$prefix-????.stats; do
-        grep "# memory_size:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
+        grep "# memstore_size:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
     done | sort -n > ${statsfolder}/$prefix.totalstats
 
     if [ "`cat ${statsfolder}/$prefix.totalstats 2> /dev/null | wc -l`" == "0" ]; then
@@ -99,12 +99,14 @@ collect_memsize_stats_per_method() {
     fi
 }
 
-#============================
-# collect_stats()
-#============================
+#========================================================
+# collect_rngmerge_blocksize_stats()
+#========================================================
 collect_rngmerge_blocksize_stats() {
 
-    my_print "collect_stats() $prefix rngmerge_block_size"
+    my_print "collect_rngmerge_blocksize_stats()"
+
+    prefix="rangemerge-blocksize"
 
     # if no files exist return, instead of creating an empty file
     if [ "`cat ${statsfolder}/$prefix-????.stats 2> /dev/null | wc -l`" == "0" ]; then
@@ -128,12 +130,14 @@ collect_rngmerge_blocksize_stats() {
       mv ${statsfolder}/$prefix.totalstats.del ${statsfolder}/$prefix.totalstats
 }
 
-#============================
-# collect_stats()
-#============================
+#========================================================
+# collect_rngmerge_flushmem_stats()
+#========================================================
 collect_rngmerge_flushmem_stats() {
 
-    my_print "collect_stats() $prefix rngmerge_flushmem_size"
+    my_print "collect_rngmerge_flushmem_stats()"
+
+    prefix="rangemerge-flushmem"
 
     # if no files exist return, instead of creating an empty file
     if [ "`cat ${statsfolder}/$prefix-????.stats 2> /dev/null | wc -l`" == "0" ]; then
@@ -151,12 +155,12 @@ collect_rngmerge_flushmem_stats() {
     fi
 }
 
-#==================================
-# collect_stats_per_memsize()
-#==================================
-collect_stats_per_memsize() {
+#==============================================================
+# collect_stats_per_memstore_size()
+#==============================================================
+collect_stats_per_memstore_size() {
 
-    my_print "collect_stats_per_memory_size()"
+    my_print "collect_stats_per_memstore_size()"
 
     files=( 'immediate' 'rangemerge' 'geometric-p-2' 'geometric-r-3' 'geometric-r-2' \
             'cassandra-l-2' 'cassandra-l-4' 'nomerge' )
@@ -188,9 +192,27 @@ collect_stats_per_memsize() {
     done
 }
 
-#============================
+#========================================================
+# collect_ordered_keys_stats()
+#========================================================
+collect_ordered_keys_stats() {
+
+    my_print "collect_ordered_keys_stats() $prefix"
+
+    # if no files exist return, instead of creating an empty file
+    if [ "`cat ${statsfolder}/$prefix-???.stats 2> /dev/null | wc -l`" == "0" ]; then
+        echo "Error: no ${statsfolder}/$prefix.* file"
+        return
+    fi
+
+    for f in ${statsfolder}/${prefix}-???.stats; do
+        grep "# ordered_prob:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
+    done | sort -rn > ${statsfolder}/${prefix}.totalstats
+}
+
+#========================================================
 # main script starts here
-#============================
+#========================================================
 
 # create *.log files that will be used for plots
 create_log_files
@@ -199,12 +221,10 @@ create_log_files
 collect_allmethods_stats
 
 # create allmethods-memsize-*.totalstats files that contain stats for all methods for a specific memsize
-collect_stats_per_memsize
+collect_stats_per_memstore_size
 
-prefix="rangemerge-blocksize"
 collect_rngmerge_blocksize_stats
 
-prefix="rangemerge-flushmem"
 collect_rngmerge_flushmem_stats
 
 prefix="rangemerge-memsize"
@@ -243,3 +263,14 @@ collect_memsize_stats_per_method
 prefix="cassandra-l-4-memsize"
 collect_memsize_stats_per_method
 
+prefix="rangemerge-blocksize-0064-ord-prob"
+collect_ordered_keys_stats
+
+prefix="rangemerge-blocksize-0128-ord-prob"
+collect_ordered_keys_stats
+
+prefix="rangemerge-blocksize-0256-ord-prob"
+collect_ordered_keys_stats
+
+prefix="logarithmic-ord-prob"
+collect_ordered_keys_stats

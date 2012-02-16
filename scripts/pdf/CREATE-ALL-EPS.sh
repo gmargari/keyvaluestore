@@ -16,6 +16,7 @@ statsfolder=$1
 ./create-eps-thrput-latency-per-method.sh $statsfolder
 ./create-eps-diff-mem-datasize-same-scale.sh $statsfolder
 ./create-eps-get-latency-num-runs.sh $statsfolder
+./create-eps-ordered-keys.sh $statsfolder
 exit 0
 
 echo "Error running $0!"

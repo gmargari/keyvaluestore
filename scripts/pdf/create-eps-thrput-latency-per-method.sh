@@ -90,13 +90,13 @@ files=(
 "nomerge-put-thrput-2500-mergebuf-4MB.stderr"
 "rangemerge-put-thrput-2500-mergebuf-4MB.stderr"
 \
-"rangemerge-b-0016-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-b-0032-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-b-0064-put-thrput-2500-mergebuf-512KB.stderr"
-#"rangemerge-b-0128-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-b-0256-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-b-0512-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-b-1024-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-0016-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-0032-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-0064-put-thrput-2500-mergebuf-512KB.stderr"
+#"rangemerge-blocksize-0128-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-0256-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-0512-put-thrput-2500-mergebuf-512KB.stderr"
+"rangemerge-blocksize-1024-put-thrput-2500-mergebuf-512KB.stderr"
 )
 
 for file in ${files[@]}; do

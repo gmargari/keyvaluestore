@@ -56,7 +56,7 @@ rangemerge_memsize() {
     bytesins=$def_mb_to_ins
     mergername="rangemerge"
     for memsize in ${memsizes[@]}; do
-        mergerparams="-b 256 -f 0";  outputname="rangemerge-memsize-$memsize";  execute_sim;
+        mergerparams="";  outputname="rangemerge-memsize-$memsize";  execute_sim;
     done
 }
 
@@ -122,18 +122,6 @@ cassandra_memsize() {
 }
 
 #========================================================
-# rangemerge_flushmem()
-#========================================================
-rangemerge_flushmem() {
-    memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins
-    mergername="rangemerge"
-    for fmem in ${flushmemsizes[@]}; do
-        mergerparams="-b 256 -f $fmem";  outputname="rangemerge-flushmem-$fmem";  execute_sim;
-    done
-}
-
-#========================================================
 # rangemerge_blocksize()
 #========================================================
 rangemerge_blocksize() {
@@ -141,10 +129,37 @@ rangemerge_blocksize() {
     bytesins=$def_mb_to_ins
     mergername="rangemerge"
     for bsize in ${blocksizes[@]}; do
-        mergerparams="-b $bsize -f 0";  outputname="rangemerge-blocksize-$bsize";  execute_sim;
+        mergerparams="-b $bsize";  outputname="rangemerge-blocksize-$bsize";  execute_sim;
     done
 }
 
+#========================================================
+# logarithmic_ordered_data()
+#======================================================== 
+logarithmic_ordered_data() {  
+    memsize=$def_memsize_in_mb
+    bytesins=$def_mb_to_ins 
+    mergername="logarithmic"
+
+    for ord_prob in 0.0 0.2 0.4 0.6 0.8 1.0; do
+         mergerparams="-o $ord_prob";  outputname="logarithmic-ord-prob-${ord_prob}";  execute_sim;
+    done
+}
+
+#========================================================
+# rangemerge_ordered_data()
+#======================================================== 
+rangemerge_ordered_data() {   
+    memsize=$def_memsize_in_mb
+    bytesins=$def_mb_to_ins
+    mergername="rangemerge"
+
+    for bsize in 0064 0128 0256; do
+        for ord_prob in 0.0 0.2 0.4 0.6 0.8 1.0; do
+            mergerparams="-b $bsize -o $ord_prob";  outputname="rangemerge-blocksize-${bsize}-ord-prob-${ord_prob}";  execute_sim;
+        done
+    done
+}
 
 
 #========================================================
@@ -158,14 +173,19 @@ if [ $# -ne 1 ]; then
 fi
 statsfolder=$1
 
-rm -rf ${kvstorefolder}/*
-rm -rf ${statsfolder}/*
+if [ ! -f ${executable} ]; then
+    echo "Error: ${executable} does not exist"
+    exit 1
+fi
 
 # assert that debug level is 0 before starting experiments
 if [ "`${executable} -c rangemerge -i 0 | grep debug_level | awk '{print $3}'`" != "0" ]; then
     echo "Error: debug level not zero"
     exit 1
 fi
+
+rm -rf ${kvstorefolder}/*
+rm -rf ${statsfolder}/*
 
 #---------------------------------
 # You can change these
@@ -209,3 +229,9 @@ rangemerge_blocksize
 
 my_print "rangemerge flushmem"
 rangemerge_flushmem
+
+my_print "logarithmic_ordered_data"
+logarithmic_ordered_data
+
+my_print "rangemerge_ordered_data"
+rangemerge_ordered_data
