@@ -65,7 +65,7 @@ const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
 const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
 const bool     DEFAULT_FLUSH_PCACHE =       false;
 const bool     DEFAULT_STATS_PRINT =        false;
-const int      DEFAULT_STATS_PRINT_INTERVAL =   5;  // print stats every 5 sec
+const int      DEFAULT_STATS_PRINT_INTERVAL =   1;  // print stats every 5 sec
 const int32_t  ZIPF_MAX_NUM =             1000000;
 
 struct thread_args {
@@ -214,7 +214,6 @@ int main(int argc, char **argv) {
     KeyValueStore *kvstore;
     struct thread_args *targs;
     pthread_t *thread;
-    std::ostringstream buf;
     struct tm *current;
     time_t now;
 
@@ -579,12 +578,8 @@ int main(int argc, char **argv) {
 
     time(&now);
     current = localtime(&now);
-    buf.str("");
-    buf << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900;
-    cout << "# start_date:          " << setw(15) << buf.str() << endl;
-    buf.str("");
-    buf << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec;
-    cout << "# start_time:          " << setw(15) << buf.str() << endl;
+    cerr << "[DATE]      " << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900 << endl;
+    cerr << "[TIME]      " << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec << endl;
 
     fflush(stdout);
 //    system("svn info | grep Revision | awk '{printf \"# svn_revision:   %20d\\n\", $2}'");
@@ -698,12 +693,8 @@ int main(int argc, char **argv) {
 
     time(&now);
     current = localtime(&now);
-    buf.str("");
-    buf << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900;
-    cout << "# end_date:            " << setw(15) << buf.str() << endl;
-    buf.str("");
-    buf << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec;
-    cout << "# end_time:            " << setw(15) << buf.str() << endl;
+    cerr << "[DATE]      " << current->tm_mday << "/" << current->tm_mon + 1 << "/" << current->tm_year + 1900 << endl;
+    cerr << "[TIME]      " << current->tm_hour << ":" << current->tm_min << ":" << current->tm_sec << endl;
 
     free(gets_count);
     free(gets_latency);
