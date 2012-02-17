@@ -130,19 +130,19 @@ MapInputStream *MemStore::new_map_inputstream(Slice key) {
  *============================================================================*/
 void MemStore::add_map(Slice key) {
     int pos = idx_of_map(key);
-    StrMapPair newpair;
+    MapEntry newentry;
 
     if (m_map.size() > 0 && strcmp(m_map[pos].key, key.data()) == 0) {
         return;  // map with same key already exists
     }
 
-    memcpy(newpair.key, key.data(), key.size() + 1);
-    newpair.map = new Map();
+    memcpy(newentry.key, key.data(), key.size() + 1);
+    newentry.map = new Map();
 
     if (m_map.size()) {
         pos++;
     }
-    m_map.insert(m_map.begin() + pos, newpair);
+    m_map.insert(m_map.begin() + pos, newentry);
 
     sanity_check();
 }
