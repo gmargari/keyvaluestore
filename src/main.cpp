@@ -1130,7 +1130,7 @@ int zipf_r(double zipf_param, uint32_t *seed) {
     }
 
     // assert that zipf_value is between 1 and N
-    assert((zipf_value >= 1) && (zipf_value <= zipf_n));
+    assert((zipf_value >= 1) && (zipf_value <= ZIPF_MAX_NUM));
 
     return (zipf_value);
 }
