@@ -52,10 +52,10 @@ class DiskStore {
      * and compaction manager write-locks diskstore, to avoid reading and
      * modifying 'm_disk_files' concurrently
      */
-    void read_lock();
-    void read_unlock();
-    void write_lock();
-    void write_unlock();
+    void read_lock()    { m_rwlock.read_lock(); }
+    void read_unlock()  { m_rwlock.read_unlock(); }
+    void write_lock()   { m_rwlock.write_lock(); }
+    void write_unlock() { m_rwlock.write_unlock(); }
 
   private:
     bool load_from_disk();
@@ -94,32 +94,4 @@ inline DiskFile *DiskStore::get_diskfile(int pos) {
  *============================================================================*/
 inline int DiskStore::get_num_disk_files() {
     return m_disk_files.size();
-}
-
-/*============================================================================
- *                                 read_lock
- *============================================================================*/
-inline void DiskStore::read_lock() {
-    m_rwlock.read_lock();
-}
-
-/*============================================================================
- *                                read_unlock
- *============================================================================*/
-inline void DiskStore::read_unlock() {
-    m_rwlock.read_unlock();
-}
-
-/*============================================================================
- *                                 write_lock
- *============================================================================*/
-inline void DiskStore::write_lock() {
-    m_rwlock.write_lock();
-}
-
-/*============================================================================
- *                                write_unlock
- *============================================================================*/
-inline void DiskStore::write_unlock() {
-    m_rwlock.write_unlock();
 }

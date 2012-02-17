@@ -104,11 +104,8 @@ class MemStore {
      * clear the map that contains a key
      */
     void add_map(Slice key);
-    int  get_num_maps();
     Map *get_map(Slice key);
-    Map *get_map(int i);
     void clear_map(Slice key);
-    void clear_map(int idx);
 
   private:
     /**
