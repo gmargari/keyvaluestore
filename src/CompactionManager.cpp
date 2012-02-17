@@ -51,7 +51,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile() {
  *                              memstore_clear
  *============================================================================*/
 void CompactionManager::memstore_clear() {
-    m_memstore->clear();
+    m_memstore->clear_map();
 }
 
 /*============================================================================

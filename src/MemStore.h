@@ -79,9 +79,9 @@ class MemStore {
     bool will_fill(Slice key, Slice value, uint64_t timestamp);
 
     /**
-     * clear memstore
+     * clear memstore's map
      */
-    void clear();
+    void clear_map();
 
     /**
      * create and return an input stream for memstore's map. NOTE: caller must
@@ -90,22 +90,16 @@ class MemStore {
     MapInputStream *new_map_inputstream();
 
     /**
-     * create and return an input stream for memstore's map which contains key
-     * 'key'. this function is used from rangemerge c.m., where we have
-     * multiple maps in memstore, one per range. NOTE: caller must delete
-     * inputstream when done with it.
-     */
-    MapInputStream *new_map_inputstream(Slice key);
-
-    /**
-     * when using rangemerge c.m. memstore consists of multiple maps, one for
-     * each range. these functions add a new map for a newly created range,
-     * find the map responsible for storing/retrieving a specific key, and
-     * clear the map that contains a key
+     * when using rangemerge c.m., memstore consists of multiple maps, one for
+     * each range. functions below add a new map for a newly created range,
+     * find the map responsible for storing/retrieving a specific key, clear
+     * the map that contains a key, and create and return an input stream for
+     * the map containing a specific key
      */
     void add_map(Slice key);
     Map *get_map(Slice key);
     void clear_map(Slice key);
+    MapInputStream *new_map_inputstream(Slice key);
 
   private:
     /**

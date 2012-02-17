@@ -105,10 +105,9 @@ bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
 /*============================================================================
  *                                   clear
  *============================================================================*/
-void MemStore::clear() {
-    for (int i = 0; i < (int)m_map.size(); i++) {
-        clear_map(m_map[i].map);
-    }
+void MemStore::clear_map() {
+    assert(m_map.size() == 1);
+    clear_map(m_map[0].map);
 }
 
 /*============================================================================
