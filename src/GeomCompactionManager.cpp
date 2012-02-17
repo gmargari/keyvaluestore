@@ -164,7 +164,6 @@ void GeomCompactionManager::do_flush() {
     // add memstore stream to vector of streams to merge, clear memstore
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
-    memstore_clear();
     istreams.push_back(new DiskFileInputStream(memstore_file));
 
     //--------------------------------------------------------------------------

@@ -30,7 +30,6 @@ void NomergeCompactionManager::do_flush() {
     DiskFile *dfile;
 
     dfile = memstore_flush_to_diskfile();
-    memstore_clear();
 
     m_diskstore->write_lock();
     m_diskstore->add_diskfile(dfile, 0);  // insert 1st, has the most recent KVs

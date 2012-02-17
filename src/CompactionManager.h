@@ -22,15 +22,10 @@ class CompactionManager {
     virtual ~CompactionManager();
 
     /**
-     * flush memstore to disk, creating a new disk file. return pointer to new
-     * disk file created
+     * flush memstore to disk, creating a new disk file, and clear memstore.
+     * return pointer to new disk file created
      */
     DiskFile *memstore_flush_to_diskfile();
-
-    /**
-     * clear memstore
-     */
-    void memstore_clear();
 
     /**
      * request a memory flush, to create some free space in memory

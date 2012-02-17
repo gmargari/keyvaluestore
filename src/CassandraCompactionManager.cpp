@@ -109,7 +109,6 @@ void CassandraCompactionManager::do_flush() {
     // flush memstore to disk, at level 0
     //--------------------------------------------------------------------------
     memstore_file = memstore_flush_to_diskfile();
-    memstore_clear();
 
     // insert first in diskstore as it contains the most recent KVs
     m_diskstore->write_lock();

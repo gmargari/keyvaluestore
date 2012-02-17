@@ -43,15 +43,9 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile() {
     delete disk_ostream;
 
     assert(m_memstore->get_size_when_serialized() == disk_file->get_size());
+    m_memstore->clear_map();
 
     return disk_file;
-}
-
-/*============================================================================
- *                              memstore_clear
- *============================================================================*/
-void CompactionManager::memstore_clear() {
-    m_memstore->clear_map();
 }
 
 /*============================================================================
