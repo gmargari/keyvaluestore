@@ -33,15 +33,20 @@ class CompactionManager {
     void memstore_clear();
 
     /**
-     * flush KVs from memory to disk, creating free space for new KVs
+     * request a memory flush, to create some free space in memory
      */
-    virtual void flush_bytes() = 0;
+    void request_flush();
 
     // Undefined methods (just remove Weffc++ warning)
     CompactionManager(const CompactionManager&);
     CompactionManager& operator=(const CompactionManager&);
 
   protected:
+    /**
+     * flush KVs from memory to disk, creating free space for new KVs
+     */
+    virtual void do_flush() = 0;
+
     MemStore    *m_memstore;
     DiskStore   *m_diskstore;
 };

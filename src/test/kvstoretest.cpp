@@ -91,7 +91,7 @@ int main() {
 
     // flush remaining memory tuples
     while (kvstore->get_mem_size()) {
-        kvstore->flush_bytes();
+        kvstore->request_flush();
     }
 
     //================================================================

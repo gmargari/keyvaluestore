@@ -31,10 +31,9 @@ class RangemergeCompactionManager: public CompactionManager {
     void     set_blocksize(uint64_t blocksize);
     uint64_t get_blocksize();
 
-    // inherited from CompactionManager (see CompactionManager.h for info)
-    void flush_bytes();
-
   private:
+    // inherited from CompactionManager (see CompactionManager.h for info)
+    void do_flush();
 
     /**
      * select best candidate range for flushing (currently: select range with

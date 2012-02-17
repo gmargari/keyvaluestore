@@ -18,14 +18,15 @@ class NomergeCompactionManager: public CompactionManager {
      */
     ~NomergeCompactionManager() { }
 
+  private:
     // inherited from CompactionManager (see CompactionManager.h for info)
-    void flush_bytes();
+    void do_flush();
 };
 
 /*============================================================================
- *                                flush_bytes
+ *                                do_flush
  *============================================================================*/
-void NomergeCompactionManager::flush_bytes() {
+void NomergeCompactionManager::do_flush() {
     DiskFile *dfile;
 
     dfile = memstore_flush_to_diskfile();

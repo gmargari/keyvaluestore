@@ -105,9 +105,9 @@ class KeyValueStore {
     bool memstore_will_fill(const char *key, uint32_t keylen,
                             const char *value, uint32_t valuelen);
     /**
-     * explicitly call compaction manager's flush_bytes()
+     * explicitly call compaction manager's request_flush()
      */
-    void flush_bytes();
+    void request_flush();
 
     /**
      * return pointer to compaction manager, in case e.g. we want to modify

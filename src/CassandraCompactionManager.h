@@ -22,9 +22,6 @@ class CassandraCompactionManager: public CompactionManager {
      */
     ~CassandraCompactionManager();
 
-    // inherited from CompactionManager (see CompactionManager.h for info)
-    void flush_bytes();
-
     /**
      * set/get value of parameter L
      */
@@ -32,6 +29,9 @@ class CassandraCompactionManager: public CompactionManager {
     int  get_L();
 
   private:
+    // inherited from CompactionManager (see CompactionManager.h for info)
+    void do_flush();
+
     /**
      * save/load compaction manager state to/from disk
      */

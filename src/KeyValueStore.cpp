@@ -93,7 +93,7 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_fill(k, v, timestamp)) {
         time_start(&(g_stats.compaction_time));
-        flush_bytes();
+        request_flush();
         time_end(&(g_stats.compaction_time));
         g_stats.disk_files = m_diskstore->get_num_disk_files();
     }
@@ -164,10 +164,10 @@ bool KeyValueStore::memstore_will_fill(const char *key, uint32_t keylen,
 }
 
 /*============================================================================
- *                                flush_bytes
+ *                                do_flush
  *============================================================================*/
-void KeyValueStore::flush_bytes() {
-    m_compactionmanager->flush_bytes();
+void KeyValueStore::request_flush() {
+    m_compactionmanager->request_flush();
 }
 
 /*============================================================================

@@ -22,9 +22,6 @@ class GeomCompactionManager: public CompactionManager {
      */
     ~GeomCompactionManager();
 
-    // inherited from CompactionManager (see CompactionManager.h for info)
-    void flush_bytes();
-
     /**
      * set/get value of parameter R of Geometric Partitioning
      */
@@ -39,6 +36,9 @@ class GeomCompactionManager: public CompactionManager {
     int  get_P();
 
   private:
+    // inherited from CompactionManager (see CompactionManager.h for info)
+    void do_flush();
+
     /**
      * return the lower bound on the size of 'num'-th partition.
      */

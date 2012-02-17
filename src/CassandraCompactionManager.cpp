@@ -47,9 +47,9 @@ int CassandraCompactionManager::get_L() {
 }
 
 /*============================================================================
- *                                flush_bytes
+ *                                do_flush
  *============================================================================*/
-void CassandraCompactionManager::flush_bytes() {
+void CassandraCompactionManager::do_flush() {
     DiskFile *disk_file, *memstore_file;
     vector<InputStream *> istreams;
     unsigned int merge_level;
@@ -200,7 +200,7 @@ int CassandraCompactionManager::sanity_check() {
     }
 
     if (last_size != 0) {
-        // sanity_check is called both when entering and exiting flush_bytes
+        // sanity_check is called both when entering and exiting do_flush
         assert(last_size == size || last_size + 1 == size);
     }
     last_size = size;

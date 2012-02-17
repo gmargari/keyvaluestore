@@ -118,9 +118,9 @@ int GeomCompactionManager::compute_current_R() {
 }
 
 /*============================================================================
- *                                flush_bytes
+ *                                do_flush
  *============================================================================*/
-void GeomCompactionManager::flush_bytes() {
+void GeomCompactionManager::do_flush() {
     DiskFile *disk_file, *memstore_file;
     vector<InputStream *> istreams;
     int size, count, part_num;

@@ -61,9 +61,9 @@ uint64_t RangemergeCompactionManager::get_blocksize() {
 }
 
 /*============================================================================
- *                               flush_bytes
+ *                               do_flush
  *============================================================================*/
-void RangemergeCompactionManager::flush_bytes() {
+void RangemergeCompactionManager::do_flush() {
     MapInputStream *map_istream;
     vector<DiskFile *> new_disk_files;
     vector<InputStream *> istreams;
@@ -289,10 +289,9 @@ int RangemergeCompactionManager::sanity_check() {
     }
 
     create_ranges(&ranges);
-    assert(m_memstore->get_num_maps() == (int)ranges.size());
     for (int i = 0; i < (int)ranges.size(); i++) {
-        assert(m_memstore->get_map(i)
-                 == m_memstore->get_map(ranges[i]->m_first));
+        // TODO: check ranges are non-interleaving and correspond to keys
+        // stored in disk files
     }
     assert(strcmp(ranges[0]->m_first.data(), "") == 0);
     delete_ranges(ranges);

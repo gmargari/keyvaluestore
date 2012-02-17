@@ -53,3 +53,10 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile() {
 void CompactionManager::memstore_clear() {
     m_memstore->clear();
 }
+
+/*============================================================================
+ *                               request_flush
+ *============================================================================*/
+void CompactionManager::request_flush() {
+    do_flush();
+}
