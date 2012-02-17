@@ -89,21 +89,21 @@ uint64_t MemStore::get_size() {
 }
 
 /*============================================================================
- *                           get_size_when_serialized
+ *                         get_size_when_serialized
  *============================================================================*/
 uint64_t MemStore::get_size_when_serialized() {
     return m_size_when_serialized;
 }
 
 /*============================================================================
- *                                  will_fill
+ *                                will_fill
  *============================================================================*/
 bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
     return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 
 /*============================================================================
- *                                   clear
+ *                                  clear
  *============================================================================*/
 void MemStore::clear_map() {
     assert(m_map.size() == 1);
@@ -116,13 +116,6 @@ void MemStore::clear_map() {
 MapInputStream *MemStore::new_map_inputstream() {
     assert(m_map.size() == 1);
     return new MapInputStream(m_map[0].map);
-}
-
-/*============================================================================
- *                             new_map_inputstream
- *============================================================================*/
-MapInputStream *MemStore::new_map_inputstream(Slice key) {
-    return new MapInputStream(m_map[idx_of_map(key)].map);
 }
 
 /*============================================================================
@@ -162,13 +155,10 @@ void MemStore::clear_map(Slice key) {
 }
 
 /*============================================================================
- *                                 clear_map
+ *                             new_map_inputstream
  *============================================================================*/
-void MemStore::clear_map(Map *map) {
-    m_num_keys -= map->get_num_keys();
-    m_size -= map->get_size();
-    m_size_when_serialized -= map->get_size_when_serialized();
-    map->clear();
+MapInputStream *MemStore::new_map_inputstream(Slice key) {
+    return new MapInputStream(m_map[idx_of_map(key)].map);
 }
 
 /*============================================================================
@@ -208,6 +198,16 @@ int MemStore::idx_of_map(Slice key) {
     assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;
+}
+
+/*============================================================================
+ *                                 clear_map
+ *============================================================================*/
+void MemStore::clear_map(Map *map) {
+    m_num_keys -= map->get_num_keys();
+    m_size -= map->get_size();
+    m_size_when_serialized -= map->get_size_when_serialized();
+    map->clear();
 }
 
 /*============================================================================
