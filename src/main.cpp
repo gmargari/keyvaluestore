@@ -37,7 +37,7 @@ using std::flush;
 
 void  *put_routine(void *args);
 void  *get_routine(void *args);
-void   print_get_throughput(int signum);
+void   print_put_get_stats(int signum);
 // call once to initialize. next calls return time difference from first call
 uint64_t get_cur_time();
 void   randstr_r(char *s, const int len, uint32_t *seed);
@@ -115,16 +115,16 @@ void print_syntax(char *progname) {
     cout << " -n, --num-keys VALUE                number of KVs to insert [" << DEFAULT_INSERTKEYS << "]" << endl;
     cout << " -k, --key-size VALUE                size of keys, in bytes [" << DEFAULT_KEY_SIZE << "]" << endl;
     cout << " -v, --value-size VALUE              size of values, in bytes [" << DEFAULT_VALUE_SIZE << "]" << endl;
-    cout << " -u, --unique-keys                   create unique keys [" << (DEFAULT_UNIQUE_KEYS ? "true " : "false") << "]" << endl;
-    cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distribution parameter [" << (DEFAULT_ZIPF_KEYS ? "true " : "false") << "]" << endl;
-    cout << " -o, --ordered-keys VALUE            keys created are ordered, with VALUE probability being random [" << (DEFAULT_ORDERED_KEYS ? "true " : "false") << "]" << endl;
+    cout << " -u, --unique-keys                   create unique keys [" << (DEFAULT_UNIQUE_KEYS ? "true" : "false") << "]" << endl;
+    cout << " -z, --zipf-keys VALUE               create zipfian keys, with given distribution parameter [" << (DEFAULT_ZIPF_KEYS ? "true" : "false") << "]" << endl;
+    cout << " -o, --ordered-keys VALUE            keys created are ordered, with VALUE probability being random [" << (DEFAULT_ORDERED_KEYS ? "true" : "false") << "]" << endl;
     cout << " -P, --put-throughput VALUE          put requests per sec (0: unlimited) [" << DEFAULT_PUT_THRPUT << "]" << endl;
     cout << endl;
     cout << "GET" << endl;
     cout << " -g, --get-threads VALUE             number of get threads [" << DEFAULT_NUM_GET_THREADS << "]" << endl;
     cout << " -G, --get-throughput VALUE          get requests per sec per thread (0: unlimited) [" << DEFAULT_GET_THRPUT << "]" << endl;
     cout << " -R, --range-get-size VALUE          max number of KVs to read (0: point get) [" << DEFAULT_RANGE_GET_SIZE << "]" << endl;
-    cout << " -x, --flush-page-cache              flush page cache after each compaction [" << (DEFAULT_FLUSH_PCACHE ? "true " : "false") << "]" << endl;
+    cout << " -x, --flush-page-cache              flush page cache after each compaction [" << (DEFAULT_FLUSH_PCACHE ? "true" : "false") << "]" << endl;
     cout << endl;
     cout << "VARIOUS" << endl;
     cout << " -e, --print-kvs-to-stdout           print KVs that would be inserted and exit" << endl;
@@ -634,7 +634,7 @@ int main(int argc, char **argv) {
             gets_latency[i] = 0;
         }
 
-        if (signal(SIGALRM, print_get_throughput) == SIG_ERR) {
+        if (signal(SIGALRM, print_put_get_stats) == SIG_ERR) {
             perror("Could not set signal handler");
             exit(EXIT_FAILURE);
         }
@@ -956,9 +956,9 @@ void *get_routine(void *args) {
 }
 
 /*============================================================================
- *                        print_get_throughput
+ *                        print_put_get_stats
  *============================================================================*/
-void print_get_throughput(int signum) {
+void print_put_get_stats(int signum) {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static uint64_t gets_count_old = 0, gets_latency_old = 0, old_time = 0;
     static uint64_t puts_count_old = 0, puts_latency_old = 0;
@@ -968,7 +968,7 @@ void print_get_throughput(int signum) {
     std::ostringstream buf;
 
     // needed in some architectures
-    if (signal(SIGALRM, print_get_throughput) == SIG_ERR) {
+    if (signal(SIGALRM, print_put_get_stats) == SIG_ERR) {
         perror("Could not set signal handler");
         exit(EXIT_FAILURE);
     }
