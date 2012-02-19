@@ -65,7 +65,7 @@ const int      DEFAULT_GET_THRPUT =            10;  // req per sec, 0: disable
 const int      DEFAULT_RANGE_GET_SIZE =        10;  // get 10 KVs per range get
 const bool     DEFAULT_FLUSH_PCACHE =       false;
 const bool     DEFAULT_STATS_PRINT =        false;
-const int      DEFAULT_STATS_PRINT_INTERVAL =   1;  // print stats every 5 sec
+const int      DEFAULT_STATS_PRINT_INTERVAL =   5;  // print stats every 5 sec
 const int32_t  ZIPF_MAX_NUM =             1000000;
 
 struct thread_args {
@@ -92,6 +92,8 @@ bool put_thread_finished = false;
 uint32_t *gets_count = NULL;
 uint32_t *gets_latency = NULL;
 int gets_num_threads = 0;
+uint32_t puts_count = 0;
+uint32_t puts_latency = 0;
 
 /*============================================================================
  *                             print_syntax
@@ -621,7 +623,7 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
     // set signal handler and timer for periodic printing of get latency/thrput
     //--------------------------------------------------------------------------
-    if (print_periodic_stats && num_get_threads) {
+    if (print_periodic_stats) {
         struct itimerval timer;
 
         gets_num_threads = num_get_threads;
@@ -737,6 +739,7 @@ void *put_routine(void *args) {
     uint64_t bytes_inserted = 0;
     RequestThrottle throttler(targs->put_thrput);
     std::ostringstream buf;
+    struct timeval start, end;
 
     if (DBGLVL > 0) {
         cout << "# [DEBUG]   put thread started" << endl;
@@ -822,8 +825,19 @@ void *put_routine(void *args) {
         //----------------------------------------------------------------------
         // insert <key, value> into store
         //----------------------------------------------------------------------
+        if (print_periodic_stats) {
+            gettimeofday(&start, NULL);
+        }
+
         kvstore->put(key, keylen, value, valuelen);
         bytes_inserted += keylen + valuelen;
+
+        if (print_periodic_stats) {
+            gettimeofday(&end, NULL);
+            puts_count++;
+            puts_latency += (end.tv_sec - start.tv_sec)*1000 +
+                            (end.tv_usec - start.tv_usec)/1000;
+        }
 
         // if this put triggered a compaction, print stats after compaction
         if (compaction_occured) {
@@ -947,7 +961,9 @@ void *get_routine(void *args) {
 void print_get_throughput(int signum) {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static uint64_t gets_count_old = 0, gets_latency_old = 0, old_time = 0;
+    static uint64_t puts_count_old = 0, puts_latency_old = 0;
     uint64_t gets_count_cur, gets_latency_cur, cur_time;
+    uint64_t puts_count_cur, puts_latency_cur;
     float sec_lapsed;
     std::ostringstream buf;
 
@@ -969,9 +985,15 @@ void print_get_throughput(int signum) {
         gets_count_cur += gets_count[i];
         gets_latency_cur += gets_latency[i];
     }
-
     gets_count_cur -= gets_count_old;
     gets_latency_cur -= gets_latency_old;
+    gets_count_old += gets_count_cur;
+    gets_latency_old += gets_latency_cur;
+
+    puts_count_cur = puts_count - puts_count_old;
+    puts_latency_cur = puts_latency - puts_latency_old;
+    puts_count_old += puts_count_cur;
+    puts_latency_old += puts_latency_cur;
 
     cur_time = get_cur_time();
     if (old_time == 0) {
@@ -982,12 +1004,13 @@ void print_get_throughput(int signum) {
     old_time = cur_time;
 
     buf.str("");
-    buf << "[GET_STATS] " << setw(9) << right << cur_time << " "
-        << sec_lapsed << " " << gets_count_cur << " " << gets_latency_cur << endl;
+    if (gets_num_threads) {
+        buf << "[GET_STATS] " << setw(9) << right << cur_time << " "
+            << sec_lapsed << " " << gets_count_cur << " " << gets_latency_cur << endl;
+    }
+    buf << "[PUT_STATS] " << setw(9) << right << cur_time << " "
+        << sec_lapsed << " " << puts_count_cur << " " << puts_latency_cur << endl;
     cerr << buf.str() << flush;
-
-    gets_count_old += gets_count_cur;
-    gets_latency_old += gets_latency_cur;
 
     pthread_mutex_unlock(&mutex);
 }
