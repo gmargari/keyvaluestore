@@ -187,7 +187,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
 
         sort(rngs->begin(), rngs->end(), Range::cmp_by_term);
 
-        rngs->at(0)->m_first = Slice("", 0);
+        rngs->at(0)->m_first = Slice::MinSlice();
         for (int i = 0; i < (int)rngs->size(); i++) {
             // m_memsize_serialized: we want to know the exact size of tuples
             // written to disk, in order to know when a block will overflow
@@ -197,7 +197,7 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
         Range *rng = new Range();
-        rng->m_first = Slice("", 0);  // to get all terms
+        rng->m_first = Slice::MinSlice();  // to get all terms
         map = m_memstore->get_map(rng->m_first);
         rng->m_memsize = map->get_size();
         rng->m_memsize_serialized = map->get_size_when_serialized();

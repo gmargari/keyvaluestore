@@ -103,15 +103,9 @@ class MemStore {
 
   private:
     /**
-     * used from add_map()/get_map()/clear_map() functions above
-     * @return the index in vector 'm_map' of the map responsible for 'key'
+     * return the index in vector 'm_map' of the map responsible for 'key'
      */
     int idx_of_map(Slice key);
-
-    /**
-     * used from clear_map() functions above
-     */
-    void clear_map(Map *map);
 
     int sanity_check();
 

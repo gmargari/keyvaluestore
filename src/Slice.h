@@ -75,6 +75,9 @@ class Slice {
             (memcmp(data_, x.data_, x.size_) == 0));
   }
 
+  // Return a slice that is smaller than all possible slices
+  static Slice MinSlice() { return  Slice("", 0); }
+
  private:
   const char* data_;
   size_t size_;

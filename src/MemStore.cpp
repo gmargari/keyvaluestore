@@ -15,7 +15,7 @@ using std::make_pair;
 MemStore::MemStore()
     : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
       m_size_when_serialized(0) {
-    add_map(Slice("", 0));
+    add_map(Slice::MinSlice());
 }
 
 /*============================================================================
@@ -103,11 +103,11 @@ bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
 }
 
 /*============================================================================
- *                                  clear
+ *                                clear_map
  *============================================================================*/
 void MemStore::clear_map() {
     assert(m_map.size() == 1);
-    clear_map(m_map[0].map);
+    clear_map(Slice::MinSlice());
 }
 
 /*============================================================================
@@ -115,7 +115,7 @@ void MemStore::clear_map() {
  *============================================================================*/
 MapInputStream *MemStore::new_map_inputstream() {
     assert(m_map.size() == 1);
-    return new MapInputStream(m_map[0].map);
+    return new_map_inputstream(Slice::MinSlice());
 }
 
 /*============================================================================
@@ -151,7 +151,12 @@ Map *MemStore::get_map(Slice key) {
  *                                 clear_map
  *============================================================================*/
 void MemStore::clear_map(Slice key) {
-    clear_map(get_map(key));
+    Map *map = get_map(key);
+
+    m_num_keys -= map->get_num_keys();
+    m_size -= map->get_size();
+    m_size_when_serialized -= map->get_size_when_serialized();
+    map->clear();
 }
 
 /*============================================================================
@@ -198,16 +203,6 @@ int MemStore::idx_of_map(Slice key) {
     assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;
-}
-
-/*============================================================================
- *                                 clear_map
- *============================================================================*/
-void MemStore::clear_map(Map *map) {
-    m_num_keys -= map->get_num_keys();
-    m_size -= map->get_size();
-    m_size_when_serialized -= map->get_size_when_serialized();
-    map->clear();
 }
 
 /*============================================================================
