@@ -283,17 +283,41 @@ void RangemergeCompactionManager::add_maps_to_memstore() {
  *============================================================================*/
 int RangemergeCompactionManager::sanity_check() {
     vector<Range *> ranges;
+    Range *rng, *nextrng;
+    DiskFile *dfile;
 
     for (int i = 0; i < m_diskstore->get_num_disk_files(); i++) {
         assert(m_diskstore->get_diskfile(i)->get_size() <= m_blocksize);
     }
 
     create_ranges(&ranges);
+    assert(m_diskstore->get_num_disk_files() == (int)ranges.size() ||
+             m_diskstore->get_num_disk_files() == 0);
     for (int i = 0; i < (int)ranges.size(); i++) {
-        // TODO: check ranges are non-interleaving and correspond to keys
-        // stored in disk files
+        rng = ranges[i];
+        if (i < (int)ranges.size() - 1) {
+            nextrng = ranges[i+1];
+        } else {
+            nextrng = NULL;
+        }
+        if (nextrng) {
+            assert(strcmp(rng->m_first.data(), nextrng->m_first.data()) < 0);
+        }
+        if (rng->m_file_num != NO_DISK_FILE) {
+            Slice first, last;
+
+            dfile = m_diskstore->get_diskfile(rng->m_file_num);
+            dfile->get_first_last_term(&first, &last);
+            if (i == 0) {
+                assert(strcmp(rng->m_first.data(), Slice::MinSlice().data()) == 0);
+            } else {
+                assert(strcmp(rng->m_first.data(), first.data()) == 0);
+            }
+            if (nextrng) {
+                assert(strcmp(last.data(), nextrng->m_first.data()) < 0);
+            }
+        }
     }
-    assert(strcmp(ranges[0]->m_first.data(), "") == 0);
     delete_ranges(ranges);
 
     return 1;
