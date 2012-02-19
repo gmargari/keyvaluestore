@@ -70,7 +70,7 @@ class MemStore {
     /**
      * return total byte size of tuples when serialized to be stored on disk.
      */
-    uint64_t get_size_when_serialized();
+    uint64_t get_size_serialized();
 
     /**
      * check if adding <key, value, timestamp> to memstore will cause memstore
@@ -79,9 +79,9 @@ class MemStore {
     bool will_fill(Slice key, Slice value, uint64_t timestamp);
 
     /**
-     * clear memstore's map
+     * clear memstore
      */
-    void clear_map();
+    void clear();
 
     /**
      * create and return an input stream for memstore's map. NOTE: caller must
@@ -96,11 +96,11 @@ class MemStore {
      * the map that contains a key, and create and return an input stream for
      * the map containing a specific key
      */
-    void add_map(Slice key);
-    uint64_t get_map_num_keys(Slice key);
-    uint64_t get_map_size(Slice key);
-    uint64_t get_map_size_when_serialized(Slice key);
-    void clear_map(Slice key);
+    void            add_map(Slice key);
+    uint64_t        get_map_num_keys(Slice key);
+    uint64_t        get_map_size(Slice key);
+    uint64_t        get_map_size_serialized(Slice key);
+    void            clear_map(Slice key);
     MapInputStream *new_map_inputstream(Slice key);
 
   private:
@@ -125,7 +125,7 @@ class MemStore {
     uint64_t         m_maxsize;
     uint64_t         m_num_keys;
     uint64_t         m_size;
-    uint64_t         m_size_when_serialized;
+    uint64_t         m_size_serialized;
 };
 
 #endif  // SRC_MEMSTORE_H_

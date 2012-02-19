@@ -112,7 +112,7 @@ void RangemergeCompactionManager::do_flush() {
     }
 
     assert((dbg_memsize = m_memstore->get_size()) || 1);
-    assert((dbg_memsize_serial = m_memstore->get_size_when_serialized()) || 1);
+    assert((dbg_memsize_serial = m_memstore->get_size_serialized()) || 1);
 
     //--------------------------------------------------------------------------
     // update memstore
@@ -129,7 +129,7 @@ void RangemergeCompactionManager::do_flush() {
 
     assert(dbg_memsize - rng.m_memsize == m_memstore->get_size());
     assert(dbg_memsize_serial - rng.m_memsize_serialized
-             == m_memstore->get_size_when_serialized());
+             == m_memstore->get_size_serialized());
 
     //--------------------------------------------------------------------------
     // update diskstore
@@ -190,14 +190,17 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
         for (int i = 0; i < (int)rngs->size(); i++) {
             // m_memsize_serialized: we want to know the exact size of tuples
             // written to disk, in order to know when a block will overflow
-            rngs->at(i)->m_memsize = m_memstore->get_map_size(rngs->at(i)->m_first);
-            rngs->at(i)->m_memsize_serialized = m_memstore->get_map_size_when_serialized(rngs->at(i)->m_first);
+            rngs->at(i)->m_memsize =
+              m_memstore->get_map_size(rngs->at(i)->m_first);
+            rngs->at(i)->m_memsize_serialized =
+              m_memstore->get_map_size_serialized(rngs->at(i)->m_first);
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
         Range *rng = new Range();
         rng->m_first = Slice::MinSlice();  // to get all terms
         rng->m_memsize = m_memstore->get_map_size(rng->m_first);
-        rng->m_memsize_serialized = m_memstore->get_map_size_when_serialized(rng->m_first);
+        rng->m_memsize_serialized =
+          m_memstore->get_map_size_serialized(rng->m_first);
         rng->m_disksize = 0;
         rng->m_file_num = NO_DISK_FILE;
         rngs->push_back(rng);

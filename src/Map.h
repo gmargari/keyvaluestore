@@ -62,7 +62,7 @@ class Map {
     /**
      * return total byte size of tuples when serialized to be stored on disk.
      */
-    uint64_t get_size_when_serialized();
+    uint64_t get_size_serialized();
 
     /**
      * size of KV when serialized and added to map

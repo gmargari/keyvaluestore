@@ -126,9 +126,9 @@ uint64_t Map::get_size() {
 }
 
 /*============================================================================
- *                          get_size_when_serialized
+ *                            get_size_serialized
  *============================================================================*/
-uint64_t Map::get_size_when_serialized() {
+uint64_t Map::get_size_serialized() {
     return m_size_serialized;
 }
 

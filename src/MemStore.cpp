@@ -14,7 +14,7 @@ using std::make_pair;
  *============================================================================*/
 MemStore::MemStore()
     : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
-      m_size_when_serialized(0) {
+      m_size_serialized(0) {
     add_map(Slice::MinSlice());
 }
 
@@ -50,11 +50,11 @@ bool MemStore::put(Slice key, Slice value, uint64_t timestamp) {
 
     m_num_keys -= map->get_num_keys();
     m_size -= map->get_size();
-    m_size_when_serialized -= map->get_size_when_serialized();
+    m_size_serialized -= map->get_size_serialized();
     ret = map->put(key, value, timestamp);
     m_num_keys += map->get_num_keys();
     m_size += map->get_size();
-    m_size_when_serialized += map->get_size_when_serialized();
+    m_size_serialized += map->get_size_serialized();
 
     return ret;
 }
@@ -89,10 +89,10 @@ uint64_t MemStore::get_size() {
 }
 
 /*============================================================================
- *                         get_size_when_serialized
+ *                           get_size_serialized
  *============================================================================*/
-uint64_t MemStore::get_size_when_serialized() {
-    return m_size_when_serialized;
+uint64_t MemStore::get_size_serialized() {
+    return m_size_serialized;
 }
 
 /*============================================================================
@@ -103,9 +103,9 @@ bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
 }
 
 /*============================================================================
- *                                clear_map
+ *                                  clear
  *============================================================================*/
-void MemStore::clear_map() {
+void MemStore::clear() {
     assert(m_map.size() == 1);
     clear_map(Slice::MinSlice());
 }
@@ -155,10 +155,10 @@ uint64_t MemStore::get_map_size(Slice key) {
 }
 
 /*============================================================================
- *                     get_map_size_when_serialized
+ *                         get_map_size_serialized
  *============================================================================*/
-uint64_t MemStore::get_map_size_when_serialized(Slice key) {
-    return get_map(key)->get_size_when_serialized();
+uint64_t MemStore::get_map_size_serialized(Slice key) {
+    return get_map(key)->get_size_serialized();
 }
 
 /*============================================================================
@@ -169,7 +169,7 @@ void MemStore::clear_map(Slice key) {
 
     m_num_keys -= map->get_num_keys();
     m_size -= map->get_size();
-    m_size_when_serialized -= map->get_size_when_serialized();
+    m_size_serialized -= map->get_size_serialized();
     map->clear();
 }
 
@@ -230,10 +230,20 @@ int MemStore::idx_of_map(Slice key) {
  *                                sanity_check
  *============================================================================*/
 int MemStore::sanity_check() {
-#if DBGLVL > 1
-    for (int i = 0; i < (int)m_map.size() - 1; i++) {
-        assert(strcmp(m_map[i].key, m_map[i+1].key) < 0);
+#if DBGLVL > 0
+    uint64_t mnum_keys = 0, msize = 0, msize_serialized = 0;
+
+    for (int i = 0; i < (int)m_map.size(); i++) {
+        if (i < (int)m_map.size() - 1) {
+            assert(strcmp(m_map[i].key, m_map[i+1].key) < 0);
+        }
+        mnum_keys += m_map[i].map->get_num_keys();
+        msize += m_map[i].map->get_size();
+        msize_serialized += m_map[i].map->get_size_serialized();
     }
+    assert(m_num_keys == mnum_keys);
+    assert(m_size == msize);
+    assert(m_size_serialized == msize_serialized);
 #endif
 
     return 1;

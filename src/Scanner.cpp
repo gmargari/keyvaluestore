@@ -31,7 +31,7 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     Slice k, v;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
-    MemStore *memstore = m_kvstore->m_memstore;
+//    MemStore *memstore = m_kvstore->m_memstore;
     DiskStore *diskstore = m_kvstore->m_diskstore;
     int diskfiles;
 
@@ -75,7 +75,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     int numkeys = 0, diskfiles;
     PriorityInputStream *pistream;
     vector<InputStream *> istreams;
-    MemStore *memstore = m_kvstore->m_memstore;
+//    MemStore *memstore = m_kvstore->m_memstore;
     DiskStore *diskstore = m_kvstore->m_diskstore;
 
     // create a priority stream, containing a stream for memstore and one
