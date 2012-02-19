@@ -9,13 +9,17 @@
 
 using std::make_pair;
 
+bool usemutex = true;
+
 /*============================================================================
  *                                 MemStore
  *============================================================================*/
 MemStore::MemStore()
     : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
-      m_size_when_serialized(0) {
+      m_size_when_serialized(0), m_mutex() {
     add_map(Slice::MinSlice());
+
+    pthread_mutex_init(&m_mutex, NULL);
 }
 
 /*============================================================================
@@ -48,6 +52,7 @@ bool MemStore::put(Slice key, Slice value, uint64_t timestamp) {
     bool ret;
     Map *map = get_map(key);
 
+if (usemutex) pthread_mutex_lock(&m_mutex);
     m_num_keys -= map->get_num_keys();
     m_size -= map->get_size();
     m_size_when_serialized -= map->get_size_when_serialized();
@@ -55,6 +60,7 @@ bool MemStore::put(Slice key, Slice value, uint64_t timestamp) {
     m_num_keys += map->get_num_keys();
     m_size += map->get_size();
     m_size_when_serialized += map->get_size_when_serialized();
+if (usemutex) pthread_mutex_unlock(&m_mutex);
 
     return ret;
 }
@@ -99,11 +105,16 @@ uint64_t MemStore::get_size_when_serialized() {
  *                                will_fill
  *============================================================================*/
 bool MemStore::will_fill(Slice key, Slice value, uint64_t timestamp) {
-    return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
+uint64_t mmem = 0;
+for (int i = 0; i < (int)m_map.size(); i++)
+    mmem += m_map[i].map->get_size();
+return (mmem + Map::kv_size(key, value, timestamp) > m_maxsize);
+
+//    return (m_size + Map::kv_size(key, value, timestamp) > m_maxsize);
 }
 
 /*============================================================================
- *                                clear_map
+ *                                 clear_map
  *============================================================================*/
 void MemStore::clear_map() {
     assert(m_map.size() == 1);
@@ -119,6 +130,30 @@ MapInputStream *MemStore::new_map_inputstream() {
 }
 
 /*============================================================================
+ *                                 snapshot_map
+ *============================================================================*/
+void MemStore::snapshot_map() {
+    assert(m_map.size() == 1);
+    snapshot_map(Slice::MinSlice());
+}
+
+/*============================================================================
+ *                                clear_snapshot
+ *============================================================================*/
+void MemStore::clear_snapshot() {
+    assert(m_map.size() == 1);
+    clear_snapshot(Slice::MinSlice());
+}
+
+/*============================================================================
+ *                            new_snapshot_inputstream
+ *============================================================================*/
+MapInputStream *MemStore::new_snapshot_inputstream() {
+    assert(m_map.size() == 1);
+    return new_snapshot_inputstream(Slice::MinSlice());
+}
+
+/*============================================================================
  *                                 add_map
  *============================================================================*/
 void MemStore::add_map(Slice key) {
@@ -131,6 +166,7 @@ void MemStore::add_map(Slice key) {
 
     memcpy(newentry.key, key.data(), key.size() + 1);
     newentry.map = new Map();
+    newentry.snapshot = NULL;
 
     if (m_map.size()) {
         pos++;
@@ -141,50 +177,79 @@ void MemStore::add_map(Slice key) {
 }
 
 /*============================================================================
- *                            get_map_num_keys
+ *                                 get_map
  *============================================================================*/
-uint64_t MemStore::get_map_num_keys(Slice key) {
-    return get_map(key)->get_num_keys();
-}
-
-/*============================================================================
- *                              get_map_size
- *============================================================================*/
-uint64_t MemStore::get_map_size(Slice key) {
-    return get_map(key)->get_size();
-}
-
-/*============================================================================
- *                     get_map_size_when_serialized
- *============================================================================*/
-uint64_t MemStore::get_map_size_when_serialized(Slice key) {
-    return get_map(key)->get_size_when_serialized();
+Map *MemStore::get_map(Slice key) {
+    return m_map[idx_of_map(key)].map;
 }
 
 /*============================================================================
  *                                 clear_map
  *============================================================================*/
 void MemStore::clear_map(Slice key) {
-    Map *map = get_map(key);
-
-    m_num_keys -= map->get_num_keys();
-    m_size -= map->get_size();
-    m_size_when_serialized -= map->get_size_when_serialized();
-    map->clear();
+    clear_map(get_map(key));
 }
 
 /*============================================================================
  *                             new_map_inputstream
  *============================================================================*/
 MapInputStream *MemStore::new_map_inputstream(Slice key) {
-    return new MapInputStream(m_map[idx_of_map(key)].map);
+    return new MapInputStream(get_map(key));
 }
 
 /*============================================================================
- *                                 get_map
+ *                                 snapshot_map
  *============================================================================*/
-Map *MemStore::get_map(Slice key) {
-    return m_map[idx_of_map(key)].map;
+void MemStore::snapshot_map(Slice key) {
+    int idx = idx_of_map(key);
+
+uint64_t mmem, smem;
+mmem = smem = 0;
+for (int i = 0; i < (int)m_map.size(); i++) {
+    mmem += m_map[i].map->get_size();
+    if (m_map[i].snapshot)
+        smem += m_map[i].snapshot->get_size();
+}
+printf("total: %Lu, mmem: %Lu, smem: %Lu (m_size: %Lu)\n", (mmem + smem)/1048576, mmem/1048576, smem/1048576, m_size/1048576);
+
+if (usemutex) pthread_mutex_lock(&m_mutex);
+    m_num_keys -= m_map[idx].map->get_num_keys();
+    m_size -= m_map[idx].map->get_size();
+    m_size_when_serialized -= m_map[0].map->get_size_when_serialized();
+if (usemutex) pthread_mutex_unlock(&m_mutex);
+
+    assert(m_map[idx].snapshot == NULL);
+    m_map[idx].snapshot = m_map[idx].map;
+    m_map[idx].map = new Map();
+
+mmem = smem = 0;
+for (int i = 0; i < (int)m_map.size(); i++) {
+    mmem += m_map[i].map->get_size();
+    if (m_map[i].snapshot)
+        smem += m_map[i].snapshot->get_size();
+}
+printf("total: %Lu, mmem: %Lu, smem: %Lu (m_size: %Lu)\n", (mmem + smem)/1048576, mmem/1048576, smem/1048576, m_size/1048576);
+}
+
+/*============================================================================
+ *                                clear_snapshot
+ *============================================================================*/
+void MemStore::clear_snapshot(Slice key) {
+    int idx = idx_of_map(key);
+
+    m_map[idx].snapshot->clear();
+    delete m_map[idx].snapshot;
+    m_map[idx].snapshot = NULL;
+}
+
+/*============================================================================
+ *                            new_snapshot_inputstream
+ *============================================================================*/
+MapInputStream *MemStore::new_snapshot_inputstream(Slice key) {
+    int idx = idx_of_map(key);
+
+    assert(m_map[idx].snapshot);
+    return new MapInputStream(m_map[idx].snapshot);
 }
 
 /*============================================================================
@@ -224,6 +289,16 @@ int MemStore::idx_of_map(Slice key) {
     assert(mid >= 0 && mid < (int)m_map.size());
 
     return mid;
+}
+
+/*============================================================================
+ *                                 clear_map
+ *============================================================================*/
+void MemStore::clear_map(Map *map) {
+    m_num_keys -= map->get_num_keys();
+    m_size -= map->get_size();
+    m_size_when_serialized -= map->get_size_when_serialized();
+    map->clear();
 }
 
 /*============================================================================

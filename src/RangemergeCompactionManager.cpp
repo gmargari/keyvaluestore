@@ -172,7 +172,6 @@ Range RangemergeCompactionManager::get_best_range() {
 void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
     int num_disk_files = m_diskstore->get_num_disk_files();
     Slice last;
-    Map *map;
 
     rngs->clear();
     if (num_disk_files) {
@@ -191,16 +190,14 @@ void RangemergeCompactionManager::create_ranges(vector<Range *> *rngs) {
         for (int i = 0; i < (int)rngs->size(); i++) {
             // m_memsize_serialized: we want to know the exact size of tuples
             // written to disk, in order to know when a block will overflow
-            map = m_memstore->get_map(rngs->at(i)->m_first);
-            rngs->at(i)->m_memsize = map->get_size();
-            rngs->at(i)->m_memsize_serialized = map->get_size_when_serialized();
+            rngs->at(i)->m_memsize = m_memstore->get_map_size(rngs->at(i)->m_first);
+            rngs->at(i)->m_memsize_serialized = m_memstore->get_map_size_when_serialized(rngs->at(i)->m_first);
         }
     } else {  // if this is the first time we flush bytes to disk (no disk file)
         Range *rng = new Range();
         rng->m_first = Slice::MinSlice();  // to get all terms
-        map = m_memstore->get_map(rng->m_first);
-        rng->m_memsize = map->get_size();
-        rng->m_memsize_serialized = map->get_size_when_serialized();
+        rng->m_memsize = m_memstore->get_map_size(rng->m_first);
+        rng->m_memsize_serialized = m_memstore->get_map_size_when_serialized(rng->m_first);
         rng->m_disksize = 0;
         rng->m_file_num = NO_DISK_FILE;
         rngs->push_back(rng);

@@ -46,9 +46,9 @@ int main() {
     memstore->put(Slice("f2", 2), Slice("y", 1), t++); // belongs to map 0 (replace)
     memstore->put(Slice("f3", 2), Slice("y", 1), t++); // belongs to map 1 (replace)
 
-    map1_num = memstore->get_map(Slice(k1, strlen(k1)))->get_num_keys();
-    map2_num = memstore->get_map(Slice(k2, strlen(k2)))->get_num_keys();
-    map3_num = memstore->get_map(Slice(k3, strlen(k3)))->get_num_keys();
+    map1_num = memstore->get_map_num_keys(Slice(k1, strlen(k1)));
+    map2_num = memstore->get_map_num_keys(Slice(k2, strlen(k2)));
+    map3_num = memstore->get_map_num_keys(Slice(k3, strlen(k3)));
 
     if (map1_num != 6 || map2_num != 5 || map3_num != 3) {
         cout << "num of keys per map should be <6, 5, 3>, but is <" << map1_num << ", " << map2_num << ", " << map3_num << ">" << endl;
@@ -61,9 +61,9 @@ int main() {
     memstore->put(Slice("z4", 2), Slice("y", 1), t++); // belongs to map 2
     memstore->put(Slice("k3", 2), Slice("y", 1), t++); // belongs to map 1
 
-    map1_num = memstore->get_map(Slice(k1, strlen(k1)))->get_num_keys();
-    map2_num = memstore->get_map(Slice(k2, strlen(k2)))->get_num_keys();
-    map3_num = memstore->get_map(Slice(k3, strlen(k3)))->get_num_keys();
+    map1_num = memstore->get_map_num_keys(Slice(k1, strlen(k1)));
+    map2_num = memstore->get_map_num_keys(Slice(k2, strlen(k2)));
+    map3_num = memstore->get_map_num_keys(Slice(k3, strlen(k3)));
 
     if (map1_num != 7 || map2_num != 6 || map3_num != 2) {
         cout << "num of keys per map should be <7, 6, 2>, but is <" << map1_num << ", " << map2_num << ", " << map3_num << ">" << endl;

@@ -90,35 +90,55 @@ class MemStore {
     MapInputStream *new_map_inputstream();
 
     /**
+     * take a snapshot of memstore's map. will be used to flush map offline
+     */
+    void snapshot_map();
+
+    /**
+     * clear memstore's snapshot
+     */
+    void clear_snapshot();
+
+    /**
+     * create and return an input stream for memstore's snapshot. NOTE: caller
+     * must delete inputstream when done with it.
+     */
+    MapInputStream *new_snapshot_inputstream();
+
+    /**
      * when using rangemerge c.m., memstore consists of multiple maps, one for
      * each range. functions below add a new map for a newly created range,
-     * get various stats about the map responsible for a specific key, clear
+     * find the map responsible for storing/retrieving a specific key, clear
      * the map that contains a key, and create and return an input stream for
      * the map containing a specific key
      */
     void add_map(Slice key);
-    uint64_t get_map_num_keys(Slice key);
-    uint64_t get_map_size(Slice key);
-    uint64_t get_map_size_when_serialized(Slice key);
+    Map *get_map(Slice key);
     void clear_map(Slice key);
     MapInputStream *new_map_inputstream(Slice key);
 
+    void snapshot_map(Slice key);
+    void clear_snapshot(Slice key);
+    MapInputStream *new_snapshot_inputstream(Slice key);
+
   private:
     /**
-     * return the map responsible for 'key'
-     */
-    Map *get_map(Slice key);
-
-    /**
-     * return the index in vector 'm_map' of the map responsible for 'key'
+     * used from add_map()/get_map()/clear_map() functions above
+     * @return the index in vector 'm_map' of the map responsible for 'key'
      */
     int idx_of_map(Slice key);
+
+    /**
+     * used from clear_map() functions above
+     */
+    void clear_map(Map *map);
 
     int sanity_check();
 
     typedef struct {
         char key[MAX_KEY_SIZE + 1];
         Map *map;
+        Map *snapshot;
     } MapEntry;
 
     vector<MapEntry> m_map;
@@ -126,6 +146,8 @@ class MemStore {
     uint64_t         m_num_keys;
     uint64_t         m_size;
     uint64_t         m_size_when_serialized;
+
+    pthread_mutex_t m_mutex;
 };
 
 #endif  // SRC_MEMSTORE_H_
