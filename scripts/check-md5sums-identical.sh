@@ -13,7 +13,7 @@ execute() {
     echo $cmd | awk '{printf "%-60s ", $0}'
     
     rm -rf /tmp/kvstore/* &&
-    $cmd > /dev/null &&
+    $cmd > /dev/null 2> /tmp/err &&
     ./build/src/tools/merge `cat /tmp/kvstore/dstore.info | grep "^/tmp/kvstore/dfile"` | grep -v ^"#" | awk '{print $1 $2 $3}' |  md5sum > $md5file &&
     md5sum=`cat $md5file | awk '{print $1}'`
     echo $md5sum
