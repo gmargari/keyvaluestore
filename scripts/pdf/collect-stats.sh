@@ -263,6 +263,42 @@ collect_memsize_stats_per_method
 prefix="cassandra-l-4-memsize"
 collect_memsize_stats_per_method
 
+prefix="geometric-p-2-ord-prob"
+collect_ordered_keys_stats
+
+prefix="geometric-p-3-ord-prob"
+collect_ordered_keys_stats
+
+prefix="geometric-p-4-ord-prob"
+collect_ordered_keys_stats
+
+prefix="geometric-r-2-ord-prob"
+collect_ordered_keys_stats
+
+prefix="geometric-r-3-ord-prob"
+collect_ordered_keys_stats
+
+prefix="geometric-r-4-ord-prob"
+collect_ordered_keys_stats
+
+prefix="cassandra-l-2-ord-prob"
+collect_ordered_keys_stats
+
+prefix="cassandra-l-3-ord-prob"
+collect_ordered_keys_stats
+
+prefix="cassandra-l-4-ord-prob"
+collect_ordered_keys_stats
+
+prefix="nomerge-ord-prob"
+collect_ordered_keys_stats
+
+prefix="rangemerge-ord-prob"
+collect_ordered_keys_stats
+
+prefix="immediate-ord-prob"
+collect_ordered_keys_stats
+
 prefix="rangemerge-blocksize-0064-ord-prob"
 collect_ordered_keys_stats
 
@@ -272,5 +308,3 @@ collect_ordered_keys_stats
 prefix="rangemerge-blocksize-0256-ord-prob"
 collect_ordered_keys_stats
 
-prefix="logarithmic-ord-prob"
-collect_ordered_keys_stats

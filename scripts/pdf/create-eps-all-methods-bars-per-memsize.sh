@@ -33,10 +33,10 @@ ylabel_comp='Compaction time (min)'
 ylabel_io='I/O time (min)'
 ylabel_gb='Total data transferred (GB)'
 
-for i in `seq 0 $(( ${#memsizes[*]} - 1 ))`; do
+for memsize in ${memsizes[@]}; do
 
-    inputfile="${statsfolder}/allmethods-memsize-${memsizes[$i]}.totalstats"
-    outputfile="${outfolder}/allmethods-memsize-${memsizes[$i]}"
+    inputfile="${statsfolder}/allmethods-memsize-${memsize}.totalstats"
+    outputfile="${outfolder}/allmethods-memsize-${memsize}"
 
     # check if file exists
     if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
@@ -61,7 +61,7 @@ gnuplot << EOF
     set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel ''
 
-    #set grid ytics
+    set grid ytics
 
     set size 0.8,1.0
 

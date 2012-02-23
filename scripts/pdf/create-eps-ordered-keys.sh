@@ -29,27 +29,24 @@ inputfile_with_linenumbers="/tmp/gnuplottmp" # tmp file
 newinputfile="/tmp/gnuplottmp2" # tmp file
 
 color="#387DB8"
+#ymax=50
 
-files=( 'rangemerge-blocksize-0064-ord-prob.totalstats' 'rangemerge-blocksize-0128-ord-prob.totalstats' \
-        'rangemerge-blocksize-0256-ord-prob.totalstats' 'logarithmic-ord-prob.totalstats' )
-xlabels=( 'Percentage of keys ordered' 'Percentage of keys ordered' \
-          'Percentage of keys ordered' 'Percentage of keys ordered' )
-
-# check arrays 'files' and 'xlabels' have the same number of elements
-if [ ${#files[*]} -ne ${#xlabels[*]} ]; then
-    echo "Error: different array size of 'files' (${#files[*]}) and 'xlabels' (${#xlabels[*]})" >&2;
-    exit 1;
-fi
+#files=( 'rangemerge-blocksize-0064-ord-prob.totalstats' 'rangemerge-blocksize-0128-ord-prob.totalstats' \
+#        'rangemerge-blocksize-0256-ord-prob.totalstats' 'logarithmic-ord-prob.totalstats' )
+files=( 'geometric-p-2-ord-prob.totalstats' 'geometric-p-3-ord-prob.totalstats' 'geometric-p-4-ord-prob.totalstats' \
+        'geometric-r-2-ord-prob.totalstats' 'geometric-r-3-ord-prob.totalstats' 'geometric-r-4-ord-prob.totalstats' \
+        'cassandra-l-2-ord-prob.totalstats' 'cassandra-l-3-ord-prob.totalstats' 'cassandra-l-4-ord-prob.totalstats' \
+        'rangemerge-ord-prob.totalstats' 'nomerge-ord-prob.totalstats' 'immediate-ord-prob.totalstats' )
+xlabel='Percentage of keys ordered (%)'
 
 # for each file in array 'files' create a number of eps
-for i in `seq 0 $(( ${#xlabels[*]} - 1 ))`; do
+for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
 
     file=${files[$i]}
     inputfile="${statsfolder}/$file"
     outputfile="${outfolder}/$file"
-    xlabel=${xlabels[$i]};
 
-    fontsize=22
+    fontsize=32
 
     # check that file exists
     if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
@@ -57,7 +54,7 @@ for i in `seq 0 $(( ${#xlabels[*]} - 1 ))`; do
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", ++i, $0}' ${inputfile} > ${inputfile_with_linenumbers}
     lines=`cat ${inputfile_with_linenumbers} | wc -l`
-    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%.1f\" %s", (1.0 - $1), NR-1}'`
+    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%.0f\" %s", (1.0 - $1)*100, NR-1}'`
 
     ylabel_ins='Insertion time (min)'
     ylabel_comp='Compaction time (min)'
@@ -72,7 +69,7 @@ gnuplot << EOF
     # mb_ins(1) Ttotal(2) Tcompac(3) Tput(4) Tmerge(5) Tfree(6) Tcmrest(7) Tmem(8) Tread(9) Twrite(10) mb_read(11) mb_writ(12) reads(13) writes(14) runs(15)
 
     set xtics (${xticklabels})
-    set yrange [0:] # start y from 0
+    set yrange [0:${ymax}] # start y from 0
 #    set xrange [0:${lines}+1]
 #    set xtics font 'Helvetica,22'
 #    set ytics font 'Helvetica,22'
@@ -83,6 +80,8 @@ gnuplot << EOF
 
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
+
+    set grid ytics
 
     set boxwidth 0.50
     set style fill solid border 0

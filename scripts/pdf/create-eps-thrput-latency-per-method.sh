@@ -133,19 +133,6 @@ for file in ${files[@]}; do
     # 'flush_stats_file2' is used to draw bars during compactions
     cat $flush_stats_file | awk '{if ($2=="START") {print $1, $2, 0; print $1, $2, 1;} else {print $1, $2, 1; print $1, $2, 0;}}' > $flush_stats_file2
 
-#########################################
-# MOVE IN SEPARATE FILE
-#########################################
-#    # compute and print percentiles of latencies (not used for plots, just for info)
-#    cat $get_stats_file | awk '{print $3}' | sort -n > $tmpfile
-#    lines=`cat $tmpfile | wc -l`
-#    for p in 0.50 0.90 0.99 0.999 1; do
-#        cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "latency %3.1f%% %5.1f\n", p*100, $1; exit}'
-#    done
-#    echo min throughput = $thrput_min
-#########################################
-
-
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
