@@ -16,7 +16,7 @@
 #include "./RangemergeCompactionManager.h"
 #include "./CassandraCompactionManager.h"
 #include "./Statistics.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 using std::cout;
 using std::cerr;

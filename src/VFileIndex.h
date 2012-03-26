@@ -9,7 +9,7 @@
 #include <map>
 
 #include "./Global.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 using std::map;
 

@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "./Global.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 using std::pair;
 using std::vector;

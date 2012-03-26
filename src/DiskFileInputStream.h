@@ -7,7 +7,7 @@
 
 #include "./Global.h"
 #include "./InputStream.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 class DiskFile;
 class Buffer;

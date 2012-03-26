@@ -6,7 +6,7 @@
 #include "./Global.h"
 #include "./InputStream.h"
 #include "./Map.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 class MapInputStream: public InputStream {
   public:

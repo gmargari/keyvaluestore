@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 #define NO_DISK_FILE (-1)
 

@@ -7,7 +7,7 @@
 #include <sys/types.h>
 
 #include "./Global.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 class VFile;
 

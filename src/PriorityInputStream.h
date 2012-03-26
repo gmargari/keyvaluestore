@@ -9,7 +9,7 @@
 
 #include "./Global.h"
 #include "./InputStream.h"
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 using std::vector;
 using std::priority_queue;

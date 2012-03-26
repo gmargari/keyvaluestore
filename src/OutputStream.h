@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "./Slice.h"
+#include "./leveldb/slice.h"
 
 class OutputStream {
   public:
