@@ -438,7 +438,30 @@ Immediate/Geometric p=1   &  31.4 &  36.1 &  41.2 & 287.2 \\
 %  \end{center}
 %\end{figure}
 
+%=============================================================================================================
+% Number of get threads
+%=============================================================================================================
 
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Number of get threads\end{huge}
+
+    \subfigure[Geometric r=2, 1 thread x 20 req/s] {\includegraphics[width=0.32\textwidth]{eps/logarithmic-getthreads-1-getthrput-20.latency.eps}}
+    \subfigure[Geometric r=3, 1 thread x 20 req/s] {\includegraphics[width=0.32\textwidth]{eps/geometric-getthreads-1-getthrput-20.latency.eps}}
+    \subfigure[Rangemerge, 1 thread x 20 req/s]    {\includegraphics[width=0.32\textwidth]{eps/rangemerge-getthreads-1-getthrput-20.latency.eps}}
+    
+    \subfigure[Geometric r=2, 2 thread x 10 req/s] {\includegraphics[width=0.32\textwidth]{eps/logarithmic-getthreads-2-getthrput-10.latency.eps}}
+    \subfigure[Geometric r=3, 2 thread x 10 req/s] {\includegraphics[width=0.32\textwidth]{eps/geometric-getthreads-2-getthrput-10.latency.eps}}
+    \subfigure[Rangemerge, 2 thread x 10 req/s]    {\includegraphics[width=0.32\textwidth]{eps/rangemerge-getthreads-2-getthrput-10.latency.eps}}
+    
+    \subfigure[Geometric r=2, 4 thread x 5 req/s] {\includegraphics[width=0.32\textwidth]{eps/logarithmic-getthreads-4-getthrput-5.latency.eps}}
+    \subfigure[Geometric r=3, 4 thread x 5 req/s] {\includegraphics[width=0.32\textwidth]{eps/geometric-getthreads-4-getthrput-5.latency.eps}}
+    \subfigure[Rangemerge, 4 thread x 5 req/s]    {\includegraphics[width=0.32\textwidth]{eps/rangemerge-getthreads-4-getthrput-5.latency.eps}}
+
+    \caption{Sensitivity to number of get() threads}
+  \end{center}
+\end{figure}
 
 %=============================================================================================================
 % Memory size - per method
@@ -624,6 +647,24 @@ Immediate/Geometric p=1   &  31.4 &  36.1 &  41.2 & 287.2 \\
 
 \clearpage
 
+\begin{figure}[h]
+  \begin{center}
+
+    \begin{huge}Rangemerge - key distribution sensitivity\end{huge}
+  
+    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-zipf_a.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]  		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-zipf_a.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-zipf_a.totalstats.compacttime.eps}}
+    \subfigure[Total time] 		{\includegraphics[width=0.49\textwidth]{eps/rangemerge-zipf_a.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Zipf parameter}
+
+  \end{center}
+\end{figure}
+
+
+\clearpage
+
+
 %=============================================================================================================
 % Rangemerge - Blocksize
 %=============================================================================================================
@@ -660,11 +701,15 @@ Immediate/Geometric p=1   &  31.4 &  36.1 &  41.2 & 287.2 \\
   \end{center}
 \end{figure}
 
+
+
 %=============================================================================================================
 %
 %                                            SELECTED METHODS
 %
 %=============================================================================================================
+
+
 
 % leave an empty page    
 \clearpage
@@ -793,8 +838,9 @@ Immediate/Geometric p=1   &  31.4 &  36.1 &  41.2 & 287.2 \\
 
 \begin{figure}[h]
   \begin{center}
-  	\subfigure[]{\includegraphics{eps/logarithmic.searchlog.eps}}
-  	\subfigure[]{\includegraphics{eps/diff-mem-datasize-same-scale.eps}}
+  	\subfigure[Geometric r = 2 memory/data scaling]{\includegraphics[width=0.49\textwidth]{eps/geometric-r-2-diff-mem-datasize-same-scale.eps}}
+  	\subfigure[Rangemerge memory/data scaling]{\includegraphics[width=0.49\textwidth]{eps/rangemerge-diff-mem-datasize-same-scale.eps}}
+  	\subfigure[]{\includegraphics[width=0.49\textwidth]{eps/logarithmic.searchlog.eps}}
   \end{center}
 \end{figure}
 

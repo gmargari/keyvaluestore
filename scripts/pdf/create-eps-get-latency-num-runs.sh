@@ -60,7 +60,7 @@ gnuplot << EOF
 
     # legend position
     # set key top left
-    set key at 5.5,4.5
+    set key at 5.2,4.7
 
     set yrange [0:${ymax}+1]
     set ylabel 'Number of disk files'
@@ -74,8 +74,8 @@ gnuplot << EOF
     set out '${outputfile}.eps'
 
     plot \
-    '${tmpfile1}' using (mb2gb(\$1)):2                        with linespoints lw 4 lc rgb '#E4191C' title 'Number of disk files' , \
-    '${tmpfile2}' using (mb2gb(\$1)):((\$2 / $y2max) * $ymax) with linespoints lw 4 lc rgb '#387DB8' title 'Range get latency' 
+    '${tmpfile1}' using (mb2gb(\$1)):2                        with lines lw 4 lc rgb '#E4191C' title 'Number of disk files' , \
+    '${tmpfile2}' using (mb2gb(\$1)):((\$2 / $y2max) * $ymax) with lines lw 4 lc rgb '#387DB8' title 'Range get latency' 
 
 EOF
 #==========================[ gnuplot embedded script ]============================

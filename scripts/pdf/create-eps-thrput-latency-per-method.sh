@@ -38,6 +38,16 @@ windowsize=15
 color="#387DB8"
 
 files=( 
+"logarithmic-getthreads-1-getthrput-20.stderr"
+"logarithmic-getthreads-2-getthrput-10.stderr"
+"logarithmic-getthreads-4-getthrput-5.stderr"
+"geometric-getthreads-1-getthrput-20.stderr"
+"geometric-getthreads-2-getthrput-10.stderr"
+"geometric-getthreads-4-getthrput-5.stderr"
+"rangemerge-getthreads-1-getthrput-20.stderr"
+"rangemerge-getthreads-2-getthrput-10.stderr"
+"rangemerge-getthreads-4-getthrput-5.stderr"
+\
 "geometric-r-2-put-thrput-0-mergebuf-512KB.stderr"
 "geometric-r-3-put-thrput-0-mergebuf-512KB.stderr"
 "geometric-r-4-put-thrput-0-mergebuf-512KB.stderr"
