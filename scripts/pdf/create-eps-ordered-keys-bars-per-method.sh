@@ -54,7 +54,7 @@ for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", ++i, $0}' ${inputfile} > ${inputfile_with_linenumbers}
     lines=`cat ${inputfile_with_linenumbers} | wc -l`
-    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%.0f\" %s", (1.0 - $1)*100, NR-1}'`
+    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%.0f\" %s", $1*100, NR-1}'`
 
     ylabel_ins='Insertion time (min)'
     ylabel_comp='Compaction time (min)'

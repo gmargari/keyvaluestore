@@ -206,7 +206,7 @@ collect_ordered_keys_stats() {
     fi
 
     for f in ${statsfolder}/${prefix}-???.stats; do
-        grep "# ordered_prob:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
+        grep "# ordered_prob:" $f | awk '{printf "%s ", (1-$3)}' && tail -n 1 $f;
     done | sort -rn > ${statsfolder}/${prefix}.totalstats
 }
 
@@ -215,18 +215,28 @@ collect_ordered_keys_stats() {
 #========================================================
 collect_zipf_keys_stats() {
 
-    my_print "collect_zipf_keys_stats() $prefix"
+    prefix="rangemerge-zipf_a"
+    my_print "collect_zipf_keys_stats()"
 
     # if no files exist return, instead of creating an empty file
-    if [ "`cat ${statsfolder}/$prefix-???.stats 2> /dev/null | wc -l`" == "0" ]; then
-        echo "Error: no ${statsfolder}/$prefix.* file"
+    if [ "`cat ${statsfolder}/$prefix-???-unique-10GB.stats 2> /dev/null | wc -l`" == "0" ]; then
+        echo "Error: no ${statsfolder}/$prefix-???-unique-10GB.stats file"
         return
     fi
 
-    for f in ${statsfolder}/${prefix}-???.stats; do
+    for f in ${statsfolder}/${prefix}-???-unique-10GB.stats; do
         grep "# zipf_parameter:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
     done | sort -n > ${statsfolder}/${prefix}.totalstats
+
+    # create also XXX-zipf_a.totalstats files for some other methods,
+    # based on 
+    for method in 'immediate' 'geometric-p-2' 'geometric-r-2' 'geometric-r-3' 'nomerge' 'cassandra-l-2' 'cassandra-l-4'; do
+        line=`tail -n 1 ${statsfolder}/${method}.stats`
+        cat ${statsfolder}/${prefix}.totalstats | awk -v line="$line" 'NF > 1{print $1, line}' > ${statsfolder}/${method}-zipf_a.totalstats
+    done
 }
+
+
 
 #========================================================
 # main script starts here
@@ -326,5 +336,4 @@ collect_ordered_keys_stats
 prefix="rangemerge-blocksize-0256-ord-prob"
 collect_ordered_keys_stats
 
-prefix="rangemerge-zipf_a"
 collect_zipf_keys_stats

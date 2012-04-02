@@ -30,8 +30,8 @@ file1="${statsfolder}/immediate.log";      title1="Immediate";        printevery
 file2="${statsfolder}/rangemerge.log";     title2="Rangemerge";       printevery2="10"
 file3="${statsfolder}/geometric-p-2.log";  title3="Geometric_{p=2}";  printevery3="1"
 file4="${statsfolder}/geometric-r-3.log";  title4="Geometric_{r=3}";  printevery4="1"
-file5="${statsfolder}/geometric-r-2.log";  title5="Geometric_{r=2}";  printevery5="1"
-file6="${statsfolder}/cassandra-l-2.log";  title6="Cassandra_{l=2}";  printevery6="1"
+file5="${statsfolder}/cassandra-l-2.log";  title5="Cassandra_{l=2}";  printevery5="1"
+file6="${statsfolder}/geometric-r-2.log";  title6="Geometric_{r=2}";  printevery6="1"
 file7="${statsfolder}/cassandra-l-4.log";  title7="Cassandra_{l=4}";  printevery7="1"
 file8="${statsfolder}/nomerge.log";        title8="Nomerge";          printevery8="1"
 
