@@ -30,8 +30,8 @@ newinputfile="/tmp/gnuplottmp2" # tmp file
 
 color="#387DB8"
 
-files=( 'rangemerge-blocksize.totalstats' 'rangemerge-flushmem.totalstats' 'rangemerge-zipf_a.totalstats' )
-xlabels=( 'Block size (MB)' 'Flushmem size (MB)' 'Zipf parameter' )
+files=( 'rangemerge-blocksize.totalstats' 'rangemerge-flushmem.totalstats' )
+xlabels=( 'Block size (MB)' 'Flushmem size (MB)' )
 
 # check arrays 'files' and 'xlabels' have the same number of elements
 if [ ${#files[*]} -ne ${#xlabels[*]} ]; then

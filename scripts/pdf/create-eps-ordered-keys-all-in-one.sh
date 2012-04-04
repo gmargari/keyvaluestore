@@ -27,7 +27,13 @@ file7="${statsfolder}/cassandra-l-4-ord-prob.totalstats";  title7="Cassandra_{l=
 file8="${statsfolder}/nomerge-ord-prob.totalstats";        title8="Nomerge";
 
 outfile="$outfolder/ord-prob"
-xticklabels=`cat $file1 | awk '{if (NR>1) printf ", "; printf "\"%.0f\" %s", (1.0 - $1)*100, NR-1}'`
+
+ylabel_ins='Insertion time (min)'
+ylabel_comp='Compaction time (min)'
+ylabel_io='I/O time (min)'
+ylabel_gb='Total data transferred (GB)'
+
+my_print
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
@@ -55,8 +61,8 @@ gnuplot << EOF
     set xlabel 'Percentage of keys ordered'
 
     # Insertion time
-    set out '$outfile.totaltime.eps'
-    set ylabel 'Insertion time (min)'
+    set out '${outfile}.totaltime.eps'
+    set ylabel "$ylabel_ins"
     set yrange [0:120]
     set key at 95,95
     plot \
@@ -67,10 +73,35 @@ gnuplot << EOF
     '$file6' using (\$1*100):(sec2min(\$3)) title '$title6' with linespoints ls 6, \
     '$file8' using (\$1*100):(sec2min(\$3)) title '$title8' with linespoints ls 8
 
+    # Compaction Time
+    set out '${outfile}.compacttime.eps'
+    set ylabel "$ylabel_comp"
+    set yrange [0:110]
+    set key at 95,87
+    plot \
+    '$file1' using (\$1*100):(sec2min(\$6)) title '$title1' with linespoints ls 1, \
+    '$file2' using (\$1*100):(sec2min(\$6)) title '$title2' with linespoints ls 2, \
+    '$file3' using (\$1*100):(sec2min(\$6)) title '$title3' with linespoints ls 3, \
+    '$file4' using (\$1*100):(sec2min(\$6)) title '$title4' with linespoints ls 4, \
+    '$file6' using (\$1*100):(sec2min(\$6)) title '$title6' with linespoints ls 6, \
+    '$file8' using (\$1*100):(sec2min(\$6)) title '$title8' with linespoints ls 8
+
+    # I/O Time
+    set out '${outfile}.iotime.eps'
+    set ylabel "$ylabel_io"
+    set yrange [0:110]
+    set key at 95,87
+    plot \
+    '$file1' using (\$1*100):(sec2min(\$10 + \$11)) title '$title1' with linespoints ls 1, \
+    '$file2' using (\$1*100):(sec2min(\$10 + \$11)) title '$title2' with linespoints ls 2, \
+    '$file3' using (\$1*100):(sec2min(\$10 + \$11)) title '$title3' with linespoints ls 3, \
+    '$file4' using (\$1*100):(sec2min(\$10 + \$11)) title '$title4' with linespoints ls 4, \
+    '$file6' using (\$1*100):(sec2min(\$10 + \$11)) title '$title6' with linespoints ls 6, \
+    '$file8' using (\$1*100):(sec2min(\$10 + \$11)) title '$title8' with linespoints ls 8
+
     # Data inserted (GB)
-    # Insertion time
-    set out '$outfile.gbtransferred.eps'
-    set ylabel 'Total data transferred (GB)'
+    set out '${outfile}.gbtransferred.eps'
+    set ylabel "$ylabel_gb"
     set yrange [0:240]
     set key at 95,195
     plot \
@@ -80,7 +111,6 @@ gnuplot << EOF
     '$file4' using (\$1*100):(mb2gb(\$12 + \$13)) title '$title4' with linespoints ls 4, \
     '$file6' using (\$1*100):(mb2gb(\$12 + \$13)) title '$title6' with linespoints ls 6, \
     '$file8' using (\$1*100):(mb2gb(\$12 + \$13)) title '$title8' with linespoints ls 8
-
 
 EOF
 #==========================[ gnuplot embedded script ]============================
