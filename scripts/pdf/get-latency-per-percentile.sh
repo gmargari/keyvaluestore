@@ -22,13 +22,18 @@ files=(
 "immediate-put-thrput-2500-mergebuf-512KB.stderr"
 )
 
-percentiles=( "0.50" "0.90" "0.99" "0.999" "1" )
+# percentile = 0 -> print average time
+percentiles=( "0" "0.50" "0.90" "0.99" "0.999" "1" )
 
 # print header
 echo ""
 echo "" | awk '{printf "%-20s ", $0}'
 for p in ${percentiles[@]}; do
-    echo $p | awk '{printf "%5.1f ", $1*100}'
+    if [ $p == "0" ]; then
+        echo "avg" | awk '{printf "%5s ", $1}'
+    else
+        echo $p | awk '{printf "%5.1f ", $1*100}'
+    fi
 done 
 echo -e "\n"
 
@@ -56,7 +61,11 @@ for file in ${files[@]}; do
 
     echo $method | awk '{printf "%-20s ", $1}'
     for p in ${percentiles[@]}; do
-        cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $1; exit}'
+        if [ $p == "0" ]; then
+            cat $tmpfile | awk '{s+=$1;n++} END{printf "%5.1f ", s/n}'
+        else
+            cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $1; exit}'
+        fi
     done
     echo ""
 

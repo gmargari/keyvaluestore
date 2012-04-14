@@ -107,6 +107,34 @@ files=(
 "rangemerge-blocksize-0256-put-thrput-2500-mergebuf-512KB.stderr"
 "rangemerge-blocksize-0512-put-thrput-2500-mergebuf-512KB.stderr"
 "rangemerge-blocksize-1024-put-thrput-2500-mergebuf-512KB.stderr"
+\
+"logarithmic-getthreads-1-getthrput-20-getsize-1.stderr"
+"logarithmic-getthreads-1-getthrput-20-getsize-10.stderr"
+"logarithmic-getthreads-1-getthrput-20-getsize-100.stderr"
+"logarithmic-getthreads-1-getthrput-20-getsize-1000.stderr"
+"logarithmic-getthreads-1-getthrput-20-getsize-10000.stderr"
+"logarithmic-getthreads-1-getthrput-20-getsize-100000.stderr"
+\
+"geometric-getthreads-1-getthrput-20-getsize-1.stderr"
+"geometric-getthreads-1-getthrput-20-getsize-10.stderr"
+"geometric-getthreads-1-getthrput-20-getsize-100.stderr"
+"geometric-getthreads-1-getthrput-20-getsize-1000.stderr"
+"geometric-getthreads-1-getthrput-20-getsize-10000.stderr"
+"geometric-getthreads-1-getthrput-20-getsize-100000.stderr"
+\
+"rangemerge-getthreads-1-getthrput-20-getsize-1.stderr"
+"rangemerge-getthreads-1-getthrput-20-getsize-10.stderr"
+"rangemerge-getthreads-1-getthrput-20-getsize-100.stderr"
+"rangemerge-getthreads-1-getthrput-20-getsize-1000.stderr"
+"rangemerge-getthreads-1-getthrput-20-getsize-10000.stderr"
+"rangemerge-getthreads-1-getthrput-20-getsize-100000.stderr"
+\
+"immediate-getthreads-1-getthrput-20-getsize-1.stderr"
+"immediate-getthreads-1-getthrput-20-getsize-10.stderr"
+"immediate-getthreads-1-getthrput-20-getsize-100.stderr"
+"immediate-getthreads-1-getthrput-20-getsize-1000.stderr"
+"immediate-getthreads-1-getthrput-20-getsize-10000.stderr"
+"immediate-getthreads-1-getthrput-20-getsize-100000.stderr"
 )
 
 for file in ${files[@]}; do

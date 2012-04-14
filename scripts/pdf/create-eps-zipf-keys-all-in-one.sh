@@ -63,8 +63,8 @@ gnuplot << EOF
     # Insertion time
     set out '${outfile}.totaltime.eps'
     set ylabel "$ylabel_ins"
-    set yrange [0:110]
-    set key at 4.7,85
+    set yrange [0:120]
+    set key at 4.7,95
     plot \
     '$file1' using 1:(sec2min(\$3)) title '$title1' with linespoints ls 1, \
     '$file2' using 1:(sec2min(\$3)) title '$title2' with linespoints ls 2, \

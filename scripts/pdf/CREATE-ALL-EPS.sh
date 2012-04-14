@@ -12,7 +12,7 @@ statsfolder=$1
 ./create-eps-all-methods-bars-per-memsize.sh $statsfolder &&
 ./create-eps-per-method-plot.sh $statsfolder &&
 ./create-eps-per-method-bars-per-memsize.sh $statsfolder &&
-./create-eps-thrput-latency-all-in-one.sh $statsfolder &&
+./create-eps-thrput-latency-three-in-one.sh $statsfolder &&
 ./create-eps-thrput-latency-per-method.sh $statsfolder &&
 ./create-eps-diff-mem-datasize-same-scale.sh $statsfolder &&
 ./create-eps-get-latency-num-runs.sh $statsfolder &&

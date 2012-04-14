@@ -110,4 +110,4 @@ EOF
 
 done
 
-
+rm $inputfile_with_linenumbers

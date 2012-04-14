@@ -26,7 +26,6 @@ my_print() {
 #  - Number of runs
 #==========================================================================================
 
-inputfile_with_linenumbers="/tmp/gnuplottmp" # tmp file
 newinputfile="/tmp/gnuplottmp2" # tmp file
 
 color="#387DB8"
@@ -138,4 +137,4 @@ EOF
 
 done
 
-
+rm $newinputfile
