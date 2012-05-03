@@ -1,45 +1,23 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-statsfolder=$1
-outfolder="$statsfolder/eps"
-mkdir -p $outfolder
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 #==========================================================================================
 # For each memory size, plot all methods in a bar chart
 #==========================================================================================
 
-inputfile_with_linenumbers="/tmp/gnuplottmp" # tmp file
-
-color="#387DB8"
-color2="#BBBBBB"
+inputfile_with_linenumbers="$(mktemp)"
 
 memsizes=( '0128' '0256' '0512' '1024' '2048' )
-
-ylabel_ins='Insertion time (min)'
-ylabel_comp='Compaction time (min)'
-ylabel_io='I/O time (min)'
-ylabel_gb='Total data transferred (GB)'
 
 for memsize in ${memsizes[@]}; do
 
     inputfile="${statsfolder}/allmethods-memsize-${memsize}.totalstats"
     outputfile="${outfolder}/allmethods-memsize-${memsize}"
 
-    # check if file exists
-    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
+    ensure_file_exist ${inputfile}
 
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", ++i, $0}' ${inputfile} > ${inputfile_with_linenumbers}

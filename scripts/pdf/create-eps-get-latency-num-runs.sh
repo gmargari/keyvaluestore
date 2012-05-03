@@ -1,21 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-statsfolder=$1
-outfolder="$statsfolder/eps"
-mkdir -p $outfolder
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 #==========================================================================================
 # Logarithmic: Number of runs vs range get time
@@ -25,10 +12,9 @@ file="logarithmic.searchlog"
 inputfile="${statsfolder}/${file}"
 outputfile="${outfolder}/${file}"
 
-# check that file exists
-if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
+ensure_file_exist ${inputfile}
 
-my_print $file
+my_print
 
 tmpfile1="$(mktemp)"
 tmpfile2="$(mktemp)"
@@ -54,7 +40,7 @@ gnuplot << EOF
 #    set xlabel font 'Helvetica,22'
 #    set ylabel font 'Helvetica,22'
 #    set y2label font 'Helvetica,22'
-    set terminal postscript color enhanced eps "Helvetica" 20
+    set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel 'Data inserted (GB)'
 #    set x2label 'Read cost' font 'Helvetica Bold'
 

@@ -1,21 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-statsfolder=$1
-outfolder="$statsfolder/eps"
-mkdir -p $outfolder
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 #==========================================================================================
 # For each method, plot GB inserted vs:
@@ -26,9 +13,7 @@ my_print() {
 #  - Number of runs
 #==========================================================================================
 
-newinputfile="/tmp/gnuplottmp2" # tmp file
-
-color="#387DB8"
+newinputfile="$(mktemp)"
 
 files=( 'rangemerge.log' 'immediate.log' 'nomerge.log' \
         'geometric-p-2.log' 'geometric-p-3.log' 'geometric-p-4.log' \
@@ -43,10 +28,9 @@ for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
         continue
     fi
 
-    # check if file exists
-    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
-
     inputfile=${statsfolder}/$file
+    ensure_file_exist ${inputfile}
+
     newymax=`cat $inputfile | awk '{if($15>max) max=$15} END{print max}'`
     if [ "$newymax" -gt "$ymaxall" ]; then
         ymaxall=$newymax
@@ -60,8 +44,7 @@ for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
     inputfile=${statsfolder}/$file
     outputfile="`echo ${outfolder}/$file | awk '{sub(/\\.log/,\"\", $1); print $1}'`"  # remove suffix .log
 
-    # check if file exists
-    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
+    ensure_file_exist ${inputfile}
 
     if [ "$file" = "nomerge.log" ]; then
         # for nomerge, ymax is its own ymax
@@ -81,12 +64,6 @@ for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
     #              4 10 (new point)
     #              4 30
     cat ${inputfile} | awk '{if (prev) print $1 prev; print $0; prev=""; for(i=2;i<=NF;i++) prev=prev" "$(i)}' > ${newinputfile}
-
-    ylabel_ins='Insertion time (min)'
-    ylabel_comp='Compaction time (min)'
-    ylabel_io='I/O time (min)'
-    ylabel_gb='Total data transferred (GB)'
-    ylabel_runs='Number of disk files'
 
     my_print $file
 

@@ -1,17 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 statsfolder=$1
 curdir=`pwd`

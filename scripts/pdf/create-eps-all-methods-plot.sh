@@ -1,21 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-statsfolder=$1
-outfolder="$statsfolder/eps"
-mkdir -p $outfolder
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 #==========================================================================================
 # For each one of the following:
@@ -26,39 +13,37 @@ my_print() {
 # create a bar chart containing all methods
 #==========================================================================================
 
-file1="${statsfolder}/immediate.log";      title1="Immediate";        printevery1="1"
-file2="${statsfolder}/rangemerge.log";     title2="Rangemerge";       printevery2="10"
-file3="${statsfolder}/geometric-p-2.log";  title3="Geometric_{p=2}";  printevery3="1"
-file4="${statsfolder}/geometric-r-3.log";  title4="Geometric_{r=3}";  printevery4="1"
-file5="${statsfolder}/cassandra-l-2.log";  title5="Cassandra_{l=2}";  printevery5="1"
-file6="${statsfolder}/geometric-r-2.log";  title6="Geometric_{r=2}";  printevery6="1"
-file7="${statsfolder}/cassandra-l-4.log";  title7="Cassandra_{l=4}";  printevery7="1"
-file8="${statsfolder}/nomerge.log";        title8="Nomerge";          printevery8="1"
+file_imm="${statsfolder}/immediate.log";     every_imm="1"
+file_rng="${statsfolder}/rangemerge.log";    every_rng="10"
+file_gp2="${statsfolder}/geometric-p-2.log"; every_gp2="1"
+file_geo="${statsfolder}/geometric-r-3.log"; every_geo="1"
+file_cl2="${statsfolder}/cassandra-l-2.log"; every_cl2="1"
+file_log="${statsfolder}/geometric-r-2.log"; every_log="1"
+file_cas="${statsfolder}/cassandra-l-4.log"; every_cas="1"
+file_nom="${statsfolder}/nomerge.log";       every_nom="1"
+
+ensure_file_exist $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom
+
+ymax_total=`cat $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom | awk '{if ($2 > max) max = $2;} END{print (max/60.0) * 1.2}'`
+ymax_comp=`cat $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom  | awk '{if ($5 > max) max = $5;} END{print (max/60.0) * 1.2}'`
+ymax_io=`cat $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom    | awk '{if ($9 + $10 > max) max = $9 + $10;} END{print (max/60.0) * 1.2}'`
+ymax_gb=`cat $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom    | awk '{if ($11 + $12 > max) max = $11 + $12;} END{print (max/1024.0) * 1.2}'`
 
 ymin_total=0.55
 ymin_comp=0.25
 ymin_io=0.25
 ymin_gb=0.45
 
-ymax_total=`cat $file1 $file2 $file3 $file4 $file5 $file6 $file7 $file8 | awk '{if ($2 > max) max = $2;} END{print (max/60.0) * 1.2}'`
-ymax_comp=`cat $file1 $file2 $file3 $file4 $file5 $file6 $file7 $file8  | awk '{if ($5 > max) max = $5;} END{print (max/60.0) * 1.2}'`
-ymax_io=`cat $file1 $file2 $file3 $file4 $file5 $file6 $file7 $file8    | awk '{if ($9 + $10 > max) max = $9 + $10;} END{print (max/60.0) * 1.2}'`
-ymax_gb=`cat $file1 $file2 $file3 $file4 $file5 $file6 $file7 $file8    | awk '{if ($11 + $12 > max) max = $11 + $12;} END{print (max/1024.0) * 1.2}'`
+my_print
 
-ylabel_ins='Insertion time (min)'
-ylabel_comp='Compaction time (min)'
-ylabel_io='I/O time (min)'
-ylabel_gb='Total data transferred (GB)'
-
-my_print "all methods"
-
+#==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
     #set xtics font 'Helvetica,16'
     #set ytics font 'Helvetica,16'
     #set xlabel font 'Helvetica,16'
     #set ylabel font 'Helvetica,16'
-    set terminal postscript color enhanced eps "Helvetica" 20
+    set terminal postscript color enhanced eps "Helvetica" 22
 
     #set grid ytics
     set xlabel 'Data inserted (GB)'
@@ -73,16 +58,6 @@ gnuplot << EOF
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
 
-    set style line 1 lw 3 pt 1 lc rgb "#000000"
-    set style line 2 lw 3 pt 1 lc rgb "#888888"
-    set style line 3 lw 3 pt 1 lc rgb "#994FA4"
-    set style line 4 lw 3 pt 1 lc rgb "#4CB04A"
-    set style line 5 lw 3 pt 1 lc rgb "#A65728"
-    set style line 6 lw 3 pt 1 lc rgb "#387DB8"
-    set style line 7 lw 3 pt 1 lc rgb "#FF8000"
-    set style line 8 lw 3 pt 1 lc rgb "#E4191C"
-
-
     #=================================================
     # Plots: Selected methods - Insertion time
     #=================================================
@@ -92,14 +67,14 @@ gnuplot << EOF
     set out '${outfolder}/8methods.logyscale.totaltime.eps'
     set ylabel "$ylabel_ins"
     plot \
-    '$file1' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery1 title '$title1' with linespoints ls 1, \
-    '$file2' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery2 title '$title2' with linespoints ls 2, \
-    '$file3' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery3 title '$title3' with linespoints ls 3, \
-    '$file4' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery4 title '$title4' with linespoints ls 4, \
-    '$file5' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery5 title '$title5' with linespoints ls 5, \
-    '$file6' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery6 title '$title6' with linespoints ls 6, \
-    '$file7' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery7 title '$title7' with linespoints ls 7, \
-    '$file8' using (mb2gb(\$1)):(sec2min(\$2)) every $printevery8 title '$title8' with linespoints ls 8
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$2)) every $every_imm title '$title_imm' with $style_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$2)) every $every_rng title '$title_rng' with $style_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$2)) every $every_gp2 title '$title_gp2' with $style_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$2)) every $every_geo title '$title_geo' with $style_geo, \
+    '$file_cl2' using (mb2gb(\$1)):(sec2min(\$2)) every $every_cl2 title '$title_cl2' with $style_cl2, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$2)) every $every_log title '$title_log' with $style_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$2)) every $every_cas title '$title_cas' with $style_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$2)) every $every_nom title '$title_nom' with $style_nom
 
     #=================================================
     # Plots: Selected methods - Compaction time
@@ -110,14 +85,14 @@ gnuplot << EOF
     set out '${outfolder}/8methods.logyscale.compacttime.eps'
     set ylabel "$ylabel_comp"
     plot \
-    '$file1' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery1 title '$title1' with linespoints ls 1, \
-    '$file2' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery2 title '$title2' with linespoints ls 2, \
-    '$file3' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery3 title '$title3' with linespoints ls 3, \
-    '$file4' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery4 title '$title4' with linespoints ls 4, \
-    '$file5' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery5 title '$title5' with linespoints ls 5, \
-    '$file6' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery6 title '$title6' with linespoints ls 6, \
-    '$file7' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery7 title '$title7' with linespoints ls 7, \
-    '$file8' using (mb2gb(\$1)):(sec2min(\$5)) every $printevery8 title '$title8' with linespoints ls 8
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$5)) every $every_imm title '$title_imm' with $style_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$5)) every $every_rng title '$title_rng' with $style_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$5)) every $every_gp2 title '$title_gp2' with $style_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$5)) every $every_geo title '$title_geo' with $style_geo, \
+    '$file_cl2' using (mb2gb(\$1)):(sec2min(\$5)) every $every_cl2 title '$title_cl2' with $style_cl2, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$5)) every $every_log title '$title_log' with $style_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$5)) every $every_cas title '$title_cas' with $style_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$5)) every $every_nom title '$title_nom' with $style_nom
 
     #=================================================
     # Plots: Selected methods - IO time
@@ -128,14 +103,14 @@ gnuplot << EOF
     set out '${outfolder}/8methods.logyscale.iotime.eps'
     set ylabel "$ylabel_io"
     plot \
-    '$file1' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery1 title '$title1' with linespoints ls 1, \
-    '$file2' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery2 title '$title2' with linespoints ls 2, \
-    '$file3' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery3 title '$title3' with linespoints ls 3, \
-    '$file4' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery4 title '$title4' with linespoints ls 4, \
-    '$file5' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery5 title '$title5' with linespoints ls 5, \
-    '$file6' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery6 title '$title6' with linespoints ls 6, \
-    '$file7' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery7 title '$title7' with linespoints ls 7, \
-    '$file8' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $printevery8 title '$title8' with linespoints ls 8
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_imm title '$title_imm' with $style_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_rng title '$title_rng' with $style_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_gp2 title '$title_gp2' with $style_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_geo title '$title_geo' with $style_geo, \
+    '$file_cl2' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_cl2 title '$title_cl2' with $style_cl2, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_log title '$title_log' with $style_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_cas title '$title_cas' with $style_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_nom title '$title_nom' with $style_nom
 
     #=================================================
     # Plots: Selected methods - GB transferred
@@ -146,14 +121,15 @@ gnuplot << EOF
     set out '${outfolder}/8methods.logyscale.gbtransferred.eps'
     set ylabel "$ylabel_gb"
     plot \
-    '$file1' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery1 title '$title1' with linespoints ls 1, \
-    '$file2' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery2 title '$title2' with linespoints ls 2, \
-    '$file3' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery3 title '$title3' with linespoints ls 3, \
-    '$file4' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery4 title '$title4' with linespoints ls 4, \
-    '$file5' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery5 title '$title5' with linespoints ls 5, \
-    '$file6' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery6 title '$title6' with linespoints ls 6, \
-    '$file7' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery7 title '$title7' with linespoints ls 7, \
-    '$file8' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $printevery8 title '$title8' with linespoints ls 8
+    '$file_imm' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_imm title '$title_imm' with $style_imm, \
+    '$file_rng' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_rng title '$title_rng' with $style_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_gp2 title '$title_gp2' with $style_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_geo title '$title_geo' with $style_geo, \
+    '$file_cl2' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_cl2 title '$title_cl2' with $style_cl2, \
+    '$file_log' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_log title '$title_log' with $style_log, \
+    '$file_cas' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_cas title '$title_cas' with $style_cas, \
+    '$file_nom' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_nom title '$title_nom' with $style_nom
 
 EOF
+#==========================[ gnuplot embedded script ]============================
 

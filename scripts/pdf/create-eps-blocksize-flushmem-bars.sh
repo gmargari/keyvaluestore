@@ -1,21 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
-
-statsfolder=$1
-outfolder="$statsfolder/eps"
-mkdir -p $outfolder
-
-#============================
-# my_print()
-#============================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 #==========================================================================================
 # For each method, and a specific parameter with different values, create a bar chart for:
@@ -26,8 +13,6 @@ my_print() {
 #==========================================================================================
 
 inputfile_with_linenumbers="/tmp/gnuplottmp" # tmp file
-
-color="#387DB8"
 
 files=( 'rangemerge-blocksize.totalstats' 'rangemerge-flushmem.totalstats' )
 xlabels=( 'Block size (MB)' 'Flushmem size (MB)' )
@@ -46,18 +31,12 @@ for i in `seq 0 $(( ${#xlabels[*]} - 1 ))`; do
     outputfile="${outfolder}/$file"
     xlabel=${xlabels[$i]};
 
-    # check that file exists
-    if [ ! -f ${inputfile} ]; then echo "Error: file '${inputfile}' does not exist" >&2; continue; fi
+    ensure_file_exist ${inputfile}
 
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", ++i, $0}' ${inputfile} > ${inputfile_with_linenumbers}
     lines=`cat ${inputfile_with_linenumbers} | wc -l`
     xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%s\" %s", $1, NR-1}'`
-
-    ylabel_ins='Insertion time (min)'
-    ylabel_comp='Compaction time (min)'
-    ylabel_io='I/O time (min)'
-    ylabel_gb='Total data transferred (GB)'
 
     my_print $file
 

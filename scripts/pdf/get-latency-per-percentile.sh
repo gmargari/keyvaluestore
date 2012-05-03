@@ -1,29 +1,27 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
+curdir=`dirname $0`
+source $curdir/include-script.sh
 
 statsfolder=$1
 
 files=( 
-"nomerge-put-thrput-2500-mergebuf-512KB.stderr"
-"cassandra-l-4-put-thrput-2500-mergebuf-512KB.stderr"
-"cassandra-l-3-put-thrput-2500-mergebuf-512KB.stderr"
-"cassandra-l-2-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-r-2-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-r-3-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-r-4-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-p-4-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-p-3-put-thrput-2500-mergebuf-512KB.stderr"
-"geometric-p-2-put-thrput-2500-mergebuf-512KB.stderr"
-"rangemerge-put-thrput-2500-mergebuf-512KB.stderr"
-"immediate-put-thrput-2500-mergebuf-512KB.stderr"
+"nomerge-putthrput-2500.stderr"
+"cassandra-l-4-putthrput-2500.stderr"
+"cassandra-l-3-putthrput-2500.stderr"
+"cassandra-l-2-putthrput-2500.stderr"
+"geometric-r-2-putthrput-2500.stderr"
+"geometric-r-3-putthrput-2500.stderr"
+"geometric-r-4-putthrput-2500.stderr"
+"geometric-p-4-putthrput-2500.stderr"
+"geometric-p-3-putthrput-2500.stderr"
+"geometric-p-2-putthrput-2500.stderr"
+"rangemerge-putthrput-2500.stderr"
+"immediate-putthrput-2500.stderr"
 )
 
 # percentile = 0 -> print average time
-percentiles=( "0" "0.50" "0.90" "0.99" "0.999" "1" )
+percentiles=( "0" "0.90" "0.99" "0.999" "1" )
 
 # print header
 echo ""
@@ -47,16 +45,14 @@ for file in ${files[@]}; do
         continue
     fi
 
-    method=`echo $file | awk '{split($1,a,"-put-"); print a[1]}'`
+    method=`echo $file | awk '{split($1,a,"-putthrput"); print a[1]}'`
 
-    get_stats_file="$(mktemp)"
-    tmpfile="$(mktemp)"
-
-    # get_stats rows: "[GET_STATS] <timestamp> <time_elapsed> <num_requests> <totallatency>
-    cat $inputfile | awk '{if ($1=="[GET_STATS]") {print $2, ($3 ? $4/$3 : 0), ($4 ? $5/$4 : 0)}}' > $get_stats_file
+    getstats_file="$(mktemp)"
+    keep_get_stats $inputfile > $getstats_file
 
     # compute and print percentiles of latencies
-    cat $get_stats_file | awk '{print $3}' | sort -n > $tmpfile
+    tmpfile="$(mktemp)"
+    cat $getstats_file | awk '{print $3}' | sort -n > $tmpfile
     lines=`cat $tmpfile | wc -l`
 
     echo $method | awk '{printf "%-20s ", $1}'

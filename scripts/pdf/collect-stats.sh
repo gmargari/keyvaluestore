@@ -1,19 +1,10 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Syntax: $0 <stats folder>"
-    exit 1
-fi
+curdir=`dirname $0`
+source $curdir/include-script.sh
+source $curdir/include-colors-titles.sh
 
 statsfolder=$1
-
-#========================================================
-# my_print()
-#========================================================
-scriptname=`basename $0`
-my_print() {
-    echo -e "\e[1;31m [ $scriptname ] $* \e[m"
-}
 
 #========================================================
 # create_log_files()
@@ -66,7 +57,7 @@ collect_allmethods_stats() {
         file=${statsfolder}/${files[$i]};
         label=${labels[$i]};
 
-        if [ ! -f ${file} ]; then echo "Error: file '${file}' does not exist" >&2; continue; fi
+        ensure_file_exist $file
 
         tail -n 1 $file | awk -v label="$label" '{printf "%s %s\n", label, $0}';
     done > $outfile
@@ -181,7 +172,7 @@ collect_stats_per_memstore_size() {
             file=${statsfolder}/${files[$j]}-memsize-$memsize.stats;
             label=${labels[$j]};
 
-            if [ ! -f ${file} ]; then echo "Error: file '${file}' does not exist" >&2; continue; fi
+            ensure_file_exist $file
 
             tail -n 1 $file | awk -v label="$label" '{printf "%s %s\n", label, $0}';
         done > $outfile
@@ -226,16 +217,183 @@ collect_zipf_keys_stats() {
     for f in ${statsfolder}/${prefix}-???-unique-10GB.stats; do
         grep "# zipf_parameter:" $f | awk '{printf "%s ", $3}' && tail -n 1 $f;
     done | sort -n > ${statsfolder}/${prefix}.totalstats
-
-#    # create also XXX-zipf_a.totalstats files for some other methods,
-#    # based on 
-#    for method in 'immediate' 'geometric-p-2' 'geometric-r-2' 'geometric-r-3' 'nomerge' 'cassandra-l-2' 'cassandra-l-4'; do
-#        line=`tail -n 1 ${statsfolder}/${method}.stats`
-#        cat ${statsfolder}/${prefix}.totalstats | awk -v line="$line" 'NF > 1{print $1, line}' > ${statsfolder}/${method}-zipf_a.totalstats
-#    done
 }
 
+#========================================================
+# collect_stats_numthreads()
+#========================================================
+collect_stats_per_numthreads() {
+    my_print "collect_stats_per_numthreads()"
 
+    files=(  'immediate' 'rangemerge' 'geometric'  'logarithmic' 'cassandra'  'geometric-p-2' )
+    labels=( 'Immediate' 'Rangemerge' 'Geom_{r=3}' 'Geom_{r=2}'  'Cass_{l=4}' 'Geom_{p=2}' )
+    numthreads=( '1' '2' '5' '10' )
+    # percentile = 0 -> average time
+    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+
+    if [ ${#files[*]} -ne ${#labels[*]} ]; then
+        echo "Error: different array size of 'files' (${#files[*]}) and 'labels' (${#labels[*]})" >&2
+        exit 1;
+    fi
+
+    tmpfile2="$(mktemp)"
+    tmpfile="$(mktemp)"
+    for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
+        label=${labels[$i]};
+        outfile=${statsfolder}/${files[$i]}-getthreads.totalstats
+
+        for getthreads in ${numthreads[@]}; do
+            getthrput=$(( 20 / $getthreads ))
+            file=${statsfolder}/${files[$i]}-getthreads-${getthreads}-getthrput-${getthrput}-getsize-10.stderr
+
+            ensure_file_exist $file
+
+            keep_get_stats $file | sort -n > $tmpfile2
+            average_using_sliding_window $tmpfile2
+            cat $tmpfile2 | sort -k 3 -n > $tmpfile
+
+            # compute and print percentiles of latencies
+            echo $getthreads | awk '{printf "%-20s ", $1}'
+            lines=`cat $tmpfile | wc -l`
+            for p in ${percentiles[@]}; do
+                if [ $p == "0" ]; then
+                    cat $tmpfile | awk '{s+=$3; n++} END{printf "%5.1f ", s/n}'
+                else
+                    cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
+                fi
+            done
+
+            # print also total time
+            file=${statsfolder}/${files[$i]}-getthreads-${getthreads}-getthrput-${getthrput}-getsize-10.stats
+            tail -n 1 $file | awk '{printf "%10d", $2}'
+
+            echo ""
+
+        done > $outfile
+
+        if [ "`cat $outfile | wc -l`" == "0" ]; then # if file empty, delete it
+            rm $outfile
+        fi
+    done
+
+    rm $tmpfile $tmpfile2
+}
+
+#========================================================
+# collect_stats_per_putthruput()
+#========================================================
+collect_stats_per_putthruput() {
+    my_print "collect_stats_per_putthruput()"
+
+    files=(  'immediate' 'rangemerge' 'geometric'  'logarithmic' 'cassandra'  'geometric-p-2' )
+    labels=( 'Immediate' 'Rangemerge' 'Geom_{r=3}' 'Geom_{r=2}'  'Cass_{l=4}' 'Geom_{p=2}' )
+    putthrputs=( '1000' '2500' '5000' '10000' '20000' '40000' )
+    # percentile = 0 -> average time
+    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+
+    if [ ${#files[*]} -ne ${#labels[*]} ]; then
+        echo "Error: different array size of 'files' (${#files[*]}) and 'labels' (${#labels[*]})" >&2
+        exit 1;
+    fi
+
+    tmpfile2="$(mktemp)"
+    tmpfile="$(mktemp)"
+    for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
+        label=${labels[$i]};
+        outfile=${statsfolder}/${files[$i]}-putthrput.totalstats
+
+        for putthrput in ${putthrputs[@]}; do
+            file=${statsfolder}/${files[$i]}-putthrput-${putthrput}.stderr
+
+            ensure_file_exist $file
+
+            keep_get_stats $file | sort -n > $tmpfile2
+            average_using_sliding_window $tmpfile2
+            cat $tmpfile2 | sort -k 3 -n > $tmpfile
+
+            # compute and print percentiles of latencies
+            echo $putthrput | awk '{printf "%-20s ", $1}'
+            lines=`cat $tmpfile | wc -l`
+            for p in ${percentiles[@]}; do
+                if [ $p == "0" ]; then
+                    cat $tmpfile | awk '{s+=$3; n++} END{printf "%5.1f ", s/n}'
+                else
+                    cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
+                fi
+            done
+
+            # print also total time
+            file=${statsfolder}/${files[$i]}-putthrput-${putthrput}.stats
+            tail -n 1 $file | awk '{printf "%10d", $2}'
+
+            echo ""
+
+        done > $outfile
+
+        if [ "`cat $outfile | wc -l`" == "0" ]; then # if file empty, delete it
+            rm $outfile
+        fi
+    done
+
+    rm $tmpfile $tmpfile2
+}
+
+#========================================================
+# collect_stats_per_rangesize()
+#========================================================
+collect_stats_per_rangesize() {
+    my_print "collect_stats_per_rangesize()"
+
+    files=(  'immediate' 'rangemerge' 'geometric'  'logarithmic' 'cassandra'  'geometric-p-2' )
+    labels=( 'Immediate' 'Rangemerge' 'Geom_{r=3}' 'Geom_{r=2}'  'Cass_{l=4}' 'Geom_{p=2}' )
+    getsizes=( '1' '10' '100' '1000' '10000' '100000' )
+    # percentile = 0 -> average time
+    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+
+    if [ ${#files[*]} -ne ${#labels[*]} ]; then
+        echo "Error: different array size of 'files' (${#files[*]}) and 'labels' (${#labels[*]})" >&2
+        exit 1;
+    fi
+
+    tmpfile2="$(mktemp)"
+    tmpfile="$(mktemp)"
+    for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
+        label=${labels[$i]};
+        outfile=${statsfolder}/${files[$i]}-getsizes.totalstats
+
+        for getsize in ${getsizes[@]}; do
+            file=${statsfolder}/${files[$i]}-getthreads-1-getthrput-20-getsize-${getsize}.stderr
+            ensure_file_exist $file
+            keep_get_stats $file | sort -n > $tmpfile2
+            average_using_sliding_window $tmpfile2
+            cat $tmpfile2 | sort -k 3 -n > $tmpfile
+
+            # compute and print percentiles of latencies
+            echo $getsize | awk '{printf "%-20s ", $1}'
+            lines=`cat $tmpfile | wc -l`
+            for p in ${percentiles[@]}; do
+                if [ $p == "0" ]; then
+                    cat $tmpfile | awk '{s+=$3; n++} END{printf "%5.1f ", s/n}'
+                else
+                    cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
+                fi
+            done
+
+            # print also total time
+            file=${statsfolder}/${files[$i]}-getthreads-1-getthrput-20-getsize-${getsize}.stats
+            tail -n 1 $file | awk '{printf "%10d", $2}'
+
+            echo ""
+
+        done > $outfile
+
+        if [ "`cat $outfile | wc -l`" == "0" ]; then # if file empty, delete it
+            rm $outfile
+        fi
+    done
+
+    rm $tmpfile $tmpfile2
+}
 
 #========================================================
 # main script starts here
@@ -352,4 +510,13 @@ collect_zipf_keys_stats
 
 prefix="geometric-p-2-zipf_a"
 collect_zipf_keys_stats
+
+prefix="cassandra-l-4-zipf_a"
+collect_zipf_keys_stats
+
+collect_stats_per_rangesize
+
+collect_stats_per_putthruput
+
+collect_stats_per_numthreads
 
