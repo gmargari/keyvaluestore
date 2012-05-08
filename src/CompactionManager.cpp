@@ -28,6 +28,13 @@ CompactionManager::~CompactionManager() {
  *                        memstore_flush_to_diskfile
  *============================================================================*/
 DiskFile *CompactionManager::memstore_flush_to_diskfile() {
+    return memstore_flush_to_diskfile("");
+}
+
+/*============================================================================
+ *                        memstore_flush_to_diskfile
+ *============================================================================*/
+DiskFile *CompactionManager::memstore_flush_to_diskfile(Slice key) {
     DiskFile *disk_file;
     DiskFileOutputStream *disk_ostream;
     MapInputStream *map_istream;
@@ -36,14 +43,14 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile() {
     disk_file = new DiskFile();
     disk_file->open_new_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGEBUF_SIZE);
-    map_istream = m_memstore->new_map_inputstream();
+    map_istream = m_memstore->new_map_inputstream(key);
     // no need to use copy_stream_unique_keys() since map keys are unique
     Streams::copy_stream(map_istream, disk_ostream);
     delete map_istream;
     delete disk_ostream;
 
-    assert(m_memstore->get_size_serialized() == disk_file->get_size());
-    m_memstore->clear();
+    // assert(m_memstore->get_size_serialized() == disk_file->get_size());
+    m_memstore->clear_map(key);
 
     return disk_file;
 }

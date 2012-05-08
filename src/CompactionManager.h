@@ -4,6 +4,7 @@
 #define SRC_COMPACTIONMANAGER_H_
 
 #include "./Global.h"
+#include "./leveldb/slice.h"
 
 class MemStore;
 class DiskStore;
@@ -26,6 +27,7 @@ class CompactionManager {
      * return pointer to new disk file created
      */
     DiskFile *memstore_flush_to_diskfile();
+    DiskFile *memstore_flush_to_diskfile(Slice key);
 
     /**
      * request a memory flush, to create some free space in memory

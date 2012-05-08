@@ -21,6 +21,7 @@ using std::vector;
 using std::min;
 
 #define SPLIT_PERC 0.6  // move to Global.h?
+#define ONLINE_MERGE 0
 
 /*============================================================================
  *                        RangemergeCompactionManager
@@ -64,6 +65,7 @@ uint64_t RangemergeCompactionManager::get_blocksize() {
  *                               do_flush
  *============================================================================*/
 void RangemergeCompactionManager::do_flush() {
+    DiskFile *memstore_file;
     MapInputStream *map_istream;
     vector<DiskFile *> new_disk_files;
     vector<InputStream *> istreams;
@@ -74,6 +76,8 @@ void RangemergeCompactionManager::do_flush() {
 #endif
 
     assert(sanity_check());
+    assert((dbg_memsize = m_memstore->get_size()) || 1);
+    assert((dbg_memsize_serial = m_memstore->get_size_serialized()) || 1);
 
     //--------------------------------------------------------------------------
     // select a range to flush
@@ -84,8 +88,14 @@ void RangemergeCompactionManager::do_flush() {
     // merge range's disk tuples with range's memory tuples
     //--------------------------------------------------------------------------
     // get istream for all memory tuples that belong to range
-    map_istream = m_memstore->new_map_inputstream(rng.m_first);
-    istreams.push_back(map_istream);
+    if (ONLINE_MERGE) {
+        map_istream = m_memstore->new_map_inputstream(rng.m_first);
+        istreams.push_back(map_istream);
+    } else {
+        memstore_file = memstore_flush_to_diskfile(rng.m_first);
+        m_memstore->clear_map(rng.m_first);
+        istreams.push_back(new DiskFileInputStream(memstore_file));
+    }
 
     // get istream for file that stores all tuples that belong to range
     if (rng.m_file_num != NO_DISK_FILE) {
@@ -106,19 +116,22 @@ void RangemergeCompactionManager::do_flush() {
         assert(newfiles == 1);
     }
 
-    // delete all istreams
+    // delete all istreams and any temporary files
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];
     }
-
-    assert((dbg_memsize = m_memstore->get_size()) || 1);
-    assert((dbg_memsize_serial = m_memstore->get_size_serialized()) || 1);
+    if (!ONLINE_MERGE) {
+        memstore_file->delete_from_disk();
+        delete memstore_file;
+    }
 
     //--------------------------------------------------------------------------
     // update memstore
     //--------------------------------------------------------------------------
     // remove from memstore tuples of range
-    m_memstore->clear_map(rng.m_first);
+    if (ONLINE_MERGE) {
+        m_memstore->clear_map(rng.m_first);
+    }
 
     // add new map(s) to memstore if new range(s) was created (range split)
     for (int i = 0; i < newfiles - 1; i++) {
