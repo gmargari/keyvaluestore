@@ -169,7 +169,11 @@ void GeomCompactionManager::do_flush() {
     //--------------------------------------------------------------------------
     // merge streams creating a new disk file
     //--------------------------------------------------------------------------
-    disk_file = Streams::merge_streams(istreams);
+    if (istreams.size() > 1) {
+        disk_file = Streams::merge_streams(istreams);
+    } else {
+        disk_file = memstore_file;
+    }
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];
     }
@@ -177,8 +181,10 @@ void GeomCompactionManager::do_flush() {
     //--------------------------------------------------------------------------
     // delete merged files
     //--------------------------------------------------------------------------
-    memstore_file->delete_from_disk();
-    delete memstore_file;
+    if (istreams.size() > 1) {
+        memstore_file->delete_from_disk();
+        delete memstore_file;
+    }
 
     m_diskstore->write_lock();
     for (int i = count - 1; i >= 0; i--) {
