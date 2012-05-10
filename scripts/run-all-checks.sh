@@ -23,11 +23,11 @@ function run_check()
 
 mkdir -p /tmp/kvstore/
 
-run_check ./build/src/test/vfiletest
-#run_check ./build/src/test/kvstoretest
-run_check ./build/src/test/maptest
-run_check ./build/src/test/memstoretest
-run_check ./build/src/test/vfileindextest
+run_check /tmp/build/src/test/vfiletest
+#run_check /tmp/build/src/test/kvstoretest
+run_check /tmp/build/src/test/maptest
+run_check /tmp/build/src/test/memstoretest
+run_check /tmp/build/src/test/vfileindextest
 # check-kvstore does not stop
 #./scripts/check-kvstore.sh && 
 run_check ./scripts/check-save-and-load-kvstore.sh

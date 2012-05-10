@@ -9,12 +9,12 @@ execute() {
     method=$1
     params=$2
     
-    cmd="./build/src/sim -m $memsize -i $bytestoinsert $generalparams -c $method"
+    cmd="/tmp/build/src/sim -m $memsize -i $bytestoinsert $generalparams -c $method"
     echo $cmd | awk '{printf "%-60s ", $0}'
     
     rm -rf /tmp/kvstore/* &&
     $cmd > /dev/null 2> /tmp/err &&
-    ./build/src/tools/merge `cat /tmp/kvstore/dstore.info | grep "^/tmp/kvstore/dfile"` | grep -v ^"#" | awk '{print $1 $2 $3}' |  md5sum > $md5file &&
+    /tmp/build/src/tools/merge `cat /tmp/kvstore/dstore.info | grep "^/tmp/kvstore/dfile"` | grep -v ^"#" | awk '{print $1 $2 $3}' |  md5sum > $md5file &&
     md5sum=`cat $md5file | awk '{print $1}'`
     echo $md5sum
     if [ -n "$prevmd5sum"  -a  "$prevmd5sum" != "$md5sum" ]; then

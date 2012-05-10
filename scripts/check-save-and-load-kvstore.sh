@@ -12,22 +12,22 @@ function execute_sim() {
 
     numlines=$(( $endline - $startline + 1 ))
 
-    echo "head -n $endline $inputfile | tail -n $numlines | ./build/src/sim -c $cmanager -m $memsize -s -g $getthreads"
-          head -n $endline $inputfile | tail -n $numlines | ./build/src/sim -c $cmanager -m $memsize -s -g $getthreads 2> /tmp/err > /dev/null && return 0
+    echo "head -n $endline $inputfile | tail -n $numlines | /tmp/build/src/sim -c $cmanager -m $memsize -s -g $getthreads"
+          head -n $endline $inputfile | tail -n $numlines | /tmp/build/src/sim -c $cmanager -m $memsize -s -g $getthreads 2> /tmp/err > /dev/null && return 0
     
     echo "Error!"
     exit 1
 }
 
 function index_md5sum() {
-    ./build/src/tools/merge `cat /tmp/kvstore/dstore.info | grep "^\/tmp"` | grep -v ^"#" | awk '{print $1, $2}' | md5sum | awk '{print $1}'
+    /tmp/build/src/tools/merge `cat /tmp/kvstore/dstore.info | grep "^\/tmp"` | grep -v ^"#" | awk '{print $1, $2}' | md5sum | awk '{print $1}'
 }
 
 
 mkdir -p /tmp/kvstore/
 rm -f /tmp/kvstore/* &&
 
-./build/src/sim -c nomerge -i $insbytes -e -k $keysize 2> /tmp/err | grep -v "^#" > $inputfile
+/tmp/build/src/sim -c nomerge -i $insbytes -e -k $keysize 2> /tmp/err | grep -v "^#" > $inputfile
 FLINES=`cat $inputfile | wc -l` &&
 
 for cmanager in nomerge logarithmic geometric "rangemerge -b 2" immediate cassandra; do

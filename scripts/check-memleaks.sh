@@ -8,7 +8,7 @@ execute() {
     method=$1
     params=$2
     
-    cmd="./build/src/sim -m $memsize -i $bytestoinsert $generalparams -c $method"
+    cmd="/tmp/build/src/sim -m $memsize -i $bytestoinsert $generalparams -c $method"
     echo $cmd | awk '{printf "%-60s ", $0}'
             
     rm -rf /tmp/kvstore/* &&

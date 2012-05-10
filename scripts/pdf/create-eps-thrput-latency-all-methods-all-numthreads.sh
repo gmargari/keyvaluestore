@@ -37,6 +37,7 @@ gnuplot << EOF
     set xrange [0:$xmax]
 
     sec2min(x) = x/60.0
+    set grid ytics
 
     set key bottom right
 

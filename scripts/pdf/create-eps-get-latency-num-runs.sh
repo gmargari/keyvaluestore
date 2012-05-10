@@ -45,8 +45,8 @@ gnuplot << EOF
 #    set x2label 'Read cost' font 'Helvetica Bold'
 
     # legend position
-    # set key top left
-    set key at 5.2,4.7
+    set key top left
+#    set key at 5.2,4.7
 
     set yrange [0:${ymax}+1]
     set ylabel 'Number of disk files'

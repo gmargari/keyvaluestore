@@ -1,6 +1,8 @@
-mkdir -p build &&
-cd build &&
-cmake .. &&
+BUILDDIR=/tmp/build/
+CURDIR=`pwd`
+mkdir -p ${BUILDDIR} &&
+cd ${BUILDDIR} &&
+cmake ${CURDIR} &&
 make &&
 
 #echo "Executable in build/bin"

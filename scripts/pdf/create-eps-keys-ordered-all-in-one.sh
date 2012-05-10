@@ -32,6 +32,9 @@ gnuplot << EOF
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
 
+    set xtics 10    # major xticks
+#    set mxtics 0    # minor xticks
+
     # Insertion time
     set out '${outfile}.totaltime.eps'
     set ylabel "$ylabel_ins"

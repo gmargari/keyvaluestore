@@ -1,6 +1,6 @@
 #!/bin/bash
 
-executable="/home/gmargari/Dropbox/phd/keyvaluestore/build/src/sim"
+executable="/tmp/build/src/sim"
 kvstorefolder="/tmp/kvstore/"
 
 #============================
@@ -12,226 +12,387 @@ my_print() {
 }
 
 #========================================================
-# execute_sim()
+# mailme()
 #========================================================
-execute_sim() {
-    command="${executable} -m ${memsize} -i ${bytesins} -c ${mergername} ${mergerparams} ${extraparams}"
-    echo $command
+mailme() {
+    echo $* | mail -s "message from `hostname`" gmargari@gmail.com
+}
+
+#========================================================
+# put_only_sim()
+#========================================================
+put_only_sim() {
+    command="${executable} -m ${memsize} -i ${datasize} -c ${method}"
+    my_print $command
+
     rm -rf ${kvstorefolder}/*
     mkdir -p ${statsfolder}
-    $command > ${statsfolder}/${outputname}.stats 2> ${statsfolder}/${outputname}.stderr && return
-
+    $command > ${statsfolder}/${prefix}${suffix}.stats 2> /dev/null && return
+    
     echo "Error running $command"
-    echo "Error running $command" | mail -s "Error running kvstore experiment" -t "gmargari@gmail.com"
+    mailme "Error running $command"
     exit 1
 }
 
 #========================================================
-# all_methods()
+# put_get_sim()
 #========================================================
-all_methods() {
-    memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins
-    mergername="nomerge";      mergerparams="";        outputname="nomerge";            execute_sim;
-    mergername="geometric";    mergerparams="-r 2";    outputname="geometric-r-2";      execute_sim;
-    mergername="geometric";    mergerparams="-r 3";    outputname="geometric-r-3";      execute_sim;
-    mergername="geometric";    mergerparams="-r 4";    outputname="geometric-r-4";      execute_sim;
-    mergername="geometric";    mergerparams="-p 4";    outputname="geometric-p-4";      execute_sim;
-    mergername="geometric";    mergerparams="-p 3";    outputname="geometric-p-3";      execute_sim;
-    mergername="geometric";    mergerparams="-p 2";    outputname="geometric-p-2";      execute_sim;
-    mergername="rangemerge";   mergerparams="";        outputname="rangemerge";         execute_sim;
-    mergername="immediate";    mergerparams="";        outputname="immediate";          execute_sim;
-    mergername="cassandra";    mergerparams="-l 2";    outputname="cassandra-l-2";      execute_sim;
-    mergername="cassandra";    mergerparams="-l 3";    outputname="cassandra-l-3";      execute_sim;
-    mergername="cassandra";    mergerparams="-l 4";    outputname="cassandra-l-4";      execute_sim;
-#    mergername="logarithmic";  mergerparams="";        outputname="logarithmic";        execute_sim; # identical to Geometric r = 2
-#    mergername="geometric";    mergerparams="-p 1";    outputname="geometric-p-1";      execute_sim; # identical to Immediate Merge
-#    mergername="rangemerge";   mergerparams="-b 0";    outputname="rangemerge-blocksize-000";  execute_sim; # identical to Immediate Merge
+put_get_sim() {
+    command="${executable} -m ${memsize} -i ${datasize} -c ${method}"
+    command=$command" -P ${putthrput} -G ${getthrput} -g ${getthreads} -R ${getsize} -t"
+    my_print $command
+
+    rm -rf ${kvstorefolder}/*
+    mkdir -p ${statsfolder}
+    $command > ${statsfolder}/${prefix}${suffix}.stats 2> ${statsfolder}/${prefix}${suffix}.stderr && return
+    
+    echo "Error running $command"
+    mailme "Error running $command"
+    exit 1
 }
 
 #========================================================
-# rangemerge_memsize()
+# Put_only_experiments()
 #========================================================
-rangemerge_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="rangemerge"
-    for memsize in ${memsizes[@]}; do
-        mergerparams="";  outputname="rangemerge-memsize-$memsize";  execute_sim;
+Put_only_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+   
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        suffix=""
+        put_only_sim
     done
+
+    mailme "${FUNCNAME}()"
 }
 
 #========================================================
-# nomerge_memsize()
+# Memsize_experiments()
 #========================================================
-nomerge_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="nomerge"
-    for memsize in ${memsizes[@]}; do
-        mergerparams="";  outputname="nomerge-memsize-$memsize";  execute_sim;
-    done
-}
+Memsize_experiments() {
+    my_print "${FUNCNAME}()"
 
-#========================================================
-# immediate_memsize()
-#========================================================
-immediate_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="immediate"
-    for memsize in ${memsizes[@]}; do
-        mergerparams="";  outputname="immediate-memsize-$memsize";  execute_sim;
-    done
-}
+    datasize=$def_datasize
 
-#========================================================
-# geometric_r_memsize()
-#========================================================
-geometric_r_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="geometric"
-    for r in 2 3 4; do
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
         for memsize in ${memsizes[@]}; do
-            mergerparams="-r $r";  outputname="geometric-r-${r}-memsize-${memsize}";  execute_sim;
+            suffix="-memsize-$memsize"
+            put_only_sim
         done
     done
+
+    mailme "${FUNCNAME}()"
 }
 
 #========================================================
-# geometric_p_memsize()
+# Put_get_experiments()
 #========================================================
-geometric_p_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="geometric"
-    for p in 2 3 4; do
-        for memsize in ${memsizes[@]}; do
-            mergerparams="-p $p";  outputname="geometric-p-${p}-memsize-${memsize}";  execute_sim;
+Put_get_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+    
+    putthrput=$def_putthrput
+    getthrput=$def_getthrput
+    getthreads=$def_getthreads
+    getsize=$def_getsize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
+        put_get_sim
+    done
+
+    mailme "${FUNCNAME}()"
+}
+
+#========================================================
+# Putthrput_experiments()
+#========================================================
+Putthrput_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+    
+    putthrput=$def_putthrput
+    getthrput=$def_getthrput
+    getthreads=$def_getthreads
+    getsize=$def_getsize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        for putthrput in ${putthrputs[@]}; do
+            suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
+            put_get_sim
         done
     done
+
+    mailme "${FUNCNAME}()"
 }
 
 #========================================================
-# cassandra_memsize()
+# Getsize_experiments()
 #========================================================
-cassandra_memsize() {
-    bytesins=$def_mb_to_ins
-    mergername="cassandra"
-    for l in 2 3 4; do
-        for memsize in ${memsizes[@]}; do
-            mergerparams="-l $l";  outputname="cassandra-l-${l}-memsize-${memsize}";  execute_sim;
+Getsize_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+    
+    putthrput=$def_putthrput
+    getthrput=$def_getthrput
+    getthreads=$def_getthreads
+    getsize=$def_getsize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        for getsize in ${getsizes[@]}; do
+            suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
+            put_get_sim
         done
     done
+
+    mailme "${FUNCNAME}()"
 }
 
 #========================================================
-# rangemerge_blocksize()
+# Numgetthreads_experiments()
 #========================================================
-rangemerge_blocksize() {
-    memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins
-    mergername="rangemerge"
-    for bsize in ${blocksizes[@]}; do
-        mergerparams="-b $bsize";  outputname="rangemerge-blocksize-$bsize";  execute_sim;
-    done
-}
+Numgetthreads_experiments() {
+    my_print "${FUNCNAME}()"
 
-#========================================================
-# logarithmic_ordered_data()
-#======================================================== 
-logarithmic_ordered_data() {  
-    memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins 
-    mergername="logarithmic"
+    memsize=$def_memsize
+    datasize=$def_datasize
+    
+    putthrput=$def_putthrput
+    getthrput=$def_getthrput
+    getthreads=$def_getthreads
+    getsize=$def_getsize
 
-    for ord_prob in 0.0 0.2 0.4 0.6 0.8 1.0; do
-         mergerparams="-o $ord_prob";  outputname="logarithmic-ord-prob-${ord_prob}";  execute_sim;
-    done
-}
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
 
-#========================================================
-# rangemerge_ordered_data()
-#======================================================== 
-rangemerge_ordered_data() {   
-    memsize=$def_memsize_in_mb
-    bytesins=$def_mb_to_ins
-    mergername="rangemerge"
-
-    for bsize in 0064 0128 0256; do
-        for ord_prob in 0.0 0.2 0.4 0.6 0.8 1.0; do
-            mergerparams="-b $bsize -o $ord_prob";  outputname="rangemerge-blocksize-${bsize}-ord-prob-${ord_prob}";  execute_sim;
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        for getthreads in ${numgetthreads[@]}; do
+            getthrput=$(( $def_getthrput / $getthreads ))
+            suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
+            put_get_sim
         done
     done
+
+    mailme "${FUNCNAME}()"
+}
+
+#========================================================
+# Zipfkeys_experiments()
+#========================================================
+Zipfkeys_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        prefix=${prefixes[$i]}
+        if [ "${methods[$i]}" == "rangemerge" ]; then
+            for zipf_a in ${rngmerge_zipf_as[@]}; do
+                method="${methods[$i]} -z ${zipf_a} -u"
+                suffix="-zipf_a-${zipf_a}"
+                put_only_sim
+            done
+        else
+            for zipf_a in ${zipf_as[@]}; do
+                method="${methods[$i]} -z ${zipf_a} -u"
+                suffix="-zipf_a-${zipf_a}"
+                put_only_sim
+            done
+        fi
+    done
+
+    mailme "${FUNCNAME}()"
+}
+
+#========================================================
+# Orderedkeys_experiments()
+#========================================================
+Orderedkeys_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        prefix=${prefixes[$i]}
+        if [ "${methods[$i]}" == "rangemerge" ]; then
+            for ordered_prob in ${rngmerge_ordered_probs[@]}; do
+                method="${methods[$i]} -o ${ordered_prob}"
+                suffix="-ord-prob-${ordered_prob}"
+                put_only_sim
+            done
+        else
+            for ordered_prob in ${ordered_probs[@]}; do
+                method="${methods[$i]} -o ${ordered_prob}"
+                suffix="-ord-prob-${ordered_prob}"
+                put_only_sim
+            done
+        fi
+    done
+
+    mailme "${FUNCNAME}()"
+}
+
+#========================================================
+# Rangemerge_blocksize()
+#========================================================
+Rangemerge_blocksize() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+
+    prefix="rangemerge"
+    for blocksize in ${blocksizes[@]}; do
+        method="rangemerge -b ${blocksize}"
+        suffix="-blocksize-${blocksize}"
+        put_only_sim
+    done
+
+    mailme "${FUNCNAME}()"
 }
 
 
-#========================================================
+
+
+
+
+#===================================================================================
 # main script starts here
-#========================================================
+#===================================================================================
 
 # check user gave results folder as argument
 if [ $# -ne 1 ]; then
     echo "Syntax: $0 <stats folder>"
     exit 1
-fi
+fi     
 statsfolder=$1
-
-if [ ! -f ${executable} ]; then
-    echo "Error: ${executable} does not exist"
-    exit 1
-fi
-
-# assert that debug level is 0 before starting experiments
-if [ "`${executable} -c rangemerge -i 0 | grep debug_level | awk '{print $3}'`" != "0" ]; then
-    echo "Error: debug level not zero"
-    exit 1
-fi
 
 rm -rf ${kvstorefolder}/*
 rm -rf ${statsfolder}/*
 
+if [ ! -f ${executable} ]; then
+    echo "Error: ${executable} not found"
+    exit 1
+fi
+
+# assert that debug level is 0 before starting experiments
+if [ "`${executable} -c rangemerge -i 0 2> /dev/null | grep debug_level | awk '{print $3}'`" != "0" ]; then 
+    echo "Error: debug level not zero"
+    exit 1
+fi
+
 #---------------------------------
 # You can change these
 #---------------------------------
-#extraparams="-z -u" # -u to make keys unique, else more than 90% of keys will be replaced in memory and thus not inserted!
-extraparams=""
-blocksizes=( "0000" "0016" "0032" "0064" "0128" "0256" "0512" "1024" "2048" "4096" ) # for rangemerge
-flushmemsizes=( "0000" "0004" "0008" "0016" "0032" "0064" "0128" "0256" "0512" "1024" ) # for rangemerge
-memsizes=( "0128" "0256" "0512" "1024" "2048" )
-## def_mb_to_ins=5000 # dont use odd number of GB (e.g. for memsize=2GB, inserting 5GB will result 4GB written (2 flushes of 2GB, 1Gb left in memory))
-#def_mb_to_ins=10150 # a bit more MB in order to totally fill memstore
-def_mb_to_ins=20250 # a bit more MB in order to totally fill memstore
-def_memsize_in_mb=1024
-#---------------------------------
-# You can change these
-#---------------------------------
+def_datasize=10100
+def_memsize=512
 
-my_print "all methods"
-all_methods
+def_putthrput=2500
+def_getthreads=1
+def_getthrput=20
+def_getsize=10
 
-my_print "nomerge memsize"
-nomerge_memsize
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -r 4" "geometric -p 2" "geometric -p 3" "geometric -p 4"
+           "cassandra -l 2" "cassandra -l 3" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2" "geometric-r-3" "geometric-r-4" "geometric-p-2" "geometric-p-3" "geometric-p-4"
+           "cassandra-l-2" "cassandra-l-3" "cassandra-l-4" "rangemerge" "immediate" )
 
-my_print "geometric-r memsize"
-geometric_r_memsize
+Put_only_experiments
 
-my_print "geometric-p memsize"
-geometric_p_memsize
+Put_get_experiments
 
-my_print "rangemerge memsize"
-rangemerge_memsize
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 
-my_print "immediate memsize"
-immediate_memsize
+## memsizes=( "0128" "0256" "0512" "1024" "2048" )
+memsizes=(    "0128" "0256"        "1024" "2048" )
+Memsize_experiments
 
-my_print "cassandra memsize"
-cassandra_memsize
+methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 
-my_print "rangemerge blocksize"
-rangemerge_blocksize
+## putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" )
+putthrputs=(    "1000"        "5000" "10000" "20000" "40000" )
+Putthrput_experiments
 
-my_print "rangemerge flushmem"
-rangemerge_flushmem
+## getsizes=( "1" "10" "100" "1000" "10000" "100000" )
+getsizes=(    "1"      "100" "1000" "10000" "100000" )
+Getsize_experiments
 
-my_print "logarithmic_ordered_data"
-logarithmic_ordered_data
+## numgetthreads=( "1" "2" "5" "10" "20" )
+numgetthreads=(        "2" "5" "10" "20" )
+Numgetthreads_experiments
 
-my_print "rangemerge_ordered_data"
-rangemerge_ordered_data
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+
+zipf_as=( "0.2" "1.0" "2.0" "3.0" "4.0" )
+rngmerge_zipf_as=( "0.2" "0.5" "1.0" "1.5" "2.0" "2.5" "3.0" "3.5" "4.0" )
+Zipfkeys_experiments
+
+ordered_probs=( "0.0" "1.0" )
+rngmerge_ordered_probs=( "0.0" "0.2" "0.4" "0.6" "0.8" "1.0" )
+Orderedkeys_experiments
+
+blocksizes=( "0000" "0016" "0032" "0064" "0128" "0256" "0512" "1024" "2048" "4096" )
+Rangemerge_blocksize
+
