@@ -66,7 +66,7 @@ int main() {
     cout << "max key size:    " << setw(12) << right << MAX_KEY_SIZE << endl;
     cout << "max value size:  " << setw(12) << right << MAX_VALUE_SIZE << endl;
 
-    key = (char *)malloc(MAX_KEY_SIZE + 1);
+    key = (char *)malloc(MAX_KEY_SIZE + 1 + 10); // +10 for UNIQUE_KEYS below
     value = (char *)malloc(MAX_VALUE_SIZE + 1);
 
     //================================================================

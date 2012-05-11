@@ -22,7 +22,7 @@ check_file_exist() {
     local file
     for file in "$@"; do
         if [ ! -f "$file" ]; then
-            echo "$file does not exist!"
+            echo "$file does not exist!" >&2
         fi
     done
 }
@@ -34,7 +34,7 @@ ensure_file_exist() {
     local file
     for file in "$@"; do
         if [ ! -f "$file" ]; then
-            echo "$file does not exist!"
+            echo "$file does not exist!" >&2
             exit 1
         fi
     done
