@@ -65,7 +65,7 @@ uint64_t RangemergeCompactionManager::get_blocksize() {
  *                               do_flush
  *============================================================================*/
 void RangemergeCompactionManager::do_flush() {
-    DiskFile *memstore_file;
+    DiskFile *memstore_file = NULL;
     MapInputStream *map_istream;
     vector<DiskFile *> new_disk_files;
     vector<InputStream *> istreams;
@@ -88,7 +88,7 @@ void RangemergeCompactionManager::do_flush() {
     // merge range's disk tuples with range's memory tuples
     //--------------------------------------------------------------------------
     // get istream for all memory tuples that belong to range
-    if (ONLINE_MERGE) {
+    if (ONLINE_MERGE || rng.m_file_num == NO_DISK_FILE) {
         map_istream = m_memstore->new_map_inputstream(rng.m_first);
         istreams.push_back(map_istream);
     } else {
@@ -120,16 +120,15 @@ void RangemergeCompactionManager::do_flush() {
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];
     }
-    if (!ONLINE_MERGE) {
+    if (memstore_file) {
         memstore_file->delete_from_disk();
         delete memstore_file;
     }
 
     //--------------------------------------------------------------------------
-    // update memstore
+    // update memstore (remove from memstore tuples of range)
     //--------------------------------------------------------------------------
-    // remove from memstore tuples of range
-    if (ONLINE_MERGE) {
+    if (ONLINE_MERGE || rng.m_file_num == NO_DISK_FILE) {
         m_memstore->clear_map(rng.m_first);
     }
 
