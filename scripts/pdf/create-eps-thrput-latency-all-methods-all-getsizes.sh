@@ -4,9 +4,9 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-file_cas="${statsfolder}/cassandra-getsizes.totalstats"
-file_log="${statsfolder}/logarithmic-getsizes.totalstats"
-file_geo="${statsfolder}/geometric-getsizes.totalstats"
+file_cas="${statsfolder}/cassandra-l-4-getsizes.totalstats"
+file_log="${statsfolder}/geometric-r-2-getsizes.totalstats"
+file_geo="${statsfolder}/geometric-r-3-getsizes.totalstats"
 file_rng="${statsfolder}/rangemerge-getsizes.totalstats"
 file_imm="${statsfolder}/immediate-getsizes.totalstats"
 file_gp2="${statsfolder}/geometric-p-2-getsizes.totalstats"
@@ -15,34 +15,36 @@ ymax2=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/n
 ymax3=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.4}'`
 ymax4=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.4}'`
 ymax5=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.4}'`
-ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.1}'`
+ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.04}'`
 
+xmin=0.8
 xmax=130000
 
 xlabel='Range get size (keys retrieved)'
 ylabel='Get latency (ms)'
 
 my_print
+ensure_file_exist $file_cas $file_log $file_geo $file_rng $file_imm $file_gp2
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-#    set xtics font 'Helvetica,20'
-#    set ytics font 'Helvetica,20'
-    #set xlabel font 'Helvetica,16'
-    #set ylabel font 'Helvetica,16'
-    set terminal postscript color enhanced eps "Helvetica" 20
+    #set xtics font 'Helvetica,20'
+    #set ytics font 'Helvetica,20'
+    set xlabel font 'Helvetica,26'
+    set ylabel font 'Helvetica,26'
+    set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel '${xlabel}'
     set ylabel '${ylabel}'
-    set xrange [0.8:$xmax]
+    set xrange [$xmin:$xmax]
 
     sec2min(x) = x/60.0
     set grid ytics
 
+    set key bottom right
+
     set logscale x
     set logscale y
-
-    set key bottom right
 
     set out '${outfolder}/allmethods-getsizes.avg.eps'
     set yrange [1:$ymax2]

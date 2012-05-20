@@ -8,36 +8,34 @@ source $curdir/include-colors-titles.sh
 # For each memory size, plot all methods in a bar chart
 #==========================================================================================
 
-inputfile_with_linenumbers="$(mktemp)"
-
 memsizes=( '0128' '0256' '0512' '1024' '2048' )
 
+inputfile_with_linenumbers="$(mktemp)"
 for memsize in ${memsizes[@]}; do
 
     inputfile="${statsfolder}/allmethods-memsize-${memsize}.totalstats"
     outputfile="${outfolder}/allmethods-memsize-${memsize}"
 
+    my_print "memsize $memsize"
     ensure_file_exist ${inputfile}
 
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
     awk '{if (NF>1) printf "%s %s\n", ++i, $0}' ${inputfile} > ${inputfile_with_linenumbers}
     lines=`cat ${inputfile_with_linenumbers} | wc -l`
-    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%s\" %s", $1, NR-1}'`
-
-    my_print "memsize ${memsizes[$i]}"
+    xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; sub(/_/, " ", $1); printf "\"%s\" %s", $1, NR-1}'`
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-    set xtics (${xticklabels}) rotate by -45
-    set yrange [0:] # start y from 0
 #    set xrange [0:${lines}+1]
 #    set xtics font 'Helvetica,18'
 #    set ytics font 'Helvetica,18'
 #    set xlabel font 'Helvetica,21'
 #    set ylabel font 'Helvetica,21'
-    set terminal postscript color enhanced eps "Helvetica" 22
+    set terminal postscript color enhanced eps "Helvetica" 26
     set xlabel ''
+    set xtics (${xticklabels}) rotate by -45
+    set yrange [0:] # start y from 0
 
     set grid ytics
 
@@ -89,3 +87,4 @@ EOF
 done
 
 rm $inputfile_with_linenumbers
+

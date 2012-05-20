@@ -8,7 +8,7 @@ source $curdir/include-colors-titles.sh
 # Logarithmic: Number of runs vs range get time
 #==========================================================================================
 
-file="logarithmic.searchlog"
+file="geometric-r-2.searchlog"
 inputfile="${statsfolder}/${file}"
 outputfile="${outfolder}/${file}"
 

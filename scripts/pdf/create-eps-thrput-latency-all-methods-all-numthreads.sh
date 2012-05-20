@@ -4,37 +4,39 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-file_cas="${statsfolder}/cassandra-getthreads.totalstats"
-file_log="${statsfolder}/logarithmic-getthreads.totalstats"
-file_geo="${statsfolder}/geometric-getthreads.totalstats"
+file_cas="${statsfolder}/cassandra-l-4-getthreads.totalstats"
+file_log="${statsfolder}/geometric-r-2-getthreads.totalstats"
+file_geo="${statsfolder}/geometric-r-3-getthreads.totalstats"
 file_rng="${statsfolder}/rangemerge-getthreads.totalstats"
 file_imm="${statsfolder}/immediate-getthreads.totalstats"
 file_gp2="${statsfolder}/geometric-p-2-getthreads.totalstats"
 
-ymax2=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.1}'`
-ymax3=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.1}'`
-ymax4=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.1}'`
-ymax5=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.1}'`
-ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.1}'`
+ymax2=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.04}'`
+ymax3=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.04}'`
+ymax4=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.04}'`
+ymax5=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.04}'`
+ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.}'`
 
+xmin=0
 xmax=10.5
 
 xlabel='Number of get threads'
 ylabel='Get latency (ms)'
 
 my_print
+ensure_file_exist $file_cas $file_log $file_geo $file_rng $file_imm $file_gp2
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-#    set xtics font 'Helvetica,20'
-#    set ytics font 'Helvetica,20'
-    #set xlabel font 'Helvetica,16'
-    #set ylabel font 'Helvetica,16'
-    set terminal postscript color enhanced eps "Helvetica" 20
+    #set xtics font 'Helvetica,20'
+    #set ytics font 'Helvetica,20'
+    set xlabel font 'Helvetica,26'
+    set ylabel font 'Helvetica,26'
+    set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel '${xlabel}'
     set ylabel '${ylabel}'
-    set xrange [0:$xmax]
+    set xrange [$xmin:$xmax]
 
     sec2min(x) = x/60.0
     set grid ytics

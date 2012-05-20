@@ -1,23 +1,23 @@
-title_imm='Immediate'
+title_imm='Remerge'
 title_rng='Rangemerge'
 title_geo='Geometric r=3'
 title_gp2='Geometric p=2'
-title_cas='Cassandra l=4'
-title_cl2='Cassandra l=2'
-title_log='Logar. / Geom. r=2'
+title_cas='SMA k=4'
+title_cl2='SMA k=2'
+title_log='Geometric r=2'
 title_nom='Nomerge'
 
 color_imm="'#FF8000'"
 color_rng="'#E4191C'"
 color_geo="'#4CB04A'"
 color_gp2="'#994FA4'"
-color_cas="'#888888'"
-color_cl2="'#A65728'"
-color_log="'#387DB8'"
-color_nom="'#000000'"
+color_cas="'#387DB8'"
+color_cl2="'#000000'"
+color_log="'#A65728'"
+color_nom="'#888888'"
 
-pointtype_imm="1"
-pointtype_rng="2"
+pointtype_imm="2"
+pointtype_rng="1"
 pointtype_geo="3"
 pointtype_gp2="4"
 pointtype_cas="5"
@@ -53,5 +53,6 @@ ylabel_ins='Insertion time (min)'
 ylabel_comp='Compaction time (min)'
 ylabel_io='I/O time (min)'
 ylabel_gb='Total data transferred (GB)'
+ylabel_gb_diff='Data transferred (GB)'
 ylabel_runs='Number of disk files'
 

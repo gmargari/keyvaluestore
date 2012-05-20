@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ $# -ne 1 ]; then
     echo "Syntax: $0 <stats folder>"
     exit 1

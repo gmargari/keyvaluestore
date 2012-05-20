@@ -46,7 +46,7 @@ gnuplot << EOF
 #    set xlabel font  'Helvetica,22'
 #    set ylabel font  'Helvetica,22'
 #    set y2label font 'Helvetica,22'
-    set terminal postscript color enhanced eps "Helvetica" 22
+    set terminal postscript color enhanced eps "Helvetica" 20
     set xlabel 'Data inserted (%)'
 
     mb2gb(x) = x/1024.0
@@ -105,7 +105,7 @@ gnuplot << EOF
     set bmargin 0
     set tmargin 1
 
-    set xlabel 'Data inserted (%) - Geometric_{r=2}'
+    set xlabel 'Data inserted (%) - Geometric r=2'
     set yrange [0:15]
     set y2range [0:150]
     plot \
