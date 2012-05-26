@@ -4,15 +4,6 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-#==========================================================================================
-# For each method, plot GB inserted vs:
-#  - Insertion time
-#  - IO time
-#  - Compaction Time
-#  - GB transferred
-#  - Number of runs
-#==========================================================================================
-
 files=( 'rangemerge' 'immediate' 'nomerge' \
         'geometric-p-2' 'geometric-p-3' 'geometric-p-4' \
         'geometric-r-2' 'geometric-r-3' 'geometric-r-4' \
@@ -43,6 +34,7 @@ for file in ${files[@]}; do
     inputfile=${statsfolder}/${file}${suffix}.log
     outputfile=${outfolder}/${file}${suffix}
 
+    my_print $file
     ensure_file_exist ${inputfile}
 
     ymax_ins=`cat ${inputfile}  | awk '{if ($2 > max) max=$2}               END{print (max/60.0)*1.03}'`
@@ -61,8 +53,6 @@ for file in ${files[@]}; do
         ymax_runs=$(( $ymaxall + 1 ))
     fi
 
-    my_print $file
-
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
@@ -71,7 +61,7 @@ gnuplot << EOF
 #    set xlabel font 'Helvetica,22'
 #    set ylabel font 'Helvetica,22'
     set terminal postscript color enhanced eps "Helvetica" 32
-    set xlabel 'Data inserted (GB)'
+    set xlabel '${xlabel_datains_gb}'
 
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
@@ -82,38 +72,38 @@ gnuplot << EOF
     # Insertion time
     set out '${outputfile}.totaltime.eps'
     set yrange [0:${ymax_ins}]
-    set ylabel "$ylabel_ins"
-    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$2)) notitle with lines lw 7 lc rgb '$color'
+    set ylabel '${ylabel_ins}'
+    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$2)) notitle with lines lw 7 lc rgb '${color}'
 
     # Compaction time
     set out '${outputfile}.compacttime.eps'
     set yrange [0:${ymax_comp}]
-    set ylabel "$ylabel_comp"
-    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$5)) notitle with lines lw 7 lc rgb '$color'
+    set ylabel '${ylabel_comp}'
+    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$5)) notitle with lines lw 7 lc rgb '${color}'
 
     # I/O time
     set out '${outputfile}.iotime.eps'
     set yrange [0:${ymax_io}]
-    set ylabel "$ylabel_io"
-    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) notitle with lines lw 7 lc rgb '$color'
+    set ylabel '${ylabel_io}'
+    plot '${inputfile}' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) notitle with lines lw 7 lc rgb '${color}'
 
     # Data inserted (GB)
     set out '${outputfile}.gbtransferred.eps'
     set yrange [0:${ymax_gb}]
-    set ylabel "$ylabel_gb"
-    plot '${inputfile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with lines lw 7 lc rgb '$color'
+    set ylabel '${ylabel_gb}'
+    plot '${inputfile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with lines lw 7 lc rgb '${color}'
 
     # Number of runs
     set out '${outputfile}.fragm.eps'
     set yrange [0:${ymax_runs}]
-    set ylabel "$ylabel_runs"
-    plot '${inputfile}' using (mb2gb(\$1)):15 notitle with lines lw 7 lc rgb '$color'
+    set ylabel '${ylabel_runs}'
+    plot '${inputfile}' using (mb2gb(\$1)):15 notitle with lines lw 7 lc rgb '${color}'
 
     # Data inserted DIFFERENTIAL (GB)
     set out '${outputfile}.gbtransferred.diff.eps'
     set yrange [0:${ymax_gb_diff}]
-    set ylabel "$ylabel_gb_diff"
-    plot '${difffile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with linespoints pt 1 lw 7 ps 2 lc rgb '$color'
+    set ylabel '${ylabel_gb_diff}'
+    plot '${difffile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with linespoints pt 1 lw 7 ps 2 lc rgb '${color}'
 
 EOF
 #==========================[ gnuplot embedded script ]============================

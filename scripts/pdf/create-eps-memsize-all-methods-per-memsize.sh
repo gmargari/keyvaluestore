@@ -4,10 +4,6 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-#==========================================================================================
-# For each memory size, plot all methods in a bar chart
-#==========================================================================================
-
 memsizes=( '0128' '0256' '0512' '1024' '2048' )
 
 inputfile_with_linenumbers="$(mktemp)"
@@ -52,34 +48,34 @@ gnuplot << EOF
     set style data histograms
     set key invert
 
-    set style line 1 lt 1 lw 2 lc rgb "$color"
-    set style line 2 lt 1 lw 2 lc rgb "$color2"
+    set style line 1 lt 1 lw 2 lc rgb '${color}'
+    set style line 2 lt 1 lw 2 lc rgb '${color2}'
 
     # Insertion time - Break down in IO / Mem
     set out '${outputfile}.totaltime.breakdown.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot \
     '${inputfile_with_linenumbers}' using (sec2min(\$11 + \$12))         ls 1 title 'Disk I/O', \
     '${inputfile_with_linenumbers}' using (sec2min(\$4 - (\$11 + \$12))) ls 2 title 'Mem \& CPU' 
 
     # Insertion time
     set out '${outputfile}.totaltime.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$4)) ls 1 notitle
 
     # Compaction Time
     set out '${outputfile}.compacttime.eps'
-    set ylabel "$ylabel_comp"
+    set ylabel '${ylabel_comp}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$7)) ls 1 notitle
 
     # I/O Time
     set out '${outputfile}.iotime.eps'
-    set ylabel "$ylabel_io"
+    set ylabel '${ylabel_io}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$11 + \$12)) ls 1 notitle
 
     # Total data transferred (GB)
     set out '${outputfile}.gbtransferred.eps'
-    set ylabel "$ylabel_gb"
+    set ylabel '${ylabel_gb}'
     plot '${inputfile_with_linenumbers}' using (mb2gb(\$13 + \$14)) ls 1 notitle
 EOF
 #==========================[ gnuplot embedded script ]============================

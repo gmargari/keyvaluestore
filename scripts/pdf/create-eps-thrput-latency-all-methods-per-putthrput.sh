@@ -57,14 +57,14 @@ for putthrput in ${putthrputs[@]}; do
 gnuplot << EOF
 
     set terminal postscript color enhanced eps "Helvetica" 22
-    set xlabel 'Time (min)'
+    set xlabel '${xlabel_time}'
     set xrange [0:(${time_max}/60000)*1.05]
     set key top left
 
     ms_to_min(x) = x/60000
 
     set out '${outputfile}.latency.eps'
-    set ylabel 'Get latency (ms)'
+    set ylabel '${ylabel_glatency}'
     set yrange [0:${latency_max}*1.05]
     plot \
     '${getstats_cas}' using (ms_to_min(\$1)):3 every $skip with $style_cas title '$title_cas', \
@@ -76,7 +76,7 @@ gnuplot << EOF
     set key bottom right
 
     set out '${outputfile}.thrput.eps'
-    set ylabel 'Get throughput (req/s)'
+    set ylabel '${ylabel_gthrput}'
     set yrange [0:${thrput_max}*1.05]
     plot \
     '${getstats_cas}' using (ms_to_min(\$1)):2 every $skip with $style_cas title '$title_cas', \

@@ -20,9 +20,6 @@ ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/n
 xmin=0
 xmax=10.5
 
-xlabel='Number of get threads'
-ylabel='Get latency (ms)'
-
 my_print
 ensure_file_exist $file_cas $file_log $file_geo $file_rng $file_imm $file_gp2
 
@@ -34,8 +31,8 @@ gnuplot << EOF
     set xlabel font 'Helvetica,26'
     set ylabel font 'Helvetica,26'
     set terminal postscript color enhanced eps "Helvetica" 22
-    set xlabel '${xlabel}'
-    set ylabel '${ylabel}'
+    set xlabel '${xlabel_gthreads}'
+    set ylabel '${ylabel_glatency}'
     set xrange [$xmin:$xmax]
 
     sec2min(x) = x/60.0

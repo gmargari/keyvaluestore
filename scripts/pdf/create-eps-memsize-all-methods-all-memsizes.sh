@@ -55,7 +55,7 @@ gnuplot << EOF
     set key top right
 
     set out '${outfolder}/allmethods-memsizes.totaltime.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot \
     '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
     '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
@@ -69,7 +69,7 @@ gnuplot << EOF
     set key bottom right
 
     set out '${outfolder}/allmethods-memsizes.totaltime.log.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot \
     '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
     '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
@@ -82,3 +82,4 @@ EOF
 #==========================[ gnuplot embedded script ]============================
 
 rm $file_nom_2 $file_cas_2 $file_log_2 $file_geo_2 $file_rng_2 $file_imm_2 $file_gp2_2
+

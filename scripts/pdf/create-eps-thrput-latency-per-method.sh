@@ -200,7 +200,7 @@ gnuplot << EOF
 #    set xlabel font 'Helvetica,22'
 #    set ylabel font 'Helvetica,22'
     set terminal postscript color enhanced eps "Helvetica" 22
-    set xlabel 'Time (min)'
+    set xlabel '${xlabel_time}'
     set xrange [0:(${time_max}/60000)*1.05]
 
     ms_to_min(x) = x/60000
@@ -214,11 +214,11 @@ gnuplot << EOF
     #---------------------------------------
 
     set out '${outputfile}.latency.eps'
-    set ylabel 'Get Latency (ms)'
+    set ylabel '${ylabel_glatency}'
     set yrange [0:${latency_max}*1.05]
     plot \
     '${flushstats_file2}' using (ms_to_min(\$1)):(const_height_latency(\$3)) with filledcurve lc rgb '$bgmerge_color' notitle, \
-    '${getstats_file}'    using (ms_to_min(\$1)):3 with lines lw 3 lt 1 lc rgb '$color' notitle
+    '${getstats_file}'    using (ms_to_min(\$1)):3 with lines lw 3 lt 1 lc rgb '${color}' notitle
 
 
     #---------------------------------------
@@ -226,11 +226,11 @@ gnuplot << EOF
     #---------------------------------------
 
     set out '${outputfile}.thrput.eps'
-    set ylabel 'Get throughput (req/s)'
+    set ylabel '${ylabel_gthrput}'
     set yrange [0:${thrput_max}*1.05]
     plot \
     '${flushstats_file2}' using (ms_to_min(\$1)):(const_height_thrput(\$3)) with filledcurve lc rgb '$bgmerge_color' notitle, \
-    '${getstats_file}'    using (ms_to_min(\$1)):2 with lines lw 3 lt 1 lc rgb '$color' notitle
+    '${getstats_file}'    using (ms_to_min(\$1)):2 with lines lw 3 lt 1 lc rgb '${color}' notitle
 
 
     #---------------------------------------
@@ -242,7 +242,7 @@ gnuplot << EOF
     set out '${outputfile}.multiple.latency.eps'
     set multiplot
 
-    set ylabel 'Get Latency (ms)'
+    set ylabel '${ylabel_glatency}'
     set xlabel ''
     set yrange [0:${latency_max}*1.05]
     set xtics 20
@@ -254,10 +254,10 @@ gnuplot << EOF
 
     plot \
     '${flushstats_file2}' using (ms_to_min(\$1)):(const_height_latency(\$3)) with filledcurve lc rgb '$bgmerge_color' notitle, \
-    '${getstats_file}'    using (ms_to_min(\$1)):3 with lines lw 3 lt 1 lc rgb '$color' notitle
+    '${getstats_file}'    using (ms_to_min(\$1)):3 with lines lw 3 lt 1 lc rgb '${color}' notitle
 
-    set ylabel 'Get throughput (req/s)'
-    set xlabel 'Time (min)'
+    set ylabel '${ylabel_gthrput}'
+    set xlabel '${xlabel_time}'
     set yrange [0:${thrput_max}*1.05]
     set xtics 20
 
@@ -268,7 +268,7 @@ gnuplot << EOF
 
     plot \
     '${flushstats_file2}' using (ms_to_min(\$1)):(const_height_thrput(\$3)) with filledcurve lc rgb '$bgmerge_color' notitle, \
-    '${getstats_file}'    using (ms_to_min(\$1)):2 with lines lw 3 lt 1 lc rgb '$color' notitle
+    '${getstats_file}'    using (ms_to_min(\$1)):2 with lines lw 3 lt 1 lc rgb '${color}' notitle
 
     set nomultiplot
 

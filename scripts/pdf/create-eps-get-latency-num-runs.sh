@@ -12,9 +12,8 @@ file="geometric-r-2.searchlog"
 inputfile="${statsfolder}/${file}"
 outputfile="${outfolder}/${file}"
 
-ensure_file_exist ${inputfile}
-
 my_print
+ensure_file_exist ${inputfile}
 
 tmpfile1="$(mktemp)"
 tmpfile2="$(mktemp)"
@@ -41,18 +40,17 @@ gnuplot << EOF
 #    set ylabel font 'Helvetica,22'
 #    set y2label font 'Helvetica,22'
     set terminal postscript color enhanced eps "Helvetica" 22
-    set xlabel 'Data inserted (GB)'
-#    set x2label 'Read cost' font 'Helvetica Bold'
+    set xlabel '${xlabel_datains_gb}'
 
     # legend position
     set key top left
 #    set key at 5.2,4.7
 
     set yrange [0:${ymax}+1]
-    set ylabel 'Number of disk files'
+    set ylabel '${ylabel_runs}'
     set ytic nomirror
     set y2range [0:${y2max}+1]
-    set y2label 'Range get latency (ms)'
+    set y2label '${ylabel_glatency}'
     set y2tic nomirror
 
     mb2gb(x) = x/1024.0

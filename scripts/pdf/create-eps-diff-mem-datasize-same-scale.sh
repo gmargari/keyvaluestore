@@ -23,6 +23,7 @@ log_outputfile=${outfolder}/geometric-r-2-diff-mem-datasize-same-scale.eps
 
 log_rng_outputfile=${outfolder}/geometric-r-2-rangemerge-diff-mem-datasize-same-scale.eps
 
+my_print
 ensure_file_exist $rng_file1 $rng_file2 $log_file1 $log_file2
 
 rng_xmax1=`cat $rng_file1 | awk '{if ($1 > max) max=$1;} END{print max * 1.01}'`
@@ -35,8 +36,6 @@ log_xmax2=`cat $log_file2 | awk '{if ($1 > max) max=$1;} END{print max * 1.01}'`
 log_ymax1=`cat $log_file1 | awk '{if ($2 > max) max=$2;} END{print max/60.0}'`
 log_ymax2=`cat $log_file2 | awk '{if ($2 > max) max=$2;} END{print max/60.0}'`
 
-my_print
-
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
@@ -47,7 +46,7 @@ gnuplot << EOF
 #    set ylabel font  'Helvetica,22'
 #    set y2label font 'Helvetica,22'
     set terminal postscript color enhanced eps "Helvetica" 20
-    set xlabel 'Data inserted (%)'
+    set xlabel '${xlabel_datains_perc}'
 
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
@@ -55,8 +54,8 @@ gnuplot << EOF
     # legend position
     set key top left
 
-    set ylabel 'Insertion time (min)'
-    set y2label 'Insertion time (min)'
+    set ylabel '${ylabel_ins}'
+    set y2label '${ylabel_ins}'
     set ytic nomirror
     set y2tic nomirror
 
@@ -105,7 +104,7 @@ gnuplot << EOF
     set bmargin 0
     set tmargin 1
 
-    set xlabel 'Data inserted (%) - Geometric r=2'
+    set xlabel '${xlabel_datains_perc_geo}'
     set yrange [0:15]
     set y2range [0:150]
     plot \
@@ -117,17 +116,14 @@ gnuplot << EOF
     set bmargin 0
     set tmargin 1
 
-    set xlabel 'Data inserted (%) - Rangemerge'
+    set xlabel '${xlabel_datains_perc_rng}'
     set yrange [0:25]
     set y2range [0:200]
     plot \
    '$rng_file1' using (\$1 / $rng_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '#E4191C' title "$title1", \
    '$rng_file2' using (\$1 / $rng_xmax2 * 100):(sec2min((\$2 / $rng_ymax2) * $rng_ymax1)) with lines lw 4 lc rgb '#387DB8' title "$title2"
 
-
     set nomultiplot
-
-
 EOF
 #==========================[ gnuplot embedded script ]============================
 

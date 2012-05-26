@@ -15,6 +15,7 @@ statsfolder=$1
 ./create-eps-thrput-latency-all-methods-per-putthrput.sh $statsfolder &&
 ./create-eps-thrput-latency-all-methods-all-putthrputs.sh $statsfolder &&
 ./create-eps-thrput-latency-all-methods-all-getsizes.sh $statsfolder &&
+./create-eps-thrput-latency-all-methods-all-getthrputs.sh $statsfolder &&
 #./create-eps-thrput-latency-all-methods-all-numthreads.sh $statsfolder &&
 ./create-eps-diff-mem-datasize-same-scale.sh $statsfolder &&
 ./create-eps-get-latency-num-runs.sh $statsfolder &&

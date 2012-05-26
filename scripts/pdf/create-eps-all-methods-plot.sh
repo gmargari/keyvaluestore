@@ -4,15 +4,6 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-#==========================================================================================
-# For each one of the following:
-#  - Insertion time
-#  - IO time
-#  - Compaction Time 
-#  - GB transferred
-# create a bar chart containing all methods
-#==========================================================================================
-
 file_imm="${statsfolder}/immediate-pthrput-0-gthrput-20-gthreads-0-gsize-10.log";     every_imm="2"
 file_rng="${statsfolder}/rangemerge-pthrput-0-gthrput-20-gthreads-0-gsize-10.log";    every_rng="2"
 file_gp2="${statsfolder}/geometric-p-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.log"; every_gp2="2"
@@ -47,7 +38,7 @@ gnuplot << EOF
     set terminal postscript color enhanced eps "Helvetica" 22
 
     #set grid ytics
-    set xlabel 'Data inserted (GB)'
+    set xlabel '${xlabel_datains_gb}'
 
     set yrange [0.1:] # start y from 0+ for logaritmic scale
     set logscale y
@@ -66,7 +57,7 @@ gnuplot << EOF
     set yrange [$ymin_total:$ymax_total]
 
     set out '${outfolder}/allmethods.totaltime.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot \
     '$file_imm' using (mb2gb(\$1)):(sec2min(\$2)) every $every_imm::1 title '$title_imm' with $style_imm, \
     '$file_rng' using (mb2gb(\$1)):(sec2min(\$2)) every $every_rng::1 title '$title_rng' with $style_rng, \
@@ -83,7 +74,7 @@ gnuplot << EOF
     set yrange [$ymin_comp:$ymax_comp]
 
     set out '${outfolder}/allmethods.compacttime.eps'
-    set ylabel "$ylabel_comp"
+    set ylabel '${ylabel_comp}'
     plot \
     '$file_imm' using (mb2gb(\$1)):(sec2min(\$5)) every $every_imm::1 title '$title_imm' with $style_imm, \
     '$file_rng' using (mb2gb(\$1)):(sec2min(\$5)) every $every_rng::1 title '$title_rng' with $style_rng, \
@@ -100,7 +91,7 @@ gnuplot << EOF
     set yrange [$ymin_io:$ymax_io]
 
     set out '${outfolder}/allmethods.iotime.eps'
-    set ylabel "$ylabel_io"
+    set ylabel '${ylabel_io}'
     plot \
     '$file_imm' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_imm::1 title '$title_imm' with $style_imm, \
     '$file_rng' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_rng::1 title '$title_rng' with $style_rng, \
@@ -117,7 +108,7 @@ gnuplot << EOF
     set yrange [$ymin_gb:$ymax_gb]
 
     set out '${outfolder}/allmethods.gbtransferred.eps'
-    set ylabel "$ylabel_gb"
+    set ylabel '${ylabel_gb}'
     plot \
     '$file_imm' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_imm::1 title '$title_imm' with $style_imm, \
     '$file_rng' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_rng::1 title '$title_rng' with $style_rng, \

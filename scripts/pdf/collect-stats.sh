@@ -197,9 +197,9 @@ collect_stats_per_numthreads() {
         outfile=${statsfolder}/${files[$i]}-getthreads.totalstats
 
         for getthreads in ${numthreads[@]}; do
+            echo $getthreads | awk '{printf "%-20s ", $1}'
             getthrput=$(( 20 / $getthreads ))
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
-
             ensure_file_exist $file
 
             keep_get_stats $file | sort -n > $tmpfile2
@@ -207,7 +207,6 @@ collect_stats_per_numthreads() {
             cat $tmpfile2 | sort -k 3 -n > $tmpfile
 
             # compute and print percentiles of latencies
-            echo $getthreads | awk '{printf "%-20s ", $1}'
             lines=`cat $tmpfile | wc -l`
             for p in ${percentiles[@]}; do
                 if [ $p == "0" ]; then
@@ -219,6 +218,7 @@ collect_stats_per_numthreads() {
 
             # print also total time
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
+            ensure_file_exist $file
             tail -n 1 $file | awk '{printf "%10d", $2}'
 
             echo ""
@@ -254,8 +254,8 @@ collect_stats_per_putthruput() {
         outfile=${statsfolder}/${files[$i]}-putthrput.totalstats
 
         for putthrput in ${putthrputs[@]}; do
+            echo $putthrput | awk '{printf "%-20s ", $1}'
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
-
             ensure_file_exist $file
 
             keep_get_stats $file | sort -n > $tmpfile2
@@ -263,7 +263,6 @@ collect_stats_per_putthruput() {
             cat $tmpfile2 | sort -k 3 -n > $tmpfile
 
             # compute and print percentiles of latencies
-            echo $putthrput | awk '{printf "%-20s ", $1}'
             lines=`cat $tmpfile | wc -l`
             for p in ${percentiles[@]}; do
                 if [ $p == "0" ]; then
@@ -275,6 +274,68 @@ collect_stats_per_putthruput() {
 
             # print also total time
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
+            ensure_file_exist $file
+            tail -n 1 $file | awk '{printf "%10d", $2}'
+
+            echo ""
+
+        done > $outfile
+
+        if [ "`cat $outfile | wc -l`" == "0" ]; then # if file empty, delete it
+            rm $outfile
+        fi
+    done
+
+    rm $tmpfile $tmpfile2
+}
+
+
+#========================================================
+# collect_stats_per_getthruput()
+#========================================================
+collect_stats_per_getthruput() {
+    my_print "${FUNCNAME}()"
+
+    files=(  'immediate' 'rangemerge' 'geometric-r-3' 'cassandra-l-4'  'geometric-p-2' 'geometric-r-2' )
+    getthrputs=( '0' '5' '10' '20' '40' )  # '0' means no gets, not infinite gets
+    # percentile = 0 -> average time
+    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    putthrput=0
+    getthreads=1
+    getthrput=20
+    getsize=10
+
+    tmpfile2="$(mktemp)"
+    tmpfile="$(mktemp)"
+    for i in `seq 0 $(( ${#files[*]} - 1 ))`; do
+        outfile=${statsfolder}/${files[$i]}-getthrput.totalstats
+
+        for getthrput in ${getthrputs[@]}; do
+            echo $getthrput | awk '{printf "%-20s ", $1}'
+#            file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
+#            ensure_file_exist $file
+#
+#            keep_get_stats $file | sort -n > $tmpfile2
+#            average_using_sliding_window $tmpfile2
+#            cat $tmpfile2 | sort -k 3 -n > $tmpfile
+#
+#            # compute and print percentiles of latencies
+#            lines=`cat $tmpfile | wc -l`
+#            for p in ${percentiles[@]}; do
+#                if [ $p == "0" ]; then
+#                    cat $tmpfile | awk '{s+=$3; n++} END{printf "%5.1f ", s/n}'
+#                else
+#                    cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
+#                fi
+#            done
+
+            # print also total time
+            if [ "$getthrput" == 0 ]; then
+                file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-20-gthreads-0-gsize-${getsize}.stats
+            else 
+                file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
+            fi
+            ensure_file_exist $file
             tail -n 1 $file | awk '{printf "%10d", $2}'
 
             echo ""
@@ -310,14 +371,15 @@ collect_stats_per_getsize() {
         outfile=${statsfolder}/${files[$i]}-getsizes.totalstats
 
         for getsize in ${getsizes[@]}; do
+            echo $getsize | awk '{printf "%-20s ", $1}'
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
             ensure_file_exist $file
+
             keep_get_stats $file | sort -n > $tmpfile2
             average_using_sliding_window $tmpfile2
             cat $tmpfile2 | sort -k 3 -n > $tmpfile
 
             # compute and print percentiles of latencies
-            echo $getsize | awk '{printf "%-20s ", $1}'
             lines=`cat $tmpfile | wc -l`
             for p in ${percentiles[@]}; do
                 if [ $p == "0" ]; then
@@ -329,6 +391,7 @@ collect_stats_per_getsize() {
 
             # print also total time
             file=${statsfolder}/${files[$i]}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
+            ensure_file_exist $file
             tail -n 1 $file | awk '{printf "%10d", $2}'
 
             echo ""
@@ -432,4 +495,6 @@ collect_stats_per_getsize
 collect_stats_per_putthruput
 
 collect_stats_per_numthreads
+
+collect_stats_per_getthruput
 

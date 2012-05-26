@@ -4,36 +4,19 @@ curdir=`dirname $0`
 source $curdir/include-script.sh
 source $curdir/include-colors-titles.sh
 
-#==========================================================================================
-# For each method, and a specific parameter with different values, create a bar chart for:
-#  - Insertion time
-#  - IO time
-#  - Compaction Time 
-#  - GB transferred
-#==========================================================================================
-
-inputfile_with_linenumbers="$(mktemp)"
-
 files=(  'rangemerge-memsize.totalstats' 'immediate-memsize.totalstats' 'nomerge-memsize.totalstats' \
          'geometric-p-4-memsize.totalstats' 'geometric-p-3-memsize.totalstats' 'geometric-p-2-memsize.totalstats' \
          'geometric-r-4-memsize.totalstats' 'geometric-r-3-memsize.totalstats' 'geometric-r-2-memsize.totalstats' \
-         'cassandra-l-4-memsize.totalstats' 'cassandra-l-3-memsize.totalstats' 'cassandra-l-2-memsize.totalstats' \
-         )
-
-xlabel='Memory size (MB)'
+         'cassandra-l-4-memsize.totalstats' 'cassandra-l-3-memsize.totalstats' 'cassandra-l-2-memsize.totalstats' )
 
 # for each file in array 'files' create a number of eps
+inputfile_with_linenumbers="$(mktemp)"
 for file in ${files[@]}; do
 
     inputfile="${statsfolder}/$file"
     outputfile="${outfolder}/$file"
 
-    if [ $file == "rangemerge-blocksize.totalstats" -o $file == "rangemerge-flushmem.totalstats" ]; then
-        fontsize=22
-    else
-        fontsize=32
-    fi
-
+    my_print $file
     ensure_file_exist ${inputfile}
 
     # create a new file, in which we prepend lines of original file with line numbers (will be used to place bars in eps)
@@ -41,22 +24,24 @@ for file in ${files[@]}; do
     lines=`cat ${inputfile_with_linenumbers} | wc -l`
     xticklabels=`cat ${inputfile} | awk '{if (NR>1) printf ", "; printf "\"%s\" %s", $1, NR-1}'`
 
-    my_print $file
+    if [ $file == "rangemerge-blocksize.totalstats" -o $file == "rangemerge-flushmem.totalstats" ]; then
+        fontsize=22
+    else
+        fontsize=32
+    fi
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-    # mb_ins(1) Ttotal(2) Tcompac(3) Tput(4) Tmerge(5) Tfree(6) Tcmrest(7) Tmem(8) Tread(9) Twrite(10) mb_read(11) mb_writ(12) reads(13) writes(14) runs(15)
-
-    set xtics (${xticklabels})
-    set yrange [0:] # start y from 0
 #    set xrange [0:${lines}+1]
 #    set xtics font 'Helvetica,22'
 #    set ytics font 'Helvetica,22'
 #    set xlabel font 'Helvetica,22'
 #    set ylabel font 'Helvetica,22'
     set terminal postscript color enhanced eps "Helvetica" $fontsize
-    set xlabel '${xlabel}'
+    set xlabel '${xlabel_memsize}'
+    set xtics (${xticklabels})
+    set yrange [0:] # start y from 0
 
     mb2gb(x) = x/1024.0
     sec2min(x) = x/60.0
@@ -69,26 +54,26 @@ gnuplot << EOF
 
     set grid ytics
 
-    set style line 1 lt 1 lw 2 lc rgb "$color"
+    set style line 1 lt 1 lw 2 lc rgb '${color}'
 
     # Insertion time
     set out '${outputfile}.totaltime.eps'
-    set ylabel "$ylabel_ins"
+    set ylabel '${ylabel_ins}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$4)) ls 1 notitle
 
     # Compaction Time
     set out '${outputfile}.compacttime.eps'
-    set ylabel "$ylabel_comp"
+    set ylabel '${ylabel_comp}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$7)) ls 1 notitle
 
     # I/O Time
     set out '${outputfile}.iotime.eps'
-    set ylabel "$ylabel_io"
+    set ylabel '${ylabel_io}'
     plot '${inputfile_with_linenumbers}' using (sec2min(\$11 + \$12)) ls 1 notitle
 
     # Data inserted (GB)
     set out '${outputfile}.gbtransferred.eps'
-    set ylabel "$ylabel_gb"
+    set ylabel '${ylabel_gb}'
     plot '${inputfile_with_linenumbers}' using (mb2gb(\$13 + \$14)) ls 1 notitle
 
 EOF
