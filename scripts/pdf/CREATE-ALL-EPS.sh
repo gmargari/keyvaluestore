@@ -17,12 +17,12 @@ statsfolder=$1
 ./create-eps-thrput-latency-all-methods-all-getsizes.sh $statsfolder &&
 ./create-eps-thrput-latency-all-methods-all-getthrputs.sh $statsfolder &&
 #./create-eps-thrput-latency-all-methods-all-numthreads.sh $statsfolder &&
-./create-eps-diff-mem-datasize-same-scale.sh $statsfolder &&
-./create-eps-get-latency-num-runs.sh $statsfolder &&
-./create-eps-blocksize-flushmem-bars.sh $statsfolder &&
-#./create-eps-keys-ordered-bars-per-method.sh $statsfolder &&
 ./create-eps-keys-zipf-all-in-one.sh $statsfolder &&
 ./create-eps-keys-ordered-all-in-one.sh $statsfolder &&
+./create-eps-diff-mem-datasize-same-scale.sh $statsfolder &&
+./create-eps-get-latency-num-runs.sh $statsfolder &&
+./create-eps-rangemerge-blocksize.sh $statsfolder &&
+#./create-eps-rangemerge-flushmem.sh $statsfolder &&
 exit 0
 
 echo "Error running $0!"

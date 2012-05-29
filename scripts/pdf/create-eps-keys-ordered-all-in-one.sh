@@ -8,7 +8,6 @@ file_imm="${statsfolder}/immediate-ord-prob.totalstats"
 file_rng="${statsfolder}/rangemerge-ord-prob.totalstats"
 file_gp2="${statsfolder}/geometric-p-2-ord-prob.totalstats"
 file_geo="${statsfolder}/geometric-r-3-ord-prob.totalstats"
-file_cl2="${statsfolder}/cassandra-l-2-ord-prob.totalstats"
 file_log="${statsfolder}/geometric-r-2-ord-prob.totalstats"
 file_cas="${statsfolder}/cassandra-l-4-ord-prob.totalstats"
 file_nom="${statsfolder}/nomerge-ord-prob.totalstats"
@@ -16,7 +15,8 @@ file_nom="${statsfolder}/nomerge-ord-prob.totalstats"
 outfile="$outfolder/ord-prob"
 
 my_print
-ensure_file_exist $file_imm $file_rng $file_gp2 $file_geo $file_cl2 $file_log $file_cas $file_nom
+#ensure_file_exist $file_imm $file_rng $file_gp2 $file_geo $file_log $file_cas $file_nom
+ensure_file_exist $file_gp2 $file_geo $file_log $file_cas $file_nom
 
 xmin=-3
 xmax=103
@@ -24,8 +24,8 @@ xmax=103
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-#    set xtics font  'Helvetica,21'
-#    set ytics font  'Helvetica,21'
+#    set xtics font  'Helvetica,22'
+#    set ytics font  'Helvetica,22'
     set xlabel font 'Helvetica,26'
     set ylabel font 'Helvetica,26'
     set terminal postscript color enhanced eps "Helvetica" 22
@@ -36,7 +36,6 @@ gnuplot << EOF
     sec2min(x) = x/60.0
 
     set xtics 10    # major xticks
-#    set mxtics 0    # minor xticks
     set grid ytics
 
     # Insertion time
