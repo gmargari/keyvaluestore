@@ -41,12 +41,12 @@ gnuplot << EOF
     #set xlabel font 'Helvetica,16'
     #set ylabel font 'Helvetica,16'
     set terminal postscript color enhanced eps "Helvetica" 20
-    set xlabel '${xlabel}'
-    set ylabel '${ylabel}'
+    set xlabel '${xlabel_memsize}'
+    set ylabel '${ylabel_ins}'
     set xrange [1-0.2:5+0.2]
     set yrange [0:]
 
-    set xtics (${xticklabels}) rotate by -45
+    set xtics (${xticklabels}) # rotate by -45
 
     sec2min(x) = x/60.0
     mb2gb(x) = x/1024.0
@@ -55,31 +55,31 @@ gnuplot << EOF
     set key top right
 
     set out '${outfolder}/allmethods-memsizes.totaltime.eps'
-    set ylabel '${ylabel_ins}'
-    plot \
-    '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
-    '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
-    '$file_geo_2' using 1:(sec2min(\$4)) title '$title_geo' with $style_geo, \
-    '$file_gp2_2' using 1:(sec2min(\$4)) title '$title_gp2' with $style_gp2, \
-    '$file_imm_2' using 1:(sec2min(\$4)) title '$title_imm' with $style_imm, \
-    '$file_rng_2' using 1:(sec2min(\$4)) title '$title_rng' with $style_rng
 
-    set yrange [10:]
+    plot \
+    '$file_imm_2' using 1:(sec2min(\$4)) title '$title_imm' with $style_imm, \
+    '$file_rng_2' using 1:(sec2min(\$4)) title '$title_rng' with $style_rng, \
+    '$file_gp2_2' using 1:(sec2min(\$4)) title '$title_gp2' with $style_gp2, \
+    '$file_geo_2' using 1:(sec2min(\$4)) title '$title_geo' with $style_geo, \
+    '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
+    '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
+    '$file_nom_2' using 1:(sec2min(\$4)) title '$title_nom' with $style_nom
+
+    set yrange [1:]
     set logscale y
-    set key bottom right
+    set key top right
 
     set out '${outfolder}/allmethods-memsizes.totaltime.log.eps'
-    set ylabel '${ylabel_ins}'
     plot \
-    '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
-    '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
-    '$file_geo_2' using 1:(sec2min(\$4)) title '$title_geo' with $style_geo, \
-    '$file_gp2_2' using 1:(sec2min(\$4)) title '$title_gp2' with $style_gp2, \
     '$file_imm_2' using 1:(sec2min(\$4)) title '$title_imm' with $style_imm, \
-    '$file_rng_2' using 1:(sec2min(\$4)) title '$title_rng' with $style_rng
+    '$file_rng_2' using 1:(sec2min(\$4)) title '$title_rng' with $style_rng, \
+    '$file_gp2_2' using 1:(sec2min(\$4)) title '$title_gp2' with $style_gp2, \
+    '$file_geo_2' using 1:(sec2min(\$4)) title '$title_geo' with $style_geo, \
+    '$file_log_2' using 1:(sec2min(\$4)) title '$title_log' with $style_log, \
+    '$file_cas_2' using 1:(sec2min(\$4)) title '$title_cas' with $style_cas, \
+    '$file_nom_2' using 1:(sec2min(\$4)) title '$title_nom' with $style_nom
 
 EOF
 #==========================[ gnuplot embedded script ]============================
 
 rm $file_nom_2 $file_cas_2 $file_log_2 $file_geo_2 $file_rng_2 $file_imm_2 $file_gp2_2
-

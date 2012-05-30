@@ -118,7 +118,7 @@ collect_stats_per_putthruput() {
         outfile=${statsfolder}/${method}-putthrput.totalstats
 
         for putthrput in ${putthrputs[@]}; do
-            echo $putthrput | awk '{printf "%-20s ", $1}'
+            echo ${putthrput} | awk '{printf "%-20s ", $1}'
             file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
             ensure_file_exist $file
 
@@ -175,7 +175,7 @@ collect_stats_per_getthruput() {
         outfile=${statsfolder}/${method}-getthrput.totalstats
 
         for getthrput in ${getthrputs[@]}; do
-            echo $getthrput | awk '{printf "%-20s ", $1}'
+            echo ${getthrput} | awk '{printf "%-20s ", $1}'
 #            file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
 #            ensure_file_exist $file
 #
@@ -235,7 +235,7 @@ collect_stats_per_getsize() {
         outfile=${statsfolder}/${method}-getsizes.totalstats
 
         for getsize in ${getsizes[@]}; do
-            echo $getsize | awk '{printf "%-20s ", $1}'
+            echo ${getsize} | awk '{printf "%-20s ", $1}'
             file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
             ensure_file_exist $file
 
@@ -272,7 +272,7 @@ collect_stats_per_getsize() {
 
 
 #========================================================
-# collect_stats_numthreads()
+# collect_stats_per_numthreads()
 #========================================================
 collect_stats_per_numthreads() {
     my_print "${FUNCNAME}()"
@@ -292,7 +292,7 @@ collect_stats_per_numthreads() {
         outfile=${statsfolder}/${method}-getthreads.totalstats
 
         for getthreads in ${numthreads[@]}; do
-            echo $getthreads | awk '{printf "%-20s ", $1}'
+            echo ${getthreads} | awk '{printf "%-20s ", $1}'
             getthrput=$(( 20 / $getthreads ))
             file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
             ensure_file_exist $file
@@ -324,6 +324,61 @@ collect_stats_per_numthreads() {
             rm $outfile
         fi
     done
+
+    rm $tmpfile $tmpfile2
+}
+
+#========================================================
+# collect_stats_per_blocksize()
+#========================================================
+collect_stats_per_blocksize() {
+    my_print "${FUNCNAME}()"
+
+#    blocksizes=( '0032' '0064' '0128' '0256' '0512' '1024' '2048' '0000' )
+    blocksizes=( '0064' '0128' '0256' '0512' '1024' '2048' )
+    # percentile = 0 -> average time
+    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    putthrput=2500
+    getthreads=1
+    getthrput=20
+    getsize=10
+
+    tmpfile2="$(mktemp)"
+    tmpfile="$(mktemp)"
+
+    outfile=${statsfolder}/rangemerge-blocksizes-latency.totalstats
+
+    for blocksize in ${blocksizes[@]}; do
+        echo ${blocksize} | awk '{printf "%-20s ", $1}'
+        file=${statsfolder}/rangemerge-b-${blocksize}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
+        ensure_file_exist $file
+
+        keep_get_stats $file | sort -n > $tmpfile2
+        average_using_sliding_window $tmpfile2
+        cat $tmpfile2 | sort -k 3 -n > $tmpfile
+
+        # compute and print percentiles of latencies
+        lines=`cat $tmpfile | wc -l`
+        for p in ${percentiles[@]}; do
+            if [ $p == "0" ]; then
+                cat $tmpfile | awk '{s+=$3; n++} END{printf "%5.1f ", s/n}'
+            else
+                cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
+            fi
+        done
+
+        # print also total time
+        file=${statsfolder}/rangemerge-b-${blocksize}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
+        ensure_file_exist $file
+        tail -n 1 $file | awk '{printf "%10d", $2}'
+
+        echo ""
+
+    done > $outfile
+
+    if [ "`cat $outfile | wc -l`" == "0" ]; then # if file empty, delete it
+        rm $outfile
+    fi
 
     rm $tmpfile $tmpfile2
 }
@@ -458,4 +513,6 @@ collect_zipf_keys_stats
 collect_rngmerge_blocksize_stats
 
 #collect_rngmerge_flushmem_stats
+
+collect_stats_per_blocksize
 

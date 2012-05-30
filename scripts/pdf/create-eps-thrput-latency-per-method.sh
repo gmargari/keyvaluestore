@@ -141,6 +141,15 @@ files=(
 "geometric-p-2-pthrput-10000-gthrput-20-gthreads-1-gsize-10.stderr"
 "geometric-p-2-pthrput-20000-gthrput-20-gthreads-1-gsize-10.stderr"
 "geometric-p-2-pthrput-40000-gthrput-20-gthreads-1-gsize-10.stderr"
+\
+"rangemerge-b-0032-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-0064-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-0128-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-0256-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-0512-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-1024-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-2048-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
+"rangemerge-b-0000-pthrput-2500-gthrput-20-gthreads-1-gsize-10.stderr"
 )
 
 for file in ${files[@]}; do
@@ -161,7 +170,6 @@ for file in ${files[@]}; do
     keep_flush_stats $inputfile > $flushstats_file
     average_using_sliding_window $getstats_file
 
-    thrput_min=`cat $getstats_file  | awk 'NR >= 100 {if (NR==100) {min=$2} else if ($2 < min) {min=$2}} END{print min}'`
     thrput_max=`cat $getstats_file  | awk '$2 > max {max=$2} END{print max}'`
     latency_max=`cat $getstats_file | awk '$3 > max {max=$3} END{print max}'`
     time_max=`cat $getstats_file    | awk '$1 > max {max=$1} END{print max}'`

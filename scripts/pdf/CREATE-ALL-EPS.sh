@@ -23,6 +23,9 @@ statsfolder=$1
 ./create-eps-get-latency-num-runs.sh $statsfolder &&
 ./create-eps-rangemerge-blocksize.sh $statsfolder &&
 #./create-eps-rangemerge-flushmem.sh $statsfolder &&
+./create-eps-cassandra.sh $statsfolder &&
+./create-eps-thrput-latency-rangemerge-blocksizes.sh $statsfolder &&
+./create-eps-memsize-all-methods-all-memsizes.sh $statsfolder &&
 exit 0
 
 echo "Error running $0!"

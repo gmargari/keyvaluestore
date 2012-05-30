@@ -16,11 +16,11 @@
 
 \footnotesize
 \begin{verbatim}
-syntax: ./build/src/sim -c compactionmanager [options]
+syntax: /tmp/build/src/sim -c compactionmanager [options]
 
 COMPACTION MANAGER
- -c, --compaction-manager VALUE      "nomerge", "immediate", "geometric", "logarithmic",
-                                     "rangemerge" or "cassandra"
+ -c, --compaction-manager VALUE      'nomerge', 'immediate', 'geometric', 'logarithmic',
+                                     'rangemerge' or 'cassandra'
  -r, --geometric-r VALUE             Geometric R parameter [3]
  -p, --geometric-p VALUE             Geometric P parameter [disabled]
  -b, --rangemerge-blocksize VALUE    Rangemerge block size, in MB [256]
@@ -35,6 +35,7 @@ PUT
  -u, --unique-keys                   create unique keys [false]
  -z, --zipf-keys VALUE               create zipfian keys, with given distribution parameter [false]
  -o, --ordered-keys VALUE            keys created are ordered, with VALUE probability being random [false]
+ -j, --gaussian-keys VALUE           create gaussian keys, with VALUE variance [false]
  -P, --put-throughput VALUE          put requests per sec (0: unlimited) [0]
 
 GET
@@ -48,6 +49,7 @@ VARIOUS
  -s, --read-kvs-from-stdin           read KVs from stdin
  -t, --print-periodic-stats          print stats on stderr about compactions and gets every 5 sec
  -h, --help                          print this help message and exit
+
 \end{verbatim}
 
 In all experiments below we insert in a datastore of \textbf{512MB} of available
@@ -432,43 +434,6 @@ Keys are 100B and values are 1KB.
 \clearpage
 
 %=============================================================================================================
-% Rangemerge - Blocksize
-%=============================================================================================================
-
-\begin{figure}[ht]
-  \begin{center}
-
-    \begin{huge}Rangemerge - Blocksize sensitivity\end{huge}
-
-    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.gbtransferred.eps}}
-    \subfigure[I/O time]        {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.iotime.eps}}
-    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.compacttime.eps}}
-    \subfigure[Insertion time]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.totaltime.eps}}
-    \caption{Rangemerge - Blocksize}
-  \end{center}
-\end{figure}
-
-\clearpage
-
-%=============================================================================================================
-% Rangemerge - Flushmem
-%=============================================================================================================
-
-%\begin{figure}[ht]
-%  \begin{center}
-%
-%    \begin{huge}Rangemerge - Flushmem sensitivity\end{huge}
-%
-%    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.gbtransferred.eps}}
-%    \subfigure[I/O time]          {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.iotime.eps}}
-%    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.compacttime.eps}}
-%    \subfigure[Insertion time]     {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.totaltime.eps}}
-%    \caption{Rangemerge - Flushmem}
-%  \end{center}
-%\end{figure}
-
-
-%=============================================================================================================
 %
 %                                      SENSITIVITY TO GET SIZE
 %
@@ -495,7 +460,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.latency.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.latency.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[Get size = 1 key]       {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-1.thrput.eps}}
     \subfigure[Get size = 10 keys]     {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -503,7 +468,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.thrput.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.thrput.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -520,7 +485,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.latency.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.latency.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[Get size = 1 key]       {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-1.thrput.eps}}
     \subfigure[Get size = 10 keys]     {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -528,7 +493,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.thrput.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.thrput.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -545,7 +510,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.latency.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.latency.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[Get size = 1 key]       {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-1.thrput.eps}}
     \subfigure[Get size = 10 keys]     {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -553,7 +518,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.thrput.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.thrput.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -595,7 +560,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.latency.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.latency.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[Get size = 1 key]       {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-1.thrput.eps}}
     \subfigure[Get size = 10 keys]     {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -603,7 +568,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.thrput.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.thrput.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -620,7 +585,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.latency.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.latency.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[Get size = 1 key]       {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-1.thrput.eps}}
     \subfigure[Get size = 10 keys]     {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -628,7 +593,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get size = 1000 keys]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-1000.thrput.eps}}
     \subfigure[Get size = 10000 keys]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-10000.thrput.eps}}
     \subfigure[Get size = 100000 keys] {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-100000.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -661,7 +626,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -669,7 +634,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -686,7 +651,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -694,7 +659,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -711,7 +676,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -719,7 +684,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -736,7 +701,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -744,7 +709,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -761,7 +726,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -769,7 +734,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -786,7 +751,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-10000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-20000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-40000-gthrput-20-gthreads-1-gsize-10.latency.eps}}
-      \caption{\textbf{Get latency}}
+    \caption{\textbf{Get latency}}
 
     \subfigure[put thrput = 1000 put/s]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-1000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 2500 put/s]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
@@ -794,7 +759,7 @@ Keys are 100B and values are 1KB.
     \subfigure[put thrput = 10000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-10000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 20000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-20000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
     \subfigure[put thrput = 40000 put/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-40000-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
-      \caption{\textbf{Get throughput}}
+    \caption{\textbf{Get throughput}}
   \end{center}
 \end{figure}
 
@@ -826,14 +791,14 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/cassandra-l-4-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
@@ -849,14 +814,14 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
@@ -872,14 +837,14 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
@@ -895,14 +860,14 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/geometric-p-2-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
@@ -918,14 +883,14 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/rangemerge-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
@@ -941,18 +906,119 @@ Keys are 100B and values are 1KB.
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-4-gthreads-5-gsize-10.latency.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-2-gthreads-10-gsize-10.latency.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-1-gthreads-20-gsize-10.latency.eps}}
-%      \caption{\textbf{Get latency}}
+%    \caption{\textbf{Get latency}}
 %
 %    \subfigure[1 thread x 20 get/s]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
 %    \subfigure[2 threads x 10 get/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-10-gthreads-2-gsize-10.thrput.eps}}
 %    \subfigure[5 threads x 4 get/s]   {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-4-gthreads-5-gsize-10.thrput.eps}}
 %    \subfigure[10 threads x 2 get/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-2-gthreads-10-gsize-10.thrput.eps}}
 %    \subfigure[20 threads x 1 get/s]  {\includegraphics[width=0.32\textwidth]{eps/immediate-pthrput-2500-gthrput-1-gthreads-20-gsize-10.thrput.eps}}
-%      \caption{\textbf{Get throughput}}
+%    \caption{\textbf{Get throughput}}
 %  \end{center}
 %\end{figure}
 %
 %\clearpage
+
+
+
+%=============================================================================================================
+%
+%                                    RANGEMERGE: SENSITIVITY TO BLOCKSIZE 
+%
+%=============================================================================================================
+
+% leave an empty page    
+\clearpage
+\mbox{}
+\vspace{3in}
+\linebreak
+\begin{center}\begin{huge}Rangemerge - Blocksize Sensitivity\end{huge}\end{center}
+\clearpage
+
+%=============================================================================================================
+% Rangemerge - Get latency/throughput vs Blocksize
+%=============================================================================================================
+
+\begin{figure}
+  \begin{center}
+  
+	\begin{huge}Latency/throughput sensitivity to blocksize\end{huge}
+  
+    \subfigure[blocksize = 32MB]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0032-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 64MB]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0064-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 128MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0128-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 256MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0256-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 512MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0512-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 1024MB] {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-1024-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = 2048MB] {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-2048-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    \subfigure[blocksize = inf. (Remerge)]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0000-pthrput-2500-gthrput-20-gthreads-1-gsize-10.latency.eps}}
+    
+    \subfigure[blocksize = 32MB]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0032-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 64MB]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0064-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 128MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0128-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 256MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0256-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 512MB]  {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0512-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 1024MB] {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-1024-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = 2048MB] {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-2048-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}
+    \subfigure[blocksize = inf. (Remerge)]   {\includegraphics[width=0.24\textwidth]{eps/rangemerge-b-0000-pthrput-2500-gthrput-20-gthreads-1-gsize-10.thrput.eps}}    
+    \caption{}
+  \end{center}
+\end{figure}
+
+\clearpage
+
+%=============================================================================================================
+% Get latency and Insertion time vs get size
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+    \subfigure[Average get latency]              {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.avg.eps}}
+    \subfigure[Get latency at 90\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.90perc.eps}}
+    \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.99perc.eps}}
+    \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.totaltime.eps}}
+    \caption{Get latency and Insertion time vs get size (\textit{latencies are average-smoothed by 
+    a window of size 12, to be consistent with previous results and figures})}
+  \end{center}
+\end{figure}
+
+\clearpage
+
+%=============================================================================================================
+% Rangemerge - Insertion time vs Blocksize
+%=============================================================================================================
+
+\begin{figure}[ht]
+  \begin{center}
+
+	\begin{huge}Insertion time sensitivity to blocksize\end{huge}
+
+    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.gbtransferred.eps}}
+    \subfigure[I/O time]        {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.iotime.eps}}
+    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.compacttime.eps}}
+    \subfigure[Insertion time]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize.totalstats.totaltime.eps}}
+    \caption{Rangemerge - Blocksize}
+  \end{center}
+\end{figure}
+
+\clearpage
+
+%=============================================================================================================
+% Rangemerge - Insertion time vs Flushmem
+%=============================================================================================================
+
+%\begin{figure}[ht]
+%  \begin{center}
+%
+%    \begin{huge}Rangemerge - Flushmem sensitivity\end{huge}
+%
+%    \subfigure[GB transferred]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.gbtransferred.eps}}
+%    \subfigure[I/O time]        {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.iotime.eps}}
+%    \subfigure[Compaction time] {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.compacttime.eps}}
+%    \subfigure[Insertion time]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-flushmem.totalstats.totaltime.eps}}
+%    \caption{Rangemerge - Flushmem}
+%  \end{center}
+%\end{figure}
 
 
 
@@ -1051,7 +1117,7 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}[ht]
   \begin{center}
-    \subfigure[GB inserted vs. Data transferred] {\includegraphics[width=0.49\textwidth]{eps/allmethods.gbtransferred.eps}}
+    \subfigure[GB inserted vs. Data transferred]  {\includegraphics[width=0.49\textwidth]{eps/allmethods.gbtransferred.eps}}
     \subfigure[GB inserted vs. IO time]           {\includegraphics[width=0.49\textwidth]{eps/allmethods.iotime.eps}}
     \subfigure[GB inserted vs. Compaction time]   {\includegraphics[width=0.49\textwidth]{eps/allmethods.compacttime.eps}}
     \subfigure[GB inserted vs. Insertion time]    {\includegraphics[width=0.49\textwidth]{eps/allmethods.totaltime.eps}}
@@ -1103,9 +1169,9 @@ Keys are 100B and values are 1KB.
     \subfigure[Average get latency]              {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.avg.eps}}
     \subfigure[Get latency at 90\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.90perc.eps}}
     \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.99perc.eps}}
-    \subfigure[Insertion Time]                     {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
+    \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
     \caption{Get latency and Insertion time vs get size (\textit{latencies are average-smoothed by 
-    a window of size 15, to be consistent with previous results and figures})}
+    a window of size 12, to be consistent with previous results and figures})}
   \end{center}
 \end{figure}
 
@@ -1122,7 +1188,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.99perc.eps}}
     \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.totaltime.eps}}
     \caption{Get latency and Insertion time vs put throughput (\textit{latencies are average-smoothed by 
-    a window of size 15, to be consistent with previous results and figures})}
+    a window of size 12, to be consistent with previous results and figures})}
   \end{center}
 \end{figure}
 
@@ -1190,9 +1256,18 @@ Keys are 100B and values are 1KB.
 \clearpage
 
 \begin{figure}
-  \subfigure[All methods (2500 put/s, 20 get/s)]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrput-2500.latency.eps}}
-  \subfigure[Geometric r=3 (2500 put/s, 20 get/s)] {\includegraphics[width=0.49\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.multiple.latency.eps}}
-  \caption{}
+  \begin{center}
+    \includegraphics[width=0.49\textwidth]{eps/cassandra.workload-10GB-pthrput-raw.out.1.eps}
+    \caption{}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \subfigure[All methods (2500 put/s, 20 get/s)]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrput-2500.latency.eps}}
+    \subfigure[Geometric r=3 (2500 put/s, 20 get/s)] {\includegraphics[width=0.49\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.multiple.latency.eps}}
+    \caption{}
+  \end{center}
 \end{figure}
 
 \begin{figure}
@@ -1202,7 +1277,6 @@ Keys are 100B and values are 1KB.
     \caption{}
   \end{center}
 \end{figure}
-
 
 \begin{figure}
   \begin{center}
@@ -1230,7 +1304,6 @@ Keys are 100B and values are 1KB.
 %  \end{center}
 %\end{figure}
 
-
 \begin{figure}
   \begin{center}
     \subfigure[Nomerge]         {\includegraphics[width=0.24\textwidth]{eps/nomerge-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
@@ -1254,7 +1327,7 @@ Keys are 100B and values are 1KB.
     \subfigure[Insertion time]                 {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
     \caption{Sensitivity to put throughput (20 get/s, size = 10) and get size (2500 put/s, 20 get/s)\\
     (\textit{get latencies are average-smoothed by 
-    a window of size 15, to be consistent with previous results and figures})}
+    a window of size 12, to be consistent with previous results and figures})}
   \end{center}
 \end{figure}
 
@@ -1285,6 +1358,13 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}
   \begin{center}
+    \includegraphics[width=0.32\textwidth]{eps/allmethods-memsizes.totaltime.log.eps}
+    \caption{}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
     \subfigure[Memory size = 256MB] {\includegraphics[width=0.24\textwidth]{eps/allmethods-memsize-0256.totaltime.breakdown.eps}}
     \subfigure[Memory size = 512MB] {\includegraphics[width=0.24\textwidth]{eps/allmethods-memsize-0512.totaltime.breakdown.eps}}
     \subfigure[Memory size = 1GB]   {\includegraphics[width=0.24\textwidth]{eps/allmethods-memsize-1024.totaltime.breakdown.eps}}
@@ -1301,25 +1381,5 @@ Keys are 100B and values are 1KB.
 \end{figure}
 
 \clearpage
-
-%%=============================================================================================================
-%% Rangemerge - Get latency vs Blocksize
-%%=============================================================================================================
-%
-%\begin{figure}[ht]
-%  \begin{center}
-%
-%    \begin{huge}Rangemerge - Get latency vs Blocksize\end{huge}
-%
-%    \subfigure[Blocksize = 16MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0016-pthrput-2500.latency.eps}}
-%    \subfigure[Blocksize = 32MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0032-pthrput-2500.latency.eps}}
-%    \subfigure[Blocksize = 64MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0064-pthrput-2500.latency.eps}}
-%%    \subfigure[Blocksize = 128MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0128-pthrput-2500.latency.eps}}
-%    \subfigure[Blocksize = 256MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0256-pthrput-2500.latency.eps}}
-%    \subfigure[Blocksize = 512MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-0512-pthrput-2500.latency.eps}}
-%    \subfigure[Blocksize = 1024MB]  {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksize-1024-pthrput-2500.latency.eps}}
-%    \caption{Rangemerge - Get latency vs Blocksize (put throughpu}
-%  \end{center}
-%\end{figure}
 
 \end{document}

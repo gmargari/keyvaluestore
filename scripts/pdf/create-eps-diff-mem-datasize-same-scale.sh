@@ -70,8 +70,8 @@ gnuplot << EOF
     set y2range [0:${rng_ymax2}+1]
 
     plot \
-   '$rng_file1' using (\$1 / $rng_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '#E4191C' title "$title1", \
-   '$rng_file2' using (\$1 / $rng_xmax2 * 100):(sec2min((\$2 / $rng_ymax2) * $rng_ymax1)) with lines lw 4 lc rgb '#387DB8' title "$title2"
+   '$rng_file1' using (\$1 / $rng_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '${color3}' title "$title1", \
+   '$rng_file2' using (\$1 / $rng_xmax2 * 100):(sec2min((\$2 / $rng_ymax2) * $rng_ymax1)) with lines lw 4 lc rgb '${color}'  title "$title2"
 
 
     #---------------------------------------
@@ -83,8 +83,8 @@ gnuplot << EOF
     set y2range [0:${log_ymax2}+1]
 
     plot \
-   '$log_file1' using (\$1 / $log_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '#E4191C' title "$title1", \
-   '$log_file2' using (\$1 / $log_xmax2 * 100):(sec2min((\$2 / $log_ymax2) * $log_ymax1)) with lines lw 4 lc rgb '#387DB8' title "$title2"
+   '$log_file1' using (\$1 / $log_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '${color3}' title "$title1", \
+   '$log_file2' using (\$1 / $log_xmax2 * 100):(sec2min((\$2 / $log_ymax2) * $log_ymax1)) with lines lw 4 lc rgb '${color}'  title "$title2"
 
 
     #---------------------------------------
@@ -108,8 +108,8 @@ gnuplot << EOF
     set yrange [0:15]
     set y2range [0:150]
     plot \
-   '$log_file1' using (\$1 / $log_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '#E4191C' title "$title1", \
-   '$log_file2' using (\$1 / $log_xmax2 * 100):(sec2min((\$2 / $log_ymax2) * $log_ymax1)) with lines lw 4 lc rgb '#387DB8' title "$title2"
+   '$log_file1' using (\$1 / $log_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '${color3}' title "$title1", \
+   '$log_file2' using (\$1 / $log_xmax2 * 100):(sec2min((\$2 / $log_ymax2) * $log_ymax1)) with lines lw 4 lc rgb '${color}'  title "$title2"
 
     set size 1,0.6
     set origin 0.0,0.00
@@ -120,8 +120,8 @@ gnuplot << EOF
     set yrange [0:25]
     set y2range [0:200]
     plot \
-   '$rng_file1' using (\$1 / $rng_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '#E4191C' title "$title1", \
-   '$rng_file2' using (\$1 / $rng_xmax2 * 100):(sec2min((\$2 / $rng_ymax2) * $rng_ymax1)) with lines lw 4 lc rgb '#387DB8' title "$title2"
+   '$rng_file1' using (\$1 / $rng_xmax1 * 100):(sec2min(\$2))                             with lines lw 4 lc rgb '${color3}' title "$title1", \
+   '$rng_file2' using (\$1 / $rng_xmax2 * 100):(sec2min((\$2 / $rng_ymax2) * $rng_ymax1)) with lines lw 4 lc rgb '${color}'  title "$title2"
 
     set nomultiplot
 EOF

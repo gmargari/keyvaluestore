@@ -45,7 +45,7 @@ ensure_file_exist() {
 #========================================================
 # average_using_sliding_window()
 #========================================================
-windowsize=15
+windowsize=12 # since stats are taken every 5 seconds, we use a sliding window of 12*5 = 1 minute
 function average_using_sliding_window {
     local tmp="$(mktemp)"
     cat $1 | awk -v w=$windowsize \

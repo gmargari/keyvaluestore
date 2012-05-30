@@ -47,6 +47,7 @@ lines_nom="lines $linewidth lt 8 lc rgb $color_nom"
 
 color="#387DB8"
 color2="#BBBBBB"
+color3="#E4191C"
 bgmerge_color="#EEEEEE"
 
 ylabel_ins='Insertion time (min)'
@@ -70,5 +71,5 @@ xlabel_gthreads='Number of get threads'
 xlabel_keysord='Percentage of keys ordered (%)'
 xlabel_keyszipf='{/Symbol a} parameter of Zipf distribution'
 xlabel_memsize='Memory size (MB)'
-xlabel_blocksize='Time (min)'
-xlabel_flushmem='Time (min)'
+xlabel_blocksize='Block size (MB)'
+xlabel_flushmem='Flush memory (MB)'
