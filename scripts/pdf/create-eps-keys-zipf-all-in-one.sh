@@ -40,7 +40,7 @@ gnuplot << EOF
     set out '${outfile}.totaltime.eps'
     set ylabel '${ylabel_ins}'
     set yrange [0:120]
-    set key at ${xmax},95
+    set key at ${xmax}*0.97,95
     plot \
     '$file_imm' using 1:(sec2min(\$3)) title '$title_imm' with $style_imm, \
     '$file_rng' using 1:(sec2min(\$3)) title '$title_rng' with $style_rng, \
@@ -55,7 +55,7 @@ gnuplot << EOF
     set out '${outfile}.compacttime.eps'
     set ylabel '${ylabel_comp}'
     set yrange [0:110]
-    set key at ${xmax},85
+    set key at ${xmax}*0.97,85
     plot \
     '$file_imm' using 1:(sec2min(\$6)) title '$title_imm' with $style_imm, \
     '$file_rng' using 1:(sec2min(\$6)) title '$title_rng' with $style_rng, \
@@ -69,7 +69,7 @@ gnuplot << EOF
     set out '${outfile}.iotime.eps'
     set ylabel '${ylabel_io}'
     set yrange [0:110]
-    set key at ${xmax},85
+    set key at ${xmax}*0.97,85
     plot \
     '$file_imm' using 1:(sec2min(\$10 + \$11)) title '$title_imm' with $style_imm, \
     '$file_rng' using 1:(sec2min(\$10 + \$11)) title '$title_rng' with $style_rng, \
@@ -82,8 +82,8 @@ gnuplot << EOF
     # Data inserted (GB)
     set out '${outfile}.gbtransferred.eps'
     set ylabel '${ylabel_gb}'
-    set yrange [0:240]
-    set key at ${xmax},195
+    set yrange [0:250]
+    set key at ${xmax}*0.97,198
     plot \
     '$file_imm' using 1:(mb2gb(\$12 + \$13)) title '$title_imm' with $style_imm, \
     '$file_rng' using 1:(mb2gb(\$12 + \$13)) title '$title_rng' with $style_rng, \

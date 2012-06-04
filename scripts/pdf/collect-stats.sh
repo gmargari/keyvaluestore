@@ -69,8 +69,8 @@ collect_stats_per_memsize() {
 
     files=( 'immediate' 'rangemerge' 'geometric-p-2' 'geometric-r-3' 'geometric-r-2' \
             'cassandra-l-4' 'nomerge' )
-    labels=( 'Remerge' 'Rangemerge' 'Geom_p=2' 'Geom_r=3' "Geom_r=2"
-             'SMA_k=4' 'Nomerge' )
+    labels=( 'Remerge' 'Rangemerge' 'Geom_(p=2)' 'Geom_(r=3)' "Geom_(r=2)"
+             'SMA_(k=4)' 'Nomerge' )
 
     memsizes=( '0128' '0256' '0512' '1024' '2048' )
 
@@ -103,10 +103,10 @@ collect_stats_per_memsize() {
 collect_stats_per_putthruput() {
     my_print "${FUNCNAME}()"
 
-    methods=(  'immediate' 'rangemerge' 'geometric-r-3'  'geometric-r-2' 'cassandra-l-4'  'geometric-p-2' )
+    methods=( 'nomerge' 'immediate' 'rangemerge' 'geometric-r-3'  'geometric-r-2' 'cassandra-l-4'  'geometric-p-2' )
     putthrputs=( '1000' '2500' '5000' '10000' '20000' '40000' )
     # percentile = 0 -> average time
-    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    percentiles=( "0" "0.50" "0.90" "0.99" "1" )
     putthrput=2500
     getthreads=1
     getthrput=20
@@ -160,11 +160,11 @@ collect_stats_per_putthruput() {
 collect_stats_per_getthruput() {
     my_print "${FUNCNAME}()"
 
-    methods=( 'immediate' 'rangemerge' 'geometric-r-3' 'cassandra-l-4' 'geometric-p-2' 'geometric-r-2' )
+    methods=( 'nomerge' 'immediate' 'rangemerge' 'geometric-r-3' 'cassandra-l-4' 'geometric-p-2' 'geometric-r-2' )
     getthrputs=( '0' '5' '10' '20' '40' )  # '0' means no gets, not infinite gets
     # percentile = 0 -> average time
-    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
-    putthrput=0
+    percentiles=( "0" "0.50" "0.90" "0.99" "1" )
+    putthrput=2500
     getthreads=1
     getthrput=20
     getsize=10
@@ -176,6 +176,8 @@ collect_stats_per_getthruput() {
 
         for getthrput in ${getthrputs[@]}; do
             echo ${getthrput} | awk '{printf "%-20s ", $1}'
+
+#========================================================================================================
 #            file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stderr
 #            ensure_file_exist $file
 #
@@ -192,11 +194,12 @@ collect_stats_per_getthruput() {
 #                    cat $tmpfile | awk -v p=$p -v lines=$lines 'NR >= p * lines {printf "%5.1f ", $3; exit}'
 #                fi
 #            done
+#========================================================================================================
 
             # print also total time
             if [ "$getthrput" == 0 ]; then
                 file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-20-gthreads-0-gsize-${getsize}.stats
-            else 
+            else
                 file=${statsfolder}/${method}-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}.stats
             fi
             ensure_file_exist $file
@@ -220,10 +223,10 @@ collect_stats_per_getthruput() {
 collect_stats_per_getsize() {
     my_print "${FUNCNAME}()"
 
-    methods=(  'immediate' 'rangemerge' 'geometric-r-3'  'geometric-r-2' 'cassandra-l-4'  'geometric-p-2' )
+    methods=( 'nomerge' 'immediate' 'rangemerge' 'geometric-r-3'  'geometric-r-2' 'cassandra-l-4'  'geometric-p-2' )
     getsizes=( '1' '10' '100' '1000' '10000' '100000' )
     # percentile = 0 -> average time
-    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    percentiles=( "0" "0.50" "0.90" "0.99" "1" )
     putthrput=2500
     getthreads=1
     getthrput=20
@@ -280,7 +283,7 @@ collect_stats_per_numthreads() {
     methods=(  'immediate' 'rangemerge' 'geometric-r-3'  'geometric-r-2' 'cassandra-l-4'  'geometric-p-2' )
     numthreads=( '1' '2' '5' '10' )
     # percentile = 0 -> average time
-    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    percentiles=( "0" "0.50" "0.90" "0.99" "1" )
     putthrput=2500
     getthreads=1
     getthrput=20
@@ -337,7 +340,7 @@ collect_stats_per_blocksize() {
 #    blocksizes=( '0032' '0064' '0128' '0256' '0512' '1024' '2048' '0000' )
     blocksizes=( '0064' '0128' '0256' '0512' '1024' '2048' )
     # percentile = 0 -> average time
-    percentiles=( "0" "0.90" "0.99" "0.999" "1" )
+    percentiles=( "0" "0.50" "0.90" "0.99" "1" )
     putthrput=2500
     getthreads=1
     getthrput=20
@@ -457,7 +460,7 @@ collect_rngmerge_blocksize_stats() {
         return
     fi
 
-    # if we have a row for blocksize = "inf", remove it from first row 
+    # if we have a row for blocksize = "inf", remove it from first row
     # (since file is sorted by blocksize) and move it at last row
     cat ${statsfolder}/$prefix.totalstats |
       awk '{if ($1 == "inf") {firstrow=$0; bs0=1} else print $0} END{if(bs0) print firstrow}' > ${statsfolder}/$prefix.totalstats.del

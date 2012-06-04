@@ -281,82 +281,6 @@ Keys are 100B and values are 1KB.
 
 \clearpage
 
-%\begin{figure}[ht]
-%\begin{center}
-%\begin{tabular}{|l|c|c|c|c|}
-%\hline
-%\multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{get() latency per percentile}} \\
-%                                 & avg & 90.0\% & 99.0\% & 99.9\% \\
-%\hline
-%\hline
-%Nomerge                   & 73.6 & 148.7 & 288.9 & 338.6 \\
-%\hline
-%SMA k=4                   & 23.2 & 51.3 &  92.1 & 104.5 \\
-%\hline
-%SMA k=3                   & 29.1 & 70.0 & 100.2 & 112.7 \\
-%\hline
-%SMA k=2                   & 32.0 & 75.8 &  99.6 & 128.6 \\
-%\hline
-%Geometric r=2             & 21.1 & 51.3 &  68.7 &  83.4 \\
-%\hline
-%Geometric r=3             & 22.4 & 48.2 &  66.6 &  73.2 \\
-%\hline
-%Geometric r=4             & 18.2 & 39.7 &  50.4 &  57.3 \\
-%\hline
-%Geometric p=4             & 18.8 & 42.8 &  56.3 &  68.4 \\
-%\hline
-%Geometric p=3             & 24.8 & 50.4 &  64.8 &  74.1 \\
-%\hline
-%Geometric p=2             & 19.8 & 41.6 &  52.0 &  58.7 \\
-%\hline
-%Rangemerge                & 13.1 & 26.7 &  32.5 &  41.5 \\
-%\hline
-%Immediate/Geometric p=1   & 22.8 & 35.1 &  41.2 & 146.7 \\
-%\hline
-%\end{tabular}
-%\caption{1 get thread x 20 get/s. Put throughput = \textbf{2500} put/s. \textbf{(6GB data)}}
-%\end{center}
-%\end{figure}
-%
-%\begin{figure}[ht]
-%\begin{center}
-%\begin{tabular}{|l|c|c|c|c|}
-%\hline
-%\multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{get() latency per percentile}} \\
-%                                 & avg & 90.0\% & 99.0\% & 99.9\% \\
-%\hline
-%\hline
-%Nomerge                   & 103.2 & 200.4 & 251.2 & 252.2 \\
-%\hline
-%SMA k=4                   &  46.6 &  85.0 & 119.2 & 130.5 \\
-%\hline
-%SMA k=3                   &  49.8 &  88.1 & 103.0 & 110.6 \\
-%\hline
-%SMA k=2                   &  54.3 & 100.1 & 131.3 & 144.4 \\
-%\hline
-%Geometric r=2             &  41.0 &  58.2 &  77.3 &  92.6 \\
-%\hline
-%Geometric r=3             &  35.8 &  54.3 &  68.3 &  74.8 \\
-%\hline
-%Geometric r=4             &  38.2 &  50.8 &  60.8 & 176.6 \\
-%\hline
-%Geometric p=4             &  32.9 &  47.0 &  57.3 &  68.0 \\
-%\hline
-%Geometric p=3             &  40.5 &  58.1 &  74.1 &  92.0 \\
-%\hline
-%Geometric p=2             &  32.1 &  42.8 &  48.3 &  74.1 \\
-%\hline
-%Rangemerge                &  22.5 &  29.5 &  44.3 &  57.8 \\
-%\hline
-%Immediate/Geometric p=1   &  30.6 &  36.1 &  41.2 & 287.2 \\
-%\hline
-%\end{tabular} 
-%\caption{1 get thread x 20 get/s. Put throughput = \textbf{infinite} put/s. \textbf{(6GB data)}}
-%\end{center}
-%\end{figure}
-%
-%\clearpage
-
 %=============================================================================================================
 % Memory size - per method
 %=============================================================================================================
@@ -974,7 +898,7 @@ Keys are 100B and values are 1KB.
 \begin{figure}[ht]
   \begin{center}
     \subfigure[Average get latency]              {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.avg.eps}}
-    \subfigure[Get latency at 90\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.90perc.eps}}
+    \subfigure[Median get latency]               {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.50perc.eps}}
     \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.99perc.eps}}
     \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/rangemerge-blocksizes-latency.totaltime.eps}}
     \caption{Get latency and Insertion time vs get size (\textit{latencies are average-smoothed by 
@@ -1127,6 +1051,18 @@ Keys are 100B and values are 1KB.
 
 \clearpage
 
+\begin{figure}[ht]
+  \begin{center}
+    \subfigure[GB inserted vs. Data transferred]  {\includegraphics[width=0.49\textwidth]{eps/allmethods.gbtransferred.lines.eps}}
+    \subfigure[GB inserted vs. IO time]           {\includegraphics[width=0.49\textwidth]{eps/allmethods.iotime.lines.eps}}
+    \subfigure[GB inserted vs. Compaction time]   {\includegraphics[width=0.49\textwidth]{eps/allmethods.compacttime.lines.eps}}
+    \subfigure[GB inserted vs. Insertion time]    {\includegraphics[width=0.49\textwidth]{eps/allmethods.totaltime.lines.eps}}
+    \caption{}
+  \end{center}
+\end{figure}
+
+\clearpage
+
 %=============================================================================================================
 % Selected methods - Get latency/throughput during compactions
 %=============================================================================================================
@@ -1166,10 +1102,11 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}[ht]
   \begin{center}
-    \subfigure[Average get latency]              {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.avg.eps}}
-    \subfigure[Get latency at 90\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.90perc.eps}}
-    \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.99perc.eps}}
-    \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
+    \subfigure[Average get latency]                       {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.avg.eps}}
+%    \subfigure[Get latency at 50\%th percentile (median)] {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.50perc.eps}}
+    \subfigure[Get latency at 90\%th percentile]          {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.90perc.eps}}
+    \subfigure[Get latency at 99\%th percentile]          {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.99perc.eps}}
+    \subfigure[Insertion Time]                            {\includegraphics[width=0.49\textwidth]{eps/allmethods-getsizes.totaltime.eps}}    
     \caption{Get latency and Insertion time vs get size (\textit{latencies are average-smoothed by 
     a window of size 12, to be consistent with previous results and figures})}
   \end{center}
@@ -1183,10 +1120,11 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}[ht]
   \begin{center}
-    \subfigure[Average get latency]              {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.avg.eps}}
-    \subfigure[Get latency at 90\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.90perc.eps}}
-    \subfigure[Get latency at 99\% percentile]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.99perc.eps}}
-    \subfigure[Insertion Time]                   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.totaltime.eps}}
+    \subfigure[Average get latency]                       {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.avg.eps}}
+%    \subfigure[Get latency at 50\%th percentile (median)] {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.50perc.eps}}
+    \subfigure[Get latency at 90\%th percentile]          {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.90perc.eps}}
+    \subfigure[Get latency at 99\%th percentile]          {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.99perc.eps}}
+    \subfigure[Insertion Time]                            {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrputs.totaltime.eps}}
     \caption{Get latency and Insertion time vs put throughput (\textit{latencies are average-smoothed by 
     a window of size 12, to be consistent with previous results and figures})}
   \end{center}
@@ -1241,6 +1179,23 @@ Keys are 100B and values are 1KB.
 
 \clearpage
 
+\begin{figure}[ht]
+  \begin{center}
+
+    \begin{huge}Cassandra (averaged by 1-minute sliding window)\end{huge}
+
+    \subfigure[1 node, 10Gb, 500 rps]   {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-10GB-0500rps-8threads.node30.node4.out.12.eps}}
+    \subfigure[1 node, 10Gb, 1000 rps]  {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-10GB-1000rps-4threads.node30.node10.out.12.eps}}
+    \subfigure[1 node, 10Gb, 2500 rps]  {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-10GB-2500rps-4threads.node30.node10.out.12.eps}}
+    \subfigure[1 node, 10Gb, 500 rps]        {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-10GB-0500rps-8threads.node30.node4.out.12.eps}}
+    \subfigure[4 nodes, 80Gb, 4000 rps]      {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-40GB-2000rps-8threads.node30.node4,node9,node12,node14.out.12.eps}}
+    \subfigure[8 nodes, 80Gb, 4000 rps]      {\includegraphics[width=0.32\textwidth]{eps/cassandra.workload-80GB-4000rps-8threads.node30.node4,node7,node9,node10,node12,node13,node14,node15.out.12.eps}}
+    
+    \caption{}
+  \end{center}
+\end{figure}
+
+\clearpage
 %=============================================================================================================
 %
 %                                         FIGURES TO BE USED IN PAPER
@@ -1257,31 +1212,47 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.49\textwidth]{eps/cassandra.workload-10GB-pthrput-raw.out.1.eps}
+    \subfigure[1 node, 10Gb, 500rps] {\includegraphics[width=0.49\textwidth]{eps/cassandra.workload-10GB-0500rps-8threads.node30.node4.out.12.eps}}
+    \subfigure[1 node, 10Gb, 500rps] {\includegraphics[width=0.49\textwidth]{eps/cassandra.latency.breakdown.eps}}
     \caption{}
   \end{center}
 \end{figure}
 
 \begin{figure}
   \begin{center}
-    \subfigure[All methods (2500 put/s, 20 get/s)]   {\includegraphics[width=0.49\textwidth]{eps/allmethods-pthrput-2500.latency.eps}}
-    \subfigure[Geometric r=3 (2500 put/s, 20 get/s)] {\includegraphics[width=0.49\textwidth]{eps/geometric-r-3-pthrput-2500-gthrput-20-gthreads-1-gsize-10.multiple.latency.eps}}
+    \includegraphics[width=0.49\textwidth]{eps/geometric-r-2-rangemerge-diff-mem-datasize-same-scale.eps}
+    \caption{Scaling up datasize and memsize}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}
+  \begin{center}
+    \subfigure[All methods (2500 put/s, 20 get/s)]   {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrput-2500.latency.eps}}
+    \subfigure[Geometric r=2 (2500 put/s, 20 get/s)] {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2-pthrput-2500-gthrput-20-gthreads-1-gsize-10.multiple.latency.eps}}
+    \subfigure[Geometric r=2]                        {\includegraphics[width=0.32\textwidth]{eps/geometric-r-2.searchlog.eps}}	
     \caption{}
   \end{center}
 \end{figure}
 
 \begin{figure}
   \begin{center}
-    \subfigure[GB inserted vs. Insertion time]  {\includegraphics[width=0.49\textwidth]{eps/allmethods.totaltime.eps}}
-    \subfigure[Scaling up datasize and memsize] {\includegraphics[width=0.49\textwidth]{eps/geometric-r-2-rangemerge-diff-mem-datasize-same-scale.eps}}
-    \caption{}
+    \subfigure[Average get latency]              {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.avg.eps}}
+    \subfigure[Get latency at 99\%th percentile] {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.99perc.eps}}
+    \subfigure[Insertion time]                   {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.totaltime.eps}}
+    \subfigure[Average get latency]              {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.avg.eps}}
+    \subfigure[Get latency at 99\%th percentile] {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.99perc.eps}}
+    \subfigure[Insertion time]                   {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
+    \caption{Sensitivity to put throughput (20 get/s, size = 10) and get size (2500 put/s, 20 get/s)\\
+    (\textit{get latencies are average-smoothed by 
+    a window of size 12, to be consistent with previous results and figures})}
   \end{center}
 \end{figure}
 
 \begin{figure}
   \begin{center}
     \subfigure[Nomerge]         {\includegraphics[width=0.24\textwidth]{eps/nomerge-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
-    \subfigure[SAMT k=4]        {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
+    \subfigure[SMA k=4]         {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
     \subfigure[Geometric r=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
     \subfigure[Geometric r=3]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-3-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
     \subfigure[Geometric p=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-p-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.fragm.eps}}
@@ -1291,10 +1262,18 @@ Keys are 100B and values are 1KB.
   \end{center}
 \end{figure}
 
+\begin{figure}
+  \begin{center}
+    \subfigure[GB inserted vs. Insertion time] {\includegraphics[width=0.49\textwidth]{eps/allmethods.totaltime.eps}}
+    \subfigure[Sensitivity to get throughput]  {\includegraphics[width=0.49\textwidth]{eps/allmethods-gthrputs.totaltime.eps}}
+    \caption{}
+  \end{center}
+\end{figure}
+
 %\begin{figure}
 %  \begin{center}
 %    \subfigure[Nomerge]         {\includegraphics[width=0.24\textwidth]{eps/nomerge-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
-%    \subfigure[SAMT k=4]        {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
+%    \subfigure[SMA k=4]         {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
 %    \subfigure[Geometric r=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
 %    \subfigure[Geometric r=3]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-3-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
 %    \subfigure[Geometric p=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-p-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.eps}}
@@ -1307,7 +1286,7 @@ Keys are 100B and values are 1KB.
 \begin{figure}
   \begin{center}
     \subfigure[Nomerge]         {\includegraphics[width=0.24\textwidth]{eps/nomerge-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
-    \subfigure[SAMT k=4]        {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
+    \subfigure[SMA k=4]         {\includegraphics[width=0.24\textwidth]{eps/cassandra-l-4-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
     \subfigure[Geometric r=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
     \subfigure[Geometric r=3]   {\includegraphics[width=0.24\textwidth]{eps/geometric-r-3-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
     \subfigure[Geometric p=2]   {\includegraphics[width=0.24\textwidth]{eps/geometric-p-2-pthrput-0-gthrput-20-gthreads-0-gsize-10.gbtransferred.diff.eps}}
@@ -1319,47 +1298,10 @@ Keys are 100B and values are 1KB.
 
 \begin{figure}
   \begin{center}
-    \subfigure[Average get latency]            {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.avg.eps}}
-    \subfigure[Get latency at 99\% percentile] {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.99perc.eps}}
-    \subfigure[Insertion time]                 {\includegraphics[width=0.32\textwidth]{eps/allmethods-pthrputs.totaltime.eps}}
-    \subfigure[Average get latency]            {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.avg.eps}}
-    \subfigure[Get latency at 99\% percentile] {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.99perc.eps}}
-    \subfigure[Insertion time]                 {\includegraphics[width=0.32\textwidth]{eps/allmethods-getsizes.totaltime.eps}}
-    \caption{Sensitivity to put throughput (20 get/s, size = 10) and get size (2500 put/s, 20 get/s)\\
-    (\textit{get latencies are average-smoothed by 
-    a window of size 12, to be consistent with previous results and figures})}
-  \end{center}
-\end{figure}
-
-\begin{figure}
-  \begin{center}
-    \subfigure[Sensitivity to get throughput]   {\includegraphics[width=0.32\textwidth]{eps/allmethods-gthrputs.totaltime.eps}}
-    \subfigure[Sensitivity to key distribution] {\includegraphics[width=0.32\textwidth]{eps/ord-prob.gbtransferred.eps}}
-    \subfigure[Sensitivity to key distribution] {\includegraphics[width=0.32\textwidth]{eps/zipf_a.gbtransferred.eps}}
-    \caption{Sensitivity to get throughput and key distribution (infinite put/s)\\
-    (\textit{in figures (b) and (c) there are no background gets})}
-  \end{center}
-\end{figure}
-
-%\begin{figure}
-%  \begin{center}
-%    \subfigure[Insertion time]                 {\includegraphics[width=0.32\textwidth]{eps/allmethods-gthrputs.totaltime.eps}}
-%    \caption{Sensitivity to get throughput}
-%  \end{center}
-%\end{figure}
-%
-%\begin{figure}
-%  \begin{center}
-%    \subfigure[Ordered keys]  {\includegraphics[width=0.49\textwidth]{eps/ord-prob.gbtransferred.eps}}
-%    \subfigure[Zipf keys]     {\includegraphics[width=0.49\textwidth]{eps/zipf_a.gbtransferred.eps}}
-%    \caption{}
-%  \end{center}
-%\end{figure}
-
-\begin{figure}
-  \begin{center}
-    \includegraphics[width=0.32\textwidth]{eps/allmethods-memsizes.totaltime.log.eps}
-    \caption{}
+    \subfigure[Ordered keys] {\includegraphics[width=0.32\textwidth]{eps/ord-prob.gbtransferred.eps}}
+    \subfigure[Zipf keys]    {\includegraphics[width=0.32\textwidth]{eps/zipf_a.gbtransferred.eps}}
+    \subfigure[Memory size]  {\includegraphics[width=0.32\textwidth]{eps/allmethods-memsizes.totaltime.log.eps}}
+    \caption{Sensitivity to key distribution and to memory size (no gets, infinite put/s) }
   \end{center}
 \end{figure}
 
@@ -1373,10 +1315,11 @@ Keys are 100B and values are 1KB.
   \end{center}
 \end{figure}
 
+
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.32\textwidth]{eps/geometric-r-2.searchlog.eps}
-    \caption{}
+\subfigure[1 Server]{\includegraphics[width=2in]{eps/cassandra.workload-10GB-0500rps-8threads.node30.node4.out.12.eps}}
+\subfigure[8 Servers]{\includegraphics[width=2in]{eps/cassandra.workload-80GB-4000rps-8threads.node30.node4,node7,node9,node10,node12,node13,node14,node15.out.12.eps}}
   \end{center}
 \end{figure}
 

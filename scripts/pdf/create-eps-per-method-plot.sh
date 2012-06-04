@@ -105,6 +105,13 @@ gnuplot << EOF
     set ylabel '${ylabel_gb_diff}'
     plot '${difffile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with linespoints pt 1 lw 7 ps 2 lc rgb '${color}'
 
+#    set out '${outputfile}.gbtransferred.box.diff.eps'
+#    set yrange [0:${ymax_gb_diff}]
+#    set ylabel '${ylabel_gb_diff}'
+#    plot '${difffile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with fsteps lc rgb '${color}' $ with [steps|fsteps|histeps]
+#    set style fill solid border
+#    plot '${difffile}' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) notitle with boxes lc rgb '${color}'
+
 EOF
 #==========================[ gnuplot embedded script ]============================
 

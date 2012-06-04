@@ -26,7 +26,7 @@ for putthrput in ${putthrputs[@]}; do
     style_geo="lines lw 5 lt 3 lc rgb $color_geo"
     style_rng="lines lw 4 lt 1 lc rgb $color_rng"
     style_gp2="lines lw 1 lt 5 lc rgb $color_gp2"
-    style_cas="lines lw 2 lt 5 lc rgb $color_cas"
+    style_cas="lines lw 3 lt 3 lc rgb $color_cas"
 #    style_cas="lines lw 2 lt 5 lc rgb '#D9A621'"
 
     outputfile="${outfolder}/allmethods-pthrput-${putthrput}"
@@ -46,16 +46,20 @@ for putthrput in ${putthrputs[@]}; do
     average_using_sliding_window $getstats_rng
     average_using_sliding_window $getstats_gp2
 
-#    latency_max=`cat $getstats_log $getstats_geo $getstats_rng $getstats_gp2 | awk '$3 > max {max=$3} END{print max}'`
-#    thrput_max=` cat $getstats_log $getstats_geo $getstats_rng $getstats_gp2 | awk '$2 > max {max=$2} END{print max}'`
-#    time_max=`   cat $getstats_log $getstats_geo $getstats_rng $getstats_gp2 | awk '$1 > max {max=$1} END{print max}'`
-    latency_max=`cat $getstats_cas $getstats_geo $getstats_rng | awk '$3 > max {max=$3} END{print max}'`
-    thrput_max=` cat $getstats_cas $getstats_geo $getstats_rng | awk '$2 > max {max=$2} END{print max}'`
-    time_max=`   cat $getstats_cas $getstats_geo $getstats_rng | awk '$1 > max {max=$1} END{print max}'`
+#    latency_max=`cat $getstats_log $getstats_log $getstats_rng $getstats_gp2 | awk '$3 > max {max=$3} END{print max}'`
+#    thrput_max=` cat $getstats_log $getstats_log $getstats_rng $getstats_gp2 | awk '$2 > max {max=$2} END{print max}'`
+#    time_max=`   cat $getstats_log $getstats_log $getstats_rng $getstats_gp2 | awk '$1 > max {max=$1} END{print max}'`
+    latency_max=`cat $getstats_cas $getstats_log $getstats_rng | awk '$3 > max {max=$3} END{print max}'`
+    thrput_max=` cat $getstats_cas $getstats_log $getstats_rng | awk '$2 > max {max=$2} END{print max}'`
+    time_max=`   cat $getstats_cas $getstats_log $getstats_rng | awk '$1 > max {max=$1} END{print max}'`
 
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
+#    set xtics font  'Helvetica,21'
+#    set ytics font  'Helvetica,21'
+    set xlabel font 'Helvetica,25'
+    set ylabel font 'Helvetica,25'
     set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel '${xlabel_time}'
     set xrange [0:(${time_max}/60000)*1.05]
@@ -68,10 +72,8 @@ gnuplot << EOF
     set yrange [0:${latency_max}*1.05]
     plot \
     '${getstats_cas}' using (ms_to_min(\$1)):3 every $skip with $style_cas title '$title_cas', \
-    '${getstats_geo}' using (ms_to_min(\$1)):3 every $skip with $style_geo title '$title_geo', \
+    '${getstats_log}' using (ms_to_min(\$1)):3 every $skip with $style_log title '$title_log', \
     '${getstats_rng}' using (ms_to_min(\$1)):3 every $skip with $style_rng title '$title_rng'
-#    '${getstats_log}' using (ms_to_min(\$1)):3 every $skip with $style_log title '$title_log', \
-#    '${getstats_gp2}' using (ms_to_min(\$1)):3 every $skip with $style_gp2 title '$title_gp2', \
 
     set key bottom right
 
@@ -80,10 +82,8 @@ gnuplot << EOF
     set yrange [0:${thrput_max}*1.05]
     plot \
     '${getstats_cas}' using (ms_to_min(\$1)):2 every $skip with $style_cas title '$title_cas', \
-    '${getstats_geo}' using (ms_to_min(\$1)):2 every $skip with $style_geo title '$title_geo', \
+    '${getstats_log}' using (ms_to_min(\$1)):2 every $skip with $style_log title '$title_log', \
     '${getstats_rng}' using (ms_to_min(\$1)):2 every $skip with $style_rng title '$title_rng'
-#    '${getstats_log}' using (ms_to_min(\$1)):2 every $skip with $style_log title '$title_log', \
-#    '${getstats_gp2}' using (ms_to_min(\$1)):2 every $skip with $style_gp2 title '$title_gp2', \
 
 EOF
 #==========================[ gnuplot embedded script ]============================

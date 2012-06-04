@@ -43,26 +43,26 @@ gnuplot << EOF
 
     set out '${outfolder}/${outfile}.avg.eps'
     set yrange [0:${ymax2}]
+    plot '${tmpfile}' using 1:2  notitle with ${style}
+
+    set out '${outfolder}/${outfile}.50perc.eps'
+    set yrange [0:${ymax3}]
     plot '${tmpfile}' using 1:3  notitle with ${style}
 
     set out '${outfolder}/${outfile}.90perc.eps'
-    set yrange [0:${ymax3}]
+    set yrange [0:${ymax4}]
     plot '${tmpfile}' using 1:4  notitle with ${style}
 
     set out '${outfolder}/${outfile}.99perc.eps'
-    set yrange [0:${ymax4}]
-    plot '${tmpfile}' using 1:5  notitle with ${style}
-
-    set out '${outfolder}/${outfile}.99.9perc.eps'
     set yrange [0:${ymax5}]
-    plot '${tmpfile}' using 1:6  notitle with ${style}
+    plot '${tmpfile}' using 1:5  notitle with ${style}
 
     set key top right
     set ylabel '${ylabel_ins}'
 
     set out '${outfolder}/${outfile}.totaltime.eps'
     set yrange [0:${ymax7}]
-    plot '${tmpfile}' using 1:(sec2min(\$8)) notitle with ${style}
+    plot '${tmpfile}' using 1:(sec2min(\$7)) notitle with ${style}
 
 EOF
 #==========================[ gnuplot embedded script ]============================

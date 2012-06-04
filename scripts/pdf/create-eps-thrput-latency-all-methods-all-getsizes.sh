@@ -11,11 +11,11 @@ file_rng="${statsfolder}/rangemerge-getsizes.totalstats"
 file_imm="${statsfolder}/immediate-getsizes.totalstats"
 file_gp2="${statsfolder}/geometric-p-2-getsizes.totalstats"
 
-ymax2=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.4}'`
-ymax3=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.4}'`
-ymax4=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.4}'`
-ymax5=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.4}'`
-ymax7=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.04}'`
+ymax2=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.2}'`
+ymax3=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.2}'`
+ymax4=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.2}'`
+ymax5=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.2}'`
+ymax7=`cat $file_imm $file_gp2 $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.01}'`
 
 xmin=0.8
 xmax=130000
@@ -53,7 +53,7 @@ gnuplot << EOF
     '$file_imm' using 1:2 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:2 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-getsizes.90perc.eps'
+    set out '${outfolder}/allmethods-getsizes.50perc.eps'
     set yrange [1:$ymax3]
     plot \
     '$file_cas' using 1:3 title '$title_cas' with $style_cas, \
@@ -63,7 +63,7 @@ gnuplot << EOF
     '$file_imm' using 1:3 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:3 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-getsizes.99perc.eps'
+    set out '${outfolder}/allmethods-getsizes.90perc.eps'
     set yrange [1:$ymax4]
     plot \
     '$file_cas' using 1:4 title '$title_cas' with $style_cas, \
@@ -73,7 +73,7 @@ gnuplot << EOF
     '$file_imm' using 1:4 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:4 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-getsizes.99.9perc.eps'
+    set out '${outfolder}/allmethods-getsizes.99perc.eps'
     set yrange [1:$ymax5]
     plot \
     '$file_cas' using 1:5 title '$title_cas' with $style_cas, \
@@ -85,6 +85,9 @@ gnuplot << EOF
 
     set nologscale y
     set ylabel '${ylabel_ins}'
+
+#    set key bottom right
+    set key at $xmax,1
 
     set out '${outfolder}/allmethods-getsizes.totaltime.eps'
     set yrange [1:$ymax7]

@@ -38,9 +38,9 @@ gnuplot << EOF
 
 #    set xtics font 'Helvetica,20'
 #    set ytics font 'Helvetica,20'
-    #set xlabel font 'Helvetica,16'
-    #set ylabel font 'Helvetica,16'
-    set terminal postscript color enhanced eps "Helvetica" 20
+    set xlabel font 'Helvetica,26'
+    set ylabel font 'Helvetica,26'
+    set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel '${xlabel_memsize}'
     set ylabel '${ylabel_ins}'
     set xrange [1-0.2:5+0.2]

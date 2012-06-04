@@ -11,11 +11,11 @@ file_rng="${statsfolder}/rangemerge-putthrput.totalstats"
 file_imm="${statsfolder}/immediate-putthrput.totalstats"
 file_gp2="${statsfolder}/geometric-p-2-putthrput.totalstats"
 
-ymax2=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.04}'`
-ymax3=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.04}'`
-ymax4=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.04}'`
-ymax5=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.04}'`
-ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.04}'`
+ymax2=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($2 > max) max = $2;} END{print max*1.02}'`
+ymax3=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($3 > max) max = $3;} END{print max*1.02}'`
+ymax4=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($4 > max) max = $4;} END{print max*1.02}'`
+ymax5=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($5 > max) max = $5;} END{print max*1.02}'`
+ymax7=`cat $file_gp2 $file_imm $file_rng $file_geo $file_log $file_cas 2> /dev/null | awk '{if ($7 > max) max = $7;} END{print (max/60)*1.02}'`
 
 xmin=0
 xmax=41000
@@ -26,8 +26,8 @@ ensure_file_exist $file_cas $file_log $file_geo $file_rng $file_imm $file_gp2
 #==========================[ gnuplot embedded script ]============================
 gnuplot << EOF
 
-    #set xtics font 'Helvetica,20'
-    #set ytics font 'Helvetica,20'
+#    set xtics font 'Helvetica,21'
+#    set ytics font 'Helvetica,21'
     set xlabel font 'Helvetica,26'
     set ylabel font 'Helvetica,26'
     set terminal postscript color enhanced eps "Helvetica" 22
@@ -50,7 +50,7 @@ gnuplot << EOF
     '$file_imm' using 1:2 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:2 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-pthrputs.90perc.eps'
+    set out '${outfolder}/allmethods-pthrputs.50perc.eps'
     set yrange [0:$ymax3]
     plot \
     '$file_cas' using 1:3 title '$title_cas' with $style_cas, \
@@ -60,7 +60,7 @@ gnuplot << EOF
     '$file_imm' using 1:3 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:3 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-pthrputs.99perc.eps'
+    set out '${outfolder}/allmethods-pthrputs.90perc.eps'
     set yrange [0:$ymax4]
     plot \
     '$file_cas' using 1:4 title '$title_cas' with $style_cas, \
@@ -70,7 +70,9 @@ gnuplot << EOF
     '$file_imm' using 1:4 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:4 title '$title_rng' with $style_rng
 
-    set out '${outfolder}/allmethods-pthrputs.99.9perc.eps'
+    set key at 40000,1
+
+    set out '${outfolder}/allmethods-pthrputs.99perc.eps'
     set yrange [0:$ymax5]
     plot \
     '$file_cas' using 1:5 title '$title_cas' with $style_cas, \
@@ -80,7 +82,9 @@ gnuplot << EOF
     '$file_imm' using 1:5 title '$title_imm' with $style_imm, \
     '$file_rng' using 1:5 title '$title_rng' with $style_rng
 
-    set key top right
+#    set key top right
+    set key at 39900,195
+
     set ylabel '${ylabel_ins}'
 
     set out '${outfolder}/allmethods-pthrputs.totaltime.eps'

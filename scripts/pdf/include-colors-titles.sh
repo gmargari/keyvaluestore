@@ -1,19 +1,43 @@
 title_imm='Remerge'
 title_rng='Rangemerge'
-title_geo='Geometric r=3'
-title_gp2='Geometric p=2'
-title_cas='SMA k=4'
-title_cl2='SMA k=2'
-title_log='Geometric r=2'
+title_geo='Geometric (r=3)'
+title_gp2='Geometric (p=2)'
+title_cas='SMA (k=4)'
+title_cl2='SMA (k=2)'
+title_log='Geometric (r=2)'
 title_nom='Nomerge'
+
+ylabel_ins='Insertion time (min)'
+ylabel_comp='Compaction time (min)'
+ylabel_io='I/O time (min)'
+ylabel_gb='Total data transferred (GB)'
+ylabel_gb_diff='Data transferred (GB)'
+ylabel_runs='Number of files per key'
+ylabel_glatency='Get latency (ms)'
+ylabel_gthrput='Get throughput (req/s)'
+
+xlabel_time='Time (min)'
+xlabel_datains_gb='Data inserted (GB)'
+xlabel_datains_perc='Data inserted (%)'
+xlabel_datains_perc_geo='Data inserted (%) - Geometric (r=2)'
+xlabel_datains_perc_rng='Data inserted (%) - Rangemerge'
+xlabel_pthrput='Put load (req/s)'
+xlabel_gthrput='Get load (req/s)'
+xlabel_gsize='Range get size (keys retrieved)'
+xlabel_gthreads='Number of get threads'
+xlabel_keysord='Percentage of keys ordered (%)'
+xlabel_keyszipf='{/Symbol a} parameter of Zipf distribution'
+xlabel_memsize='Memory size (MB)'
+xlabel_blocksize='Block size (MB)'
+xlabel_flushmem='Flush memory (MB)'
 
 color_imm="'#FF8000'"
 color_rng="'#E4191C'"
-color_geo="'#4CB04A'"
+color_geo="'#A65728'"
 color_gp2="'#994FA4'"
 color_cas="'#387DB8'"
 color_cl2="'#000000'"
-color_log="'#A65728'"
+color_log="'#4CB04A'"
 color_nom="'#888888'"
 
 pointtype_imm="2"
@@ -35,7 +59,7 @@ style_cl2="linespoints $linewidth lt 6 pt $pointtype_cl2 lc rgb $color_cl2"
 style_log="linespoints $linewidth lt 7 pt $pointtype_log lc rgb $color_log"
 style_nom="linespoints $linewidth lt 8 pt $pointtype_nom lc rgb $color_nom"
 
-linewidth="lw 3"
+linewidth="lw 5"
 lines_imm="lines $linewidth lt 1 lc rgb $color_imm"
 lines_rng="lines $linewidth lt 2 lc rgb $color_rng"
 lines_geo="lines $linewidth lt 3 lc rgb $color_geo"
@@ -50,26 +74,3 @@ color2="#BBBBBB"
 color3="#E4191C"
 bgmerge_color="#EEEEEE"
 
-ylabel_ins='Insertion time (min)'
-ylabel_comp='Compaction time (min)'
-ylabel_io='I/O time (min)'
-ylabel_gb='Total data transferred (GB)'
-ylabel_gb_diff='Data transferred (GB)'
-ylabel_runs='Number of disk files'
-ylabel_glatency='Get latency (ms)'
-ylabel_gthrput='Get throughput (req/s)'
-
-xlabel_time='Time (min)'
-xlabel_datains_gb='Data inserted (GB)'
-xlabel_datains_perc='Data inserted (%)'
-xlabel_datains_perc_geo='Data inserted (%) - Geometric r=2'
-xlabel_datains_perc_rng='Data inserted (%) - Rangemerge'
-xlabel_pthrput='Put throughput (req/s)'
-xlabel_gthrput='Get throughput (req/s)'
-xlabel_gsize='Range get size (keys retrieved)'
-xlabel_gthreads='Number of get threads'
-xlabel_keysord='Percentage of keys ordered (%)'
-xlabel_keyszipf='{/Symbol a} parameter of Zipf distribution'
-xlabel_memsize='Memory size (MB)'
-xlabel_blocksize='Block size (MB)'
-xlabel_flushmem='Flush memory (MB)'

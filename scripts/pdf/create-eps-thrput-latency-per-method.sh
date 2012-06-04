@@ -182,8 +182,8 @@ gnuplot << EOF
 
 #    set xtics font  'Helvetica,21'
 #    set ytics font  'Helvetica,21'
-#    set xlabel font 'Helvetica,22'
-#    set ylabel font 'Helvetica,22'
+    set xlabel font 'Helvetica,25'
+    set ylabel font 'Helvetica,25'
     set terminal postscript color enhanced eps "Helvetica" 22
     set xlabel '${xlabel_time}'
     set xrange [0:(${time_max}/60000)*1.05]
@@ -230,7 +230,8 @@ gnuplot << EOF
     set ylabel '${ylabel_glatency}'
     set xlabel ''
     set yrange [0:${latency_max}*1.05]
-    set xtics 20
+#    set xtics 20
+    unset xtics
 
     set size 1,0.6
     set origin 0.0,0.5

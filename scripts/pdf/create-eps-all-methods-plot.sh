@@ -67,6 +67,16 @@ gnuplot << EOF
     '$file_cas' using (mb2gb(\$1)):(sec2min(\$2)) every $every_cas::1 title '$title_cas' with $style_cas, \
     '$file_nom' using (mb2gb(\$1)):(sec2min(\$2)) every $every_nom::1 title '$title_nom' with $style_nom
 
+    set out '${outfolder}/allmethods.totaltime.lines.eps'
+    plot \
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_imm' with $lines_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_rng' with $lines_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_gp2' with $lines_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_geo' with $lines_geo, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_log' with $lines_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_cas' with $lines_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$2)) title '$title_nom' with $lines_nom
+
     #=================================================
     # Plots: Selected methods - Compaction time
     #=================================================
@@ -83,6 +93,16 @@ gnuplot << EOF
     '$file_log' using (mb2gb(\$1)):(sec2min(\$5)) every $every_log::1 title '$title_log' with $style_log, \
     '$file_cas' using (mb2gb(\$1)):(sec2min(\$5)) every $every_cas::1 title '$title_cas' with $style_cas, \
     '$file_nom' using (mb2gb(\$1)):(sec2min(\$5)) every $every_nom::1 title '$title_nom' with $style_nom
+
+    set out '${outfolder}/allmethods.compacttime.lines.eps'
+    plot \
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_imm' with $lines_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_rng' with $lines_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_gp2' with $lines_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_geo' with $lines_geo, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_log' with $lines_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_cas' with $lines_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$5)) title '$title_nom' with $lines_nom
 
     #=================================================
     # Plots: Selected methods - IO time
@@ -101,6 +121,16 @@ gnuplot << EOF
     '$file_cas' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_cas::1 title '$title_cas' with $style_cas, \
     '$file_nom' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) every $every_nom::1 title '$title_nom' with $style_nom
 
+    set out '${outfolder}/allmethods.iotime.lines.eps'
+    plot \
+    '$file_imm' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_imm' with $lines_imm, \
+    '$file_rng' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_rng' with $lines_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_gp2' with $lines_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_geo' with $lines_geo, \
+    '$file_log' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_log' with $lines_log, \
+    '$file_cas' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_cas' with $lines_cas, \
+    '$file_nom' using (mb2gb(\$1)):(sec2min(\$9 + \$10)) title '$title_nom' with $lines_nom
+
     #=================================================
     # Plots: Selected methods - GB transferred
     #=================================================
@@ -117,6 +147,16 @@ gnuplot << EOF
     '$file_log' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_log::1 title '$title_log' with $style_log, \
     '$file_cas' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_cas::1 title '$title_cas' with $style_cas, \
     '$file_nom' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) every $every_nom::1 title '$title_nom' with $style_nom
+
+    set out '${outfolder}/allmethods.gbtransferred.lines.eps'
+    plot \
+    '$file_imm' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_imm' with $lines_imm, \
+    '$file_rng' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_rng' with $lines_rng, \
+    '$file_gp2' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_gp2' with $lines_gp2, \
+    '$file_geo' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_geo' with $lines_geo, \
+    '$file_log' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_log' with $lines_log, \
+    '$file_cas' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_cas' with $lines_cas, \
+    '$file_nom' using (mb2gb(\$1)):(mb2gb(\$11 + \$12)) title '$title_nom' with $lines_nom
 
 EOF
 #==========================[ gnuplot embedded script ]============================
