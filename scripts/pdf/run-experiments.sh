@@ -19,6 +19,62 @@ mailme() {
 }
 
 #========================================================
+# async_start_disk_stats()
+#========================================================
+async_start_disk_stats() {
+
+    if [ $# -ne 1 ]; then
+        echo "${FUNCNAME}(): log file argument missing"
+        exit 1
+    fi 
+    logfile=$1
+
+    iostat -k -d -x 5 > $logfile &
+}
+
+#========================================================
+# async_start_cpu_stats()
+#========================================================
+async_start_cpu_stats() {
+
+    if [ $# -ne 1 ]; then
+        echo "${FUNCNAME}(): log file argument missing"
+        exit 1
+    fi 
+    logfile=$1
+
+    mpstat 5 > $logfile &
+}
+
+#========================================================
+# stop_disk_stats()
+#========================================================
+stop_disk_stats() {
+    if [ $# -ne 1 ]; then
+        echo "${FUNCNAME}(): log file argument missing"
+        exit 1
+    fi 
+    logfile=$1
+
+    pkill iostat
+    tmpfile=$(mktemp)
+    iostat -k -d -x 1 1 | grep Device > $tmpfile
+    cat $logfile | grep "^sda "    >> $tmpfile
+    mv $tmpfile $logfile
+}
+
+#========================================================
+# stop_cpu_stats()
+#========================================================
+stop_cpu_stats() {
+    if [ $# -ne 1 ]; then
+        echo "${FUNCNAME}(): log file argument missing"
+        exit 1
+    fi 
+    pkill mpstat
+}
+
+#========================================================
 # put_only_sim()
 #========================================================
 put_only_sim() {
@@ -27,10 +83,17 @@ put_only_sim() {
 
     rm -rf ${kvstorefolder}/*
     mkdir -p ${statsfolder}
-    $command > ${statsfolder}/${prefix}${suffix}.stats 2> /dev/null && return
+    filename=${statsfolder}/${prefix}${suffix}
     
-    echo "Error running $command"
-    mailme "Error running $command"
+    async_start_disk_stats ${filename}.iostat
+    async_start_cpu_stats ${filename}.mpstat
+    $command > ${filename}.stats 2> /dev/null && 
+    stop_disk_stats ${filename}.iostat &&
+    stop_cpu_stats ${filename}.mpstat &&
+    return
+    
+    echo "Error running ${command}"
+    mailme "Error running ${command}"
     exit 1
 }
 
@@ -44,10 +107,17 @@ put_get_sim() {
 
     rm -rf ${kvstorefolder}/*
     mkdir -p ${statsfolder}
-    $command > ${statsfolder}/${prefix}${suffix}.stats 2> ${statsfolder}/${prefix}${suffix}.stderr && return
+    filename=${statsfolder}/${prefix}${suffix}
+
+    async_start_disk_stats ${filename}.iostat
+    async_start_cpu_stats ${filename}.mpstat
+    $command > ${filename}.stats 2> ${filename}.stderr && 
+    stop_disk_stats ${filename}.iostat && 
+    stop_cpu_stats ${filename}.mpstat && 
+    return
     
-    echo "Error running $command"
-    mailme "Error running $command"
+    echo "Error running ${command}"
+    mailme "Error running ${command}"
     exit 1
 }
 
@@ -101,35 +171,6 @@ Memsize_experiments() {
 }
 
 #========================================================
-# Put_get_experiments()
-#========================================================
-Put_get_experiments() {
-    my_print "${FUNCNAME}()"
-
-    memsize=$def_memsize
-    datasize=$def_datasize
-    
-    putthrput=$def_putthrput
-    getthrput=$def_getthrput
-    getthreads=$def_getthreads
-    getsize=$def_getsize
-
-    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
-        echo "Error: different array size of 'methods' and 'prefixes'"
-        exit 1
-    fi
-
-    for (( i=0; i < ${#methods[*]}; i++ )); do
-        method=${methods[$i]}
-        prefix=${prefixes[$i]}
-        suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
-        put_get_sim
-    done
-
-    mailme "${FUNCNAME}()"
-}
-
-#========================================================
 # Putthrput_experiments()
 #========================================================
 Putthrput_experiments() {
@@ -138,7 +179,6 @@ Putthrput_experiments() {
     memsize=$def_memsize
     datasize=$def_datasize
     
-    putthrput=$def_putthrput
     getthrput=$def_getthrput
     getthreads=$def_getthreads
     getsize=$def_getsize
@@ -192,6 +232,37 @@ Getsize_experiments() {
 }
 
 #========================================================
+# Getthrput_experiments()
+#========================================================
+Getthrput_experiments() {
+    my_print "${FUNCNAME}()"
+
+    memsize=$def_memsize
+    datasize=$def_datasize
+    
+    putthrput=$def_putthrput
+    getthrput=$def_getthrput
+    getthreads=$def_getthreads
+    getsize=$def_getsize
+
+    if [ ${#methods[*]} -ne ${#prefixes[*]} ]; then
+        echo "Error: different array size of 'methods' and 'prefixes'"
+        exit 1
+    fi
+
+    for (( i=0; i < ${#methods[*]}; i++ )); do
+        method=${methods[$i]}
+        prefix=${prefixes[$i]}
+        for getthrput in ${getthrputs[@]}; do
+            suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
+            put_get_sim
+        done
+    done
+
+    mailme "${FUNCNAME}()"
+}
+
+#========================================================
 # Numgetthreads_experiments()
 #========================================================
 Numgetthreads_experiments() {
@@ -214,7 +285,11 @@ Numgetthreads_experiments() {
         method=${methods[$i]}
         prefix=${prefixes[$i]}
         for getthreads in ${numgetthreads[@]}; do
-            getthrput=$(( $def_getthrput / $getthreads ))
+            if [ "$getthreads" == "0" ]; then
+                getthrput=$def_getthrput
+            else
+                getthrput=$(( $def_getthrput / $getthreads ))
+            fi
             suffix="-pthrput-${putthrput}-gthrput-${getthrput}-gthreads-${getthreads}-gsize-${getsize}"
             put_get_sim
         done
@@ -312,9 +387,6 @@ Rangemerge_blocksize() {
 
 
 
-
-
-
 #===================================================================================
 # main script starts here
 #===================================================================================
@@ -327,7 +399,7 @@ fi
 statsfolder=$1
 
 rm -rf ${kvstorefolder}/*
-rm -rf ${statsfolder}/*
+#rm -rf ${statsfolder}/*
 
 if [ ! -f ${executable} ]; then
     echo "Error: ${executable} not found"
@@ -355,44 +427,57 @@ methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -r 4" "geometr
            "cassandra -l 2" "cassandra -l 3" "cassandra -l 4" "rangemerge" "immediate" )
 prefixes=( "nomerge" "geometric-r-2" "geometric-r-3" "geometric-r-4" "geometric-p-2" "geometric-p-3" "geometric-p-4"
            "cassandra-l-2" "cassandra-l-3" "cassandra-l-4" "rangemerge" "immediate" )
-
-Put_only_experiments
-
-Put_get_experiments
-
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-2"  "cassandra-l-4"  "rangemerge" "immediate" )
-
-## memsizes=( "0128" "0256" "0512" "1024" "2048" )
-memsizes=(    "0128" "0256"        "1024" "2048" )
-Memsize_experiments
+#Put_only_experiments
 
 methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
 prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" "0" )
+#Putthrput_experiments
 
-## putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" )
-putthrputs=(    "1000"        "5000" "10000" "20000" "40000" )
-Putthrput_experiments
-
+methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## getsizes=( "1" "10" "100" "1000" "10000" "100000" )
 getsizes=(    "1"      "100" "1000" "10000" "100000" )
-Getsize_experiments
+#Getsize_experiments
 
+methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## numgetthreads=( "1" "2" "5" "10" "20" )
 numgetthreads=(        "2" "5" "10" "20" )
-Numgetthreads_experiments
+#Numgetthreads_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+## memsizes=( "0128" "0256" "0512" "1024" "2048" )
+memsizes=(    "0128" "0256"        "1024" "2048" )
+#Memsize_experiments
 
-zipf_as=( "0.2" "1.0" "2.0" "3.0" "4.0" )
-rngmerge_zipf_as=( "0.2" "0.5" "1.0" "1.5" "2.0" "2.5" "3.0" "3.5" "4.0" )
-Zipfkeys_experiments
+methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+#getthrputs=( "1" "2" "5" "10" "20" "40" "0" )
+getthrputs=(          "5" "10"      "40" "0" )
+def_putthrput=0
+#Getthrput_experiments
+def_putthrput=2500
 
-ordered_probs=( "0.0" "1.0" )
-rngmerge_ordered_probs=( "0.0" "0.2" "0.4" "0.6" "0.8" "1.0" )
-Orderedkeys_experiments
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+## zipf_as=( "0.0" "1.0" "2.0" "3.0" "4.0" )
+zipf_as=(    "0.0"       "2.0"       "4.0" )
+rngmerge_zipf_as=( "0.0" "0.5" "1.0" "1.5" "2.0" "2.5" "3.0" "3.5" "4.0" )
+#Zipfkeys_experiments
 
-blocksizes=( "0000" "0016" "0032" "0064" "0128" "0256" "0512" "1024" "2048" "4096" )
-Rangemerge_blocksize
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+ordered_probs=( "0.00" "0.50" "1.00" )
+rngmerge_ordered_probs=( "0.00" "0.25" "0.50" "0.75" "1.00" )
+#Orderedkeys_experiments
 
+## blocksizes=( "0032" "0064" "0128" "0256" "0512" "1024" "2048" "0000" )
+blocksizes=(    "0032" "0064" "0128"        "0512" "1024" "2048" "0000" )
+#Rangemerge_blocksize
+
+methods=(  "rangemerge -b 0032" "rangemerge -b 0064" "rangemerge -b 0128" "rangemerge -b 0512" "rangemerge -b 1024" "rangemerge -b 2048" "rangemerge -b 0000" )
+prefixes=( "rangemerge-b-0032"  "rangemerge-b-0064"  "rangemerge-b-0128"  "rangemerge-b-0512"  "rangemerge-b-1024"  "rangemerge-b-2048"  "rangemerge-b-0000"  )
+putthrputs=( "2500" )
+#Putthrput_experiments
