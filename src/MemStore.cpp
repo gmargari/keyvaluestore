@@ -14,7 +14,7 @@ using std::make_pair;
  *============================================================================*/
 MemStore::MemStore()
     : m_map(), m_maxsize(DEFAULT_MEMSTORE_SIZE), m_num_keys(0), m_size(0),
-      m_size_serialized(0) {
+      m_size_serialized(0), m_rwlock() {
     add_map(Slice::MinSlice());
 }
 

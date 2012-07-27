@@ -27,12 +27,10 @@ class NomergeCompactionManager: public CompactionManager {
  *                                do_flush
  *============================================================================*/
 void NomergeCompactionManager::do_flush() {
-    DiskFile *dfile;
-
-    dfile = memstore_flush_to_diskfile();
+    DiskFile *disk_file = memstore_flush_to_diskfile();
 
     m_diskstore->write_lock();
-    m_diskstore->add_diskfile(dfile, 0);  // insert 1st, has the most recent KVs
+    m_diskstore->add_diskfile(disk_file, 0);  // insert 1st, has most recent KVs
     m_diskstore->write_unlock();
 }
 

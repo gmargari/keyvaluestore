@@ -43,6 +43,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile(Slice key) {
     disk_file = new DiskFile();
     disk_file->open_new_unique();
     disk_ostream = new DiskFileOutputStream(disk_file, MERGEBUF_SIZE);
+    m_memstore->write_lock();
     map_istream = m_memstore->new_map_inputstream(key);
     // no need to use copy_stream_unique_keys() since map keys are unique
     Streams::copy_stream(map_istream, disk_ostream);
@@ -51,6 +52,7 @@ DiskFile *CompactionManager::memstore_flush_to_diskfile(Slice key) {
 
     // assert(m_memstore->get_size_serialized() == disk_file->get_size());
     m_memstore->clear_map(key);
+    m_memstore->write_unlock();
 
     return disk_file;
 }

@@ -89,6 +89,7 @@ void RangemergeCompactionManager::do_flush() {
     //--------------------------------------------------------------------------
     // get istream for all memory tuples that belong to range
     if (ONLINE_MERGE || rng.m_file_num == NO_DISK_FILE) {
+        m_memstore->write_lock();
         map_istream = m_memstore->new_map_inputstream(rng.m_first);
         istreams.push_back(map_istream);
     } else {
@@ -130,6 +131,7 @@ void RangemergeCompactionManager::do_flush() {
     //--------------------------------------------------------------------------
     if (ONLINE_MERGE || rng.m_file_num == NO_DISK_FILE) {
         m_memstore->clear_map(rng.m_first);
+        m_memstore->write_unlock();
     }
 
     // add new map(s) to memstore if new range(s) was created (range split)

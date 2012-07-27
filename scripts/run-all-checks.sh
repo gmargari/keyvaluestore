@@ -24,12 +24,11 @@ function run_check()
 mkdir -p /tmp/kvstore/
 
 run_check /tmp/build/src/test/vfiletest
-#run_check /tmp/build/src/test/kvstoretest
+run_check /tmp/build/src/test/kvstoretest
 run_check /tmp/build/src/test/maptest
 run_check /tmp/build/src/test/memstoretest
 run_check /tmp/build/src/test/vfileindextest
-# check-kvstore does not stop
-#./scripts/check-kvstore.sh && 
+run_check ./scripts/check-kvstore.sh
 run_check ./scripts/check-save-and-load-kvstore.sh
 run_check ./scripts/check-kvstore.sh
 run_check ./scripts/check-md5sums-identical.sh

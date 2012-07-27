@@ -31,18 +31,19 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     Slice k, v;
     uint64_t t;
     DiskFileInputStream *disk_istream = NULL;
-//    MemStore *memstore = m_kvstore->m_memstore;
+    MemStore *memstore = m_kvstore->m_memstore;
     DiskStore *diskstore = m_kvstore->m_diskstore;
     int diskfiles;
 
-    // NOTE: don't read from memstore, it's not thread-safe for concurrent puts
-    // and gets
-     // first check memstore, since it has the most recent values
-//     k = Slice(key, keylen);
-//     if (memstore->get(k, &v, &t)) {
-//         free(const_cast<char *>(v.data()));  // it has been copied
-//         return 1;
-//     }
+    // first check memstore, since it has the most recent values
+    memstore->read_lock();
+    k = Slice(key, keylen);
+    if (memstore->get(k, &v, &t)) {
+        free(const_cast<char *>(v.data()));  // it has been copied
+        memstore->read_unlock();
+        return 1;
+    }
+    memstore->read_unlock();
 
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
@@ -75,7 +76,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
     int numkeys = 0, diskfiles;
     PriorityInputStream *pistream;
     vector<InputStream *> istreams;
-//    MemStore *memstore = m_kvstore->m_memstore;
+    MemStore *memstore = m_kvstore->m_memstore;
     DiskStore *diskstore = m_kvstore->m_diskstore;
 
     // create a priority stream, containing a stream for memstore and one
@@ -86,9 +87,9 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
         DiskFile *dfile = diskstore->get_diskfile(i);
         istreams.push_back(new DiskFileInputStream(dfile, CHUNK_SIZE));
     }
-    // NOTE: don't read from memstore, it's not thread safe for concurrent puts
-    //       and gets
-//    istreams.push_back(memstore->new_map_inputstream());
+
+    memstore->read_lock();
+    istreams.push_back((InputStream *)memstore->new_map_inputstream(""));
     pistream = new PriorityInputStream(istreams);
 
     // get all keys between 'start_key' and 'end_key'
@@ -102,6 +103,7 @@ int Scanner::range_get(const char *start_key, uint32_t start_keylen,
         }
     }
     diskstore->read_unlock();
+    memstore->read_unlock();
 
     for (int i = 0; i < (int)istreams.size(); i++) {
         delete istreams[i];

@@ -89,6 +89,7 @@ uint64_t KeyValueStore::get_memstore_maxsize() {
 bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
                         uint32_t valuelen, uint64_t timestamp) {
     Slice k(key, keylen), v(value, valuelen);
+    bool ret;
 
     assert(m_memstore->get_size() <= m_memstore->get_maxsize());
     if (m_memstore->will_fill(k, v, timestamp)) {
@@ -98,7 +99,11 @@ bool KeyValueStore::put(const char *key, uint32_t keylen, const char *value,
         g_stats.disk_files = m_diskstore->get_num_disk_files();
     }
 
-    return m_memstore->put(k, v, timestamp);
+    m_memstore->write_lock();
+    ret = m_memstore->put(k, v, timestamp);
+    m_memstore->write_unlock();
+
+    return ret;
 }
 
 /*============================================================================

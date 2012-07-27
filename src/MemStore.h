@@ -11,6 +11,7 @@
 
 #include "./Global.h"
 #include "./leveldb/slice.h"
+#include "./ReadWriteMutex.h"
 
 using std::pair;
 using std::vector;
@@ -103,6 +104,16 @@ class MemStore {
     void            clear_map(Slice key);
     MapInputStream *new_map_inputstream(Slice key);
 
+    /**
+     * memstore contains a read-write lock: reads/scans read-lock memstore,
+     * inserts and compaction manager write-locks diskstore, to avoid reading
+     * and modifying 'm_map' concurrently
+     */
+    void read_lock()    { m_rwlock.read_lock(); }
+    void read_unlock()  { m_rwlock.read_unlock(); }
+    void write_lock()   { m_rwlock.write_lock(); }
+    void write_unlock() { m_rwlock.write_unlock(); }
+
   private:
     /**
      * return the map responsible for 'key'
@@ -126,6 +137,8 @@ class MemStore {
     uint64_t         m_num_keys;
     uint64_t         m_size;
     uint64_t         m_size_serialized;
+
+    ReadWriteMutex   m_rwlock;
 };
 
 #endif  // SRC_MEMSTORE_H_
