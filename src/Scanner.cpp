@@ -11,6 +11,8 @@
 #include "./DiskFileInputStream.h"
 #include "./PriorityInputStream.h"
 
+#define BLOOM_FILTER_SIM 1  // Simulate use of bloom filters for point gets
+
 /*============================================================================
  *                                 Scanner
  *============================================================================*/
@@ -45,6 +47,7 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
     }
     memstore->read_unlock();
 
+#if BLOOM_FILTER_SIM != 1
     // search disk files in order, from most recently created to oldest.
     // return the first value found, since this is the most recent value
     diskstore->read_lock();
@@ -61,6 +64,27 @@ int Scanner::point_get(const char *key, uint32_t keylen) {
         delete disk_istream;
     }
     diskstore->read_unlock();
+#else
+    // simulate the use of bloom filters: select a single file and read from it,
+    // similar to the use of bloom filters where, with high probability, we
+    // would only read from a single file
+    diskstore->read_lock();
+    diskfiles = diskstore->get_num_disk_files();
+    if (diskfiles) {
+        int rand_file = rand() % diskfiles;
+        DiskFile *dfile = diskstore->get_diskfile(rand_file);
+        disk_istream = new DiskFileInputStream(dfile, CHUNK_SIZE);
+        disk_istream->set_key_range(key, key, true, true);
+        if (disk_istream->read(&k, &v, &t)) {
+            diskstore->read_unlock();
+            delete disk_istream;
+            return 1;
+        }
+        delete disk_istream;
+    }
+    diskstore->read_unlock();
+#endif
+
 
     return 0;
 }
