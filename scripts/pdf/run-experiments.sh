@@ -1,7 +1,6 @@
 #!/bin/bash
 
 executable="/tmp/build/src/sim"
-kvstorefolder="/tmp/kvstore/"
 
 #============================
 # my_print()
@@ -367,9 +366,9 @@ Orderedkeys_experiments() {
 }
 
 #========================================================
-# Rangemerge_blocksize()
+# Rangemerge_blocksize_experiments()
 #========================================================
-Rangemerge_blocksize() {
+Rangemerge_blocksize_experiments() {
     my_print "${FUNCNAME}()"
 
     memsize=$def_memsize
@@ -398,19 +397,38 @@ if [ $# -ne 1 ]; then
 fi     
 statsfolder=$1
 
-rm -rf ${kvstorefolder}/*
-#rm -rf ${statsfolder}/*
-
+# check if executable exists
 if [ ! -f ${executable} ]; then
     echo "Error: ${executable} not found"
     exit 1
 fi
 
-# assert that debug level is 0 before starting experiments
-if [ "`${executable} -c rangemerge -i 0 2> /dev/null | grep debug_level | awk '{print $3}'`" != "0" ]; then 
+# check if sample run executes without problems
+cmd="${executable} -c nomerge -i 0"
+${cmd} 2> /dev/null > /dev/null
+retval=$?
+if [ $retval -ne 0 ]; then
+    echo "Error running: ${cmd}"
+    ${cmd}
+    exit 1
+fi
+
+# check if index folder exists
+kvstorefolder=`${executable} -c nomerge -i 0 2> /dev/null | grep 'index_dir:' | awk '{print $3}'`
+echo $kvstorefolder
+if [ ! -d ${kvstorefolder} ]; then
+    echo "Error: folder ${kvstorefolder} does not exist"
+    exit 1
+fi
+
+# ensure that debug level is set to 0 before starting experiments
+if [ "`${executable} -c nomerge -i 0 2> /dev/null | grep 'debug_level:' | awk '{print $3}'`" != "0" ]; then
     echo "Error: debug level not zero"
     exit 1
 fi
+
+echo "index folder: ${kvstorefolder}"
+echo "stats folder: ${statsfolder}"
 
 #---------------------------------
 # You can change these
@@ -423,61 +441,57 @@ def_getthreads=1
 def_getthrput=20
 def_getsize=10
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -r 4" "geometric -p 2" "geometric -p 3" "geometric -p 4"
-           "cassandra -l 2" "cassandra -l 3" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2" "geometric-r-3" "geometric-r-4" "geometric-p-2" "geometric-p-3" "geometric-p-4"
-           "cassandra-l-2" "cassandra-l-3" "cassandra-l-4" "rangemerge" "immediate" )
-#Put_only_experiments
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+Put_only_experiments
 
-methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
-putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" "0" )
-#Putthrput_experiments
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" "0" )   
+Putthrput_experiments
 
-methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+## getthrputs=( "1" "2" "5" "10" "20" "40" "0" )
+getthrputs=(            "5" "10"      "40" "0" )
+Getthrput_experiments
+
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## getsizes=( "1" "10" "100" "1000" "10000" "100000" )
 getsizes=(    "1"      "100" "1000" "10000" "100000" )
-#Getsize_experiments
+Getsize_experiments  
 
-methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## numgetthreads=( "1" "2" "5" "10" "20" )
 numgetthreads=(        "2" "5" "10" "20" )
-#Numgetthreads_experiments
+Numgetthreads_experiments
 
 methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
 prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## memsizes=( "0128" "0256" "0512" "1024" "2048" )
 memsizes=(    "0128" "0256"        "1024" "2048" )
-#Memsize_experiments
-
-methods=(  "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
-#getthrputs=( "1" "2" "5" "10" "20" "40" "0" )
-getthrputs=(          "5" "10"      "40" "0" )
-def_putthrput=0
-#Getthrput_experiments
-def_putthrput=2500
+Memsize_experiments
 
 methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
 prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ## zipf_as=( "0.0" "1.0" "2.0" "3.0" "4.0" )
 zipf_as=(    "0.0"       "2.0"       "4.0" )
 rngmerge_zipf_as=( "0.0" "0.5" "1.0" "1.5" "2.0" "2.5" "3.0" "3.5" "4.0" )
-#Zipfkeys_experiments
+Zipfkeys_experiments
 
 methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
 prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
 ordered_probs=( "0.00" "0.50" "1.00" )
 rngmerge_ordered_probs=( "0.00" "0.25" "0.50" "0.75" "1.00" )
-#Orderedkeys_experiments
+Orderedkeys_experiments
 
 ## blocksizes=( "0032" "0064" "0128" "0256" "0512" "1024" "2048" "0000" )
 blocksizes=(    "0032" "0064" "0128"        "0512" "1024" "2048" "0000" )
-#Rangemerge_blocksize
+Rangemerge_blocksize_experiments
 
 methods=(  "rangemerge -b 0032" "rangemerge -b 0064" "rangemerge -b 0128" "rangemerge -b 0512" "rangemerge -b 1024" "rangemerge -b 2048" "rangemerge -b 0000" )
 prefixes=( "rangemerge-b-0032"  "rangemerge-b-0064"  "rangemerge-b-0128"  "rangemerge-b-0512"  "rangemerge-b-1024"  "rangemerge-b-2048"  "rangemerge-b-0000"  )
-putthrputs=( "2500" )
-#Putthrput_experiments
+putthrputs=( "2500" )   
+Putthrput_experiments

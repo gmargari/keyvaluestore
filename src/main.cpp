@@ -443,8 +443,8 @@ int main(int argc, char **argv) {
         cerr << "Error: 'valuesize' cannot be bigger than " << MAX_VALUE_SIZE << endl;
         exit(EXIT_FAILURE);
     }
-    if (zflag && zipf_param <= 0) {
-        cerr << "Error: zipf parameter must be > 0" << endl;
+    if (zflag && zipf_param < 0) {
+        cerr << "Error: zipf parameter must be >= 0" << endl;
         exit(EXIT_FAILURE);
     }
     if (oflag && (ordered_prob < 0 || ordered_prob > 1)) {
@@ -577,6 +577,7 @@ int main(int argc, char **argv) {
     cout << "# print_periodic_stats: " << setw(14) << (print_periodic_stats ? "true" : "false") << "       " << (tflag == 0 ? "(default)" : "") << endl;
     cout << "# debug_level:         " << setw(15) << DBGLVL << endl;
     cout << "# mergebuf_size:       " << setw(15) << MERGEBUF_SIZE << " B" << endl;
+    cout << "# index_dir:           " << setw(15) << ROOT_DIR << endl;
 
     time(&now);
     current = localtime(&now);
