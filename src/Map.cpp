@@ -3,6 +3,7 @@
 #include "./Global.h"
 #include "./Map.h"
 
+#include <stdlib.h>
 #include <assert.h>
 #include <utility>
 #include <iostream>

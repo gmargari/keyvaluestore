@@ -3,6 +3,7 @@
 #include "./Global.h"
 #include "./DiskFile.h"
 
+#include <stdlib.h>
 #include <fcntl.h>
 
 #include "./VFile.h"

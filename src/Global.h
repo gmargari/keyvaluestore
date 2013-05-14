@@ -3,6 +3,7 @@
 #ifndef SRC_GLOBAL_H_
 #define SRC_GLOBAL_H_
 
+#include <stdlib.h>
 #include <stdint.h>
 
 // set debug level:
