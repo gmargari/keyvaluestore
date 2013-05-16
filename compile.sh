@@ -5,7 +5,7 @@ cd ${BUILDDIR} &&
 cmake ${CURDIR} &&
 make &&
 
-#echo "Executable in build/bin"
+echo "Executable: ${BUILDDIR}src/sim"
 #cmake --graphviz=/tmp/a.dot .. &&
 #dot -Tps /tmp/a.dot -o graphviz_call_graph.ps
 
