@@ -16,11 +16,10 @@
 #include <iomanip>
 
 #include "./KeyValueStore.h"
-#include "./ImmCompactionManager.h"
+#include "./RemergeCompactionManager.h"
 #include "./GeomCompactionManager.h"
-#include "./LogCompactionManager.h"
 #include "./RangemergeCompactionManager.h"
-#include "./CassandraCompactionManager.h"
+#include "./SMACompactionManager.h"
 #include "./Statistics.h"
 #include "./Scanner.h"
 #include "./RequestThrottle.h"
@@ -103,12 +102,11 @@ void print_syntax(char *progname) {
     cout << "syntax: " << progname << " -c compactionmanager [options]" << endl;
     cout << endl;
     cout << "COMPACTION MANAGER" << endl;
-    cout << " -c, --compaction-manager VALUE      'nomerge', 'immediate', 'geometric', 'logarithmic'," << endl;
-    cout << "                                     'rangemerge' or 'cassandra'" << endl;
+    cout << " -c, --compaction-manager VALUE      'nomerge', 'remerge', 'geometric', 'rangemerge' or 'sma'" << endl;
     cout << " -r, --geometric-r VALUE             Geometric R parameter [" << DEFAULT_GEOM_R << "]" << endl;
     cout << " -p, --geometric-p VALUE             Geometric P parameter [disabled]" << endl;
     cout << " -b, --rangemerge-blocksize VALUE    Rangemerge block size, in MB [" << b2mb(DEFAULT_RNG_BLOCKSIZE) << "]" << endl;
-    cout << " -l, --cassandra-l VALUE             Cassandra L parameter [" << DEFAULT_CASS_K << "]" << endl;
+    cout << " -l, --sma-l VALUE                   Stepped Merge Array L parameter [" << DEFAULT_CASS_K << "]" << endl;
     cout << " -m, --memstore-size VALUE           memstore size, in MB [" << b2mb(DEFAULT_MEMSTORE_SIZE) << "]" << endl;
     cout << endl;
     cout << "PUT" << endl;
@@ -144,7 +142,7 @@ int main(int argc, char **argv) {
              {"geometric-r",          required_argument,  0, 'r'},
              {"geometric-p",          required_argument,  0, 'p'},
              {"rangemerge-blocksize", required_argument,  0, 'b'},
-             {"cassandra-l",          required_argument,  0, 'l'},
+             {"sma-l",                required_argument,  0, 'l'},
              {"memstore-size",        required_argument,  0, 'm'},
              {"insert-bytes",         required_argument,  0, 'i'},
              {"num-keys",             required_argument,  0, 'n'},
@@ -424,11 +422,11 @@ int main(int argc, char **argv) {
         cerr << "Error: you must set compaction manager" << endl;
         exit(EXIT_FAILURE);
     }
-    if (cflag && strcmp(cmanager, "nomerge") && strcmp(cmanager, "immediate")
-          && strcmp(cmanager, "geometric") && strcmp(cmanager, "logarithmic")
-          && strcmp(cmanager, "rangemerge") && strcmp(cmanager, "cassandra")) {
-        cerr << "Error: compaction manager can be 'nomerge', 'immediate', ";
-        cerr << "'geometric', 'logarithmic', 'rangemerge' or 'cassandra'";
+    if (cflag && strcmp(cmanager, "nomerge") && strcmp(cmanager, "remerge")
+          && strcmp(cmanager, "geometric") && strcmp(cmanager, "rangemerge")
+          && strcmp(cmanager, "sma")) {
+        cerr << "Error: compaction manager can be 'nomerge', 'remerge', ";
+        cerr << "'geometric', 'rangemerge' or 'sma'";
         cerr << endl;
         exit(EXIT_FAILURE);
     }
@@ -486,9 +484,9 @@ int main(int argc, char **argv) {
     if (strcmp(cmanager, "nomerge") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::NOMERGE_CM);
     }
-    // Immediate compaction manager
-    else if (strcmp(cmanager, "immediate") == 0) {
-        kvstore = new KeyValueStore(KeyValueStore::IMM_CM);
+    // Remerge compaction manager
+    else if (strcmp(cmanager, "remerge") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::REMERGE_CM);
     }
     // Geometric compaction manager
     else if (strcmp(cmanager, "geometric") == 0) {
@@ -500,10 +498,6 @@ int main(int argc, char **argv) {
             ((GeomCompactionManager *)kvstore->get_compaction_manager())->set_P(geom_p);
         }
     }
-    // Logarithmic compaction manager
-    else if (strcmp(cmanager, "logarithmic") == 0) {
-        kvstore = new KeyValueStore(KeyValueStore::LOG_CM);
-    }
     // Rangemerge compaction manager
     else if (strcmp(cmanager, "rangemerge") == 0) {
         kvstore = new KeyValueStore(KeyValueStore::RNGMERGE_CM);
@@ -511,11 +505,11 @@ int main(int argc, char **argv) {
             ((RangemergeCompactionManager *)kvstore->get_compaction_manager())->set_blocksize(blocksize);
         }
     }
-    // Cassandra compaction manager
-    else if (strcmp(cmanager, "cassandra") == 0) {
-        kvstore = new KeyValueStore(KeyValueStore::CASSANDRA_CM);
+    // Stepped Merge Array compaction manager
+    else if (strcmp(cmanager, "sma") == 0) {
+        kvstore = new KeyValueStore(KeyValueStore::SMA_CM);
         if (lflag) {
-            ((CassandraCompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
+            ((SMACompactionManager *)kvstore->get_compaction_manager())->set_L(cass_l);
         }
     } else {
         cerr << "Error: unknown compaction manager (but we should not get here!)" << endl;
@@ -570,8 +564,8 @@ int main(int argc, char **argv) {
             cout << "# rngmerge_block_size: " << setw(15) << b2mb(blocksize) << " MB    " << (bflag == 0 ? "(default)" : "") << endl;
         }
     }
-    if (strcmp(cmanager, "cassandra") == 0) {
-        cout << "# cassandra_l:         " << setw(15) << cass_l << "       " << (lflag == 0 ? "(default)" : "") << endl;
+    if (strcmp(cmanager, "sma") == 0) {
+        cout << "# sma_l:               " << setw(15) << cass_l << "       " << (lflag == 0 ? "(default)" : "") << endl;
     }
     cout << "# read_from_stdin:     " << setw(15) << (sflag ? "true" : "false") << "       " << (sflag == 0 ? "(default)" : "") << endl;
     cout << "# flush_page_cache:    " << setw(15) << (flush_page_cache ? "true" : "false") << "       " << (xflag == 0 ? "(default)" : "") << endl;

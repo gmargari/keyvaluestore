@@ -49,7 +49,7 @@ void RangemergeCompactionManager::set_blocksize(uint64_t blocksize) {
         m_blocksize = blocksize;
     } else {
         // if blocksize == 0, block splitting is disabled and Rangemerge behaves
-        // identically to Immediate Merge
+        // identically to Remerge
         m_blocksize = ULONG_MAX;  // practically, infinite block size
     }
 }

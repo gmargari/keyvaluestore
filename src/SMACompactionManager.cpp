@@ -1,7 +1,7 @@
 // Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
 #include "./Global.h"
-#include "./CassandraCompactionManager.h"
+#include "./SMACompactionManager.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,11 +14,12 @@
 #include "./DiskFile.h"
 #include "./DiskFileInputStream.h"
 #include "./Streams.h"
+#include "./Statistics.h"
 
 /*============================================================================
- *                          CassandraCompactionManager
+ *                            SMACompactionManager
  *============================================================================*/
-CassandraCompactionManager::CassandraCompactionManager(MemStore *memstore,
+SMACompactionManager::SMACompactionManager(MemStore *memstore,
                                                        DiskStore *diskstore)
     : CompactionManager(memstore, diskstore),
       m_L(DEFAULT_CASS_K), m_level_files() {
@@ -26,30 +27,30 @@ CassandraCompactionManager::CassandraCompactionManager(MemStore *memstore,
 }
 
 /*============================================================================
- *                         ~CassandraCompactionManager
+ *                           ~SMACompactionManager
  *============================================================================*/
-CassandraCompactionManager::~CassandraCompactionManager() {
+SMACompactionManager::~SMACompactionManager() {
     save_state_to_disk();
 }
 
 /*============================================================================
  *                                   set_L
  *============================================================================*/
-void CassandraCompactionManager::set_L(int l) {
+void SMACompactionManager::set_L(int l) {
     m_L = l;
 }
 
 /*============================================================================
  *                                   get_L
  *============================================================================*/
-int CassandraCompactionManager::get_L() {
+int SMACompactionManager::get_L() {
     return m_L;
 }
 
 /*============================================================================
  *                                do_flush
  *============================================================================*/
-void CassandraCompactionManager::do_flush() {
+void SMACompactionManager::do_flush() {
     DiskFile *disk_file, *memstore_file;
     vector<InputStream *> istreams;
 
@@ -127,7 +128,7 @@ void CassandraCompactionManager::do_flush() {
 /*============================================================================
  *                              save_state_to_disk
  *============================================================================*/
-bool CassandraCompactionManager::save_state_to_disk() {
+bool SMACompactionManager::save_state_to_disk() {
     char fname[100];
     FILE *fp;
 
@@ -138,7 +139,7 @@ bool CassandraCompactionManager::save_state_to_disk() {
         exit(EXIT_FAILURE);
     }
 
-    fprintf(fp, "cmmanager: %s\n", "cassandra");
+    fprintf(fp, "cmmanager: %s\n", "sma");
     fprintf(fp, "L: %d\n", m_L);
     fprintf(fp, "levels: %d\n", m_level_files.size());
     for (int i = 0; i < (int)m_level_files.size(); i++) {
@@ -153,7 +154,7 @@ bool CassandraCompactionManager::save_state_to_disk() {
 /*============================================================================
  *                            load_state_from_disk
  *============================================================================*/
-bool CassandraCompactionManager::load_state_from_disk() {
+bool SMACompactionManager::load_state_from_disk() {
     char fname[100], cmmanager[100];
     FILE *fp;
     int num_levels, level_files;
@@ -162,8 +163,8 @@ bool CassandraCompactionManager::load_state_from_disk() {
     sprintf(fname, "%s%s", ROOT_DIR, CMMANAGER_FILENAME);
     if ((fp = fopen(fname, "r")) != NULL) {
         fscanf(fp, "cmmanager: %s\n", cmmanager);
-        if (strcmp(cmmanager, "cassandra") != 0) {
-            printf("Error: expected 'cassandra' cmanager in %s, found '%s'\n",
+        if (strcmp(cmmanager, "sma") != 0) {
+            printf("Error: expected 'sma' cmanager in %s, found '%s'\n",
                    fname, cmmanager);
             exit(EXIT_FAILURE);
         }
@@ -188,7 +189,7 @@ bool CassandraCompactionManager::load_state_from_disk() {
 /*============================================================================
  *                                sanity_check
  *============================================================================*/
-int CassandraCompactionManager::sanity_check() {
+int SMACompactionManager::sanity_check() {
     int size = 0;
     static int last_size = 0;
 

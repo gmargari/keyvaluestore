@@ -18,13 +18,13 @@ class KeyValueStore {
     /**
      * Memory flush & compaction manager algorithm:
      *  - NOMERGE_CM:  No Merge compaction manager
-     *  - IMM_CM:      Immediate Merge compaction manager
+     *  - REMERGE_CM:  Remerge compaction manager
      *  - GEOM_CM:     Geometric Partitioning compaction manager
-     *  - LOG_CM:      Logarithmic Merge compaction manager
      *  - RNGMERGE_CM: Range Merge compaction manager
+     *  - SMA_CM:      Stepped Merge Array compaction manager
      */
-    typedef enum { NOMERGE_CM, IMM_CM, GEOM_CM, LOG_CM, RNGMERGE_CM,
-                   CASSANDRA_CM } cm_type;
+    typedef enum { NOMERGE_CM, REMERGE_CM, GEOM_CM, RNGMERGE_CM,
+                   SMA_CM } cm_type;
 
     /**
      * constructor

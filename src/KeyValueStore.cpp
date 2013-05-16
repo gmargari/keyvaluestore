@@ -10,11 +10,10 @@
 #include "./MemStore.h"
 #include "./DiskStore.h"
 #include "./NomergeCompactionManager.h"
-#include "./ImmCompactionManager.h"
-#include "./LogCompactionManager.h"
+#include "./RemergeCompactionManager.h"
 #include "./GeomCompactionManager.h"
 #include "./RangemergeCompactionManager.h"
-#include "./CassandraCompactionManager.h"
+#include "./SMACompactionManager.h"
 #include "./Statistics.h"
 #include "./leveldb/slice.h"
 
@@ -34,25 +33,21 @@ KeyValueStore::KeyValueStore(cm_type type)
             m_compactionmanager = new NomergeCompactionManager(m_memstore,
                                                                m_diskstore);
             break;
-        case KeyValueStore::IMM_CM:
-            m_compactionmanager = new ImmCompactionManager(m_memstore,
-                                                           m_diskstore);
+        case KeyValueStore::REMERGE_CM:
+            m_compactionmanager = new RemergeCompactionManager(m_memstore,
+                                                               m_diskstore);
             break;
         case KeyValueStore::GEOM_CM:
             m_compactionmanager = new GeomCompactionManager(m_memstore,
                                                             m_diskstore);
             break;
-        case KeyValueStore::LOG_CM:
-            m_compactionmanager = new LogCompactionManager(m_memstore,
-                                                           m_diskstore);
-            break;
         case KeyValueStore::RNGMERGE_CM:
             m_compactionmanager = new RangemergeCompactionManager(m_memstore,
                                                                   m_diskstore);
             break;
-        case KeyValueStore::CASSANDRA_CM:
-            m_compactionmanager = new CassandraCompactionManager(m_memstore,
-                                                                 m_diskstore);
+        case KeyValueStore::SMA_CM:
+            m_compactionmanager = new SMACompactionManager(m_memstore,
+                                                           m_diskstore);
             break;
     }
     set_memstore_maxsize(DEFAULT_MEMSTORE_SIZE);

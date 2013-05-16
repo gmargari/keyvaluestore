@@ -441,48 +441,48 @@ def_getthreads=1
 def_getthrput=20
 def_getsize=10
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 Put_only_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 putthrputs=( "1000" "2500" "5000" "10000" "20000" "40000" "0" )   
 Putthrput_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ## getthrputs=( "1" "2" "5" "10" "20" "40" "0" )
 getthrputs=(            "5" "10"      "40" "0" )
 Getthrput_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ## getsizes=( "1" "10" "100" "1000" "10000" "100000" )
 getsizes=(    "1"      "100" "1000" "10000" "100000" )
 Getsize_experiments  
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ## numgetthreads=( "1" "2" "5" "10" "20" )
 numgetthreads=(        "2" "5" "10" "20" )
 Numgetthreads_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ## memsizes=( "0128" "0256" "0512" "1024" "2048" )
 memsizes=(    "0128" "0256"        "1024" "2048" )
 Memsize_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ## zipf_as=( "0.0" "1.0" "2.0" "3.0" "4.0" )
 zipf_as=(    "0.0"       "2.0"       "4.0" )
 rngmerge_zipf_as=( "0.0" "0.5" "1.0" "1.5" "2.0" "2.5" "3.0" "3.5" "4.0" )
 Zipfkeys_experiments
 
-methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "cassandra -l 4" "rangemerge" "immediate" )
-prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "cassandra-l-4"  "rangemerge" "immediate" )
+methods=(  "nomerge" "geometric -r 2" "geometric -r 3" "geometric -p 2" "sma -l 4" "rangemerge" "remerge" )
+prefixes=( "nomerge" "geometric-r-2"  "geometric-r-3"  "geometric-p-2"  "sma-l-4"  "rangemerge" "remerge" )
 ordered_probs=( "0.00" "0.50" "1.00" )
 rngmerge_ordered_probs=( "0.00" "0.25" "0.50" "0.75" "1.00" )
 Orderedkeys_experiments

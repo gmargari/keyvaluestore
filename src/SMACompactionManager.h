@@ -1,7 +1,7 @@
 // Copyright (c) 2011 Giorgos Margaritis. All rights reserved.
 
-#ifndef SRC_CASSANDRACOMPACTIONMANAGER_H_
-#define SRC_CASSANDRACOMPACTIONMANAGER_H_
+#ifndef SRC_SMACOMPACTIONMANAGER_H_
+#define SRC_SMACOMPACTIONMANAGER_H_
 
 #include <vector>
 
@@ -10,17 +10,17 @@
 
 using std::vector;
 
-class CassandraCompactionManager: public CompactionManager {
+class SMACompactionManager: public CompactionManager {
   public:
     /**
      * constructor
      */
-    CassandraCompactionManager(MemStore *memstore, DiskStore *diskstore);
+    SMACompactionManager(MemStore *memstore, DiskStore *diskstore);
 
     /**
      * destructor
      */
-    ~CassandraCompactionManager();
+    ~SMACompactionManager();
 
     /**
      * set/get value of parameter L
@@ -44,4 +44,4 @@ class CassandraCompactionManager: public CompactionManager {
     vector<int> m_level_files;  // number of existing files per level
 };
 
-#endif  // SRC_CASSANDRACOMPACTIONMANAGER_H_
+#endif  // SRC_SMACOMPACTIONMANAGER_H_

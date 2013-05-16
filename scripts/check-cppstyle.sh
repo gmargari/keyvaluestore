@@ -13,14 +13,14 @@ filter=$filter",-readability/todo"         # Missing username in TODO; it should
 
 filter=$filter",-build/include_order"
 
-for f in *.h; do
+for f in ../src/*.h; do
     if [ $f == "Slice.h" -o $f == "Debug.h" ]; then
         continue
     fi
     ../scripts/cpplint.py $filter $f #|| exit 1
 done
 
-for f in *.cpp; do
+for f in ../src/*.cpp; do
     if [ $f == "main.cpp" ]; then
         continue
     fi
